@@ -10,7 +10,7 @@ This README explains **what every file does** and **where to look when something
 
 - **Play it:** double-click `index.html`.
 - **Changed mod data:** double-click `build.cmd` (home PC only), then open `index.html`.
-- **Upload to GitHub:** double-click `push.cmd` (home PC only) → pushes to `Ri-el/poe2-crafting`.
+- **Upload to GitHub:** double-click `push.cmd` (home PC only) → pushes to `Ri-el/Ri-el.github.io`.
 
 > The app reads compiled `.data.js` files (because `file://` can't fetch raw `.json`). After editing any JSON you MUST run `build.cmd` to recompile, or the app won't see your change.
 
@@ -27,14 +27,14 @@ You edit **one small JSON file per base item** in `data/bases/` (e.g. `ruby.json
 | File | What it does | Look here when… |
 |---|---|---|
 | `index.html` | The page itself. Loads every script/style in order. The `<script>` tags at the bottom decide what code runs. | A file you added isn't loading, or you need to add a new script/style tag. |
-| `app.js` | **Boot + UI glue.** Wraps everything in an IIFE (`window.CraftingEngine`), reads `window.MOD_BASES` from the compiled data, builds the engine, wires up buttons, cursor orb, animations, the stash, and ALT tier tooltips. Has a guard that throws a clear error if the mod data didn't load (\"run build\"). | Buttons/clicks/tooltips/animations misbehave, or data isn't loading into the UI. |
+| `app.js` | **Boot + UI glue.** Wraps everything in an IIFE (`window.CraftingEngine`), reads `window.MOD_BASES` from the compiled data, builds the engine, wires up buttons, cursor orb, animations, the stash, and ALT tier tooltips. Has a guard that throws a clear error if the mod data didn't load ("run build"). | Buttons/clicks/tooltips/animations misbehave, or data isn't loading into the UI. |
 | `crafting.js` | **The crafting engine (the rules).** Currency behavior lives here — Transmute, Augment, Regal, Exalt, Chaos, Annul, Alchemy, Divine, Vaal, Essence of the Abyss, Desecrate, plus prefix/suffix caps and tier rolling. It also migrates legacy quality values into `{ amount, type, source }`; this state support does not by itself enable quality currencies. | An orb does the wrong thing, mods roll incorrectly, or affix caps are off. **Engine bugs live here, NOT in the data files.** |
 | `select.js` | **Item-picker menu.** Defines the category tree (jewels, armour, weapons, etc.). Each category has a `status` of `'active'` or `'soon'` (greyed out). Flip `'soon'`→`'active'` once a base has real data. | A base/category isn't selectable, or you finished its data and want to turn it on. |
 | `style.css` | Main look — item tooltip, stash panel, dark PoE2 theme, layout. | General visual styling. |
 | `overhaul.css` | Final in-game-inspired layout layer: three-column workbench, currency stash tab, item stash, Omens row, and responsive selection screen. | Current UI layout and visual polish. |
 | `desecrate.css` | Styling specific to the Desecrate / abyssal-bones overlay feature. | The desecrate panel looks wrong. |
 | `select.css` | Styling for the item-picker menu only. | The category picker looks wrong. |
-| `sw.js` | Service worker — caches files so the app works offline / installs as a PWA. | Offline mode or \"install app\" behaves oddly (or stale cache after an update). |
+| `sw.js` | Service worker — caches files so the app works offline / installs as a PWA. | Offline mode or "install app" behaves oddly (or stale cache after an update). |
 | `manifest.json` | PWA metadata (app name, icons, colors) so it can install to desktop/phone. | Install name/icon is wrong. |
 
 ---
@@ -44,7 +44,7 @@ You edit **one small JSON file per base item** in `data/bases/` (e.g. `ruby.json
 | File / folder | What it does | Look here when… |
 |---|---|---|
 | `data/bases/*.json` | **The converted Craft of Exile mod data — one file per supported item class (61 files).** 56 are populated; Diamond and the four Time-Lost jewel files are empty. Each file is self-contained: `{ name, attribute?, prefixes:[], suffixes:[] }`. | A specific class has wrong/missing mods — open just that file. **Wrong weighting or a missing modifier = a data-conversion/data bug, fix it here.** |
-| `data/mods.data.js` | **Auto-generated.** `build_data.ps1` bundles every `data/bases/*.json` into this one file (`window.MOD_BASES[\"<id>\"] = {...}`). The app loads this, not the raw JSON. | Never edit by hand. If it's stale/missing, run `build.cmd`. |
+| `data/mods.data.js` | **Auto-generated.** `build_data.ps1` bundles every `data/bases/*.json` into this one file (`window.MOD_BASES["<id>"] = {...}`). The app loads this, not the raw JSON. | Never edit by hand. If it's stale/missing, run `build.cmd`. |
 | `data/desecrated-mods.json` | Source data for the Desecrate (abyssal bone) feature — one shared jewel pool (Lightless prefixes + of-the-Abyss suffixes), keyed under `jewelTypes` and gated by `bones` (only `preserved_cranium` is valid for jewels). Hand-editable. | Desecrate offers wrong mods. |
 | `data/desecrated-mods.data.js` | **Auto-generated** browser version of the above (built by `build_data.ps1`). | Don't edit by hand; rebuild instead. |
 | `data/normalized/*.json` | Repository-owned normalized base, modifier, crafting-item, and Essence records plus a version manifest and output hashes. | A source mapping or normalized reference fails validation. |
@@ -79,7 +79,7 @@ No quality currency button is enabled merely from a known description.
 | `tools/build-normalized-data.mjs` | Rebuilds `data/normalized.data.js` from repository-owned normalized JSON. | Run through the normal build. |
 | `tools/build-currency-index.mjs` | Rebuilds the 530-entry classified currency inventory, browser wrapper, and coverage report. `--check` fails if generated files are stale. | Development-time only; no runtime fetches. |
 | `tools/sync-poe2-data.mjs` | Staging-only public-source sync/import utility with HTTPS/public-host checks, rate limits, response limits, hashes, and provenance. `verify` validates the active repository snapshot without downloading. | New fetches are candidates; they do not auto-promote runtime data. |
-| `push.cmd` | **Double-click to upload everything to GitHub.** Inits git if needed, then force-pushes the whole folder to `Ri-el/poe2-crafting` (`main`). | Home PC only. Force-push overwrites the old version on GitHub — pull/sync first if the repo changed elsewhere. |
+| `push.cmd` | **Double-click to upload everything to GitHub.** Inits git if needed, then force-pushes the whole folder to `Ri-el/Ri-el.github.io` (`main`). | Home PC only. Force-push overwrites the old version on GitHub — pull/sync first if the repo changed elsewhere. |
 | `serve.ps1` | Optional: starts a tiny local web server (only needed if you ever want to test PWA/service-worker features that `file://` can't do). | Not needed for normal play. |
 | `.gitignore` | Tells git which files to skip (OS junk, `node_modules/`, the dev-only generator). | — |
 
@@ -110,7 +110,7 @@ The current UI contract suite passes **63/63**, and the fixed-seed fuzz run pass
 
 ---
 
-## 🧭 \"Something's wrong\" cheat sheet
+## 🧭 "Something's wrong" cheat sheet
 
 - **An orb / currency behaves wrong, caps wrong, tiers wrong** → `crafting.js` (engine logic).
 - **A specific item has wrong or missing mods** → that one file in `data/bases/` (data), then run `build.cmd`.
@@ -123,7 +123,7 @@ The current UI contract suite passes **63/63**, and the fixed-seed fuzz run pass
 ---
 
 ## ➕ Adding a new base later (no code edits needed)
-1. Drop a new file in `data/bases/`, e.g. `data/bases/my_new_base.json` with `{ \"name\": \"My Base\", \"prefixes\": [], \"suffixes\": [] }`.
+1. Drop a new file in `data/bases/`, e.g. `data/bases/my_new_base.json` with `{ "name": "My Base", "prefixes": [], "suffixes": [] }`.
 2. Fill in its `prefixes` / `suffixes`.
 3. Double-click `build.cmd`.
 4. If it should show in the menu, set its category to `'active'` in `select.js`.
