@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "networkPolicy": {
+    "userAgent": "poe2-crafting-data-sync/1.0 (repository data maintenance)",
+    "minimumRequestIntervalMs": 2000,
+    "requestTimeoutMs": 30000,
+    "maximumResponseBytes": 33554432,
+    "maximumRedirects": 3
+  },
+  "feeds": {
+    "craft-of-exile-poe2": {
+      "label": "Craft of Exile PoE 2 export",
+      "url": "https://www.craftofexile.com/json/poe2/main/poec_data.json",
+      "parser": "craft-of-exile-export-v1",
+      "reportedVersion": "0.5.4.1.2",
+      "versionObservedAt": "2026-07-11",
+      "status": "candidate",
+      "notes": "The current converter accepts the fixed coedata assignment or bare JSON. A fetched snapshot must still pass schema validation and review before promotion."
+    },
+    "repoe-poe2": {
+      "label": "RePoE-fork PoE 2 datasets",
+      "url": "https://repoe-fork.github.io/poe2/",
+      "parser": null,
+      "reportedVersion": "4.5.4.3",
+      "versionObservedAt": "2026-07-11",
+      "status": "adapter-required",
+      "files": [
+        "base_items.min.json",
+        "item_classes.min.json",
+        "mods.min.json",
+        "mods_by_base.min.json",
+        "augments.min.json"
+      ],
+      "notes": "Useful independent structured coverage, but its multi-file schema is not compatible with tools/convert-coe-data.mjs and must not be fed to that parser."
+    }
+  },
+  "evidence": [
+    {
+      "id": "ggg-0.5.0-item-changes",
+      "version": "0.5.0",
+      "url": "https://www.pathofexile.com/forum/view-thread/3932540"
+    },
+    {
+      "id": "ggg-0.5.4-patch-notes",
+      "version": "0.5.4",
+      "url": "https://www.pathofexile.com/forum/view-thread/3975218"
+    },
+    {
+      "id": "ggg-0.5.4-hotfix",
+      "version": "0.5.4",
+      "url": "https://www.pathofexile.com/forum/view-thread/3975342"
+    },
+    {
+      "id": "ggg-0.5.4-hotfix-2",
+      "version": "0.5.4",
+      "url": "https://www.pathofexile.com/forum/view-thread/3976201"
+    }
+  ]
+}

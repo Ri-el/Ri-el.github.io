@@ -1,0 +1,618 @@
+#!/usr/bin/env node
+
+import assert from 'node:assert/strict';
+import { readFileSync, readdirSync } from 'node:fs';
+import path from 'node:path';
+import vm from 'node:vm';
+import { fileURLToPath } from 'node:url';
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const BASE_DIR = path.join(HERE, 'data', 'bases');
+
+globalThis.window = globalThis;
+await import(new URL('./crafting.js', import.meta.url));
+const Engine = globalThis.CraftingEngine;
+
+function loadBases() {
+  const bases = {};
+  for (const file of readdirSync(BASE_DIR).filter(f => f.endsWith('.json')).sort()) {
+    bases[file.replace(/\.json$/, '')] = JSON.parse(readFileSync(path.join(BASE_DIR, file), 'utf8'));
+  }
+  return bases;
+}
+
+const bases = loadBases();
+const modData = { bases };
+const desecratedData = JSON.parse(readFileSync(path.join(HERE, 'data', 'desecrated-mods.json'), 'utf8'));
+
+function mulberry32(seed) {
+  return () => {
+    seed |= 0;
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function withRandom(random, fn) {
+  const original = Math.random;
+  Math.random = typeof random === 'function' ? random : mulberry32(random >>> 0);
+  try { return fn(); } finally { Math.random = original; }
+}
+
+function tier(ilvlReq, weight, value = ilvlReq) {
+  return { tier: ilvlReq, ilvlReq, weight, name: `L${ilvlReq}`, modLine: '+{0} test', min: value, max: value };
+}
+
+function group(modGroup, tiers) { return { modGroup, tiers }; }
+
+function syntheticBase(prefixCount = 5, suffixCount = 5) {
+  return {
+    name: 'Synthetic Equipment',
+    prefixes: Array.from({ length: prefixCount }, (_, i) => group(`P${i}`, [tier(1, 100)])),
+    suffixes: Array.from({ length: suffixCount }, (_, i) => group(`S${i}`, [tier(1, 100)])),
+  };
+}
+
+function record(modGroup, ilvlReq, extra = {}) {
+  return { modGroup, ilvlReq, tier: ilvlReq, displayText: modGroup, fractured: false, ...extra };
+}
+
+function rareItem(baseType, prefixes = [], suffixes = []) {
+  return {
+    rarity: 'rare', baseName: baseType, name: 'Test Item', baseType, jewelType: baseType,
+    prefixes, suffixes, enchantments: [], corrupted: false, sanctified: false,
+    mirrored: false, quality: { amount: 0, type: 'normal', source: null },
+    ilvl: 83, currencyUsed: {}, hinekoraLocked: false,
+  };
+}
+
+function desecrationTransactionFixture() {
+  const baseType = 'desecration_transaction_test';
+  const data = { bases: { [baseType]: {
+    name: 'Desecration Transaction Test',
+    limits: {
+      magic: { prefixes: 1, suffixes: 1 },
+      rare: { prefixes: 2, suffixes: 2 },
+    },
+    prefixes: ['P0', 'P1', 'P2', 'P3'].map(name => group(name, [tier(1, 100)])),
+    suffixes: ['S0', 'S1', 'S2', 'S3'].map(name => group(name, [tier(1, 100)])),
+  } } };
+  const makeDesecrated = name => ({
+    modGroup: name, name, tier: 'D', weight: 100,
+    modLine: '+{0} desecrated test', min: 1, max: 2,
+  });
+  const desecrated = { bases: { [baseType]: {
+    prefixes: ['DP0', 'DP1', 'DP2'].map(makeDesecrated),
+    suffixes: ['DS0', 'DS1', 'DS2'].map(makeDesecrated),
+  } } };
+  return { baseType, data, desecrated };
+}
+
+const tests = [];
+const test = (name, fn) => tests.push({ name, fn });
+
+test('compiled browser data exactly matches all source base JSON', () => {
+  const context = { window: {} };
+  vm.runInNewContext(readFileSync(path.join(HERE, 'data', 'mods.data.js'), 'utf8'), context);
+  assert.deepEqual(JSON.parse(JSON.stringify(context.window.MOD_BASES)), bases);
+});
+
+test('equal-weight fallback pools are explicitly marked unverified', () => {
+  const expected = [
+    'body_armours_str_dex_int', 'claws', 'daggers', 'flails',
+    'one_hand_axes', 'one_hand_swords', 'two_hand_axes', 'two_hand_swords',
+  ];
+  const observed = Object.entries(bases)
+    .filter(([, base]) => {
+      const tiers = [...(base.prefixes || []), ...(base.suffixes || [])]
+        .flatMap(group => group.tiers || []);
+      return tiers.length > 0 && tiers.every(entry => entry.weight === 1);
+    })
+    .map(([id]) => id)
+    .sort();
+  assert.deepEqual(observed, expected);
+  for (const id of expected) {
+    assert.equal(bases[id].weightStatus, 'unverified');
+    assert.equal(bases[id].weightSourceVersion, '0.5.4.1.2');
+    assert.match(bases[id].weightSource, /^https:\/\//);
+    assert.match(bases[id].weightNote, /not verified/i);
+  }
+});
+
+test('legacy quality state migrates to the structured shape without changing mechanics', () => {
+  const data = { bases: { quality_migration_test: syntheticBase() } };
+  const engine = new Engine(data, 'quality_migration_test');
+  assert.deepEqual(engine.getItem().quality, { amount: 0, type: 'normal', source: null });
+
+  const legacy = rareItem('quality_migration_test');
+  legacy.quality = 7;
+  engine.loadItem(legacy);
+  assert.deepEqual(engine.getItem().quality, { amount: 7, type: 'normal', source: null });
+
+  const structured = rareItem('quality_migration_test');
+  structured.quality = { amount: '12', type: 'preserved', source: { id: 'saved-state' } };
+  engine.loadItem(structured);
+  assert.deepEqual(engine.getItem().quality, {
+    amount: 12,
+    type: 'preserved',
+    source: { id: 'saved-state' },
+  });
+});
+
+test('same Amulet base filters monotonically across several item levels', () => {
+  const counts = [];
+  for (const level of [1, 20, 40, 60, 83]) {
+    const engine = new Engine(modData, 'amulets', desecratedData);
+    engine.setItemLevel(level);
+    const candidates = [...engine._prefixCandidates, ...engine._suffixCandidates];
+    assert(candidates.length > 0);
+    assert(candidates.every(c => c.tier.ilvlReq <= level));
+    counts.push(candidates.length);
+  }
+  assert.deepEqual(counts, [...counts].sort((a, b) => a - b));
+});
+
+test('low-item-level base cannot roll a high-level tier', () => {
+  const data = { bases: { low_test: {
+    name: 'Low Test',
+    prefixes: [group('LevelGate', [tier(80, 10000), tier(20, 1000), tier(1, 100)])],
+    suffixes: [],
+  } } };
+  withRandom(91, () => {
+    for (let i = 0; i < 250; i++) {
+      const engine = new Engine(data, 'low_test');
+      engine.setItemLevel(10);
+      const result = engine.applyTransmutation();
+      assert(result.success);
+      assert(result.addedMods[0].ilvlReq <= 10);
+    }
+  });
+});
+
+test('ordinary equipment fills to three prefixes and three suffixes', () => {
+  const data = { bases: { test_equipment: syntheticBase() } };
+  withRandom(7, () => {
+    const engine = new Engine(data, 'test_equipment');
+    assert(engine.applyAlchemy().success);
+    while (engine.applyExalted().success) { /* fill every open slot */ }
+    const item = engine.getItem();
+    assert.equal(item.prefixes.length, 3);
+    assert.equal(item.suffixes.length, 3);
+  });
+});
+
+test('jewels remain capped at two prefixes and two suffixes', () => {
+  const data = { bases: { ruby: syntheticBase() } };
+  withRandom(8, () => {
+    const engine = new Engine(data, 'ruby');
+    assert(engine.applyAlchemy().success);
+    while (engine.applyExalted().success) { /* fill every open slot */ }
+    const item = engine.getItem();
+    assert.equal(item.prefixes.length, 2);
+    assert.equal(item.suffixes.length, 2);
+  });
+});
+
+test('flasks and charms reject Rare upgrades but still craft as Magic', () => {
+  const data = { bases: { life_flasks: syntheticBase() } };
+  const engine = new Engine(data, 'life_flasks');
+  assert.equal(engine.applyAlchemy().success, false);
+  assert(engine.applyTransmutation().success);
+  assert(engine.applyAugmentation().success);
+  assert.equal(engine.applyRegal().success, false);
+  assert.equal(engine.getItem().rarity, 'magic');
+});
+
+test('Alchemy produces exactly four fresh modifiers', () => {
+  const data = { bases: { test_equipment: syntheticBase() } };
+  withRandom(() => 0, () => {
+    const engine = new Engine(data, 'test_equipment');
+    const result = engine.applyAlchemy();
+    assert(result.success);
+    assert.equal(result.item.prefixes.length + result.item.suffixes.length, 4);
+  });
+});
+
+test('a full prefix or suffix side forces Exalted onto the open side', () => {
+  const data = { bases: { test_equipment: syntheticBase() } };
+  const prefixesFull = new Engine(data, 'test_equipment');
+  prefixesFull.loadItem(rareItem('test_equipment', [record('P0', 1), record('P1', 1), record('P2', 1)], []));
+  assert.equal(prefixesFull.applyExalted().addedMods[0].type, 'suffix');
+
+  const suffixesFull = new Engine(data, 'test_equipment');
+  suffixesFull.loadItem(rareItem('test_equipment', [], [record('S0', 1), record('S1', 1), record('S2', 1)]));
+  assert.equal(suffixesFull.applyExalted().addedMods[0].type, 'prefix');
+});
+
+test('fractured modifiers survive Chaos and remain group blockers', () => {
+  const data = { bases: { test_equipment: syntheticBase() } };
+  const engine = new Engine(data, 'test_equipment');
+  engine.loadItem(rareItem('test_equipment', [record('P0', 1, { fractured: true }), record('P1', 20)], [record('S0', 60)]));
+  const result = withRandom(() => 0, () => engine.applyChaos('whittling'));
+  assert(result.success);
+  assert.equal(result.removedMods[0].modGroup, 'P1');
+  assert(engine.getItem().prefixes.concat(engine.getItem().suffixes).some(m => m.modGroup === 'P0' && m.fractured));
+  assert(!engine._eligibleCandidates('prefix', engine._existingGroups()).some(c => c.group.modGroup === 'P0'));
+});
+
+test('Omen of Whittling uses modifier level and randomises equal-lowest ties', () => {
+  const data = { bases: { test_equipment: syntheticBase() } };
+  const make = () => {
+    const engine = new Engine(data, 'test_equipment');
+    engine.loadItem(rareItem('test_equipment', [record('P0', 20), record('P1', 20)], [record('S0', 60)]));
+    return engine;
+  };
+  const first = withRandom(() => 0, () => make().applyChaos('whittling').removedMods[0].modGroup);
+  const second = withRandom(() => 0.999999, () => make().applyChaos('whittling').removedMods[0].modGroup);
+  assert.equal(first, 'P0');
+  assert.equal(second, 'P1');
+});
+
+test('modifier groups are mutually exclusive across both affix sides', () => {
+  const shared = group('SharedFamily', [tier(60, 100), tier(1, 100)]);
+  const data = { bases: { group_test: { name: 'Group Test', prefixes: [shared], suffixes: [shared, group('Other', [tier(1, 100)])] } } };
+  const engine = new Engine(data, 'group_test');
+  engine.loadItem(rareItem('group_test', [record('SharedFamily', 60)], []));
+  assert(!engine._eligibleCandidates('prefix', engine._existingGroups()).some(c => c.group.modGroup === 'SharedFamily'));
+  assert(!engine._eligibleCandidates('suffix', engine._existingGroups()).some(c => c.group.modGroup === 'SharedFamily'));
+});
+
+test('Well of Souls excludes modifiers that conflict with existing groups', () => {
+  const data = { bases: { desecration_group_test: {
+    name: 'Desecration Group Test',
+    prefixes: [group('SharedFamily', [tier(1, 100)]), group('OrdinaryFresh', [tier(1, 100)])],
+    suffixes: [group('SuffixFresh', [tier(1, 100)])],
+  } } };
+  const desecrated = { bases: { desecration_group_test: {
+    prefixes: [
+      { modGroup: 'SharedFamily', weight: 100, modLine: '+{0} conflict', min: 1, max: 1 },
+      { modGroup: 'DesecratedFresh', weight: 100, modLine: '+{0} fresh', min: 1, max: 1 },
+    ],
+    suffixes: [],
+  } } };
+  const engine = new Engine(data, 'desecration_group_test', desecrated);
+  engine.loadItem(rareItem('desecration_group_test', [record('SharedFamily', 1)], []));
+  const started = withRandom(() => 0, () => engine.startDesecration({
+    bone: 'preserved_cranium',
+    omen: 'sinistral_necromancy',
+  }));
+  assert(started.success);
+  assert(started.options.length > 0);
+  assert(!started.options.some(option => option.modGroup === 'SharedFamily'));
+  assert(engine.chooseDesecratedMod(0).success);
+  const groups = engine.getItem().prefixes.concat(engine.getItem().suffixes).map(mod => mod.modGroup);
+  assert.equal(groups.length, new Set(groups).size);
+});
+
+test('cancelling Desecration removes added placeholders and restores replaced modifiers', () => {
+  const { baseType, data, desecrated } = desecrationTransactionFixture();
+
+  const addEngine = new Engine(data, baseType, desecrated);
+  const addBefore = rareItem(baseType, [record('P0', 1)], [record('S0', 1)]);
+  addEngine.loadItem(addBefore);
+  const added = withRandom(() => 0, () => addEngine.startDesecration({
+    bone: 'preserved_cranium', omen: 'sinistral_necromancy',
+  }));
+  assert(added.success);
+  assert.equal(added.mode, 'add');
+  assert(addEngine.getItem().prefixes.some(mod => mod.modGroup === '__desecrated_pending__'));
+  assert(addEngine.cancelDesecration().success);
+  assert.deepEqual(addEngine.getItem(), addBefore);
+  assert.equal(addEngine.getPendingDesecration(), null);
+
+  const replaceEngine = new Engine(data, baseType, desecrated);
+  const replaceBefore = rareItem(baseType, [record('P0', 1), record('P1', 1)], [record('S0', 1)]);
+  replaceEngine.loadItem(replaceBefore);
+  const replaced = withRandom(() => 0, () => replaceEngine.startDesecration({
+    bone: 'preserved_cranium', omen: 'sinistral_necromancy',
+  }));
+  assert(replaced.success);
+  assert.equal(replaced.mode, 'replace');
+  assert.equal(replaced.removedMods[0].modGroup, 'P0');
+  assert(replaceEngine.cancelDesecration().success);
+  assert.deepEqual(replaceEngine.getItem(), replaceBefore);
+  assert.equal(replaceEngine.getPendingDesecration(), null);
+});
+
+test('cancelling Desecration restores a consumed Mark of the Abyssal Lord', () => {
+  const { baseType, data, desecrated } = desecrationTransactionFixture();
+  const engine = new Engine(data, baseType, desecrated);
+  engine.loadItem(rareItem(baseType, [record('P0', 1)], [record('S0', 1)]));
+  assert(withRandom(() => 0, () => engine.applyEssenceOfAbyss()).success);
+  const beforeDesecration = engine.getItem();
+  assert(beforeDesecration.prefixes.concat(beforeDesecration.suffixes).some(mod => mod.mark && mod.crafted));
+
+  const started = withRandom(() => 0, () => engine.startDesecration({ bone: 'preserved_cranium' }));
+  assert(started.success);
+  assert(!engine.getItem().prefixes.concat(engine.getItem().suffixes).some(mod => mod.mark));
+  assert(engine.cancelDesecration().success);
+  assert.deepEqual(engine.getItem(), beforeDesecration);
+});
+
+test('Desecration rerolls are enforced and decremented by the engine', () => {
+  const { baseType, data, desecrated } = desecrationTransactionFixture();
+  const engine = new Engine(data, baseType, desecrated);
+  engine.loadItem(rareItem(baseType, [record('P0', 1)], [record('S0', 1)]));
+  const started = withRandom(0xdec0de, () => engine.startDesecration({
+    bone: 'preserved_cranium',
+    omens: ['sinistral_necromancy', 'abyssal_echoes'],
+  }));
+  assert(started.success);
+  assert.equal(engine.getPendingDesecration().rerollsLeft, 1);
+
+  const first = withRandom(0xdec0df, () => engine.rerollDesecration());
+  assert(first.success);
+  assert.equal(first.rerollsLeft, 0);
+  const afterFirst = engine.getPendingDesecration();
+  assert.equal(afterFirst.rerollsLeft, 0);
+
+  const second = engine.rerollDesecration();
+  assert.equal(second.success, false);
+  assert.match(second.error, /no desecration rerolls remaining/i);
+  assert.deepEqual(engine.getPendingDesecration(), afterFirst);
+
+  const noEchoes = new Engine(data, baseType, desecrated);
+  noEchoes.loadItem(rareItem(baseType, [record('P0', 1)], [record('S0', 1)]));
+  assert(withRandom(() => 0, () => noEchoes.startDesecration({
+    bone: 'preserved_cranium', omen: 'sinistral_necromancy',
+  })).success);
+  assert.equal(noEchoes.rerollDesecration().success, false);
+});
+
+test('weights produce the expected 1:3 selection ratio', () => {
+  const data = { bases: { weight_test: {
+    name: 'Weight Test',
+    prefixes: [group('Light', [tier(1, 100)]), group('Heavy', [tier(1, 300)])],
+    suffixes: [],
+  } } };
+  const counts = { Light: 0, Heavy: 0 };
+  withRandom(0x504054, () => {
+    for (let i = 0; i < 12000; i++) {
+      const result = new Engine(data, 'weight_test').applyTransmutation();
+      counts[result.addedMods[0].modGroup]++;
+    }
+  });
+  const heavyShare = counts.Heavy / (counts.Light + counts.Heavy);
+  assert(Math.abs(heavyShare - 0.75) < 0.025, `heavy share was ${heavyShare}`);
+});
+
+test('zero-weight modifier tiers are excluded even at random roll zero', () => {
+  const data = { bases: { weight_test: {
+    name: 'Weight Test',
+    prefixes: [group('Impossible', [tier(1, 0)]), group('Eligible', [tier(1, 100)])],
+    suffixes: [],
+  } } };
+  const engine = new Engine(data, 'weight_test');
+  assert(!engine._prefixCandidates.some(candidate => candidate.group.modGroup === 'Impossible'));
+  const result = withRandom(() => 0, () => engine.applyTransmutation());
+  assert(result.success);
+  assert.equal(result.addedMods[0].modGroup, 'Eligible');
+});
+
+test('normalized source weights and stable modifier identity are applied', () => {
+  const data = { bases: { overlay_test: {
+    name: 'Overlay Test',
+    baseTags: ['ring'],
+    prefixes: [group('Blocked', [tier(1, 9999)]), group('Eligible', [tier(1, 1)])],
+    suffixes: [],
+  } } };
+  const overlay = new Map([
+    ['prefix|Blocked|1', {
+      stableModifierId: 1001, sourceModifierKey: 'BlockedBySourceWeight', sourceModifierGroupId: 51,
+      spawnWeight: 0, modifierTags: ['attack'], requiredTags: [], forbiddenTags: [], weightConditions: [],
+    }],
+    ['prefix|Eligible|1', {
+      stableModifierId: 1002, sourceModifierKey: 'EligibleBySourceWeight', sourceModifierGroupId: 52,
+      spawnWeight: 250, modifierTags: ['caster'], requiredTags: ['ring'], forbiddenTags: [], weightConditions: [],
+    }],
+  ]);
+  const engine = new Engine(data, 'overlay_test', null, overlay);
+  assert(!engine._prefixCandidates.some(candidate => candidate.group.modGroup === 'Blocked'));
+  const result = withRandom(() => 0, () => engine.applyTransmutation());
+  assert(result.success);
+  assert.equal(result.addedMods[0].stableModifierId, 1002);
+  assert.equal(result.addedMods[0].sourceModifierKey, 'EligibleBySourceWeight');
+  assert.equal(result.addedMods[0].sourceModifierGroupId, 52);
+  assert.deepEqual(result.addedMods[0].modifierTags, ['caster']);
+});
+
+test('source tag restrictions and stable modifier-group conflicts are enforced', () => {
+  const data = { bases: { source_group_test: {
+    name: 'Source Group Test',
+    baseTags: ['ring'],
+    prefixes: [group('VisiblePrefixName', [tier(1, 100)])],
+    suffixes: [group('DifferentVisibleSuffixName', [tier(1, 100)]), group('ForbiddenOnRings', [tier(1, 100)])],
+  } } };
+  const overlay = new Map([
+    ['prefix|VisiblePrefixName|1', { stableModifierId: 2001, sourceModifierGroupId: 77, spawnWeight: 100 }],
+    ['suffix|DifferentVisibleSuffixName|1', { stableModifierId: 2002, sourceModifierGroupId: 77, spawnWeight: 100 }],
+    ['suffix|ForbiddenOnRings|1', { stableModifierId: 2003, sourceModifierGroupId: 78, spawnWeight: 100, forbiddenTags: ['ring'] }],
+  ]);
+  const engine = new Engine(data, 'source_group_test', null, overlay);
+  engine.loadItem(rareItem('source_group_test', [record('VisiblePrefixName', 1, { sourceModifierGroupId: 77 })], []));
+  const eligible = engine._eligibleCandidates('suffix', engine._existingGroups());
+  assert(!eligible.some(candidate => candidate.group.modGroup === 'DifferentVisibleSuffixName'));
+  assert(!eligible.some(candidate => candidate.group.modGroup === 'ForbiddenOnRings'));
+});
+
+test('Chaos and Whittling roll back when no eligible replacement exists', () => {
+  const data = { bases: { no_replacement: { name: 'No Replacement', prefixes: [], suffixes: [] } } };
+  for (const omen of [null, 'whittling']) {
+    const engine = new Engine(data, 'no_replacement');
+    const before = rareItem('no_replacement', [record('Existing', 20)], []);
+    engine.loadItem(before);
+    const result = engine.applyChaos(omen);
+    assert.equal(result.success, false);
+    assert.match(result.error, /no eligible replacement/i);
+    assert.deepEqual(engine.getItem(), before);
+  }
+});
+
+test('Whittling refuses unknown modifier levels without mutating the item', () => {
+  const data = { bases: { test_equipment: syntheticBase() } };
+  const engine = new Engine(data, 'test_equipment');
+  const before = rareItem('test_equipment', [record('P0', 20)], [record('Unknown', 'D', { ilvlReq: undefined, tier: 'D', desecrated: true })]);
+  engine.loadItem(before);
+  const result = engine.applyChaos('whittling');
+  assert.equal(result.success, false);
+  assert.match(result.error, /^Unsupported — verification required/);
+  assert.deepEqual(engine.getItem(), before);
+});
+
+test('Essence of the Abyss creates one crafted Mark and respects the crafted-modifier limit', () => {
+  const data = { bases: { test_equipment: syntheticBase() } };
+  const first = new Engine(data, 'test_equipment');
+  first.loadItem(rareItem('test_equipment', [record('P0', 1)], [record('S0', 1)]));
+  const applied = withRandom(() => 0, () => first.applyEssenceOfAbyss());
+  assert(applied.success);
+  const mark = first.getItem().prefixes.concat(first.getItem().suffixes).find(mod => mod.mark);
+  assert(mark && mark.crafted);
+
+  const blocked = new Engine(data, 'test_equipment');
+  const withCrafted = rareItem('test_equipment', [record('P0', 1, { crafted: true })], [record('S0', 1)]);
+  blocked.loadItem(withCrafted);
+  const result = blocked.applyEssenceOfAbyss();
+  assert.equal(result.success, false);
+  assert.match(result.error, /maximum of one crafted modifier/);
+  assert.deepEqual(blocked.getItem(), withCrafted);
+});
+
+test('Greater/Perfect currencies filter tiers by Minimum Modifier Level', () => {
+  assert.deepEqual(Engine.CURRENCY_MIN_MODIFIER_LEVEL, {
+    greater_transmutation: 44, perfect_transmutation: 70,
+    greater_augmentation: 44, perfect_augmentation: 70,
+    greater_regal: 35, perfect_regal: 50,
+    greater_exalted: 35, perfect_exalted: 50,
+    greater_chaos: 35, perfect_chaos: 50,
+  });
+  const data = { bases: { floor_test: {
+    name: 'Floor Test',
+    prefixes: [
+      group('HasHighTier', [tier(60, 100), tier(10, 5000)]),
+      group('NoHighTier', [tier(30, 100), tier(1, 5000)]),
+    ],
+    suffixes: [],
+  } } };
+  const engine = new Engine(data, 'floor_test');
+  const filtered = engine._filterByMinModifierLevel(engine._prefixCandidates, 50);
+  assert.deepEqual(filtered.map(c => [c.group.modGroup, c.tier.ilvlReq]).sort(), [['HasHighTier', 60], ['NoHighTier', 30]]);
+  withRandom(23, () => {
+    for (let i = 0; i < 500; i++) {
+      const roll = new Engine(data, 'floor_test').applyTransmutation({ minModLevel: 50 }).addedMods[0];
+      assert.notEqual(roll.ilvlReq, 10);
+      assert.notEqual(roll.ilvlReq, 1);
+    }
+  });
+});
+
+test('Omen of Whittling followed by Perfect Chaos uses both rules in order', () => {
+  const data = { bases: { chaos_test: {
+    name: 'Chaos Test',
+    prefixes: [group('Target', [tier(60, 100), tier(10, 5000)]), group('OtherPrefix', [tier(55, 100)])],
+    suffixes: [group('KeptSuffix', [tier(70, 100)])],
+  } } };
+  const engine = new Engine(data, 'chaos_test');
+  engine.loadItem(rareItem('chaos_test', [record('Target', 10)], [record('KeptSuffix', 70)]));
+  const result = withRandom(() => 0, () => engine.applyChaos('whittling', { minModLevel: 50 }));
+  assert(result.success);
+  assert.equal(result.removedMods[0].modGroup, 'Target');
+  assert.equal(result.removedMods[0].ilvlReq, 10);
+  assert(result.addedMods[0].ilvlReq >= 50);
+});
+
+test('eligibility and weights are recalculated after every item-state change', () => {
+  const data = { bases: { test_equipment: syntheticBase() } };
+  const engine = new Engine(data, 'test_equipment');
+  engine.loadItem(rareItem('test_equipment', [record('P0', 1), record('P1', 1)], []));
+  let eligible = engine._eligibleCandidates('prefix', engine._existingGroups()).map(c => c.group.modGroup);
+  assert(!eligible.includes('P0') && !eligible.includes('P1'));
+
+  engine.loadItem(rareItem('test_equipment', [record('P0', 1, { fractured: true })], []));
+  eligible = engine._eligibleCandidates('prefix', engine._existingGroups()).map(c => c.group.modGroup);
+  assert(!eligible.includes('P0'));
+
+  engine.loadItem(rareItem('test_equipment', [record('P2', 1, { desecrated: true })], []));
+  eligible = engine._eligibleCandidates('prefix', engine._existingGroups()).map(c => c.group.modGroup);
+  assert(!eligible.includes('P2'));
+
+  withRandom(() => 0, () => engine.applyAnnulment());
+  eligible = engine._eligibleCandidates('prefix', engine._existingGroups()).map(c => c.group.modGroup);
+  assert(eligible.includes('P2'));
+});
+
+test('every populated selectable base constructs and accepts a valid craft', () => {
+  const selectable = [
+    'ruby', 'sapphire', 'emerald', 'amulets', 'rings', 'belts',
+    ...['gloves', 'boots', 'helmets'].flatMap(base => ['str', 'dex', 'int', 'str_dex', 'str_int', 'dex_int'].map(attr => `${base}_${attr}`)),
+    ...['str', 'dex', 'int', 'str_dex', 'str_int', 'dex_int', 'str_dex_int'].map(attr => `body_armours_${attr}`),
+    'quivers', 'shields_str', 'shields_str_dex', 'shields_str_int', 'bucklers', 'foci',
+    'claws', 'daggers', 'wands', 'one_hand_swords', 'one_hand_axes', 'one_hand_maces', 'sceptres', 'spears', 'flails',
+    'bows', 'staves', 'two_hand_swords', 'two_hand_axes', 'two_hand_maces', 'quarterstaves', 'crossbows',
+    'life_flasks', 'mana_flasks', 'charms',
+  ];
+  assert.equal(selectable.length, 56);
+  withRandom(0x454, () => {
+    for (const id of selectable) {
+      assert(bases[id], `missing ${id}`);
+      const engine = new Engine(modData, id, desecratedData);
+      engine.setItemLevel(83);
+      const result = engine.applyTransmutation();
+      assert(result.success, `${id}: ${result.error}`);
+    }
+  });
+});
+
+test('base-specific pools do not leak modifiers between item classes', () => {
+  const amuletGroups = new Set([...bases.amulets.prefixes, ...bases.amulets.suffixes].map(g => g.modGroup));
+  const ringGroups = new Set([...bases.rings.prefixes, ...bases.rings.suffixes].map(g => g.modGroup));
+  const amuletOnly = [...amuletGroups].find(g => !ringGroups.has(g));
+  assert(amuletOnly);
+  const ring = new Engine(modData, 'rings');
+  assert(![...ring._prefixCandidates, ...ring._suffixCandidates].some(c => c.group.modGroup === amuletOnly));
+});
+
+const audit = {
+  files: Object.keys(bases).length,
+  populated: 0,
+  groups: 0,
+  tiers: 0,
+  empty: [],
+  allWeightsOne: [],
+  invalidWeights: [],
+  metadata: { limits: 0, tags: 0, itemClass: 0, baseTypes: 0, requirements: 0 },
+};
+
+for (const [id, base] of Object.entries(bases)) {
+  const groups = [...(base.prefixes || []), ...(base.suffixes || [])];
+  const tiers = groups.flatMap(g => g.tiers || []);
+  audit.groups += groups.length;
+  audit.tiers += tiers.length;
+  if (tiers.length) audit.populated++;
+  else audit.empty.push(id);
+  if (tiers.length && tiers.every(t => t.weight === 1)) audit.allWeightsOne.push(id);
+  for (const t of tiers) if (!(Number.isFinite(t.weight) && t.weight > 0)) audit.invalidWeights.push(id);
+  for (const key of Object.keys(audit.metadata)) if (base[key] != null) audit.metadata[key]++;
+}
+
+let passed = 0;
+const failures = [];
+for (const { name, fn } of tests) {
+  try {
+    await fn();
+    passed++;
+    console.log(`PASS  ${name}`);
+  } catch (error) {
+    failures.push({ name, error: error.message });
+    console.log(`FAIL  ${name}\n      ${error.message}`);
+  }
+}
+
+console.log('\nDataset audit');
+console.log(JSON.stringify(audit, null, 2));
+console.log(`\nRESULT: ${passed}/${tests.length} tests passed`);
+if (failures.length) {
+  console.log(JSON.stringify({ failures }, null, 2));
+  process.exitCode = 1;
+}

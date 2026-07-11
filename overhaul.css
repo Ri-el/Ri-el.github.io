@@ -1,0 +1,957 @@
+/* ============================================================
+   Oishy Crafting Forge — in-game-inspired interface layer
+   Loaded last so the legacy styles remain the functional base.
+   ============================================================ */
+
+:root {
+  --forge-bg: #080a0b;
+  --forge-panel: #111417;
+  --forge-panel-deep: #090b0d;
+  --forge-slot: #15191c;
+  --forge-gold: #b9823f;
+  --forge-gold-bright: #d0a15f;
+  --forge-rule: rgba(185, 130, 63, 0.28);
+  --forge-edge: rgba(155, 133, 94, 0.32);
+  --forge-text: #c8b58e;
+  --forge-muted: #716c63;
+  --forge-green: #78b987;
+}
+
+html { background: var(--forge-bg); }
+body {
+  background:
+    linear-gradient(rgba(8, 10, 11, 0.93), rgba(8, 10, 11, 0.98)),
+    repeating-linear-gradient(90deg, transparent 0 89px, rgba(255,255,255,0.012) 90px),
+    repeating-linear-gradient(0deg, transparent 0 89px, rgba(255,255,255,0.012) 90px),
+    #080a0b;
+  color: var(--forge-text);
+}
+
+body::before {
+  background:
+    radial-gradient(ellipse 70% 48% at 50% 0%, rgba(163, 103, 41, 0.09), transparent 72%),
+    linear-gradient(90deg, rgba(0,0,0,0.28), transparent 20%, transparent 80%, rgba(0,0,0,0.28));
+}
+
+[hidden] { display: none !important; }
+
+/* ---------- Shared forge chrome ---------- */
+.status-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: var(--forge-green);
+  box-shadow: 0 0 9px rgba(120, 185, 135, 0.75);
+}
+
+.section-kicker,
+.panel-kicker {
+  display: block;
+  color: var(--forge-gold);
+  font: 600 0.7rem/1.2 'Inter', sans-serif;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+#app-header {
+  position: sticky;
+  top: 0;
+  min-height: 88px;
+  padding: 10px 32px;
+  background: rgba(8, 10, 11, 0.96);
+  border-bottom: 1px solid rgba(185, 130, 63, 0.24);
+  backdrop-filter: blur(14px);
+  z-index: 100;
+}
+
+#app-header .app-logo { height: 58px !important; }
+#app-header .header-inner { display: flex; align-items: center; gap: 22px; }
+#app-header .app-title { margin: 0; }
+#app-header .app-subtitle { margin: 0; color: #8b857a; }
+#app-header .jewel-selector {
+  margin: 0;
+  padding-left: 20px;
+  border-left: 1px solid var(--forge-rule);
+}
+
+#app-header .back-to-select {
+  left: 32px;
+  padding: 8px 13px;
+  border-radius: 2px;
+  background: #0f1214;
+  border-color: rgba(185, 130, 63, 0.36);
+  color: #a99166;
+}
+
+/* ---------- Crafting workspace ---------- */
+#main-content {
+  display: grid;
+  grid-template-columns: 320px minmax(440px, 1fr) 350px;
+  grid-template-areas:
+    'guide guide guide'
+    'currency item stash'
+    'omens omens omens';
+  align-items: start;
+  justify-content: stretch;
+  gap: 18px;
+  width: min(100%, 1580px);
+  max-width: 1580px;
+  margin: 0 auto;
+  padding: 20px 24px 52px;
+}
+
+#side-rail { display: contents; }
+
+.craft-guide {
+  grid-area: guide;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 60px;
+  padding: 10px 18px;
+  background: linear-gradient(90deg, rgba(17,20,23,0.82), rgba(10,12,14,0.7));
+  border: 1px solid rgba(155, 133, 94, 0.19);
+  color: #716c63;
+}
+
+.guide-step { display: flex; align-items: center; gap: 10px; }
+.guide-step > span {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(185,130,63,0.55);
+  color: #d0a15f;
+  font: 600 0.72rem 'Cinzel', serif;
+}
+.guide-step p { margin: 0; font-size: 0.7rem; letter-spacing: 0.025em; }
+.guide-step strong { color: #b5a787; font-weight: 500; }
+.craft-guide > i { color: #594a37; font-style: normal; }
+.guide-tip {
+  margin-left: auto;
+  padding: 7px 11px;
+  border: 1px solid rgba(95,211,138,0.18);
+  color: #77897a;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+#currency-panel,
+#jewel-panel,
+#stash-panel,
+#desecrate-panel {
+  width: auto;
+  min-width: 0;
+  position: relative;
+  top: auto;
+  border-radius: 0;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.018), transparent 32%),
+    var(--forge-panel);
+  border: 1px solid rgba(155, 133, 94, 0.27);
+  box-shadow: 0 18px 45px rgba(0,0,0,0.28), inset 0 0 0 3px rgba(0,0,0,0.26);
+  overflow: hidden;
+}
+
+#currency-panel::after,
+#jewel-panel::after,
+#stash-panel::after,
+#desecrate-panel::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border: 1px solid rgba(255,255,255,0.025);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#currency-panel > *,
+#jewel-panel > *,
+#stash-panel > *,
+#desecrate-panel > * { position: relative; z-index: 1; }
+
+#currency-panel { grid-area: currency; padding: 20px 16px 16px; }
+#jewel-panel {
+  grid-area: item;
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-start;
+  min-height: 590px;
+  padding: 0 20px 24px;
+}
+#stash-panel { grid-area: stash; padding: 20px 18px; }
+#desecrate-panel { grid-area: omens; padding: 20px 22px 24px; }
+
+.panel-title {
+  min-height: 46px;
+  margin: 0 0 14px;
+  padding: 5px 0 14px;
+  color: #c7ad79;
+  text-align: left;
+  font-size: 0.94rem;
+  letter-spacing: 0.14em;
+  border-bottom: 1px solid var(--forge-rule);
+}
+.panel-title::after { display: none; }
+
+.workbench-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 74px;
+  padding: 18px 4px 12px;
+  border-bottom: 0;
+}
+.workbench-heading h2 {
+  margin: 0;
+  color: #c7ad79;
+  font: 600 1.02rem/1.2 'Cinzel', serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.workbench-state {
+  padding: 8px 10px;
+  border: 1px solid rgba(255,255,255,0.055);
+  color: #8a8479;
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Only the workbench READY dot breathes; every other status dot stays still. */
+.workbench-state .status-dot {
+  animation: workbenchReadyBreath 2.8s ease-in-out infinite;
+}
+
+@keyframes workbenchReadyBreath {
+  0%, 100% {
+    background-color: #5f9d70;
+    box-shadow: 0 0 4px rgba(95, 157, 112, 0.45);
+  }
+  50% {
+    background-color: #91d6a2;
+    box-shadow: 0 0 11px rgba(120, 210, 143, 0.88);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workbench-state .status-dot {
+    animation: none;
+    background-color: #78b987;
+    box-shadow: 0 0 7px rgba(120, 185, 135, 0.68);
+  }
+}
+
+#craft-zone {
+  display: grid;
+  place-items: start center;
+  width: 100%;
+  min-height: 430px;
+  margin-top: 18px;
+  padding: 34px 24px;
+  background:
+    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px),
+    #090b0d;
+  background-size: 42px 42px;
+  border: 1px solid rgba(155, 133, 94, 0.24);
+}
+
+#jewel-tooltip.tooltip {
+  width: min(100%, 560px);
+  max-width: 560px;
+  border-radius: 0;
+  background: #090a0c;
+  border: 1px solid rgba(112, 101, 151, 0.48);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.55), inset 0 0 30px rgba(50,45,70,0.12);
+}
+#jewel-tooltip .tooltip-content { padding: 28px 28px 22px; }
+#jewel-tooltip .item-name { font-size: 1.3rem; letter-spacing: 0.055em; }
+#jewel-tooltip .item-level { color: #827b70; }
+
+/* ---------- Currency stash tab ---------- */
+#currency-panel::before { display: none; }
+#currency-panel .currency-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 8px;
+  background: #080a0b;
+  border: 1px solid rgba(155, 133, 94, 0.22);
+}
+
+#currency-panel .currency-btn,
+#currency-panel .cur-cluster {
+  min-width: 0;
+  min-height: 82px;
+  border-radius: 0;
+  background: linear-gradient(145deg, #171b1e, #111417);
+  border: 1px solid rgba(255,255,255,0.065);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.45);
+}
+
+#currency-panel .currency-btn {
+  display: flex;
+  width: 100%;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 3px 6px;
+}
+
+#currency-panel .currency-btn:hover {
+  transform: none;
+  border-color: rgba(185,130,63,0.62);
+  background: linear-gradient(145deg, #202327, #141719);
+  box-shadow: inset 0 0 14px rgba(185,130,63,0.07), 0 0 12px rgba(0,0,0,0.4);
+}
+
+#currency-panel .currency-btn.armed {
+  transform: none;
+  border-color: var(--forge-gold-bright);
+  background: #201b14;
+}
+
+#currency-panel .currency-icon {
+  width: 50px;
+  height: 50px;
+  flex: 0 0 auto;
+  border-radius: 3px;
+  background-color: #0c0e10;
+}
+#currency-panel .currency-img { border-radius: 2px; padding: 1px; }
+#currency-panel .currency-label {
+  display: block;
+  max-width: 74px;
+  color: #80796c;
+  font-size: 0.54rem;
+  letter-spacing: 0.035em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+#currency-panel .cur-cluster {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 24px;
+  gap: 3px;
+  padding: 4px;
+}
+#currency-panel .cur-cluster > .currency-btn {
+  min-height: 72px;
+  padding: 4px 1px;
+  background: transparent;
+  border-color: transparent;
+}
+#currency-panel .cur-tiers {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 3px;
+}
+#currency-panel .cur-tiers .currency-btn {
+  min-height: 0;
+  padding: 0;
+  border: 1px solid rgba(255,255,255,0.07);
+  background: #0c0f11;
+}
+#currency-panel .tier-badge .currency-icon { width: 20px; height: 28px; border-radius: 1px; }
+#currency-panel .tier-num { font-size: 0.52rem; }
+
+.undo-redo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+#currency-panel .reset-btn,
+#stash-panel .save-btn {
+  min-height: 38px;
+  border-radius: 0;
+  background: #111315;
+  border: 1px solid rgba(185,130,63,0.26);
+  color: #9e8f74;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-size: 0.62rem;
+}
+#currency-panel .reset-btn:hover,
+#stash-panel .save-btn:hover {
+  border-color: rgba(185,130,63,0.62);
+  background: #191713;
+  color: #cbb184;
+}
+
+/* ---------- Item stash ---------- */
+#base-tabs:empty,
+#base-stash:empty { display: none; }
+#stash-panel .stash-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 5px;
+  margin-bottom: 14px;
+  padding: 10px;
+  background: #080a0b;
+  border: 1px solid rgba(155,133,94,0.24);
+}
+#stash-panel .stash-slot {
+  border-radius: 0;
+  background: linear-gradient(145deg, #171b1e, #101315);
+  border-color: rgba(255,255,255,0.075);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.5);
+}
+#stash-panel .stash-slot:hover { border-color: rgba(185,130,63,0.68); }
+
+/* ---------- Omens / Abyss stash ---------- */
+#desecrate-panel::before { opacity: 0.45; }
+#desecrate-panel .abyss-stash { gap: 10px; }
+#desecrate-panel .stash-row {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(74px, 1fr));
+  gap: 6px;
+  padding: 9px;
+  background: #080a0b;
+  border: 1px solid rgba(95,211,138,0.11);
+}
+#desecrate-panel .stash-row.bones-row,
+#desecrate-panel .stash-row.essences-row { padding: 9px; border: 1px solid rgba(95,211,138,0.11); }
+#desecrate-panel .abyss-btn {
+  width: 100%;
+  min-height: 92px;
+  padding: 9px 5px;
+  border-radius: 0;
+  background: linear-gradient(145deg, #14191a, #101415);
+  border-color: rgba(95,211,138,0.14);
+}
+#desecrate-panel .abyss-btn:hover { transform: none; border-color: rgba(95,211,138,0.48); }
+#desecrate-panel .currency-icon { width: 46px; height: 46px; border-radius: 2px; }
+
+/* ---------- Base selection screen ---------- */
+#select-view {
+  width: min(100%, 1500px);
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 28px 28px 46px;
+}
+.select-header {
+  display: grid;
+  grid-template-columns: 300px minmax(360px, 1fr) 250px;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 26px;
+  padding: 20px 26px;
+  text-align: left;
+  background: linear-gradient(100deg, rgba(17,20,23,0.96), rgba(9,11,13,0.92));
+  border: 1px solid rgba(155,133,94,0.24);
+  box-shadow: inset 0 0 0 4px rgba(0,0,0,0.22);
+}
+.select-brand .app-logo { height: 76px !important; margin: 0 !important; }
+.brand-edition {
+  display: block;
+  margin-top: 5px;
+  color: #645e55;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.select-heading {
+  margin: 6px 0 3px;
+  color: #c8b58e;
+  font-size: 1.38rem;
+  text-align: left;
+}
+.select-subtitle { color: #716c63; font-size: 0.72rem; }
+.select-toolbar { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+.search-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 11px;
+  background: #080a0b;
+  border: 1px solid rgba(155,133,94,0.28);
+  color: #806b4d;
+}
+.search-control input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #b8aa8d;
+  font: 0.72rem 'Inter', sans-serif;
+}
+.search-control input::placeholder { color: #544f48; }
+.search-control:focus-within { border-color: rgba(185,130,63,0.65); }
+.select-result-count { color: #5f5a52; font-size: 0.62rem; text-align: right; }
+
+.cat-group {
+  margin: 0 0 20px;
+  padding: 16px;
+  background: rgba(13,16,18,0.82);
+  border: 1px solid rgba(155,133,94,0.17);
+}
+.cat-group-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 11px; }
+.cat-group-title {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: #a68d65;
+  text-align: left;
+  font-size: 0.68rem;
+}
+.cat-group-count { color: #504c46; font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.cat-grid { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 8px; }
+.cat-card {
+  min-height: 104px;
+  padding: 14px 10px;
+  border-radius: 0;
+  background: linear-gradient(145deg, #171b1e, #101315);
+  border-color: rgba(255,255,255,0.065);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.5);
+}
+.cat-card.is-active { border-color: rgba(95,211,138,0.18); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.5); }
+.cat-card:hover:not(.is-disabled),
+.cat-card.is-active:hover {
+  transform: translateY(-2px);
+  border-color: rgba(185,130,63,0.68);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.32), inset 0 0 14px rgba(185,130,63,0.06);
+}
+.cat-ico { width: 46px; height: 46px; }
+.cat-ico-monogram {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(185,130,63,0.26);
+  color: #a6885e;
+  font: 600 0.68rem 'Cinzel', serif;
+}
+.cat-card-label { color: #a99f8c; font-size: 0.68rem; }
+.cat-badge { border-radius: 0; background: rgba(95,211,138,0.09); color: #65866c; }
+.variant-back,
+.back-to-select { border-radius: 0; }
+.select-empty { padding: 70px 20px; text-align: center; color: #686159; }
+.select-empty-mark { display: block; color: #947245; font-size: 2rem; }
+.select-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 4px 0;
+  color: #4e4b46;
+  font-size: 0.6rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* ---------- Responsive workbench ---------- */
+@media (max-width: 1280px) {
+  #main-content {
+    grid-template-columns: 300px minmax(420px, 1fr) 320px;
+    gap: 14px;
+    padding-inline: 16px;
+  }
+  #currency-panel .currency-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #desecrate-panel .stash-row { grid-template-columns: repeat(6, minmax(72px, 1fr)); }
+}
+
+@media (max-width: 1050px) {
+  #main-content {
+    grid-template-columns: 300px minmax(0, 1fr);
+    grid-template-areas:
+      'guide guide'
+      'currency item'
+      'stash stash'
+      'omens omens';
+  }
+  #stash-panel .stash-grid { grid-template-columns: repeat(12, 1fr); }
+  .select-header { grid-template-columns: 220px 1fr; }
+  .select-toolbar { grid-column: 1 / -1; flex-direction: row; align-items: center; }
+  .search-control { flex: 1; }
+}
+
+@media (max-width: 768px) {
+  #app-header { position: relative; min-height: 130px; padding-top: 46px; }
+  #app-header .header-inner { flex-direction: column; gap: 8px; }
+  #app-header .jewel-selector { padding: 0; border: 0; }
+  #app-header .back-to-select { top: 18px; left: 14px; transform: none; }
+  #main-content {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'guide' 'item' 'currency' 'stash' 'omens';
+    padding: 12px 10px 46px;
+  }
+  .craft-guide { display: none; }
+  #jewel-panel { min-height: 0; padding-inline: 12px; }
+  #craft-zone { min-height: 360px; padding: 24px 10px; }
+  #currency-panel { position: relative; inset: auto; }
+  #currency-panel .currency-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  #stash-panel .stash-grid { grid-template-columns: repeat(6, 1fr); }
+  #desecrate-panel .stash-row { grid-template-columns: repeat(3, minmax(72px, 1fr)); }
+  .select-header { grid-template-columns: 1fr; text-align: center; }
+  .select-brand .app-logo { margin: 0 auto !important; }
+  .select-heading { text-align: center; }
+  .select-result-count { text-align: left; }
+  .select-footer { flex-direction: column; align-items: center; text-align: center; }
+}
+
+/* ============================================================
+   Compact tabbed crafting stash — desktop 100% zoom layout
+   ============================================================ */
+@media (min-width: 1101px) {
+  #craft-view {
+    height: 100dvh;
+    min-height: 640px;
+    overflow: hidden;
+  }
+
+  #app-header {
+    box-sizing: border-box;
+    height: 74px;
+    min-height: 74px;
+    padding-block: 7px;
+  }
+  #app-header .app-logo { height: 48px !important; }
+
+  #main-content {
+    box-sizing: border-box;
+    grid-template-columns: minmax(320px, 350px) minmax(430px, 1fr) minmax(285px, 320px);
+    grid-template-rows: 44px minmax(0, 1fr);
+    grid-template-areas:
+      'guide guide guide'
+      'currency item stash';
+    align-items: stretch;
+    gap: 12px;
+    width: min(100%, 1760px);
+    max-width: 1760px;
+    height: calc(100dvh - 74px);
+    margin: 0 auto;
+    padding: 10px 16px 12px;
+    overflow: hidden;
+  }
+
+  .craft-guide {
+    min-height: 0;
+    height: 44px;
+    padding-block: 6px;
+    overflow: hidden;
+  }
+
+  #currency-panel,
+  #jewel-panel,
+  #stash-panel {
+    box-sizing: border-box;
+    width: auto;
+    height: 100%;
+    min-height: 0;
+  }
+}
+
+#currency-panel.crafting-stash {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 9px;
+  padding: 13px;
+  overflow: hidden;
+}
+
+.crafting-stash-heading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+#currency-panel .crafting-stash-heading .panel-title {
+  width: 100%;
+  min-height: 0;
+  margin: 2px 0 0;
+  padding: 0;
+  border: 0;
+  text-align: center;
+  font-size: 0.88rem;
+}
+
+.craft-tab-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-flow: row;
+  grid-auto-rows: 29px;
+  gap: 4px;
+  min-width: 0;
+  padding: 5px;
+  overflow: hidden;
+  background: #080a0b;
+  border: 1px solid rgba(155,133,94,0.24);
+}
+
+.craft-tab-list::-webkit-scrollbar,
+.craft-tab-panel::-webkit-scrollbar,
+#craft-zone::-webkit-scrollbar { width: 7px; height: 7px; }
+.craft-tab-list::-webkit-scrollbar-track,
+.craft-tab-panel::-webkit-scrollbar-track,
+#craft-zone::-webkit-scrollbar-track { background: #080a0b; }
+.craft-tab-list::-webkit-scrollbar-thumb,
+.craft-tab-panel::-webkit-scrollbar-thumb,
+#craft-zone::-webkit-scrollbar-thumb { background: #765a35; border: 1px solid #080a0b; }
+
+.craft-tab {
+  min-width: 0;
+  width: 100%;
+  height: 29px;
+  padding: 0 6px;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 0;
+  background: #121518;
+  color: #756d61;
+  font: 600 0.56rem/1 'Inter', sans-serif;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.craft-tab:hover { color: #bba77e; border-color: rgba(185,130,63,0.42); }
+.craft-tab.active,
+.craft-tab[aria-selected="true"] {
+  color: #e0c58f;
+  background: #211b13;
+  border-color: rgba(208,161,95,0.72);
+  box-shadow: inset 0 -2px 0 #b9823f;
+}
+.craft-tab:focus-visible { outline: 2px solid #d0a15f; outline-offset: -2px; }
+
+.craft-tab-panels {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: #080a0b;
+  border: 1px solid rgba(155,133,94,0.22);
+}
+
+.craft-tab-panel {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 8px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(185,130,63,0.5) #080a0b;
+}
+
+#currency-panel .craft-tab-panel .crafting-card-grid,
+#currency-panel .craft-tab-panel .currency-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-content: start;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+#currency-panel .currency-btn,
+#currency-panel .abyss-btn,
+#currency-panel .cur-cluster {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 78px;
+  border-radius: 0;
+  background: linear-gradient(145deg, #171b1e, #111417);
+  border: 1px solid rgba(255,255,255,0.065);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.45);
+}
+
+#currency-panel .currency-btn,
+#currency-panel .abyss-btn {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 7px 3px 6px;
+}
+
+#currency-panel .abyss-btn:hover,
+#currency-panel .currency-btn:hover {
+  transform: none;
+  border-color: rgba(185,130,63,0.62);
+  background: linear-gradient(145deg, #202327, #141719);
+}
+
+#currency-panel .currency-btn.active,
+#currency-panel .abyss-btn.active,
+#currency-panel .currency-btn.armed,
+#currency-panel .abyss-btn.armed {
+  border-color: var(--forge-gold-bright);
+  background: #211b13;
+  box-shadow: inset 0 0 14px rgba(185,130,63,0.1), 0 0 10px rgba(185,130,63,0.12);
+}
+
+#currency-panel .currency-btn.disabled,
+#currency-panel .abyss-btn.disabled,
+#currency-panel .currency-btn:disabled,
+#currency-panel .abyss-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  filter: grayscale(0.55);
+  pointer-events: auto;
+}
+
+#currency-panel .currency-icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  border-radius: 2px;
+}
+#currency-panel .currency-label {
+  display: block;
+  max-width: 70px;
+  color: #8b8273;
+  font-size: 0.51rem;
+  letter-spacing: 0.025em;
+  line-height: 1.12;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+#currency-panel .cur-cluster {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 22px;
+  gap: 3px;
+  padding: 3px;
+}
+#currency-panel .cur-cluster > .currency-btn {
+  min-height: 70px;
+  padding: 3px 1px;
+  border-color: transparent;
+  background: transparent;
+}
+#currency-panel .cur-tiers {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 3px;
+}
+#currency-panel .cur-tiers .currency-btn {
+  min-height: 0;
+  padding: 0;
+  background: #0c0f11;
+}
+#currency-panel .cur-tiers .currency-icon { width: 18px; height: 26px; }
+#currency-panel .tier-num { font-size: 0.5rem; }
+
+.tab-help {
+  margin: 0 0 8px;
+  padding: 7px 8px;
+  color: #827969;
+  background: rgba(185,130,63,0.055);
+  border-left: 2px solid rgba(185,130,63,0.45);
+  font-size: 0.62rem;
+  line-height: 1.4;
+}
+
+.unsupported-notice,
+.unsupported-item-card {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 8px;
+  padding: 12px;
+  background: linear-gradient(145deg, rgba(33,27,19,0.62), rgba(15,17,19,0.9));
+  border: 1px solid rgba(185,130,63,0.25);
+  color: #7d7569;
+  font-size: 0.64rem;
+  line-height: 1.48;
+}
+.unsupported-notice strong,
+.unsupported-item-card strong { color: #c4a875; font-size: 0.66rem; }
+.unsupported-item-name {
+  color: #9c9180;
+  font: 600 0.7rem/1.2 'Cinzel', serif;
+  letter-spacing: 0.06em;
+}
+
+#currency-panel .crafting-actions {
+  display: grid;
+  gap: 6px;
+  padding-top: 1px;
+}
+#currency-panel .crafting-actions .reset-btn {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 34px;
+  margin: 0;
+}
+
+#jewel-panel {
+  align-items: stretch;
+  overflow: hidden;
+}
+#jewel-panel .workbench-heading {
+  min-height: 52px;
+  padding: 9px 4px 7px;
+}
+#craft-zone {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-top: 10px;
+  padding: 18px 16px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(185,130,63,0.5) #080a0b;
+}
+#jewel-tooltip.tooltip { width: min(100%, 560px); }
+#jewel-tooltip .tooltip-content { padding: 22px 24px 18px; }
+#reveal-panel { flex: 0 0 auto; }
+
+#stash-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+#stash-panel > .panel-title {
+  min-height: 34px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+}
+#stash-panel .stash-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  flex: 0 0 auto;
+  gap: 5px;
+  margin-bottom: 10px;
+  padding: 8px;
+}
+#stash-panel .save-btn { width: 100%; margin-top: auto; }
+
+@media (min-width: 1101px) and (max-width: 1280px) {
+  #main-content {
+    grid-template-columns: minmax(290px, 320px) minmax(400px, 1fr) minmax(270px, 300px);
+    gap: 10px;
+    padding-inline: 10px;
+  }
+  #currency-panel .craft-tab-panel .crafting-card-grid,
+  #currency-panel .craft-tab-panel .currency-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .guide-tip { display: none; }
+}
+
+@media (max-width: 1100px) {
+  #craft-view { height: auto; min-height: 100vh; overflow: visible; }
+  #main-content {
+    height: auto;
+    overflow: visible;
+    grid-template-columns: minmax(300px, 0.8fr) minmax(0, 1.2fr);
+    grid-template-areas: 'guide guide' 'currency item' 'stash stash';
+  }
+  #currency-panel.crafting-stash { max-height: 720px; }
+  #stash-panel .stash-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+}
+
+@media (max-width: 768px) {
+  #main-content { grid-template-areas: 'item' 'currency' 'stash'; }
+  #currency-panel.crafting-stash { max-height: none; min-height: 620px; }
+  #currency-panel .craft-tab-panel .crafting-card-grid,
+  #currency-panel .craft-tab-panel .currency-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  #stash-panel .stash-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}

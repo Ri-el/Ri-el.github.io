@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "activeSnapshotId": "legacy-coe-30a09add1e2e",
+  "snapshots": [
+    {
+      "id": "legacy-coe-30a09add1e2e",
+      "status": "normalized-without-raw-cache",
+      "recordedAt": "2026-07-11",
+      "source": {
+        "kind": "craft-of-exile-export",
+        "url": null,
+        "publishedAt": null,
+        "retrievedAt": null,
+        "fileName": "data.json",
+        "bytes": 2897500,
+        "sha256": "30a09add1e2e626a74c697da3aa78c2400c4122c21353bd0ed824bd4aa58b4ee",
+        "wrapper": "coedata-assignment",
+        "etag": null,
+        "lastModified": null,
+        "rawAvailable": false,
+        "rawPath": null,
+        "rawUnavailableReason": "The original upload was used to create the normalized repository data but was not retained in this workspace. Its identity is preserved from data/normalized/version-manifest.json.",
+        "candidateRefreshSourceId": "craft-of-exile-poe2"
+      },
+      "gameVersion": {
+        "target": "0.5.4",
+        "embedded": null,
+        "verificationStatus": "The source export did not encode a game version; compatibility requires mechanic-level verification."
+      },
+      "parser": {
+        "path": "tools/convert-coe-data.mjs",
+        "schemaVersion": 1,
+        "inputContract": "JSON or a fixed coedata={...}; assignment; never evaluated",
+        "rawRevalidationAvailable": false
+      },
+      "normalized": {
+        "directory": "data/normalized",
+        "bundle": "data/normalized.data.js",
+        "hashAlgorithm": "sha256",
+        "hashScope": "UTF-8 JSON.stringify payload without the file's trailing newline",
+        "outputHashes": {
+          "baseItems": "1587392484edfad41a9f3d7a58bc678be3a876d9a4b101c86532f54af9e6f545",
+          "modifiers": "01767a40c7d14bdd191dbc6b346028d28aad80009c9b16971ac474a329186b18",
+          "craftingItems": "53712335380e3da6e4c35f63468d7d7b7afea5cd7e64ebc8b173fec48bcf5c45",
+          "essences": "2c2b009a200fface8bc43ff0390c5f658f894b030885818b4a39f5cc3a3422d2"
+        }
+      }
+    }
+  ]
+}

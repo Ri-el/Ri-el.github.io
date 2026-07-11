@@ -1,0 +1,151 @@
+/* ============================================================
+   Item Category Selection Screen
+   Standalone styles (scoped) so style.css is untouched.
+   Compact, single merged grid that fills every row.
+   ============================================================ */
+
+#select-view[hidden],
+#craft-view[hidden] { display: none !important; }
+
+#select-view {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 18px 16px 40px;
+}
+
+.select-header {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.select-heading {
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #e8d6a8;
+  letter-spacing: 0.04em;
+  margin: 8px 0 2px;
+}
+
+.cat-group { margin-bottom: 12px; }
+
+.cat-group-title {
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: #8a8470;
+  border-bottom: 1px solid rgba(200, 162, 83, 0.18);
+  padding-bottom: 5px;
+  margin: 0 0 8px;
+  text-align: center;
+}
+
+/* One continuous grid — cards stretch to fill each row (no ragged gaps). */
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+  gap: 10px;
+}
+
+.cat-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 8px;
+  min-height: 84px;
+  background: linear-gradient(180deg, rgba(28, 28, 32, 0.9), rgba(16, 16, 19, 0.9));
+  border: 1px solid rgba(120, 110, 80, 0.25);
+  border-radius: 10px;
+  color: #d8d2c2;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  text-align: center;
+}
+
+.cat-card:hover:not(.is-disabled) {
+  transform: translateY(-2px);
+  border-color: rgba(200, 162, 83, 0.6);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45), 0 0 18px rgba(200, 162, 83, 0.12);
+}
+
+.cat-card.is-active {
+  border-color: rgba(120, 200, 140, 0.55);
+  box-shadow: 0 0 18px rgba(90, 200, 130, 0.18);
+}
+.cat-card.is-active:hover {
+  border-color: rgba(120, 220, 150, 0.85);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5), 0 0 24px rgba(90, 220, 140, 0.28);
+}
+
+.cat-card.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  filter: grayscale(0.35);
+}
+
+.cat-ico {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cat-ico img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.cat-ico-glyph { font-size: 20px; color: #6f6a55; }
+
+.cat-card-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.cat-badge {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  font-size: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+.badge-soon { background: rgba(120, 110, 80, 0.18); color: #9a9176; }
+.badge-ready { background: rgba(90, 200, 130, 0.2); color: #87d8a4; }
+
+/* ---- Variant (attribute) screen ---- */
+.variant-back,
+.back-to-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(20, 20, 24, 0.8);
+  border: 1px solid rgba(200, 162, 83, 0.3);
+  color: #cdb784;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.variant-back { margin-bottom: 14px; }
+.back-to-select { margin: 16px 0 0 16px; }
+.variant-back:hover,
+.back-to-select:hover { border-color: rgba(200, 162, 83, 0.7); color: #e8d6a8; }
+
+.variant-base {
+  font-size: 0.66rem;
+  color: #8a8470;
+  font-style: italic;
+}
+
+@media (max-width: 560px) {
+  .cat-grid { grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px; }
+  #select-view { padding: 14px 10px 36px; }
+  .cat-card { min-height: 74px; padding: 10px 6px; }
+}

@@ -1,0 +1,384 @@
+{
+  "schemaVersion": 1,
+  "targetGameVersion": "0.5.4",
+  "retrievedAt": "2026-07-11",
+  "defaultMaximumQuality": 20,
+  "versionAssessment": {
+    "status": "target-version-compatible-with-explicit-gap",
+    "summary": "The 0.5.4 patch notes do not change ordinary quality currencies. Target classes, the default 20% cap, and Gemcutter's Prism's fixed +5% increment are attributable; the exact 0.5.4 item-level increment formula for the four ordinary equipment quality currencies is not present in the retrieved sources.",
+    "doNotInfer": "Do not substitute Path of Exile 1's item-level formula or a rarity-based legacy formula for the missing Path of Exile 2 formula."
+  },
+  "sources": [
+    {
+      "id": "ggg-0.1.0c",
+      "type": "official_patch_notes",
+      "url": "https://www.pathofexile.com/forum/view-thread/3611708/filter-account-type/staff",
+      "version": "0.1.0c",
+      "supports": [
+        "gemcutters_prism_fixed_increment"
+      ]
+    },
+    {
+      "id": "ggg-0.5.0",
+      "type": "official_patch_notes",
+      "url": "https://www.pathofexile.com/forum/view-thread/3932540",
+      "version": "0.5.0",
+      "supports": [
+        "armour_martial_caster_jewellery_target_taxonomy",
+        "twenty_quality_threshold_for_infusers"
+      ]
+    },
+    {
+      "id": "ggg-0.5.4",
+      "type": "official_patch_notes",
+      "url": "https://www.pathofexile.com/forum/view-thread/3975218",
+      "version": "0.5.4",
+      "supports": [
+        "no_ordinary_quality_rule_change_in_target_patch"
+      ]
+    },
+    {
+      "id": "poe2db-quality",
+      "type": "public_datamined_reference",
+      "url": "https://poe2db.tw/us/Quality",
+      "version": "0.5.4",
+      "supports": [
+        "currency_descriptions",
+        "target_classes",
+        "default_quality_effects"
+      ]
+    },
+    {
+      "id": "poe2db-currency",
+      "type": "public_datamined_reference",
+      "url": "https://poe2db.tw/us/Currency",
+      "version": "0.5.4",
+      "supports": [
+        "currency_descriptions",
+        "mirrored_copy_cannot_be_modified"
+      ]
+    },
+    {
+      "id": "poe2wiki-quality",
+      "type": "attributable_public_reference",
+      "url": "https://www.poe2wiki.net/wiki/Quality",
+      "version": "0.5.4",
+      "supports": [
+        "default_maximum_quality",
+        "equipment_increment_depends_on_item_level",
+        "gemcutters_prism_fixed_increment",
+        "excluded_equipment_classes"
+      ]
+    },
+    {
+      "id": "poe2wiki-mirrored",
+      "type": "attributable_public_reference",
+      "url": "https://www.poe2wiki.net/wiki/Mirrored",
+      "version": "0.5.4",
+      "supports": [
+        "mirrored_items_cannot_be_modified"
+      ]
+    },
+    {
+      "id": "repository-normalized-crafting-items",
+      "type": "repository_owned_normalized_data",
+      "path": "data/normalized/crafting-items.json",
+      "version": "source-export-version-not-encoded",
+      "supports": [
+        "is_modifiable_constraint",
+        "target_class_constraints",
+        "not_maximum_quality_constraint"
+      ]
+    }
+  ],
+  "itemClasses": {
+    "martial_weapon": {
+      "label": "martial weapon",
+      "baseTypes": [
+        "claws",
+        "daggers",
+        "one_hand_swords",
+        "one_hand_axes",
+        "one_hand_maces",
+        "spears",
+        "flails",
+        "bows",
+        "two_hand_swords",
+        "two_hand_axes",
+        "two_hand_maces",
+        "quarterstaves",
+        "crossbows",
+        "talismans"
+      ],
+      "itemClassNames": [
+        "Claw",
+        "Dagger",
+        "One Hand Sword",
+        "One Hand Axe",
+        "One Hand Mace",
+        "Spear",
+        "Flail",
+        "Bow",
+        "Two Hand Sword",
+        "Two Hand Axe",
+        "Two Hand Mace",
+        "Warstaff",
+        "Crossbow",
+        "Talisman"
+      ]
+    },
+    "caster_weapon": {
+      "label": "caster weapon",
+      "baseTypes": [
+        "wands",
+        "staves",
+        "sceptres"
+      ],
+      "itemClassNames": [
+        "Wand",
+        "Staff",
+        "Sceptre"
+      ]
+    },
+    "armour": {
+      "label": "armour",
+      "baseTypes": [
+        "bucklers",
+        "foci"
+      ],
+      "baseTypePrefixes": [
+        "gloves_",
+        "boots_",
+        "helmets_",
+        "body_armours_",
+        "shields_"
+      ],
+      "itemClassNames": [
+        "Gloves",
+        "Boots",
+        "Helmet",
+        "Body Armour",
+        "Shield",
+        "Buckler",
+        "Focus"
+      ]
+    },
+    "flask": {
+      "label": "flask",
+      "baseTypes": [
+        "life_flasks",
+        "mana_flasks"
+      ],
+      "itemClassNames": [
+        "Life Flask",
+        "Mana Flask",
+        "Flask"
+      ]
+    },
+    "skill_gem": {
+      "label": "Skill Gem",
+      "baseTypes": [
+        "skill_gem",
+        "skill_gems"
+      ],
+      "itemClassNames": [
+        "Skill Gem"
+      ],
+      "tags": [
+        "skill_gem"
+      ]
+    },
+    "support_gem": {
+      "label": "Support Gem",
+      "baseTypes": [
+        "support_gem",
+        "support_gems"
+      ],
+      "itemClassNames": [
+        "Support Gem"
+      ],
+      "tags": [
+        "support_gem"
+      ]
+    },
+    "jewellery": {
+      "label": "jewellery",
+      "baseTypes": [
+        "rings",
+        "amulets"
+      ],
+      "itemClassNames": [
+        "Ring",
+        "Amulet"
+      ]
+    },
+    "belt": {
+      "label": "belt",
+      "baseTypes": [
+        "belts"
+      ],
+      "itemClassNames": [
+        "Belt"
+      ]
+    },
+    "quiver": {
+      "label": "quiver",
+      "baseTypes": [
+        "quivers"
+      ],
+      "itemClassNames": [
+        "Quiver"
+      ]
+    },
+    "jewel": {
+      "label": "jewel",
+      "baseTypes": [
+        "ruby",
+        "sapphire",
+        "emerald",
+        "diamond",
+        "time_lost_ruby",
+        "time_lost_sapphire",
+        "time_lost_emerald",
+        "time_lost_diamond"
+      ],
+      "itemClassNames": [
+        "Jewel"
+      ]
+    },
+    "charm": {
+      "label": "charm",
+      "baseTypes": [
+        "charms"
+      ],
+      "itemClassNames": [
+        "Charm"
+      ]
+    }
+  },
+  "operations": {
+    "blacksmiths_whetstone": {
+      "displayName": "Blacksmith's Whetstone",
+      "classification": "blocked_missing_data",
+      "targetClasses": [
+        "martial_weapon"
+      ],
+      "targetDescription": "a martial weapon",
+      "qualityType": "normal",
+      "maximumQuality": 20,
+      "increment": {
+        "kind": "unverified",
+        "status": "blocked_missing_formula",
+        "knownRule": "The amount is item-level-dependent and decreases as item level increases.",
+        "reason": "Unsupported — verification required: the exact Path of Exile 2 0.5.4 item-level quality increment formula for Blacksmith's Whetstone is unavailable in the cited sources."
+      },
+      "evidence": [
+        "ggg-0.5.0",
+        "poe2db-quality",
+        "poe2wiki-quality",
+        "repository-normalized-crafting-items"
+      ]
+    },
+    "arcanists_etcher": {
+      "displayName": "Arcanist's Etcher",
+      "classification": "blocked_missing_data",
+      "targetClasses": [
+        "caster_weapon"
+      ],
+      "targetDescription": "a wand, staff or sceptre",
+      "qualityType": "normal",
+      "maximumQuality": 20,
+      "increment": {
+        "kind": "unverified",
+        "status": "blocked_missing_formula",
+        "knownRule": "The amount is item-level-dependent and decreases as item level increases.",
+        "reason": "Unsupported — verification required: the exact Path of Exile 2 0.5.4 item-level quality increment formula for Arcanist's Etcher is unavailable in the cited sources."
+      },
+      "evidence": [
+        "ggg-0.5.0",
+        "poe2db-quality",
+        "poe2wiki-quality",
+        "repository-normalized-crafting-items"
+      ]
+    },
+    "armourers_scrap": {
+      "displayName": "Armourer's Scrap",
+      "classification": "blocked_missing_data",
+      "targetClasses": [
+        "armour"
+      ],
+      "targetDescription": "an armour item",
+      "qualityType": "normal",
+      "maximumQuality": 20,
+      "increment": {
+        "kind": "unverified",
+        "status": "blocked_missing_formula",
+        "knownRule": "The amount is item-level-dependent and decreases as item level increases.",
+        "reason": "Unsupported — verification required: the exact Path of Exile 2 0.5.4 item-level quality increment formula for Armourer's Scrap is unavailable in the cited sources."
+      },
+      "evidence": [
+        "ggg-0.5.0",
+        "poe2db-quality",
+        "poe2wiki-quality",
+        "repository-normalized-crafting-items"
+      ]
+    },
+    "glassblowers_bauble": {
+      "displayName": "Glassblower's Bauble",
+      "classification": "blocked_missing_data",
+      "targetClasses": [
+        "flask"
+      ],
+      "targetDescription": "a flask",
+      "qualityType": "normal",
+      "maximumQuality": 20,
+      "increment": {
+        "kind": "unverified",
+        "status": "blocked_missing_formula",
+        "knownRule": "The amount is item-level-dependent and decreases as item level increases.",
+        "reason": "Unsupported — verification required: the exact Path of Exile 2 0.5.4 item-level quality increment formula for Glassblower's Bauble is unavailable in the cited sources."
+      },
+      "evidence": [
+        "poe2db-quality",
+        "poe2wiki-quality",
+        "repository-normalized-crafting-items"
+      ]
+    },
+    "gemcutters_prism": {
+      "displayName": "Gemcutter's Prism",
+      "classification": "blocked_missing_data",
+      "runtimeStatus": "blocked_missing_item_model",
+      "runtimeReason": "The +5% rule is verified, but this simulator has no Skill Gem item model, quality operation, or UI target.",
+      "targetClasses": [
+        "skill_gem"
+      ],
+      "targetDescription": "a Skill Gem",
+      "qualityType": "normal",
+      "maximumQuality": 20,
+      "increment": {
+        "kind": "fixed",
+        "status": "verified",
+        "amount": 5
+      },
+      "evidence": [
+        "ggg-0.1.0c",
+        "poe2db-quality",
+        "poe2wiki-quality"
+      ]
+    }
+  },
+  "unresolved": [
+    {
+      "id": "ordinary-equipment-quality-increment-formula",
+      "affects": [
+        "blacksmiths_whetstone",
+        "arcanists_etcher",
+        "armourers_scrap",
+        "glassblowers_bauble"
+      ],
+      "known": "Each use grants an item-level-dependent amount, with less quality at higher item levels.",
+      "missing": "The exact 0.5.4 formula, breakpoints, rounding rule, and any distribution needed for deterministic simulation.",
+      "behavior": "Applicability and cap validation are active, but preview/apply fail atomically with the operation's verification-required reason."
+    }
+  ]
+}

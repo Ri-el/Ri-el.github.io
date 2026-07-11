@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-10T20:57:01.421Z",
+  "activeSnapshotId": "legacy-coe-30a09add1e2e",
+  "targetGameVersion": "0.5.4",
+  "normalizedSourceHash": "30a09add1e2e626a74c697da3aa78c2400c4122c21353bd0ed824bd4aa58b4ee",
+  "counts": {
+    "legacyPools": 61,
+    "populatedLegacyPools": 56,
+    "legacyPrefixGroups": 473,
+    "legacySuffixGroups": 802,
+    "legacyPrefixTiers": 3381,
+    "legacySuffixTiers": 4548,
+    "normalizedMappings": 65,
+    "normalizedClasses": 76,
+    "concreteBases": 1760,
+    "normalizedModifiers": 2734,
+    "normalizedDesecratedModifiers": 225,
+    "normalizedEssenceModifiers": 200,
+    "craftingItems": 530,
+    "essences": 95,
+    "socketables": 295
+  },
+  "gaps": {
+    "emptyLegacyPools": [
+      "diamond",
+      "time_lost_diamond",
+      "time_lost_emerald",
+      "time_lost_ruby",
+      "time_lost_sapphire"
+    ],
+    "normalizedOnlyMappings": [
+      "boots_str_dex_int",
+      "gloves_str_dex_int",
+      "helmets_str_dex_int",
+      "shields_str_dex_int"
+    ],
+    "legacyOnlyMappings": [],
+    "allOneWeightPools": [
+      "body_armours_str_dex_int",
+      "claws",
+      "daggers",
+      "flails",
+      "one_hand_axes",
+      "one_hand_swords",
+      "two_hand_axes",
+      "two_hand_swords"
+    ],
+    "emptyDesecratedPools": [
+      "charms",
+      "life_flasks",
+      "mana_flasks",
+      "sceptres"
+    ]
+  },
+  "normalizedLimitations": [
+    "Numeric localization labels have no string table in this export; modifier display templates are unavailable.",
+    "Positive generation-tag weights are ordered conditions, not explicit mandatory-tag declarations.",
+    "The simulator selects class-level pools rather than concrete base IDs, so base-specific conditions cannot always be applied safely.",
+    "Quality, socket, essence, catalyst, emotion, Genesis, runeforging, corruption-upgrade, and sacrifice state transitions are not fully specified."
+  ],
+  "candidateFeeds": {
+    "craft-of-exile-poe2": {
+      "status": "candidate",
+      "reportedVersion": "0.5.4.1.2",
+      "versionObservedAt": "2026-07-11",
+      "parser": "craft-of-exile-export-v1"
+    },
+    "repoe-poe2": {
+      "status": "adapter-required",
+      "reportedVersion": "4.5.4.3",
+      "versionObservedAt": "2026-07-11",
+      "parser": null
+    }
+  }
+}
