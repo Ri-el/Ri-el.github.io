@@ -1,0 +1,343 @@
+/* ============================================================
+   Larger centred logo + workshop label inside the header
+   Workbench base selector remains centred in its heading row.
+   ============================================================ */
+
+:root {
+  --craft-header-height: 88px;
+}
+
+/* ---------- Top craft header ---------- */
+#app-header {
+  box-sizing: border-box !important;
+  display: grid !important;
+  grid-template-columns: minmax(180px, 1fr) auto minmax(180px, 1fr) !important;
+  align-items: center !important;
+  width: 100% !important;
+  height: var(--craft-header-height) !important;
+  min-height: var(--craft-header-height) !important;
+  padding: 6px 30px !important;
+  overflow: visible !important;
+}
+
+#app-header .back-to-select {
+  position: static !important;
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  align-self: center;
+  transform: none !important;
+  margin: 0 !important;
+}
+
+#app-header .header-inner {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 1px !important;
+  min-width: 0;
+  height: 100%;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: center;
+}
+
+#app-header .app-title {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: auto;
+  height: 57px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  line-height: 1;
+}
+
+#app-header .app-logo {
+  display: block !important;
+  width: auto !important;
+  height: 57px !important;
+  max-width: 340px !important;
+  max-height: 57px !important;
+  margin: 0 !important;
+  object-fit: contain;
+}
+
+#app-header .app-subtitle {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 14px;
+  margin: -2px 0 0 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  white-space: nowrap;
+}
+
+#app-header .app-subtitle .status-dot {
+  flex: 0 0 auto;
+}
+
+/* ---------- Workbench title row ---------- */
+#jewel-panel .workbench-heading {
+  position: relative;
+  z-index: 4;
+  display: grid !important;
+  grid-template-columns: minmax(190px, 1fr) auto minmax(90px, 1fr);
+  align-items: center !important;
+  gap: 14px;
+  box-sizing: border-box !important;
+  width: 100%;
+  height: 62px !important;
+  min-height: 62px !important;
+  flex: 0 0 62px;
+  margin: 0 !important;
+  padding: 0 14px !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Optical correction: the font and controls look high even when mathematically
+   centred, so move the complete row down together inside the bordered area. */
+#jewel-panel .workbench-heading > h2,
+#jewel-panel .workbench-heading > .jewel-selector,
+#jewel-panel .workbench-heading > .workbench-base-selector,
+#jewel-panel .workbench-heading > .workbench-state {
+  position: relative;
+  top: 5px;
+}
+
+#jewel-panel .workbench-heading h2 {
+  justify-self: start;
+  align-self: center;
+  margin: 0 !important;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+#jewel-panel .workbench-heading .jewel-selector {
+  justify-self: center;
+  align-self: center;
+  display: flex;
+  align-items: center !important;
+  justify-content: center;
+  flex-wrap: nowrap !important;
+  gap: 8px;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
+#jewel-panel .workbench-heading .jewel-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 31px;
+  padding: 5px 13px;
+  margin: 0;
+  line-height: 1;
+}
+
+#jewel-panel .workbench-heading .workbench-state {
+  justify-self: end;
+  align-self: center;
+  margin: 0 !important;
+  line-height: 1;
+}
+
+/* Match the desktop workspace height to the corrected header. */
+@media (min-width: 1101px) {
+  #main-content {
+    height: calc(100dvh - var(--craft-header-height)) !important;
+  }
+}
+
+/* Narrow desktop/tablet: selector moves to a second row if needed. */
+@media (max-width: 1280px) and (min-width: 769px) {
+  #jewel-panel .workbench-heading {
+    grid-template-columns: minmax(170px, 1fr) auto;
+    grid-template-areas:
+      "title state"
+      "selector selector";
+    align-items: center !important;
+    row-gap: 7px;
+    height: 88px !important;
+    min-height: 88px !important;
+    flex-basis: 88px;
+  }
+
+  #jewel-panel .workbench-heading h2 {
+    grid-area: title;
+  }
+
+  #jewel-panel .workbench-heading .jewel-selector,
+  #jewel-panel .workbench-heading .workbench-base-selector {
+    grid-area: selector;
+  }
+
+  #jewel-panel .workbench-heading .workbench-state {
+    grid-area: state;
+  }
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 768px) {
+  :root {
+    --craft-header-height: 132px;
+  }
+
+  #app-header {
+    display: block !important;
+    height: var(--craft-header-height) !important;
+    min-height: var(--craft-header-height) !important;
+    padding: 43px 14px 8px !important;
+  }
+
+  #app-header .back-to-select {
+    position: absolute !important;
+    top: 10px !important;
+    left: 14px !important;
+    margin: 0 !important;
+  }
+
+  #app-header .header-inner {
+    height: 80px;
+    gap: 0 !important;
+  }
+
+  #app-header .app-title {
+    height: 57px !important;
+  }
+
+  #app-header .app-logo {
+    height: 57px !important;
+    max-height: 57px !important;
+    max-width: min(320px, 88vw) !important;
+  }
+
+  #app-header .app-subtitle {
+    margin-top: -1px !important;
+  }
+
+  #jewel-panel .workbench-heading {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "title state"
+      "selector selector";
+    align-items: center !important;
+    row-gap: 8px;
+    height: 92px !important;
+    min-height: 92px !important;
+    flex-basis: 92px;
+  }
+
+  #jewel-panel .workbench-heading h2 {
+    grid-area: title;
+  }
+
+  #jewel-panel .workbench-heading .jewel-selector,
+  #jewel-panel .workbench-heading .workbench-base-selector {
+    grid-area: selector;
+    flex-wrap: wrap !important;
+  }
+
+  #jewel-panel .workbench-heading .workbench-state {
+    grid-area: state;
+  }
+}
+
+
+/* Fallback: the JavaScript removes this node completely. */
+#craft-mode-label {
+  display: none !important;
+}
+
+
+#app-header .header-inner {
+  gap: 0 !important;
+}
+
+#app-header .app-title {
+  margin: 0 !important;
+}
+
+
+/* Respect app.js base mode:
+   Ruby/Sapphire/Emerald only appear while crafting Jewels. */
+#jewel-selector[style*="display: none"] {
+  display: none !important;
+}
+
+
+/* ---------- Non-jewel base selector ---------- */
+#jewel-panel .workbench-heading .workbench-base-selector {
+  justify-self: center;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 7px;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+#jewel-panel .workbench-heading .workbench-base-selector[hidden] {
+  display: none !important;
+}
+
+#jewel-panel .workbench-heading .base-choice-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 31px;
+  padding: 5px 11px;
+  margin: 0;
+  border: 1px solid rgba(200, 162, 83, 0.28);
+  border-radius: 8px;
+  background: rgba(20, 20, 24, 0.8);
+  color: #cdb784;
+  font: 500 0.72rem/1 'Inter', sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+#jewel-panel .workbench-heading .base-choice-btn:hover {
+  border-color: rgba(200, 162, 83, 0.6);
+  color: #e8d6a8;
+}
+
+#jewel-panel .workbench-heading .base-choice-btn.active {
+  border-color: rgba(200, 162, 83, 0.9);
+  background: rgba(42, 32, 18, 0.9);
+  color: #f0e2b8;
+  box-shadow: 0 0 14px rgba(200, 162, 83, 0.22);
+}
+
+#jewel-panel .workbench-heading .base-choice-btn.single-choice {
+  cursor: default;
+}
+
+/* Seven body-armour attribute pools still fit in one desktop row. */
+@media (max-width: 1500px) and (min-width: 1281px) {
+  #jewel-panel .workbench-heading .workbench-base-selector {
+    gap: 5px;
+  }
+
+  #jewel-panel .workbench-heading .base-choice-btn {
+    padding-inline: 8px;
+    font-size: 0.66rem;
+  }
+}

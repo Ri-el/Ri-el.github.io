@@ -10,9 +10,9 @@
 //  e.g. gloves_str.png, gloves_str_dex.png, body_armours_str_dex_int.png
 //
 //  ALL BASES RELEASED: every category is playable. Clicking a simple
-//  category loads that base's mod pool directly; an armour category
-//  with attribute variants opens its variant grid, and each variant
-//  loads its own base (e.g. gloves_str). Jewels are special -- they
+//  category opens its crafting workbench directly. Classes with
+//  attribute variants start on their first available base, then allow
+//  switching variants inside the workbench. Jewels are special -- they
 //  enter the jewel crafter and use the in-craft Ruby/Sapphire/Emerald
 //  header selector to swap sub-bases.
 // ============================================================
@@ -119,6 +119,18 @@ let selectSub;
 let searchInput;
 let resultCount;
 let emptyState;
+let workbenchBaseSelector;
+
+// Load the focused craft-header layout fix while preserving direct file:// use.
+function ensureCraftHeaderStyles() {
+  if (document.querySelector('link[data-craft-header-fix]')) return;
+
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'header-fix.css?v=14';
+  link.dataset.craftHeaderFix = 'true';
+  document.head.appendChild(link);
+}
 
 // Auto-loading icon with graceful glyph fallback.
 function monogram(label) {
@@ -165,8 +177,10 @@ function buildCard(item, groupName) {
   card.appendChild(label);
 
   card.addEventListener('click', () => {
-    if (hasVariants) renderVariants(item);
-    else enterCraft(item.id, item.name);
+    // This screen chooses only the item class. Variant selection happens
+    // inside the crafting workbench.
+    const initialBaseId = hasVariants ? item.variants[0].id : item.id;
+    enterCraft(initialBaseId, item.name);
   });
 
   return card;
@@ -175,7 +189,7 @@ function buildCard(item, groupName) {
 // All categories render into ONE continuous grid so every row fills
 // edge-to-edge (no empty space at the end of each section).
 function renderCategories() {
-  if (selectHeading) selectHeading.textContent = 'Choose your crafting base';
+  if (selectHeading) selectHeading.textContent = 'Choose your item class';
   if (selectSub) selectSub.textContent = 'Practice every slam, annul and omen without risking your currency.';
   if (selectView) selectView.classList.remove('showing-variants');
   if (searchInput) {
@@ -278,6 +292,123 @@ function renderVariants(item) {
   window.scrollTo(0, 0);
 }
 
+
+// Find the category item and all switchable base choices for a compiled base id.
+function findBaseChoice(baseId) {
+  for (const category of CATEGORIES) {
+    for (const item of category.items) {
+      if (item.id === baseId) {
+        return {
+          item,
+          choices: [{ id: item.id, name: item.name }],
+          selectedId: baseId,
+        };
+      }
+
+      const variant = Array.isArray(item.variants)
+        ? item.variants.find(choice => choice.id === baseId)
+        : null;
+
+      if (variant) {
+        return {
+          item,
+          choices: item.variants,
+          selectedId: baseId,
+        };
+      }
+    }
+  }
+
+  return null;
+}
+
+// Create a second selector for every non-jewel base. It occupies the same
+// workbench-heading position as Ruby/Sapphire/Emerald, but the two selectors
+// are never visible at the same time.
+function ensureWorkbenchBaseSelector() {
+  if (workbenchBaseSelector && workbenchBaseSelector.isConnected) {
+    return workbenchBaseSelector;
+  }
+
+  const heading = document.querySelector('#jewel-panel .workbench-heading');
+  const state = heading ? heading.querySelector('.workbench-state') : null;
+  if (!heading) return null;
+
+  workbenchBaseSelector = document.getElementById('workbench-base-selector');
+  if (!workbenchBaseSelector) {
+    workbenchBaseSelector = document.createElement('div');
+    workbenchBaseSelector.id = 'workbench-base-selector';
+    workbenchBaseSelector.className = 'workbench-base-selector';
+    workbenchBaseSelector.setAttribute('aria-label', 'Available bases');
+    workbenchBaseSelector.hidden = true;
+  }
+
+  if (workbenchBaseSelector.parentElement !== heading) {
+    if (state) heading.insertBefore(workbenchBaseSelector, state);
+    else heading.appendChild(workbenchBaseSelector);
+  }
+
+  return workbenchBaseSelector;
+}
+
+function renderWorkbenchBaseSelector(baseId, classLabel) {
+  const genericSelector = ensureWorkbenchBaseSelector();
+  const jewelSelector = document.getElementById('jewel-selector');
+  if (!genericSelector) return;
+
+  // Jewels keep the original Ruby/Sapphire/Emerald selector.
+  if (baseId === 'jewels') {
+    genericSelector.hidden = true;
+    genericSelector.replaceChildren();
+    return;
+  }
+
+  const baseChoice = findBaseChoice(baseId);
+  const fallbackName = classLabel || baseId.replaceAll('_', ' ');
+  const choices = baseChoice?.choices || [{ id: baseId, name: fallbackName }];
+  const itemLabel = baseChoice?.item?.name || classLabel || 'Item';
+
+  // app.js already hides the jewel selector for non-jewel bases. Keep that
+  // behaviour and show the matching class/attribute choices instead.
+  if (jewelSelector) jewelSelector.style.display = 'none';
+
+  const fragment = document.createDocumentFragment();
+
+  for (const choice of choices) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'base-choice-btn';
+    button.dataset.baseId = choice.id;
+    button.textContent = choice.name;
+
+    const active = choice.id === baseId;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-pressed', String(active));
+
+    // A class with only one compiled pool has nothing else to switch to, but
+    // still shows its selected base in the centre of the workbench heading.
+    if (choices.length === 1) {
+      button.classList.add('single-choice');
+      button.setAttribute('aria-current', 'true');
+    } else {
+      button.addEventListener('click', () => {
+        if (button.classList.contains('active')) return;
+        if (!window.CraftForge || typeof window.CraftForge.loadBase !== 'function') return;
+
+        const ok = window.CraftForge.loadBase(choice.id, itemLabel);
+        if (ok === false) return;
+
+        renderWorkbenchBaseSelector(choice.id, itemLabel);
+      });
+    }
+
+    fragment.appendChild(button);
+  }
+
+  genericSelector.replaceChildren(fragment);
+  genericSelector.hidden = false;
+}
+
 // Hand the chosen base to the crafter (app.js). If its data isn't available the
 // bridge returns false and we stay on the select screen rather than opening an
 // empty crafter.
@@ -286,6 +417,8 @@ function enterCraft(baseId, classLabel) {
     const ok = window.CraftForge.loadBase(baseId, classLabel);
     if (ok === false) return;
   }
+
+  renderWorkbenchBaseSelector(baseId, classLabel);
   craftView.hidden = false;
   selectView.hidden = true;
   window.scrollTo(0, 0);
@@ -297,13 +430,41 @@ function exitCraft() {
   window.scrollTo(0, 0);
 }
 
+
+
+// Remove the old craft-mode caption from the document completely.
+// This is more reliable than only hiding it with CSS because index.html
+// still contains the legacy "Jewel workshop" element.
+function removeCraftModeLabel() {
+  const label = document.getElementById('craft-mode-label');
+  if (label) label.remove();
+}
+
+// Keep the jewel base choices in the workbench heading so the controls sit
+// beside "Crafting Workbench" and the Ready indicator.
+function placeJewelSelectorInWorkbench() {
+  const selector = document.getElementById('jewel-selector');
+  const heading = document.querySelector('#jewel-panel .workbench-heading');
+  const state = heading ? heading.querySelector('.workbench-state') : null;
+
+  if (!selector || !heading || selector.parentElement === heading) return;
+
+  if (state) heading.insertBefore(selector, state);
+  else heading.appendChild(selector);
+}
+
 function init() {
+  ensureCraftHeaderStyles();
+  removeCraftModeLabel();
+  placeJewelSelectorInWorkbench();
+  ensureWorkbenchBaseSelector();
   selectView = document.getElementById('select-view');
   craftView = document.getElementById('craft-view');
   root = document.getElementById('select-grid');
   selectHeading = document.getElementById('select-heading');
   selectSub = document.getElementById('select-sub');
   searchInput = document.getElementById('item-search');
+  if (searchInput) searchInput.placeholder = 'Search item classes';
   resultCount = document.getElementById('select-result-count');
   emptyState = document.getElementById('select-empty');
 
