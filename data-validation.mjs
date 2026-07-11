@@ -12,6 +12,9 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const NORMALIZED_DIR = path.join(HERE, 'data', 'normalized');
 const PROVENANCE_PATH = path.join(HERE, 'data', 'source-cache', 'provenance.json');
 const COVERAGE_PATH = path.join(HERE, 'reports', 'data-coverage.json');
+const BASE_PARITY_PATH = path.join(HERE, 'reports', 'base-item-parity.json');
+const CRAFTING_PARITY_PATH = path.join(HERE, 'reports', 'crafting-parity.json');
+const CURRENCY_INDEX_PATH = path.join(HERE, 'data', 'crafting', 'currency-index.json');
 const NORMALIZED_FILES = {
   baseItems: 'base-items.json',
   modifiers: 'modifiers.json',
@@ -134,6 +137,9 @@ if (!existsSync(PROVENANCE_PATH)) failAndExit('missing data/source-cache/provena
 const actual = Object.fromEntries(Object.entries(NORMALIZED_FILES)
   .map(([key, fileName]) => [key, readJson(path.join(NORMALIZED_DIR, fileName))]));
 const provenance = readJson(PROVENANCE_PATH);
+const baseParity = readJson(BASE_PARITY_PATH);
+const craftingParity = readJson(CRAFTING_PARITY_PATH);
+const currencyIndex = readJson(CURRENCY_INDEX_PATH);
 const activeSnapshot = (provenance.snapshots || [])
   .find(snapshot => snapshot.id === provenance.activeSnapshotId);
 
@@ -174,6 +180,44 @@ const mappingsValid = Object.values(actual.baseItems.simulatorBaseMap).every(map
   mapping.classIds.length > 0 && mapping.classIds.every(id => classIds.has(id)) &&
   mapping.concreteBaseIds.length > 0 && mapping.concreteBaseIds.every(id => baseIds.has(id)));
 check('simulator mappings reference retained classes and concrete bases', mappingsValid);
+
+const amuletMapping = actual.baseItems.simulatorBaseMap.amulets;
+const normalizedAmulets = (amuletMapping?.concreteBaseIds || [])
+  .map(id => actual.baseItems.bases.find(base => base.id === id))
+  .filter(Boolean);
+check('Amulet mapping retains all 25 concrete bases with Crimson first',
+  stable(amuletMapping?.classIds) === stable([34]) &&
+  normalizedAmulets.length === 25 &&
+  normalizedAmulets[0]?.id === 2546 &&
+  normalizedAmulets[0]?.displayName === 'Crimson Amulet');
+check('every normalized Amulet maps to class and modifier-pool class 34',
+  normalizedAmulets.every(base =>
+    base.itemClass === 'Amulet' && base.equipmentSlot === 'Amulet' &&
+    base.classId === 34 && base.modifierPoolClassId === 34));
+check('Amulet stable IDs and metadata keys are unique',
+  uniqueIds(normalizedAmulets) &&
+  normalizedAmulets.length === new Set(normalizedAmulets.map(base => base.metadataKey)).size);
+check('Amulet implicit references resolve and duplicate names remain ID-addressable',
+  normalizedAmulets.every(base => base.implicitModifierIds.every(id => modifierIds.has(id))) &&
+  normalizedAmulets.filter(base => base.displayName === 'Runemastered Veridical Chain').length === 3);
+check('Amulet drop level remains distinct from unavailable required level',
+  normalizedAmulets.every(base =>
+    Number.isFinite(base.dropLevel) &&
+    !Object.prototype.hasOwnProperty.call(base, 'requiredLevel') &&
+    !Object.prototype.hasOwnProperty.call(base, 'requirements')));
+check('base-item parity report matches Task 01 normalized Amulet coverage',
+  baseParity.targetGameVersion === actual.manifest.targetGameVersion &&
+  baseParity.fullParityClaim === false &&
+  baseParity.task01.normalizedConcreteBaseCount === normalizedAmulets.length &&
+  baseParity.task01.selectorImplementedCount === normalizedAmulets.length &&
+  baseParity.task01.defaultBase.id === normalizedAmulets[0].id);
+check('crafting parity baseline matches the classified currency index',
+  craftingParity.targetGameVersion === currencyIndex.targetGameVersion &&
+  craftingParity.fullParityClaim === false &&
+  craftingParity.counts.sourceEntries === currencyIndex.counts.entries &&
+  craftingParity.counts.runtimeDefinitions === currencyIndex.counts.runtimeDefinitions &&
+  stable(craftingParity.counts.sourceByClassification) === stable(currencyIndex.counts.byClassification) &&
+  stable(craftingParity.counts.runtimeByClassification) === stable(currencyIndex.counts.runtimeByClassification));
 
 check('base records reference retained classes and implicit modifiers',
   actual.baseItems.bases.every(base =>

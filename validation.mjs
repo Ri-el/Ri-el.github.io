@@ -68,6 +68,29 @@ function rareItem(baseType, prefixes = [], suffixes = []) {
   };
 }
 
+function concreteAmulet(id, displayName, dropLevel, implicitId) {
+  return {
+    id,
+    metadataKey: `Metadata/Items/Amulets/Test${id}`,
+    displayName,
+    itemClass: 'Amulet',
+    simulatorPoolId: 'amulets',
+    requiredLevel: null,
+    dropLevel,
+    tags: ['amulet', 'default'],
+    baseProperties: {},
+    implicits: [{
+      id: implicitId,
+      key: `TestImplicit${implicitId}`,
+      stats: [{ id: `test_stat_${implicitId}`, range: [1, 2] }],
+      displayText: `Test stat ${implicitId}: 1\u20132`,
+    }],
+    socketCount: 0,
+    targetGameVersion: '0.5.4',
+    verificationState: 'fixture',
+  };
+}
+
 function desecrationTransactionFixture() {
   const baseType = 'desecration_transaction_test';
   const data = { bases: { [baseType]: {
@@ -139,6 +162,112 @@ test('legacy quality state migrates to the structured shape without changing mec
     type: 'preserved',
     source: { id: 'saved-state' },
   });
+});
+
+test('concrete Amulet identity remains separate from the simulator pool', () => {
+  const data = { bases: { amulets: syntheticBase() } };
+  const crimson = concreteAmulet(2546, 'Crimson Amulet', 1, 1564);
+  const azure = concreteAmulet(2547, 'Azure Amulet', 1, 1565);
+  const engine = new Engine(data, 'amulets', null, null, null, crimson);
+  const initial = engine.getItem();
+
+  assert.equal(initial.schemaVersion, 2);
+  assert.equal(initial.baseType, 'amulets');
+  assert.equal(initial.jewelType, 'amulets');
+  assert.equal(initial.simulatorPoolId, 'amulets');
+  assert.equal(initial.baseItemId, 2546);
+  assert.equal(initial.baseName, 'Crimson Amulet');
+  assert.equal(initial.name, 'Crimson Amulet');
+  assert.equal(initial.itemClass, 'Amulet');
+  assert.equal(initial.requiredLevel, null);
+  assert.equal(initial.dropLevel, 1);
+  assert.deepEqual(initial.baseTags, ['amulet', 'default']);
+  assert.equal(initial.baseSocketCount, 0);
+  assert.equal(initial.implicits[0].id, 1564);
+  assert(engine.isFreshItem());
+
+  engine.setItemLevel(71);
+  engine.setConcreteBase(azure, { resetItem: true, preserveItemLevel: true });
+  const switched = engine.getItem();
+  assert.equal(switched.ilvl, 71);
+  assert.equal(switched.baseItemId, 2547);
+  assert.equal(switched.baseName, 'Azure Amulet');
+  assert.equal(switched.simulatorPoolId, 'amulets');
+  assert.equal(switched.implicits[0].id, 1565);
+  assert(engine.isFreshItem());
+
+  const beforeMismatch = engine.getItem();
+  assert.throws(() => engine.setConcreteBase({ ...crimson, simulatorPoolId: 'rings' }), /does not map/);
+  assert.deepEqual(engine.getItem(), beforeMismatch);
+});
+
+test('concrete implicits survive ordinary affix crafting and reset', () => {
+  const data = { bases: { amulets: syntheticBase() } };
+  const crimson = concreteAmulet(2546, 'Crimson Amulet', 1, 1564);
+  const engine = new Engine(data, 'amulets', null, null, null, crimson);
+  const result = withRandom(() => 0, () => engine.applyTransmutation());
+  assert(result.success);
+  assert.equal(engine.isFreshItem(), false);
+  assert.equal(engine.getItem().implicits[0].id, 1564);
+  assert.equal(engine.getItem().prefixes.length + engine.getItem().suffixes.length, 1);
+
+  const serialized = JSON.parse(JSON.stringify(engine.getItem()));
+  const restored = new Engine(data, 'amulets', null, null, null, crimson);
+  restored.loadItem(serialized);
+  assert.deepEqual(restored.getItem(), serialized);
+  restored.resetItem();
+  assert.equal(restored.getItem().baseItemId, 2546);
+  assert.equal(restored.getItem().baseName, 'Crimson Amulet');
+  assert.equal(restored.getItem().implicits[0].id, 1564);
+  assert(restored.isFreshItem());
+});
+
+test('reset rebuilds item-level candidate pools for the reset item', () => {
+  const data = { bases: { reset_pool_test: {
+    name: 'Reset Pool Test',
+    prefixes: [group('LevelGate', [tier(80, 100), tier(1, 100)])],
+    suffixes: [],
+  } } };
+  const engine = new Engine(data, 'reset_pool_test');
+  engine.setItemLevel(1);
+  assert.deepEqual(engine._prefixCandidates.map(candidate => candidate.tier.ilvlReq), [1]);
+  engine.resetItem();
+  assert.equal(engine.getItem().ilvl, 83);
+  assert.deepEqual(engine._prefixCandidates.map(candidate => candidate.tier.ilvlReq), [80, 1]);
+});
+
+test('fresh-item detection includes irreversible and special item state', () => {
+  const data = { bases: { amulets: syntheticBase() } };
+  const crimson = concreteAmulet(2546, 'Crimson Amulet', 1, 1564);
+  const make = () => new Engine(data, 'amulets', null, null, null, crimson);
+  const cases = [
+    item => { item.rarity = 'magic'; },
+    item => { item.prefixes.push(record('P0', 1)); },
+    item => { item.enchantments.push('Test enchantment'); },
+    item => { item.quality.amount = 1; },
+    item => { item.quality.type = 'catalyst'; },
+    item => { item.quality.source = { id: 'test-source' }; },
+    item => { item.sockets = [{ index: 0, insertedItemId: null }]; },
+    item => { item.socketCount = 1; },
+    item => { item.socketedContent = { 0: 'test-rune' }; },
+    item => { item.corrupted = true; },
+    item => { item.sanctified = true; },
+    item => { item.hinekoraLocked = true; },
+    item => { item.currencyUsed.transmutation = 1; },
+    item => { item.flags = { special: true }; },
+  ];
+  for (const mutate of cases) {
+    const engine = make();
+    const item = engine.getItem();
+    mutate(item);
+    engine.loadItem(item);
+    assert.equal(engine.isFreshItem(), false);
+  }
+
+  const legacy = new Engine({ bases: { ruby: syntheticBase() } }, 'ruby');
+  assert.equal(legacy.getItem().baseItemId, undefined);
+  assert.equal(legacy.getItem().baseName, 'Synthetic Equipment');
+  assert(legacy.isFreshItem());
 });
 
 test('same Amulet base filters monotonically across several item levels', () => {

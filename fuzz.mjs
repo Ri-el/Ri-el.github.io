@@ -195,6 +195,22 @@ function checkItemShape(engine, item) {
 	if (engine && typeof engine.baseType === 'string' && item.baseType !== engine.baseType) {
 		v.push(`item baseType ${item.baseType} does not match engine baseType ${engine.baseType}`)
 	}
+	if (item.baseItemId != null) {
+		if (!['string', 'number'].includes(typeof item.baseItemId) || String(item.baseItemId).length === 0) {
+			v.push('baseItemId must be a stable string or number')
+		}
+		if (typeof item.simulatorPoolId !== 'string' || item.simulatorPoolId !== engine?.baseType) {
+			v.push(`simulatorPoolId ${String(item.simulatorPoolId)} does not match engine baseType ${String(engine?.baseType)}`)
+		}
+		if (!Array.isArray(item.baseTags)) v.push('baseTags must be an array when baseItemId is present')
+		if (!Array.isArray(item.implicits)) v.push('implicits must be an array when baseItemId is present')
+		if (item.requiredLevel != null && (!Number.isInteger(item.requiredLevel) || item.requiredLevel < 0)) {
+			v.push('requiredLevel must be null or a non-negative integer')
+		}
+		if (item.dropLevel != null && (!Number.isInteger(item.dropLevel) || item.dropLevel < 0)) {
+			v.push('dropLevel must be null or a non-negative integer')
+		}
+	}
 	for (const key of ['prefixes', 'suffixes', 'enchantments']) {
 		if (!Array.isArray(item[key])) v.push(`${key} must be an array`)
 	}
@@ -396,7 +412,7 @@ const ACTIONS = [
 const FIXED_SNAPSHOT = {
 	iterations: 30000,
 	seed: 542026,
-	digest: '780fbd933eac3cbc60df3f2cb3e13077e00e8a56384e146d5e43d76cdd937a4b',
+	digest: '4c82a5fae17ea3bbea3a96960a997ed850606f24bec5112d2686215e9d7c2a0a',
 }
 const runHash = createHash('sha256')
 function hashEvent(event) {

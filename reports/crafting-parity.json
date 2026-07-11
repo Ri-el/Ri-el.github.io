@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "targetGameVersion": "0.5.4",
+  "fullParityClaim": false,
+  "inventorySource": "data/crafting/currency-index.json",
+  "entryDetailStatus": "baseline_reference_pending_task03_registry_expansion",
+  "counts": {
+    "sourceEntries": 530,
+    "runtimeDefinitions": 37,
+    "unclassified": 0,
+    "sourceByClassification": {
+      "implemented": 31,
+      "conditional": 0,
+      "non_item_currency": 0,
+      "blocked_missing_data": 489,
+      "probability_unverified": 1,
+      "intentionally_out_of_scope": 0,
+      "deprecated_for_target_version": 9
+    },
+    "runtimeByClassification": {
+      "implemented": 32,
+      "conditional": 0,
+      "non_item_currency": 0,
+      "blocked_missing_data": 4,
+      "probability_unverified": 1,
+      "intentionally_out_of_scope": 0,
+      "deprecated_for_target_version": 0
+    }
+  },
+  "task01Change": {
+    "craftingItemStatusesChanged": 0,
+    "note": "Task 01 changes concrete Amulet selection and item identity only; it does not claim or change crafting-item mechanics."
+  },
+  "blockers": [
+    "Task 03 must expand this baseline into the authoritative per-entry registry/parity contract with applicability, handler, evidence, verification, test reference, and blocker fields.",
+    "489 retained source items remain blocked_missing_data and one remains probability_unverified."
+  ]
+}

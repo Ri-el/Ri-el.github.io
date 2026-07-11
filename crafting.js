@@ -176,7 +176,7 @@ class CraftingEngine {
   };
 
   // `desecratedData` is the parsed contents of data/desecrated-mods.json (or null).
-  constructor(modData, baseType = 'ruby', desecratedData = null, sourceModifierOverlay = null, qualityRules = null) {
+  constructor(modData, baseType = 'ruby', desecratedData = null, sourceModifierOverlay = null, qualityRules = null, concreteBase = null) {
     this._modData = modData;
     // Keep `jewelType` for backwards-compatibility (stash records, UI), and
     // expose `baseType` as the generic alias.
@@ -187,7 +187,9 @@ class CraftingEngine {
     if (!typeData) throw new Error(`Invalid base type: ${baseType}`);
     this._typeData = typeData;
     this._sourceModifierOverlay = sourceModifierOverlay instanceof Map ? sourceModifierOverlay : new Map();
-    this._baseTags = new Set(typeData.baseTags || typeData.tags || []);
+    this._typeBaseTags = new Set(typeData.baseTags || typeData.tags || []);
+    this._concreteBase = this._normalizeConcreteBaseDefinition(concreteBase);
+    this._refreshBaseTags();
     const globalQualityRules = typeof globalThis !== 'undefined' ? globalThis.QUALITY_RULES : null;
     const suppliedQualityRules = qualityRules || globalQualityRules;
     this._qualityRules = structuredClone(
@@ -222,6 +224,122 @@ class CraftingEngine {
   }
 
   getItem() { return structuredClone(this._item); }
+
+  // Concrete base identity is independent from the simulator modifier pool.
+  // The browser controller hydrates this record exclusively from the checked-in
+  // normalized data. Keeping a small serializable snapshot on the item makes
+  // base identity survive save/load, history, and Hinekora previews without
+  // coupling the engine to browser globals.
+  _normalizeConcreteBaseDefinition(base) {
+    if (!base || typeof base !== 'object' || base.id == null || !base.displayName) return null;
+    const numericOrNull = value => {
+      if (value == null || value === '') return null;
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : null;
+    };
+    return {
+      id: base.id,
+      metadataKey: base.metadataKey || null,
+      displayName: String(base.displayName),
+      itemClass: base.itemClass || null,
+      simulatorPoolId: base.simulatorPoolId || this.baseType,
+      requiredLevel: numericOrNull(base.requiredLevel),
+      dropLevel: numericOrNull(base.dropLevel != null ? base.dropLevel : base.baseLevel),
+      tags: Array.isArray(base.tags) ? base.tags.map(String) : [],
+      baseProperties: base.baseProperties && typeof base.baseProperties === 'object'
+        ? structuredClone(base.baseProperties)
+        : {},
+      implicits: Array.isArray(base.implicits) ? structuredClone(base.implicits) : [],
+      socketCount: numericOrNull(base.socketCount),
+      icon: base.icon || null,
+      targetGameVersion: base.targetGameVersion || null,
+      verificationState: base.verificationState || null,
+    };
+  }
+
+  _refreshBaseTags() {
+    this._baseTags = new Set(this._typeBaseTags || []);
+    for (const tag of this._concreteBase?.tags || []) this._baseTags.add(tag);
+  }
+
+  _applyConcreteBaseDefinition(item) {
+    const base = this._concreteBase;
+    if (!base || !item) return item;
+    const previousBaseName = item.baseName;
+    item.schemaVersion = Math.max(2, Number(item.schemaVersion) || 0);
+    item.baseItemId = base.id;
+    item.baseMetadataKey = base.metadataKey;
+    item.simulatorPoolId = base.simulatorPoolId || this.baseType;
+    item.itemClass = base.itemClass;
+    item.requiredLevel = base.requiredLevel;
+    item.dropLevel = base.dropLevel;
+    item.baseTags = base.tags.slice();
+    item.baseProperties = structuredClone(base.baseProperties);
+    item.implicits = structuredClone(base.implicits);
+    item.baseSocketCount = base.socketCount;
+    item.baseIcon = base.icon;
+    item.targetGameVersion = base.targetGameVersion;
+    item.baseVerificationState = base.verificationState;
+    item.baseName = base.displayName;
+    item.baseType = this.baseType;
+    item.jewelType = this.jewelType;
+    if (item.rarity === 'normal' || !item.name || item.name === previousBaseName) {
+      item.name = base.displayName;
+    }
+    return item;
+  }
+
+  getConcreteBase() {
+    return this._concreteBase ? structuredClone(this._concreteBase) : null;
+  }
+
+  setConcreteBase(base, options = {}) {
+    const next = this._normalizeConcreteBaseDefinition(base);
+    if (!next) throw new Error('Invalid concrete base definition.');
+    if (next.simulatorPoolId !== this.baseType) {
+      throw new Error(`Concrete base ${next.id} does not map to simulator pool ${this.baseType}.`);
+    }
+    const preserveItemLevel = options.preserveItemLevel !== false;
+    const resetItem = options.resetItem !== false;
+    const itemLevel = this._item?.ilvl;
+    this._concreteBase = next;
+    this._refreshBaseTags();
+    if (resetItem) {
+      this._item = this._createBlankItem(next.displayName);
+      if (preserveItemLevel && Number.isFinite(Number(itemLevel))) {
+        this.setItemLevel(itemLevel);
+      } else {
+        this._prefixCandidates = this._buildCandidatePool(this._prefixPool, 'prefix');
+        this._suffixCandidates = this._buildCandidatePool(this._suffixPool, 'suffix');
+      }
+      this._pendingDesecration = null;
+    } else {
+      this._prefixCandidates = this._buildCandidatePool(this._prefixPool, 'prefix');
+      this._suffixCandidates = this._buildCandidatePool(this._suffixPool, 'suffix');
+    }
+    return this.getConcreteBase();
+  }
+
+  isFreshItem(item = this._item) {
+    if (!item || item.rarity !== 'normal') return false;
+    if ((item.prefixes || []).length || (item.suffixes || []).length || (item.enchantments || []).length) return false;
+    const quality = item.quality && typeof item.quality === 'object'
+      ? item.quality
+      : { amount: item.quality ?? 0, type: 'normal', source: null };
+    if (Number(quality.amount || 0) !== 0 || (quality.type || 'normal') !== 'normal' || quality.source != null) return false;
+    if (item.corrupted || item.sanctified || item.mirrored || item.isMirrored || item.hinekoraLocked) return false;
+    if (this._pendingDesecration || item.desecratedState || item.abyssState || item.omenState || item.hinekoraState) return false;
+    if (Object.values(item.currencyUsed || {}).some(value => Number(value) > 0)) return false;
+    for (const key of ['sockets', 'socketedContent', 'socketState', 'runes', 'soulCores', 'fracturedMods']) {
+      const value = item[key];
+      if (Array.isArray(value) && value.length) return false;
+      if (value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length) return false;
+      if (value != null && typeof value !== 'object' && value !== false && Number(value) !== 0) return false;
+    }
+    if (item.socketCount != null && Number(item.socketCount) !== Number(item.baseSocketCount || 0)) return false;
+    if (item.flags && typeof item.flags === 'object' && Object.keys(item.flags).length) return false;
+    return true;
+  }
 
   getLimits(rarity = null) {
     if (rarity) return this._limits[rarity] ? structuredClone(this._limits[rarity]) : null;
@@ -261,6 +379,8 @@ class CraftingEngine {
   resetItem() {
     this._item = this._createBlankItem(this._typeData.name);
     this._pendingDesecration = null;
+    this._prefixCandidates = this._buildCandidatePool(this._prefixPool, 'prefix');
+    this._suffixCandidates = this._buildCandidatePool(this._suffixPool, 'suffix');
     return this.getItem();
   }
 
@@ -273,6 +393,7 @@ class CraftingEngine {
     if (this._item.sanctified == null) this._item.sanctified = false;
     if (this._item.mirrored == null) this._item.mirrored = !!this._item.isMirrored;
     if (this._item.ilvl == null) this._item.ilvl = 83;
+    this._applyConcreteBaseDefinition(this._item);
     this._normalizeQualityState(this._item);
     // Rebuild the ilvl-eligible candidate pools to match the loaded item's Item
     // Level. Without this, an item loaded from the stash (or restored by
@@ -1134,7 +1255,7 @@ class CraftingEngine {
   }
 
   _createBlankItem(baseName) {
-    return {
+    const item = {
       rarity: 'normal',
       baseName,
       name: baseName,
@@ -1151,6 +1272,7 @@ class CraftingEngine {
       currencyUsed: {},
       hinekoraLocked: false,
     };
+    return this._applyConcreteBaseDefinition(item);
   }
 
   _generateRareName() {

@@ -29,9 +29,10 @@ You edit **one small JSON file per base item** in `data/bases/` (e.g. `ruby.json
 | `index.html` | The page itself. Loads every script/style in order. The `<script>` tags at the bottom decide what code runs. | A file you added isn't loading, or you need to add a new script/style tag. |
 | `app.js` | **Boot + UI glue.** Wraps everything in an IIFE (`window.CraftingEngine`), reads `window.MOD_BASES` from the compiled data, builds the engine, wires up buttons, cursor orb, animations, the stash, and ALT tier tooltips. Has a guard that throws a clear error if the mod data didn't load ("run build"). | Buttons/clicks/tooltips/animations misbehave, or data isn't loading into the UI. |
 | `crafting.js` | **The crafting engine (the rules).** Currency behavior lives here — Transmute, Augment, Regal, Exalt, Chaos, Annul, Alchemy, Divine, Vaal, Essence of the Abyss, Desecrate, plus prefix/suffix caps and tier rolling. It also migrates legacy quality values into `{ amount, type, source }`; this state support does not by itself enable quality currencies. | An orb does the wrong thing, mods roll incorrectly, or affix caps are off. **Engine bugs live here, NOT in the data files.** |
-| `select.js` | **Item-picker menu.** Defines the category tree (jewels, armour, weapons, etc.). Each category has a `status` of `'active'` or `'soon'` (greyed out). Flip `'soon'`→`'active'` once a base has real data. | A base/category isn't selectable, or you finished its data and want to turn it on. |
+| `select.js` | **Item-class menu and workbench base selector.** Defines the outer category tree without inserting a concrete-base screen. Inside the workbench it renders the normalized Amulet picker, search, keyboard behavior, and reset confirmation. | A class/category is missing, or the in-workbench base picker misbehaves. |
 | `style.css` | Main look — item tooltip, stash panel, dark PoE2 theme, layout. | General visual styling. |
 | `overhaul.css` | Final in-game-inspired layout layer: three-column workbench, currency stash tab, item stash, Omens row, and responsive selection screen. | Current UI layout and visual polish. |
+| `header-fix.css` | Versioned workbench-header, concrete-base dialog, confirmation, and concrete tooltip-detail styles loaded locally by `select.js`. | The workbench selector, its mobile drawer, or concrete details look wrong. |
 | `desecrate.css` | Styling specific to the Desecrate / abyssal-bones overlay feature. | The desecrate panel looks wrong. |
 | `select.css` | Styling for the item-picker menu only. | The category picker looks wrong. |
 | `sw.js` | Service worker — caches files so the app works offline / installs as a PWA. | Offline mode or "install app" behaves oddly (or stale cache after an update). |
@@ -47,7 +48,7 @@ You edit **one small JSON file per base item** in `data/bases/` (e.g. `ruby.json
 | `data/mods.data.js` | **Auto-generated.** `build_data.ps1` bundles every `data/bases/*.json` into this one file (`window.MOD_BASES["<id>"] = {...}`). The app loads this, not the raw JSON. | Never edit by hand. If it's stale/missing, run `build.cmd`. |
 | `data/desecrated-mods.json` | Source data for the Desecrate (abyssal bone) feature — one shared jewel pool (Lightless prefixes + of-the-Abyss suffixes), keyed under `jewelTypes` and gated by `bones` (only `preserved_cranium` is valid for jewels). Hand-editable. | Desecrate offers wrong mods. |
 | `data/desecrated-mods.data.js` | **Auto-generated** browser version of the above (built by `build_data.ps1`). | Don't edit by hand; rebuild instead. |
-| `data/normalized/*.json` | Repository-owned normalized base, modifier, crafting-item, and Essence records plus a version manifest and output hashes. | A source mapping or normalized reference fails validation. |
+| `data/normalized/*.json` | Repository-owned normalized base, modifier, crafting-item, and Essence records plus a version manifest and output hashes. `base-items.json` retains 1,760 concrete base records; Task 01 uses all 25 mapped Amulets. | A source mapping, concrete-base identity, or normalized reference fails validation. |
 | `data/normalized.data.js` | **Auto-generated** `file://` wrapper for the normalized records. | Never edit by hand; run the build. |
 | `data/source-cache/` | Source policy and provenance for the normalized data. The manifest explicitly records that the legacy raw export is unavailable rather than fabricating a fixture. | Auditing source identity, target version, parser version, or hashes. |
 | `data/crafting/currency-index.json` | Classified inventory of all 530 retained crafting-item records. Every record has exactly one classification; the existing 37 runtime craft IDs are preserved as an overlay. | Adding or auditing a crafting item. Generate it with `tools/build-currency-index.mjs`. |
@@ -56,7 +57,7 @@ You edit **one small JSON file per base item** in `data/bases/` (e.g. `ruby.json
 ### The 61 base files at a glance
 - **Populated and selectable (56):** Ruby/Emerald/Sapphire jewels; all listed armour attribute combinations; jewellery; off-hands; one- and two-handed weapons; flasks and charms.
 - **Empty and not selectable (5):** `diamond`, `time_lost_ruby`, `time_lost_emerald`, `time_lost_sapphire`, `time_lost_diamond`.
-- These are **item-class pools**, not every concrete in-game base type. The converted files currently do not retain concrete base IDs, requirements, item tags, or per-base modifier-limit overrides.
+- These are **simulator modifier pools**, not every concrete in-game base type. Concrete IDs and tags live separately in normalized data. Task 01 maps all 25 normalized Amulets to the single `amulets` pool while keeping concrete identity in item state. Amulet drop levels and implicit IDs are retained; verified required levels, per-base icons, inherent skills, base properties, localized implicit templates, and per-base limit enforcement remain explicit gaps.
 - Eight populated pools contain only binary/equal fallback weights: `body_armours_str_dex_int`, `claws`, `daggers`, `flails`, `one_hand_axes`, `one_hand_swords`, `two_hand_axes`, and `two_hand_swords`. They now carry `weightStatus: "unverified"` with source/version metadata. The app is an emulator, not a statistically accurate probability calculator for those pools.
 
 ### Quality support at the current checkpoint
@@ -90,10 +91,10 @@ No quality currency button is enabled merely from a known description.
 | File | What it does |
 |---|---|
 | `_scaffold_data.mjs` | One-off Node generator that split the jewel data into per-base files and created the empty scaffolds. Already done its job; kept for reference. Git-ignored. |
-| `fuzz.mjs` | **Node fuzz / regression harness for the crafting engine.** It treats malformed data, engine exceptions, malformed item state, zero meaningful mutations, invariant violations, and fixed-seed digest drift as fatal. The reviewed checkpoint is `node fuzz.mjs 30000 542026`: 30,016 operations, 2,526 meaningful mutations, 198 Hinekora consumptions, digest `780fbd933eac3cbc60df3f2cb3e13077e00e8a56384e146d5e43d76cdd937a4b`. |
-| `validation.mjs` | Deterministic 0.5.4-oriented engine/data regression suite, including all four confirmed hazard fixes, source overlays, weight metadata, structured quality migration, and all 56 populated pools. Current checkpoint: **29/29**. |
+| `fuzz.mjs` | **Node fuzz / regression harness for the crafting engine.** It treats malformed data, engine exceptions, malformed item state, zero meaningful mutations, invariant violations, and fixed-seed digest drift as fatal. The reviewed Task 01 checkpoint is `node fuzz.mjs 30000 542026`: 30,016 operations, 2,573 meaningful mutations, 206 Hinekora consumptions, digest `4c82a5fae17ea3bbea3a96960a997ed850606f24bec5112d2686215e9d7c2a0a`. The digest changed because reset now rebuilds the modifier candidates for its level-83 item instead of retaining a stale lower-level pool. |
+| `validation.mjs` | Deterministic 0.5.4-oriented engine/data regression suite, including concrete Amulet identity/switch/reset checks, reset candidate-pool consistency, source overlays, weight metadata, structured quality migration, and all 56 populated pools. Current checkpoint: **33/33**. |
 | `ui-validation.mjs` | Dependency-free DOM/CSS contract checks for the workbench grid, hidden modal state, normal-flow panel positioning, mobile drawer reset, currency activation, search, and stash markup. Run with `node ui-validation.mjs`. |
-| `data-validation.mjs` | Validates normalized schemas, cross-record mappings, provenance/version/parser metadata, hashes, the browser bundle, and coverage using only repository-owned files. Current checkpoint: **23/23**. |
+| `data-validation.mjs` | Validates normalized schemas, all 25 mapped Amulets, parity checkpoints, cross-record mappings, provenance/version/parser metadata, hashes, the browser bundle, and coverage using only repository-owned files. Current checkpoint: **30/30**. |
 
 ### Validation commands
 
@@ -101,12 +102,13 @@ No quality currency button is enabled merely from a known description.
 node validation.mjs
 node ui-validation.mjs
 node data-validation.mjs
+node tools/build-normalized-data.mjs --check
 node tools/build-currency-index.mjs --check
 node tools/sync-poe2-data.mjs verify
 node fuzz.mjs 30000 542026
 ```
 
-The current UI contract suite passes **63/63**, and the fixed-seed fuzz run passes with zero exceptions, harness errors, or invariant violations.
+The current UI contract suite passes **88/88**, and the fixed-seed fuzz run passes with zero exceptions, harness errors, or invariant violations.
 
 ---
 
@@ -122,10 +124,10 @@ The current UI contract suite passes **63/63**, and the fixed-seed fuzz run pass
 
 ---
 
-## ➕ Adding a new base later (no code edits needed)
+## ➕ Adding a new simulator pool later
 1. Drop a new file in `data/bases/`, e.g. `data/bases/my_new_base.json` with `{ "name": "My Base", "prefixes": [], "suffixes": [] }`.
 2. Fill in its `prefixes` / `suffixes`.
 3. Double-click `build.cmd`.
 4. If it should show in the menu, set its category to `'active'` in `select.js`.
 
-That's it — `index.html` and `app.js` never need to change.
+This adds a class/attribute modifier pool. A concrete in-game base is a separate normalized record and must map to exactly one such pool.

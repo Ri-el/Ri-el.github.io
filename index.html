@@ -133,6 +133,8 @@
                 </div>
               </div>
             </div>
+            <div id="base-detail-list" class="base-detail-list" aria-label="Concrete base details" hidden></div>
+            <div id="implicit-list" class="implicit-list" aria-label="Implicit modifiers" hidden></div>
             <div id="enchant-list" class="enchant-list">
               <!-- Enchantment lines rendered by app.js -->
             </div>
@@ -470,6 +472,45 @@
         <button id="well-cancel" class="well-btn well-cancel" type="button">Cancel</button>
       </div>
     </div>
+  </div>
+
+  <div id="concrete-base-picker" class="base-picker-overlay" hidden>
+    <section class="base-picker-dialog" role="dialog" aria-modal="true" aria-labelledby="base-picker-title">
+      <header class="base-picker-header">
+        <div>
+          <p class="base-picker-kicker">Concrete base</p>
+          <h3 id="base-picker-title">Choose an Amulet</h3>
+        </div>
+        <button id="base-picker-close" class="base-picker-close" type="button" aria-label="Close base selector">&times;</button>
+      </header>
+      <div class="base-picker-toolbar">
+        <label class="base-picker-search" for="base-picker-search">
+          <span aria-hidden="true">&#x2315;</span>
+          <span class="base-picker-search-label">Search Amulet bases</span>
+          <input id="base-picker-search" type="search" placeholder="Search name or implicit" autocomplete="off">
+        </label>
+        <button id="base-picker-reset" class="base-picker-reset" type="button">Reset search</button>
+      </div>
+      <p id="base-picker-count" class="base-picker-count" aria-live="polite"></p>
+      <div id="base-picker-list" class="base-picker-list" role="listbox" aria-label="Available Amulet bases"></div>
+      <div id="base-picker-empty" class="base-picker-state" hidden>
+        <strong>No bases found</strong>
+        <span>Try a different name, property, or implicit.</span>
+      </div>
+      <div id="base-picker-error" class="base-picker-state is-error" role="alert" hidden></div>
+    </section>
+  </div>
+
+  <div id="base-change-confirmation" class="base-confirm-overlay" hidden>
+    <section class="base-confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="base-confirm-title" aria-describedby="base-confirm-message">
+      <p class="base-picker-kicker">Crafted item</p>
+      <h3 id="base-confirm-title">Change concrete base?</h3>
+      <p id="base-confirm-message">Changing the base resets crafted item state.</p>
+      <div class="base-confirm-actions">
+        <button id="base-confirm-cancel" type="button">Cancel</button>
+        <button id="base-confirm-apply" type="button">Change Base and Reset Item</button>
+      </div>
+    </section>
   </div>
 
   <div id="cursor-orb" class="cursor-orb" aria-hidden="true"></div>

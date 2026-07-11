@@ -1,15 +1,15 @@
 // Auto-updating service worker for the PoE2 jewel crafting sim.
 //
-// You should NEVER need to bump a version number here again.
+// Runtime asset changes bump CACHE_NAME so an installed offline shell cannot
+// retain stale markup, scripts, or styles across tested task boundaries.
 //  - Strategy is NETWORK-FIRST for everything: while your local server is
 //    running, every reload pulls the freshest file straight from disk, so
 //    code/CSS/HTML edits show up immediately on a normal refresh.
 //  - The cache is only a fallback for when the server is offline.
-//  - On activate we delete EVERY old cache automatically, so stale assets
-//    can never pile up regardless of name.
+//  - On activate we delete every older cache automatically.
 //  - skipWaiting + clients.claim means a new worker takes over instantly.
 
-const CACHE_NAME = 'poe2-craft'; // static on purpose — no version bumping needed
+const CACHE_NAME = 'poe2-craft-task01-v1';
 
 const APP_SHELL = [
   './',
@@ -18,6 +18,7 @@ const APP_SHELL = [
   './select.css',
   './desecrate.css',
   './overhaul.css',
+  './header-fix.css?v=15',
   './app.js',
   './select.js',
   './crafting.js',

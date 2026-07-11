@@ -120,6 +120,16 @@ let searchInput;
 let resultCount;
 let emptyState;
 let workbenchBaseSelector;
+let activeWorkbenchBaseId = null;
+let activeWorkbenchClassLabel = null;
+let concreteBasePicker;
+let basePickerSearch;
+let basePickerList;
+let basePickerCount;
+let basePickerEmpty;
+let basePickerError;
+let pendingConcreteBaseId = null;
+let lastBasePickerTrigger = null;
 
 // Load the focused craft-header layout fix while preserving direct file:// use.
 function ensureCraftHeaderStyles() {
@@ -127,7 +137,7 @@ function ensureCraftHeaderStyles() {
 
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = 'header-fix.css?v=14';
+  link.href = 'header-fix.css?v=15';
   link.dataset.craftHeaderFix = 'true';
   document.head.appendChild(link);
 }
@@ -351,15 +361,273 @@ function ensureWorkbenchBaseSelector() {
   return workbenchBaseSelector;
 }
 
+function concreteBaseContext() {
+  if (!window.CraftForge || typeof window.CraftForge.getConcreteBaseContext !== 'function') return null;
+  return window.CraftForge.getConcreteBaseContext();
+}
+
+function concreteBaseIcon(base) {
+  const wrap = document.createElement('span');
+  wrap.className = 'base-option-icon';
+  const fallback = () => {
+    if (wrap.querySelector('.base-option-monogram')) return;
+    const glyph = document.createElement('span');
+    glyph.className = 'base-option-monogram';
+    glyph.textContent = monogram(base.displayName);
+    wrap.appendChild(glyph);
+  };
+  if (!base.icon) {
+    fallback();
+    return wrap;
+  }
+  const img = document.createElement('img');
+  img.src = `assets/icons/${base.icon}.png`;
+  img.alt = '';
+  img.loading = 'lazy';
+  img.addEventListener('error', () => {
+    img.remove();
+    fallback();
+  });
+  wrap.appendChild(img);
+  return wrap;
+}
+
+function renderConcreteBaseOptions(context) {
+  if (!basePickerList || !basePickerError || !basePickerEmpty || !basePickerCount) return;
+  basePickerList.replaceChildren();
+  basePickerError.hidden = true;
+  basePickerError.textContent = '';
+  if (!context || context.error) {
+    basePickerError.textContent = context?.error || 'Concrete base data is unavailable.';
+    basePickerError.hidden = false;
+    basePickerEmpty.hidden = true;
+    basePickerCount.textContent = 'Base data unavailable';
+    return;
+  }
+
+  const duplicateNames = new Map();
+  for (const base of context.bases || []) {
+    duplicateNames.set(base.displayName, (duplicateNames.get(base.displayName) || 0) + 1);
+  }
+
+  const fragment = document.createDocumentFragment();
+  for (const base of context.bases || []) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'concrete-base-option';
+    button.dataset.baseItemId = base.id;
+    button.setAttribute('role', 'option');
+    const selected = Number(base.id) === Number(context.selectedBaseItemId);
+    button.classList.toggle('active', selected);
+    button.setAttribute('aria-selected', String(selected));
+
+    button.appendChild(concreteBaseIcon(base));
+    const copy = document.createElement('span');
+    copy.className = 'base-option-copy';
+    const title = document.createElement('strong');
+    title.className = 'base-option-title';
+    title.textContent = base.displayName;
+    copy.appendChild(title);
+
+    if (duplicateNames.get(base.displayName) > 1) {
+      const identity = document.createElement('span');
+      identity.className = 'base-option-identity';
+      identity.textContent = `Source ID ${base.id}`;
+      copy.appendChild(identity);
+    }
+
+    const levels = document.createElement('span');
+    levels.className = 'base-option-levels';
+    const requiredText = base.requiredLevel == null
+      ? 'Required level unavailable'
+      : `Requires level ${base.requiredLevel}`;
+    const dropLevelText = base.dropLevel == null ? '' : `Drop level ${base.dropLevel}`;
+    levels.textContent = [requiredText, dropLevelText].filter(Boolean).join(' \u00b7 ');
+    copy.appendChild(levels);
+
+    const implicitText = (base.implicits || []).map(implicit => implicit.displayText).filter(Boolean).join(' / ');
+    if (implicitText) {
+      const implicit = document.createElement('span');
+      implicit.className = 'base-option-implicit';
+      implicit.textContent = implicitText;
+      copy.appendChild(implicit);
+    }
+
+    const propertyText = Object.entries(base.baseProperties || {})
+      .map(([key, value]) => `${key.replaceAll('_', ' ')} ${value}`)
+      .join(' ');
+    button.dataset.search = [base.displayName, base.id, requiredText, dropLevelText, implicitText, propertyText]
+      .join(' ')
+      .toLowerCase();
+    button.appendChild(copy);
+    button.addEventListener('click', () => chooseConcreteBase(base.id));
+    fragment.appendChild(button);
+  }
+  basePickerList.appendChild(fragment);
+  filterConcreteBaseOptions();
+}
+
+function visibleConcreteBaseOptions() {
+  return Array.from(basePickerList?.querySelectorAll('.concrete-base-option:not([hidden])') || []);
+}
+
+function setWorkbenchModalIsolation(active) {
+  const app = document.getElementById('app');
+  if (!app) return;
+  if ('inert' in app) app.inert = active;
+  if (active) app.setAttribute('aria-hidden', 'true');
+  else app.removeAttribute('aria-hidden');
+}
+
+function trapModalFocus(container, event) {
+  if (event.key !== 'Tab') return false;
+  const focusable = Array.from(container.querySelectorAll(
+    'button:not([disabled]):not([hidden]), input:not([disabled]):not([hidden]), [tabindex]:not([tabindex="-1"]):not([hidden])'
+  )).filter(element => element.getClientRects().length > 0);
+  if (!focusable.length) {
+    event.preventDefault();
+    return true;
+  }
+  const current = focusable.indexOf(document.activeElement);
+  const next = event.shiftKey
+    ? (current <= 0 ? focusable.length - 1 : current - 1)
+    : (current < 0 || current === focusable.length - 1 ? 0 : current + 1);
+  event.preventDefault();
+  focusable[next].focus();
+  return true;
+}
+
+function filterConcreteBaseOptions() {
+  if (!basePickerList || !basePickerCount || !basePickerEmpty) return;
+  const query = basePickerSearch?.value.trim().toLowerCase() || '';
+  let visible = 0;
+  basePickerList.querySelectorAll('.concrete-base-option').forEach(option => {
+    const matches = !query || (option.dataset.search || '').includes(query);
+    option.hidden = !matches;
+    if (matches) visible++;
+  });
+  basePickerCount.textContent = `${visible} ${visible === 1 ? 'base' : 'bases'}`;
+  basePickerEmpty.hidden = visible !== 0 || !basePickerError?.hidden;
+}
+
+function openConcreteBasePicker(trigger) {
+  if (!concreteBasePicker) return;
+  lastBasePickerTrigger = trigger || document.querySelector('.concrete-base-trigger');
+  if (basePickerSearch) basePickerSearch.value = '';
+  renderConcreteBaseOptions(concreteBaseContext());
+  concreteBasePicker.hidden = false;
+  setWorkbenchModalIsolation(true);
+  lastBasePickerTrigger?.setAttribute('aria-expanded', 'true');
+  requestAnimationFrame(() => basePickerSearch?.focus());
+}
+
+function closeConcreteBasePicker({ restoreFocus = true } = {}) {
+  if (!concreteBasePicker || concreteBasePicker.hidden) return;
+  concreteBasePicker.hidden = true;
+  const currentTrigger = document.querySelector('.concrete-base-trigger');
+  currentTrigger?.setAttribute('aria-expanded', 'false');
+  setWorkbenchModalIsolation(false);
+  if (restoreFocus) requestAnimationFrame(() => document.querySelector('.concrete-base-trigger')?.focus());
+}
+
+function closeBaseConfirmation({ restoreFocus = true } = {}) {
+  const confirmation = document.getElementById('base-change-confirmation');
+  if (!confirmation || confirmation.hidden) return;
+  confirmation.hidden = true;
+  pendingConcreteBaseId = null;
+  setWorkbenchModalIsolation(false);
+  if (restoreFocus) requestAnimationFrame(() => document.querySelector('.concrete-base-trigger')?.focus());
+}
+
+function openBaseConfirmation(result) {
+  const confirmation = document.getElementById('base-change-confirmation');
+  const message = document.getElementById('base-confirm-message');
+  const cancel = document.getElementById('base-confirm-cancel');
+  if (!confirmation || !message || !cancel) return;
+  pendingConcreteBaseId = result.nextBaseItemId;
+  message.textContent = `Changing ${result.currentBaseName} to ${result.nextBaseName} resets modifiers, quality, sockets, and special state. Item level is preserved.`;
+  confirmation.hidden = false;
+  setWorkbenchModalIsolation(true);
+  requestAnimationFrame(() => cancel.focus());
+}
+
+function chooseConcreteBase(baseItemId) {
+  if (!window.CraftForge || typeof window.CraftForge.selectConcreteBase !== 'function') return;
+  const result = window.CraftForge.selectConcreteBase(baseItemId);
+  if (result?.requiresConfirmation) {
+    closeConcreteBasePicker({ restoreFocus: false });
+    openBaseConfirmation(result);
+    return;
+  }
+  if (result?.success) {
+    closeConcreteBasePicker();
+  }
+}
+
+function moveConcreteBaseFocus(event) {
+  if (!concreteBasePicker || concreteBasePicker.hidden) return;
+  if (trapModalFocus(concreteBasePicker, event)) return;
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    closeConcreteBasePicker();
+    return;
+  }
+  if (event.target === basePickerSearch && event.key !== 'ArrowDown') return;
+  if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+  const options = visibleConcreteBaseOptions();
+  if (!options.length) return;
+  event.preventDefault();
+  const current = options.indexOf(document.activeElement);
+  let next = current;
+  if (event.key === 'Home') next = 0;
+  else if (event.key === 'End') next = options.length - 1;
+  else if (event.key === 'ArrowDown') next = current < 0 ? 0 : (current + 1) % options.length;
+  else next = current < 0 ? options.length - 1 : (current - 1 + options.length) % options.length;
+  options[next].focus();
+}
+
 function renderWorkbenchBaseSelector(baseId, classLabel) {
   const genericSelector = ensureWorkbenchBaseSelector();
   const jewelSelector = document.getElementById('jewel-selector');
   if (!genericSelector) return;
+  activeWorkbenchBaseId = baseId;
+  activeWorkbenchClassLabel = classLabel;
 
   // Jewels keep the original Ruby/Sapphire/Emerald selector.
   if (baseId === 'jewels') {
     genericSelector.hidden = true;
     genericSelector.replaceChildren();
+    return;
+  }
+
+  if (baseId === 'amulets') {
+    if (jewelSelector) jewelSelector.style.display = 'none';
+    const context = concreteBaseContext();
+    const selected = context?.bases?.find(base => Number(base.id) === Number(context.selectedBaseItemId));
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'base-choice-btn concrete-base-trigger active';
+    trigger.setAttribute('aria-haspopup', 'dialog');
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.setAttribute('aria-controls', 'concrete-base-picker');
+    trigger.disabled = !context;
+    const label = document.createElement('span');
+    label.className = 'concrete-base-trigger-label';
+    label.textContent = selected?.displayName || (context?.error ? 'Base data unavailable' : 'Choose Amulet base');
+    const caret = document.createElement('span');
+    caret.className = 'concrete-base-trigger-caret';
+    caret.setAttribute('aria-hidden', 'true');
+    caret.textContent = '\u25be';
+    trigger.append(label, caret);
+    trigger.addEventListener('click', () => openConcreteBasePicker(trigger));
+    trigger.addEventListener('keydown', event => {
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        openConcreteBasePicker(trigger);
+      }
+    });
+    genericSelector.replaceChildren(trigger);
+    genericSelector.hidden = false;
     return;
   }
 
@@ -425,6 +693,8 @@ function enterCraft(baseId, classLabel) {
 }
 
 function exitCraft() {
+  closeConcreteBasePicker({ restoreFocus: false });
+  closeBaseConfirmation({ restoreFocus: false });
   selectView.hidden = false;
   craftView.hidden = true;
   window.scrollTo(0, 0);
@@ -453,11 +723,73 @@ function placeJewelSelectorInWorkbench() {
   else heading.appendChild(selector);
 }
 
+function setupConcreteBasePicker() {
+  concreteBasePicker = document.getElementById('concrete-base-picker');
+  basePickerSearch = document.getElementById('base-picker-search');
+  basePickerList = document.getElementById('base-picker-list');
+  basePickerCount = document.getElementById('base-picker-count');
+  basePickerEmpty = document.getElementById('base-picker-empty');
+  basePickerError = document.getElementById('base-picker-error');
+  if (!concreteBasePicker || !basePickerSearch || !basePickerList) return;
+
+  document.getElementById('base-picker-close')?.addEventListener('click', () => closeConcreteBasePicker());
+  document.getElementById('base-picker-reset')?.addEventListener('click', () => {
+    basePickerSearch.value = '';
+    filterConcreteBaseOptions();
+    basePickerSearch.focus();
+  });
+  basePickerSearch.addEventListener('input', filterConcreteBaseOptions);
+  basePickerSearch.addEventListener('keydown', event => {
+    if (event.key === 'Enter') {
+      const first = visibleConcreteBaseOptions()[0];
+      if (first) {
+        event.preventDefault();
+        first.click();
+      }
+    }
+  });
+  concreteBasePicker.addEventListener('keydown', moveConcreteBaseFocus);
+  concreteBasePicker.addEventListener('click', event => {
+    if (event.target === concreteBasePicker) closeConcreteBasePicker();
+  });
+
+  const confirmation = document.getElementById('base-change-confirmation');
+  const cancel = document.getElementById('base-confirm-cancel');
+  const apply = document.getElementById('base-confirm-apply');
+  cancel?.addEventListener('click', () => closeBaseConfirmation());
+  apply?.addEventListener('click', () => {
+    if (pendingConcreteBaseId == null || !window.CraftForge?.selectConcreteBase) return;
+    const nextId = pendingConcreteBaseId;
+    window.CraftForge.selectConcreteBase(nextId, { confirmed: true });
+    closeBaseConfirmation();
+  });
+  confirmation?.addEventListener('click', event => {
+    if (event.target === confirmation) closeBaseConfirmation();
+  });
+  confirmation?.addEventListener('keydown', event => {
+    if (trapModalFocus(confirmation, event)) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeBaseConfirmation();
+    }
+  });
+
+  window.addEventListener('craftforge:concrete-base-changed', event => {
+    const context = event.detail;
+    if (!context?.workbenchBaseId) return;
+    renderWorkbenchBaseSelector(
+      context.workbenchBaseId,
+      context.classLabel || activeWorkbenchClassLabel || 'Item',
+    );
+  });
+}
+
 function init() {
   ensureCraftHeaderStyles();
   removeCraftModeLabel();
   placeJewelSelectorInWorkbench();
   ensureWorkbenchBaseSelector();
+  setupConcreteBasePicker();
   selectView = document.getElementById('select-view');
   craftView = document.getElementById('craft-view');
   root = document.getElementById('select-grid');

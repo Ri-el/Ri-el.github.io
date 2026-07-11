@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "targetGameVersion": "0.5.4",
+  "fullParityClaim": false,
+  "source": {
+    "normalizedBaseItems": "data/normalized/base-items.json",
+    "manifest": "data/normalized/version-manifest.json",
+    "sourceVersionStatus": "Source export does not encode a game version; 0.5.4 compatibility must be verified per mechanic."
+  },
+  "task01": {
+    "simulatorPoolId": "amulets",
+    "normalizedItemClass": "Amulet",
+    "modifierPoolClassId": 34,
+    "normalizedConcreteBaseCount": 25,
+    "selectorImplementedCount": 25,
+    "defaultBase": {
+      "id": 2546,
+      "displayName": "Crimson Amulet"
+    },
+    "duplicateDisplayNameGroups": [
+      {
+        "displayName": "Runemastered Veridical Chain",
+        "ids": [2558, 2559, 2560]
+      }
+    ],
+    "availableFields": [
+      "id",
+      "metadataKey",
+      "displayName",
+      "classId",
+      "itemClass",
+      "equipmentSlot",
+      "tags",
+      "socketCount",
+      "modifierPoolClassId",
+      "implicitModifierIds",
+      "sourceCorruptFlag",
+      "unmodifiable",
+      "dropLevel"
+    ],
+    "blockedFields": {
+      "requiredLevel": "No normalized Amulet record contains a verified required-level field; dropLevel is not substituted.",
+      "icon": "No per-base icon is retained; runtime uses a monogram fallback.",
+      "inherentSkill": "No retained Amulet inherent-skill field.",
+      "baseProperties": "No retained Amulet base-property payload.",
+      "implicitDisplayTemplate": "The source export has no numeric localization string table; sourced stat IDs/ranges are shown instead.",
+      "perBaseVersionVerification": "The retained source does not embed its game version."
+    },
+    "manualVerification": {
+      "directFile": "blocked_browser_local_file_url_policy",
+      "serviceWorker": "pending_local_network_approval"
+    }
+  }
+}

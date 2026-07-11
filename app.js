@@ -180,6 +180,10 @@ let currentJewelType = 'ruby';
 // PoE2 item-class line shown on the tooltip (e.g. 'Jewel', 'Rings', 'Body
 // Armours'). Set by loadBase() when a category is chosen on the select screen.
 let currentItemClass = 'Jewel';
+// Stable normalized concrete-base identity. The simulator pool remains in
+// currentJewelType/baseType; this ID only identifies the in-game base selected
+// inside the workbench.
+let currentConcreteBaseId = null;
 // True while crafting a Jewel (keeps the Ruby/Sapphire/Emerald header selector
 // visible). Every other base picks its base on the select screen and hides it.
 let isJewelMode = true;
@@ -226,6 +230,8 @@ const elements = {
   itemName: document.getElementById('item-name'),
   modList: document.getElementById('mod-list'),
   enchantList: document.getElementById('enchant-list'),
+  baseDetailList: document.getElementById('base-detail-list'),
+  implicitList: document.getElementById('implicit-list'),
   corruptedLabel: document.getElementById('corrupted-label'),
   itemLevel: document.getElementById('item-level'),
   ilvlSlider: document.getElementById('ilvl-slider'),
@@ -263,6 +269,7 @@ const elements = {
   wellReroll: document.getElementById('well-reroll'),
   wellRerolls: document.getElementById('well-rerolls'),
   wellCancel: document.getElementById('well-cancel'),
+  itemFlavor: document.getElementById('item-flavor'),
 };
 
 function escapeHtml(s) {
@@ -371,6 +378,110 @@ function buildNormalizedDataIndexes(data) {
     for (const method of data.craftingItems.methods || []) visitMethod(method);
     return indexes;
   });
+}
+
+function normalizedRequiredLevel(base) {
+  const value = base?.requiredLevel ?? base?.requirements?.level ?? null;
+  if (value == null || value === '') return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
+
+function normalizedStatText(stat) {
+  if (!stat || !stat.id) return '';
+  const label = String(stat.id).replaceAll('_', ' ').replace(/\s+/g, ' ').trim();
+  const range = Array.isArray(stat.range) ? stat.range : [];
+  const values = range.length === 0
+    ? ''
+    : range.length === 1 || range[0] === range[1]
+      ? String(range[0])
+      : `${range[0]}\u2013${range[1]}`;
+  return `${capitalize(label)}${values ? `: ${values}` : ''}`;
+}
+
+function normalizedImplicitSnapshot(modifierId) {
+  const modifier = normalizedIndexes?.modifiersById.get(modifierId);
+  if (!modifier) return { id: modifierId, key: null, stats: [], displayText: `Modifier ${modifierId}` };
+  const stats = Array.isArray(modifier.stats) ? structuredClone(modifier.stats) : [];
+  const statText = stats.map(normalizedStatText).filter(Boolean);
+  return {
+    id: modifier.id,
+    key: modifier.key || null,
+    modifierGroupId: modifier.modifierGroupId ?? null,
+    modifierGroup: modifier.modifierGroup || null,
+    stats,
+    // The source export has no localization templates. This deliberately uses
+    // sourced stat identifiers/ranges instead of inventing in-game wording.
+    displayText: statText.join('; ') || modifier.key || `Modifier ${modifier.id}`,
+  };
+}
+
+function concreteBaseDefinition(base, simulatorPoolId) {
+  if (!base) return null;
+  const sourceClass = normalizedIndexes?.classesById.get(base.classId);
+  return {
+    id: base.id,
+    metadataKey: base.metadataKey || null,
+    displayName: base.displayName,
+    itemClass: base.itemClass,
+    simulatorPoolId,
+    requiredLevel: normalizedRequiredLevel(base),
+    dropLevel: base.dropLevel != null && Number.isFinite(Number(base.dropLevel)) ? Number(base.dropLevel) : null,
+    tags: Array.isArray(base.tags) ? base.tags.slice() : [],
+    baseProperties: base.baseProperties && typeof base.baseProperties === 'object'
+      ? structuredClone(base.baseProperties)
+      : {},
+    implicits: (base.implicitModifierIds || []).map(normalizedImplicitSnapshot),
+    socketCount: base.socketCount != null && Number.isFinite(Number(base.socketCount)) ? Number(base.socketCount) : null,
+    icon: base.icon || sourceClass?.iconKey || null,
+    targetGameVersion: normalizedData?.manifest?.targetGameVersion || null,
+    verificationState: normalizedData?.manifest?.source?.versionStatus || null,
+  };
+}
+
+function concreteBasesForPool(simulatorPoolId) {
+  const mapping = normalizedData?.baseItems?.simulatorBaseMap?.[simulatorPoolId];
+  if (!mapping || !normalizedIndexes) return [];
+  return (mapping.concreteBaseIds || [])
+    .map(id => normalizedIndexes.basesById.get(id))
+    .filter(Boolean)
+    .map(base => concreteBaseDefinition(base, simulatorPoolId));
+}
+
+function concreteBaseById(baseItemId, simulatorPoolId = currentJewelType) {
+  const numericId = Number(baseItemId);
+  return concreteBasesForPool(simulatorPoolId)
+    .find(base => Number(base.id) === numericId) || null;
+}
+
+function defaultConcreteBaseForPool(simulatorPoolId) {
+  // Normalized mappings are emitted in stable numeric ID order. For Amulets,
+  // the first retained record is 2546 (Crimson Amulet).
+  return concreteBasesForPool(simulatorPoolId)[0] || null;
+}
+
+function concreteBaseContext() {
+  const bases = currentJewelType === 'amulets' ? concreteBasesForPool(currentJewelType) : [];
+  const item = engine ? engine.getItem() : null;
+  return {
+    enabled: currentJewelType === 'amulets',
+    workbenchBaseId: isJewelMode ? 'jewels' : currentJewelType,
+    simulatorPoolId: currentJewelType,
+    itemClass: item?.itemClass || null,
+    classLabel: currentItemClass,
+    selectedBaseItemId: item?.baseItemId ?? currentConcreteBaseId,
+    bases,
+    error: currentJewelType === 'amulets' && bases.length === 0
+      ? 'Normalized Amulet base data is unavailable.'
+      : '',
+  };
+}
+
+function notifyConcreteBaseChange() {
+  if (typeof window.CustomEvent !== 'function') return;
+  window.dispatchEvent(new CustomEvent('craftforge:concrete-base-changed', {
+    detail: concreteBaseContext(),
+  }));
 }
 
 function buildSourceModifierOverlay(baseType) {
@@ -500,14 +611,24 @@ function resetOmenState() {
   if (elements.craftOmenBtns) elements.craftOmenBtns.forEach(b => b.classList.remove('active'));
 }
 
-function createEngine(type) {
+function createEngine(type, concreteBase = null) {
   return measureOperation('base-selection', () => {
-    engine = new CraftingEngine(modData, type, desecData, buildSourceModifierOverlay(type));
+    const selectedConcreteBase = concreteBase || (type === 'amulets' ? defaultConcreteBaseForPool(type) : null);
+    currentConcreteBaseId = selectedConcreteBase?.id ?? null;
+    engine = new CraftingEngine(
+      modData,
+      type,
+      desecData,
+      buildSourceModifierOverlay(type),
+      null,
+      selectedConcreteBase,
+    );
     undoStack = [];
     redoStack = [];
     resetOmenState();
     clearDesecration();
     renderItem();
+    notifyConcreteBaseChange();
     return engine;
   });
 }
@@ -553,8 +674,62 @@ function loadBase(baseId, classLabel) {
     setJewelSelectorVisible(false);
   }
   disarmCurrency();
-  createEngine(currentJewelType);
+  createEngine(
+    currentJewelType,
+    currentJewelType === 'amulets' ? defaultConcreteBaseForPool('amulets') : null,
+  );
   return true;
+}
+
+function selectConcreteBase(baseItemId, options = {}) {
+  if (!engine || currentJewelType !== 'amulets') {
+    return { success: false, error: 'Concrete base selection is not available for this item class yet.' };
+  }
+  const nextBase = concreteBaseById(baseItemId, currentJewelType);
+  if (!nextBase) {
+    const error = 'That concrete base is not available for the active simulator pool.';
+    showError(error);
+    return { success: false, error };
+  }
+
+  const currentItem = engine.getItem();
+  if (Number(currentItem.baseItemId) === Number(nextBase.id)) {
+    return { success: true, unchanged: true, base: nextBase };
+  }
+
+  const crafted = !engine.isFreshItem();
+  if (crafted && options.confirmed !== true) {
+    return {
+      success: false,
+      requiresConfirmation: true,
+      currentBaseName: currentItem.baseName,
+      nextBaseName: nextBase.displayName,
+      nextBaseItemId: nextBase.id,
+    };
+  }
+
+  const before = snapshotState(currentItem);
+  pushUndo(before);
+  engine.setConcreteBase(nextBase, { resetItem: true, preserveItemLevel: true });
+  currentConcreteBaseId = nextBase.id;
+  resetOmenState();
+  clearDesecration();
+  foreseenSeals = {};
+  foreseenHover = null;
+  hideForeseenBanner();
+  disarmCurrency();
+  renderItem();
+  notifyConcreteBaseChange();
+  return { success: true, reset: crafted, base: nextBase, item: engine.getItem() };
+}
+
+function syncConcreteBaseTemplateFromItem(item) {
+  if (!engine || currentJewelType !== 'amulets') return null;
+  const base = concreteBaseById(item?.baseItemId, currentJewelType) || defaultConcreteBaseForPool(currentJewelType);
+  if (!base) return null;
+  engine.setConcreteBase(base, { resetItem: false });
+  currentConcreteBaseId = base.id;
+  return base;
 }
 
 // Expose the bridge the select screen calls. Assigned at load time so it exists
@@ -566,6 +741,8 @@ window.CraftForge.getActiveCraftTab = () => activeCraftTab;
 window.CraftForge.getCraftRegistry = () => CRAFTING_ITEM_REGISTRY;
 window.CraftForge.getPerformanceMetrics = () => performanceMetrics.map(metric => ({ ...metric }));
 window.CraftForge.reloadCraftIcons = () => setupCurrencyIcons();
+window.CraftForge.getConcreteBaseContext = concreteBaseContext;
+window.CraftForge.selectConcreteBase = selectConcreteBase;
 window.CraftForge.getNormalizedIndexCounts = () => normalizedIndexes ? ({
   bases: normalizedIndexes.basesById.size,
   itemClasses: normalizedIndexes.basesByItemClass.size,
@@ -1472,6 +1649,7 @@ function pushUndo(beforeState) {
 }
 
 function restoreSnapshot(snap) {
+  syncConcreteBaseTemplateFromItem(snap.item);
   engine.loadItem(snap.item, snap.pending);
   clearDesecration();
   // Restore the pending reveal AFTER clearDesecration so the Reveal panel
@@ -1490,6 +1668,7 @@ function restoreSnapshot(snap) {
   foreseenHover = null;
   disarmCurrency();
   renderItem();
+  notifyConcreteBaseChange();
 }
 
 function undoLastAction() {
@@ -1674,13 +1853,14 @@ function computeForesight(currency) {
   // engine back so nothing is actually committed. The captured outcome is
   // sealed and reused for both the preview and the eventual commit.
   const snapshot = engine.getItem();
+  const snapshotPending = engine.getPendingDesecration();
   const result = applyCurrencyToEngine(currency);
   if (!result || !result.success) {
-    engine.loadItem(snapshot);
+    engine.loadItem(snapshot, snapshotPending);
     return { result };
   }
   const afterItem = engine.getItem();
-  engine.loadItem(snapshot);
+  engine.loadItem(snapshot, snapshotPending);
   return { result, afterItem };
 }
 
@@ -1693,14 +1873,15 @@ function computeDesecrationForesight(bone) {
     return { result: { success: false, error: 'Desecrated modifier data is not available.' } };
   }
   const snapshot = engine.getItem();
+  const snapshotPending = engine.getPendingDesecration();
   const res = engine.startDesecration({ bone, omens: Array.from(selectedOmens) });
-  if (!res || !res.success) { engine.loadItem(snapshot); return { result: res }; }
+  if (!res || !res.success) { engine.loadItem(snapshot, snapshotPending); return { result: res }; }
   const afterItem = engine.getItem();
   // Capture the engine's pending desecration (the placement + the rolled Well of
   // Souls options) so Hinekora's Lock can later COMMIT this exact sealed
   // desecration instead of rolling a brand-new one.
   const pending = engine.getPendingDesecration();
-  engine.loadItem(snapshot); // roll back the placed mod + pending desecration
+  engine.loadItem(snapshot, snapshotPending); // roll back the placed mod + pending desecration
   return { result: res, afterItem, pending };
 }
 
@@ -2144,6 +2325,58 @@ function omenDisabledReason(definition, item) {
   return '';
 }
 
+function baseDetailRow(label, value, unavailable = false) {
+  const row = document.createElement('div');
+  row.className = 'base-detail-row' + (unavailable ? ' is-unavailable' : '');
+  const labelEl = document.createElement('span');
+  labelEl.className = 'base-detail-label';
+  labelEl.textContent = label;
+  const valueEl = document.createElement('span');
+  valueEl.className = 'base-detail-value';
+  valueEl.textContent = value;
+  row.append(labelEl, valueEl);
+  return row;
+}
+
+function renderConcreteBaseDetails(item) {
+  const hasConcreteBase = item?.baseItemId != null;
+  if (elements.baseDetailList) {
+    elements.baseDetailList.hidden = !hasConcreteBase;
+    if (hasConcreteBase) {
+      const fragment = document.createDocumentFragment();
+      if (item.requiredLevel != null && Number.isFinite(Number(item.requiredLevel))) {
+        fragment.appendChild(baseDetailRow('Required Level', String(item.requiredLevel)));
+      } else {
+        fragment.appendChild(baseDetailRow('Required Level', 'Unavailable in normalized source', true));
+      }
+      if (item.dropLevel != null && Number.isFinite(Number(item.dropLevel))) {
+        fragment.appendChild(baseDetailRow('Drop Level', String(item.dropLevel)));
+      }
+      for (const [key, value] of Object.entries(item.baseProperties || {})) {
+        const label = capitalize(String(key).replaceAll('_', ' ').replace(/\s+/g, ' '));
+        fragment.appendChild(baseDetailRow(label, String(value)));
+      }
+      elements.baseDetailList.replaceChildren(fragment);
+    } else {
+      elements.baseDetailList.replaceChildren();
+    }
+  }
+
+  if (elements.implicitList) {
+    const implicits = hasConcreteBase && Array.isArray(item.implicits) ? item.implicits : [];
+    elements.implicitList.hidden = implicits.length === 0;
+    const fragment = document.createDocumentFragment();
+    for (const implicit of implicits) {
+      const line = document.createElement('div');
+      line.className = 'implicit-line';
+      line.textContent = implicit.displayText || implicit.key || `Modifier ${implicit.id}`;
+      line.dataset.implicitId = implicit.id;
+      fragment.appendChild(line);
+    }
+    elements.implicitList.replaceChildren(fragment);
+  }
+}
+
 function renderItem(actionResult = null, overrideItem = null) {
   const item = overrideItem || engine.getItem();
   const liveItem = overrideItem ? engine.getItem() : item;
@@ -2191,7 +2424,7 @@ function renderItem(actionResult = null, overrideItem = null) {
     }
     // The item-class line tracks the chosen category (Jewel, Rings, Body
     // Armours, ...), not a hard-coded 'Jewel'.
-    classEl.textContent = currentItemClass || 'Jewel';
+    classEl.textContent = item.itemClass || currentItemClass || 'Jewel';
     // Show the small base-type subtitle ONLY for Rare items, whose generated
     // name does not contain the base. Magic names already include the base
     // ('Burning Ruby of the Salamander') and Normal items ARE the base, so a
@@ -2210,6 +2443,7 @@ function renderItem(actionResult = null, overrideItem = null) {
   if (elements.itemLevel) {
     updateIlvlUI(item.ilvl);
   }
+  renderConcreteBaseDetails(item);
 
   const allMods = [
     ...item.prefixes.map(m => ({ ...m, type: 'prefix' })),
@@ -2289,11 +2523,14 @@ function renderItem(actionResult = null, overrideItem = null) {
   // When not corrupted, the flavour text sits in the middle between the rules.
   elements.corruptedLabel.style.display = item.corrupted ? 'block' : 'none';
   if (elements.sanctifiedLabel) elements.sanctifiedLabel.style.display = item.sanctified ? 'block' : 'none';
-  const flavorEl = document.getElementById('item-flavor');
+  const flavorEl = elements.itemFlavor || document.getElementById('item-flavor');
   const sepC = document.getElementById('sep-c');
   if (flavorEl && sepC) {
-    if (item.corrupted) sepC.after(flavorEl);
-    else sepC.before(flavorEl);
+    flavorEl.hidden = !isJewelMode;
+    if (isJewelMode) {
+      if (item.corrupted) sepC.after(flavorEl);
+      else sepC.before(flavorEl);
+    }
   }
 
   // Keep the Reveal panel in sync with the REAL item: it is visible only while an
@@ -2425,8 +2662,9 @@ function saveToStash() {
     return;
   }
   const item = engine.getItem();
-  // Remember which item-class label to show when this item is loaded back.
-  item.itemClass = currentItemClass;
+  // Keep the normalized singular item class on the item itself and store the
+  // outer-screen category label separately for legacy UI restoration.
+  item.categoryLabel = currentItemClass;
   // Preserve any in-progress (unrevealed) desecration so a saved item can be
   // resumed after it is loaded back. The unrevealed placeholder lives on the
   // item itself, but the pending reveal options (and the UI reveal state) live
@@ -2446,23 +2684,37 @@ function loadFromStash(index) {
 
   // Restore the saved item's base. Jewels keep the header swatch selector; any
   // other base hides it and shows that base's class label instead.
-  currentJewelType = saved.jewelType;
-  if (JEWEL_BASES.has(saved.jewelType)) {
+  currentJewelType = saved.simulatorPoolId || saved.jewelType || saved.baseType;
+  if (JEWEL_BASES.has(currentJewelType)) {
     isJewelMode = true;
     currentItemClass = 'Jewel';
     setJewelSelectorVisible(true);
-    elements.jewelBtns.forEach(b => b.classList.toggle('active', b.dataset.type === saved.jewelType));
+    elements.jewelBtns.forEach(b => b.classList.toggle('active', b.dataset.type === currentJewelType));
   } else {
     isJewelMode = false;
-    currentItemClass = saved.itemClass || 'Item';
+    currentItemClass = saved.categoryLabel || saved.itemClass || 'Item';
     setJewelSelectorVisible(false);
   }
 
+  let savedConcreteBase = null;
+  if (currentJewelType === 'amulets') {
+    savedConcreteBase = concreteBaseById(saved.baseItemId, currentJewelType);
+    if (!savedConcreteBase) {
+      savedConcreteBase = defaultConcreteBaseForPool(currentJewelType);
+      if (saved.baseItemId != null && savedConcreteBase) {
+        showError(`Saved base ${saved.baseItemId} is unavailable; loaded ${savedConcreteBase.displayName}.`);
+      }
+    }
+  }
+  currentConcreteBaseId = savedConcreteBase?.id ?? null;
+
   engine = new CraftingEngine(
     modData,
-    saved.jewelType,
+    currentJewelType,
     desecData,
-    buildSourceModifierOverlay(saved.jewelType),
+    buildSourceModifierOverlay(currentJewelType),
+    null,
+    savedConcreteBase,
   );
 
   // Restore a saved in-progress desecration (the unrevealed placeholder plus its
@@ -2485,6 +2737,7 @@ function loadFromStash(index) {
   // restored; set desecState AFTER clearDesecration, mirroring restoreSnapshot.
   desecState = savedDesecState;
   renderItem();
+  notifyConcreteBaseChange();
   playSound('regal');
 }
 
