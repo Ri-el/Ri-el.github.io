@@ -444,7 +444,7 @@ class CraftingEngine {
     if (item.corrupted || item.sanctified || item.mirrored || item.isMirrored || item.hinekoraLocked) return false;
     if (this._pendingDesecration || item.desecratedState || item.abyssState || item.omenState || item.hinekoraState) return false;
     if (Object.values(item.currencyUsed || {}).some(value => Number(value) > 0)) return false;
-    for (const key of ['sockets', 'socketedContent', 'socketState', 'runes', 'soulCores', 'fracturedMods']) {
+    for (const key of ['sockets', 'socketedContent', 'socketState', 'legacySocketState', 'runes', 'soulCores', 'fracturedMods']) {
       const value = item[key];
       if (Array.isArray(value) && value.length) return false;
       if (value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length) return false;

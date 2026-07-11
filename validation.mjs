@@ -462,6 +462,7 @@ test('fresh-item detection includes irreversible and special item state', () => 
     item => { item.quality.source = { id: 'test-source' }; },
     item => { item.sockets = [{ index: 0, insertedItemId: null }]; },
     item => { item.socketCount = 1; },
+    item => { item.legacySocketState = { status: 'preserved-unverified', payload: { count: 1 } }; },
     item => { item.socketedContent = { 0: 'test-rune' }; },
     item => { item.corrupted = true; },
     item => { item.sanctified = true; },

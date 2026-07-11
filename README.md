@@ -91,10 +91,10 @@ No quality currency button is enabled merely from a known description.
 | File | What it does |
 |---|---|
 | `_scaffold_data.mjs` | One-off Node generator that split the jewel data into per-base files and created the empty scaffolds. Already done its job; kept for reference. Git-ignored. |
-| `fuzz.mjs` | **Node fuzz / regression harness for the crafting engine.** It treats malformed data, engine exceptions, malformed item state, zero meaningful mutations, invariant violations, and fixed-seed digest drift as fatal. The reviewed Task 01 checkpoint is `node fuzz.mjs 30000 542026`: 30,016 operations, 2,573 meaningful mutations, 206 Hinekora consumptions, digest `4c82a5fae17ea3bbea3a96960a997ed850606f24bec5112d2686215e9d7c2a0a`. The digest changed because reset now rebuilds the modifier candidates for its level-83 item instead of retaining a stale lower-level pool. |
-| `validation.mjs` | Deterministic 0.5.4-oriented engine/data regression suite, including concrete Amulet identity/switch/reset checks, reset candidate-pool consistency, source overlays, weight metadata, structured quality migration, and all 56 populated pools. Current checkpoint: **33/33**. |
+| `fuzz.mjs` | **Node fuzz / regression harness for the crafting engine.** It treats malformed data, engine exceptions, malformed item state, zero meaningful mutations, invariant violations, and fixed-seed digest drift as fatal. The reviewed Task 02 checkpoint is `node fuzz.mjs 30000 542026`: 30,016 operations, 2,573 meaningful mutations, 206 Hinekora consumptions, digest `46984d739488e00aea6bfd0664a34741306ec273e68542df96d574695f1f5104`. The intentional digest change comes from attaching deterministic schema-v3 concrete-base state to every populated pool. |
+| `validation.mjs` | Deterministic 0.5.4-oriented engine/data regression suite, including generic concrete identity/state migration, source overlays, base-specific tags/affix limits, structured quality/socket preservation, and all 56 populated pools. Current checkpoint: **38/38**. |
 | `ui-validation.mjs` | Dependency-free DOM/CSS contract checks for the workbench grid, hidden modal state, normal-flow panel positioning, mobile drawer reset, currency activation, search, and stash markup. Run with `node ui-validation.mjs`. |
-| `data-validation.mjs` | Validates normalized schemas, all 25 mapped Amulets, parity checkpoints, cross-record mappings, provenance/version/parser metadata, hashes, the browser bundle, and coverage using only repository-owned files. Current checkpoint: **30/30**. |
+| `data-validation.mjs` | Validates normalized schemas, all 1,760 concrete records, malformed-mapping fixtures, the 31-class parity report, provenance/version/parser metadata, hashes, browser bundle, and explicit blockers using only repository-owned files. Current checkpoint: **57/57**. |
 
 ### Validation commands
 
@@ -108,7 +108,7 @@ node tools/sync-poe2-data.mjs verify
 node fuzz.mjs 30000 542026
 ```
 
-The current UI contract suite passes **88/88**, and the fixed-seed fuzz run passes with zero exceptions, harness errors, or invariant violations.
+The current UI contract suite passes **100/100**, and the fixed-seed fuzz run passes with zero exceptions, harness errors, or invariant violations.
 
 ---
 

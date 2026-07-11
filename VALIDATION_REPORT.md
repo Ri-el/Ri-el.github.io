@@ -78,13 +78,13 @@ These prevent a claim of complete game parity:
 
 Every one of the 56 currently selectable populated class/attribute pools constructs and accepts a valid basic craft without an exception. That is not the same as supporting every concrete base available in PoE2 0.5.4.
 
-Task 01 also corrected a reset invariant: `resetItem()` previously created an item at level 83 while retaining the old item's lower-level candidate cache. Reset now rebuilds prefix and suffix candidates for the reset item. This intentional engine correction changes deterministic post-reset crafting paths; it is covered by a focused regression and is the reason for the reviewed fuzz digest change below.
+Task 01 also corrected a reset invariant: `resetItem()` previously created an item at level 83 while retaining the old item's lower-level candidate cache. Reset now rebuilds prefix and suffix candidates for the reset item and remains covered by a focused regression. The current Task 02 digest change is separately explained below.
 
 ## Repeatable results
 
 - Baseline deterministic suite against the original engine: **11/17 passed**. Failures covered the stale browser bundle, equipment limits, Magic-only classes, Alchemy count, Whittling ties, and Greater/Perfect semantics.
-- Current deterministic suite: **33/33 passed** with `node validation.mjs`.
-- Current UI DOM/CSS contract suite: **88/88 passed** with `node ui-validation.mjs`.
-- Current normalized-data suite: **30/30 passed** with `node data-validation.mjs`.
-- Seeded fuzz suite: **30,016 operations across 56 populated pools, 2,573 meaningful mutations, 206 Hinekora consumptions, 0 exceptions, and 0 invariant violations** with `node fuzz.mjs 30000 542026`. Reviewed digest: `4c82a5fae17ea3bbea3a96960a997ed850606f24bec5112d2686215e9d7c2a0a`.
+- Current deterministic suite: **38/38 passed** with `node validation.mjs`.
+- Current UI DOM/CSS contract suite: **100/100 passed** with `node ui-validation.mjs`.
+- Current normalized-data suite: **57/57 passed** with `node data-validation.mjs`.
+- Seeded fuzz suite: **30,016 operations across 56 populated pools, 2,573 meaningful mutations, 206 Hinekora consumptions, 0 exceptions, and 0 invariant violations** with `node fuzz.mjs 30000 542026`. Reviewed digest: `46984d739488e00aea6bfd0664a34741306ec273e68542df96d574695f1f5104`. The intentional Task 02 digest change comes from deterministic schema-v3 concrete-base state being included for every pool.
 - Syntax and patch checks: `node --check` for engine/UI scripts and `git diff --check` passed.

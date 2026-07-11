@@ -368,6 +368,11 @@
       "invalidOrBlockedMapping": "Show a compatibility message and do not crash or map by display name.",
       "legacyQuality": "Normalize to the structured quality shape.",
       "socketSemantics": "Preserve unknown legacy socket state without inventing verified maximum/default limits."
+    },
+    "manualVerification": {
+      "directFile": "blocked_browser_local_file_url_policy",
+      "serviceWorker": "not_run_no_local_network_authorization",
+      "sourceContract": "Classic deferred scripts, local browser bundles, and no runtime fetch requirement validated."
     }
   }
 }

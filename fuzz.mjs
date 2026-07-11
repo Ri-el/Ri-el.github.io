@@ -486,7 +486,7 @@ const ACTIONS = [
 const FIXED_SNAPSHOT = {
 	iterations: 30000,
 	seed: 542026,
-	digest: '4c82a5fae17ea3bbea3a96960a997ed850606f24bec5112d2686215e9d7c2a0a',
+	digest: '46984d739488e00aea6bfd0664a34741306ec273e68542df96d574695f1f5104',
 }
 const runHash = createHash('sha256')
 function hashEvent(event) {

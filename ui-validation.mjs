@@ -190,7 +190,9 @@ const loadFromStashStart = app.indexOf('function loadFromStash(index)');
 const loadFromStashEnd = app.indexOf('\nfunction removeFromStash', loadFromStashStart);
 const loadFromStashSource = app.slice(loadFromStashStart, loadFromStashEnd);
 check('stash reload rebuilds the normalized modifier overlay for the saved simulator pool',
-  /new CraftingEngine\(\s*modData,\s*currentJewelType,\s*desecData,\s*buildSourceModifierOverlay\(currentJewelType\),\s*null,\s*savedConcreteBase,?\s*\)/.test(loadFromStashSource));
+  /new CraftingEngine\(\s*modData,\s*savedPoolId,\s*desecData,\s*buildSourceModifierOverlay\(savedPoolId\),\s*null,\s*savedConcreteBase,?\s*\)/.test(loadFromStashSource));
+check('incompatible stash migration is transactional and preserves the live engine',
+  /let candidateEngine;[\s\S]*?try \{[\s\S]*?candidateEngine\.loadItem\(item, pending\);[\s\S]*?catch \(error\)[\s\S]*?showError\(`[\s\S]*?return;[\s\S]*?engine = candidateEngine;/.test(loadFromStashSource));
 check('requested performance paths are instrumented',
   ['initial-data-load', 'base-selection', 'item-level-change', 'chaos-with-whittling', 'tab-switch', 'undo', 'redo']
     .every(metric => app.includes(metric)) && /`craft-\$\{baseCurrency\}`/.test(app));

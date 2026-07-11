@@ -2885,30 +2885,6 @@ function loadFromStash(index) {
     return;
   }
 
-  // Only mutate the live workbench after all compatibility checks pass.
-  currentJewelType = savedPoolId;
-  currentSelectablePoolIds = selectablePoolIds;
-  currentConcreteBaseId = savedConcreteBase.id;
-  if (JEWEL_BASES.has(currentJewelType)) {
-    isJewelMode = true;
-    currentItemClass = 'Jewel';
-    setJewelSelectorVisible(true);
-    elements.jewelBtns.forEach(b => b.classList.toggle('active', b.dataset.type === currentJewelType));
-  } else {
-    isJewelMode = false;
-    currentItemClass = saved.categoryLabel || saved.itemClass || 'Item';
-    setJewelSelectorVisible(false);
-  }
-
-  engine = new CraftingEngine(
-    modData,
-    currentJewelType,
-    desecData,
-    buildSourceModifierOverlay(currentJewelType),
-    null,
-    savedConcreteBase,
-  );
-
   // Restore a saved in-progress desecration (the unrevealed placeholder plus its
   // pending reveal options) so a stashed reveal can be resumed. Strip the
   // stash-only bookkeeping fields before handing the item to the engine so they
@@ -2926,7 +2902,33 @@ function loadFromStash(index) {
     });
   }
 
-  engine.loadItem(item, pending);
+  // Construct and migrate off to the side. A malformed/future save must not
+  // partially replace the current engine or workbench context.
+  let candidateEngine;
+  try {
+    candidateEngine = new CraftingEngine(
+      modData,
+      savedPoolId,
+      desecData,
+      buildSourceModifierOverlay(savedPoolId),
+      null,
+      savedConcreteBase,
+    );
+    candidateEngine.loadItem(item, pending);
+  } catch (error) {
+    showError(`Saved item is incompatible: ${error.message}`);
+    return;
+  }
+
+  // Only mutate live controller state after construction and migration pass.
+  engine = candidateEngine;
+  currentJewelType = savedPoolId;
+  currentSelectablePoolIds = selectablePoolIds;
+  currentConcreteBaseId = savedConcreteBase.id;
+  isJewelMode = JEWEL_BASES.has(savedPoolId);
+  currentItemClass = isJewelMode ? 'Jewel' : (saved.categoryLabel || saved.itemClass || 'Item');
+  setJewelSelectorVisible(isJewelMode);
+  syncJewelSelectorActive();
   undoStack = [];
   redoStack = [];
   disarmCurrency();
