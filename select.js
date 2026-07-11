@@ -164,14 +164,6 @@ function buildCard(item, groupName) {
   label.textContent = item.name;
   card.appendChild(label);
 
-  // Now that every base is released, every card wears the green "Playable" tag.
-  if (active) {
-    const badge = document.createElement('span');
-    badge.className = 'cat-badge badge-ready';
-    badge.textContent = 'Playable';
-    card.appendChild(badge);
-  }
-
   card.addEventListener('click', () => {
     if (hasVariants) renderVariants(item);
     else enterCraft(item.id, item.name);
