@@ -62,6 +62,199 @@ function uniqueIds(records) {
   return ids.length === new Set(ids).size;
 }
 
+function isStableId(value) {
+  return (typeof value === 'string' && value.trim().length > 0) ||
+    (typeof value === 'number' && Number.isFinite(value) && Number.isInteger(value));
+}
+
+function isPlainObject(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value) &&
+    Object.getPrototypeOf(value) === Object.prototype;
+}
+
+function isValidBasePropertyValue(value) {
+  if (value == null || typeof value === 'string' || typeof value === 'boolean') return true;
+  if (typeof value === 'number') return Number.isFinite(value);
+  if (Array.isArray(value)) return value.every(isValidBasePropertyValue);
+  if (!isPlainObject(value)) return false;
+  return Object.entries(value).every(([key, child]) => key.trim().length > 0 && isValidBasePropertyValue(child));
+}
+
+// Validate the normalized concrete-base contract independently from the UI.
+// Known source limitations are accepted only through explicit ID allowlists;
+// malformed fixtures without those allowlists must still fail deterministically.
+export function validateNormalizedBaseCatalog(baseItems, modifiers, manifest, options = {}) {
+  const errors = [];
+  const warnings = [];
+  const addError = (code, message, context = {}) => errors.push({ code, message, ...context });
+  const addWarning = (code, message, context = {}) => warnings.push({ code, message, ...context });
+  const allowedUnmapped = new Set((options.allowedUnmappedBaseIds || []).map(String));
+  const allowedDuplicateTags = new Set((options.allowedDuplicateTagBaseIds || []).map(String));
+  const allowedMalformedBaseProperties = new Set((options.allowedMalformedBasePropertyIds || []).map(String));
+  const classes = Array.isArray(baseItems?.classes) ? baseItems.classes : [];
+  const bases = Array.isArray(baseItems?.bases) ? baseItems.bases : [];
+  const mappings = isPlainObject(baseItems?.simulatorBaseMap) ? baseItems.simulatorBaseMap : {};
+  const modifierRecords = Array.isArray(modifiers?.modifiers) ? modifiers.modifiers : [];
+  const targetVersion = manifest?.targetGameVersion || null;
+  const classById = new Map();
+  const baseById = new Map();
+  const modifierIds = new Set(modifierRecords.filter(record => isStableId(record?.id)).map(record => String(record.id)));
+  const reverseMappings = new Map();
+  const ambiguousBaseIds = new Set();
+  const unknownMappingBaseIds = new Set();
+
+  for (const sourceClass of classes) {
+    if (!isStableId(sourceClass?.id)) {
+      addError('unknown_item_class', 'Normalized source class is missing a stable ID.');
+      continue;
+    }
+    const key = String(sourceClass.id);
+    if (classById.has(key)) addError('unknown_item_class', `Duplicate normalized source class ID ${key}.`, { classId: sourceClass.id });
+    classById.set(key, sourceClass);
+  }
+
+  for (const base of bases) {
+    if (!isStableId(base?.id)) {
+      addError('missing_stable_id', 'Concrete base is missing a stable ID.');
+      continue;
+    }
+    const baseKey = String(base.id);
+    if (baseById.has(baseKey)) {
+      addError('duplicate_stable_id', `Duplicate concrete-base ID ${baseKey}.`, { baseId: base.id });
+    } else {
+      baseById.set(baseKey, base);
+    }
+
+    if (typeof base.displayName !== 'string' || !base.displayName.trim()) {
+      addError('missing_display_name', `Concrete base ${baseKey} has no display name.`, { baseId: base.id });
+    }
+
+    const sourceClass = classById.get(String(base.classId));
+    const modifierClass = classById.get(String(base.modifierPoolClassId));
+    if (!sourceClass || !modifierClass || typeof base.itemClass !== 'string' ||
+        base.itemClass !== sourceClass?.itemClass) {
+      addError('unknown_item_class', `Concrete base ${baseKey} has an unknown or inconsistent item class.`, {
+        baseId: base.id,
+        classId: base.classId,
+        itemClass: base.itemClass,
+        modifierPoolClassId: base.modifierPoolClassId,
+      });
+    }
+
+    if (!Array.isArray(base.tags)) {
+      addError('malformed_tags', `Concrete base ${baseKey} tags must be an array.`, { baseId: base.id });
+    } else {
+      const malformed = base.tags.some(tag => typeof tag !== 'string' || !tag.trim());
+      const duplicate = base.tags.length !== new Set(base.tags).size;
+      if (malformed || (duplicate && !allowedDuplicateTags.has(baseKey))) {
+        addError('malformed_tags', `Concrete base ${baseKey} contains malformed or duplicate tags.`, { baseId: base.id });
+      } else if (duplicate) {
+        addWarning('allowed_duplicate_source_tag', `Concrete base ${baseKey} retains a documented duplicate source tag.`, { baseId: base.id });
+      }
+    }
+
+    if (!Array.isArray(base.implicitModifierIds) ||
+        base.implicitModifierIds.some(id => !isStableId(id) || !modifierIds.has(String(id))) ||
+        base.implicitModifierIds.length !== new Set(base.implicitModifierIds.map(String)).size) {
+      addError('malformed_implicit_data', `Concrete base ${baseKey} has malformed or unresolved implicit data.`, { baseId: base.id });
+    }
+
+    const requiredLevels = [base.requiredLevel, base.requirements?.level].filter(value => value != null);
+    if (requiredLevels.some(value => !Number.isInteger(value) || value < 0) ||
+        (requiredLevels.length > 1 && new Set(requiredLevels).size > 1)) {
+      addError('invalid_required_level', `Concrete base ${baseKey} has an invalid required level.`, { baseId: base.id });
+    }
+
+    const socketFields = ['socketCount', 'maximumSockets', 'maxSockets', 'defaultSockets'];
+    const invalidSocket = socketFields.some(field =>
+      base[field] != null && (!Number.isInteger(base[field]) || base[field] < 0));
+    const maximumSockets = base.maximumSockets ?? base.maxSockets ?? null;
+    if (invalidSocket ||
+        (base.maximumSockets != null && base.maxSockets != null && base.maximumSockets !== base.maxSockets) ||
+        (maximumSockets != null && base.defaultSockets != null && base.defaultSockets > maximumSockets)) {
+      addError('invalid_socket_limit', `Concrete base ${baseKey} has an invalid socket field.`, { baseId: base.id });
+    }
+
+    if (Object.prototype.hasOwnProperty.call(base, 'baseProperties') &&
+        (!isPlainObject(base.baseProperties) || !isValidBasePropertyValue(base.baseProperties))) {
+      if (allowedMalformedBaseProperties.has(baseKey)) {
+        addWarning('allowed_malformed_source_base_properties', `Concrete base ${baseKey} retains a documented malformed source property payload.`, { baseId: base.id });
+      } else {
+        addError('malformed_base_properties', `Concrete base ${baseKey} has malformed base properties.`, { baseId: base.id });
+      }
+    }
+
+    for (const versionField of ['targetGameVersion', 'sourceVersion', 'gameVersion']) {
+      if (base[versionField] != null && base[versionField] !== targetVersion) {
+        addError('unsupported_version_mixing', `Concrete base ${baseKey} mixes target version ${base[versionField]} with ${targetVersion}.`, {
+          baseId: base.id,
+          versionField,
+        });
+      }
+    }
+  }
+
+  for (const [poolId, mapping] of Object.entries(mappings)) {
+    if (!poolId.trim() || !isPlainObject(mapping) || !Array.isArray(mapping.classIds) ||
+        mapping.classIds.length === 0 || !Array.isArray(mapping.concreteBaseIds) ||
+        mapping.concreteBaseIds.length === 0) {
+      addError('missing_simulator_pool_mapping', `Simulator pool ${poolId || '(blank)'} has a malformed mapping.`, { poolId });
+      continue;
+    }
+    if (mapping.classIds.length !== new Set(mapping.classIds.map(String)).size ||
+        mapping.classIds.some(id => !classById.has(String(id)))) {
+      addError('unknown_item_class', `Simulator pool ${poolId} references an unknown or duplicate class.`, { poolId });
+    }
+    if (mapping.concreteBaseIds.length !== new Set(mapping.concreteBaseIds.map(String)).size) {
+      addError('ambiguous_simulator_pool_mapping', `Simulator pool ${poolId} repeats a concrete base ID.`, { poolId });
+    }
+
+    for (const baseId of mapping.concreteBaseIds) {
+      const baseKey = String(baseId);
+      const base = baseById.get(baseKey);
+      if (!base) {
+        unknownMappingBaseIds.add(baseId);
+        addError('missing_simulator_pool_mapping', `Simulator pool ${poolId} references unknown base ${baseKey}.`, { poolId, baseId });
+        continue;
+      }
+      const previousPool = reverseMappings.get(baseKey);
+      if (previousPool && previousPool !== poolId) {
+        ambiguousBaseIds.add(baseId);
+        addError('ambiguous_simulator_pool_mapping', `Concrete base ${baseKey} maps to both ${previousPool} and ${poolId}.`, {
+          baseId,
+          poolIds: [previousPool, poolId],
+        });
+      } else {
+        reverseMappings.set(baseKey, poolId);
+      }
+      if (!mapping.classIds.includes(base.classId) || !mapping.classIds.includes(base.modifierPoolClassId)) {
+        addError('unknown_item_class', `Concrete base ${baseKey} does not match simulator pool ${poolId}'s classes.`, { poolId, baseId });
+      }
+    }
+  }
+
+  const unmappedBaseIds = [];
+  for (const base of bases) {
+    if (!isStableId(base?.id) || reverseMappings.has(String(base.id))) continue;
+    unmappedBaseIds.push(base.id);
+    if (allowedUnmapped.has(String(base.id))) {
+      addWarning('allowed_unmapped_source_base', `Concrete base ${base.id} is a documented unselectable source record.`, { baseId: base.id });
+    } else {
+      addError('missing_simulator_pool_mapping', `Concrete base ${base.id} has no simulator-pool mapping.`, { baseId: base.id });
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+    warnings,
+    reverseMappings,
+    unmappedBaseIds,
+    ambiguousBaseIds: [...ambiguousBaseIds],
+    unknownMappingBaseIds: [...unknownMappingBaseIds],
+  };
+}
+
 function parseArguments(argv) {
   let sourcePath = null;
   for (let index = 0; index < argv.length; index++) {
@@ -123,6 +316,127 @@ function legacyPoolCoverage(baseItems) {
   };
 }
 
+const TASK02_OUTER_CLASSES = [
+  {
+    outerId: 'jewels', label: 'Jewels', normalizedItemClasses: ['Jewel'],
+    normalizedPoolIds: [
+      'ruby', 'sapphire', 'emerald', 'diamond',
+      'time_lost_ruby', 'time_lost_sapphire', 'time_lost_emerald', 'time_lost_diamond',
+    ],
+    selectorPoolIds: ['ruby', 'sapphire', 'emerald'],
+    blockerIds: ['empty-jewel-engine-pools', 'unmapped-timeless-jewel'],
+  },
+  { outerId: 'amulets', label: 'Amulets', normalizedItemClasses: ['Amulet'], normalizedPoolIds: ['amulets'] },
+  { outerId: 'rings', label: 'Rings', normalizedItemClasses: ['Ring'], normalizedPoolIds: ['rings'] },
+  { outerId: 'belts', label: 'Belts', normalizedItemClasses: ['Belt'], normalizedPoolIds: ['belts'] },
+  {
+    outerId: 'gloves', label: 'Gloves', normalizedItemClasses: ['Gloves'],
+    normalizedPoolIds: [
+      'gloves_str', 'gloves_dex', 'gloves_int', 'gloves_str_dex',
+      'gloves_str_int', 'gloves_dex_int', 'gloves_str_dex_int',
+    ],
+    blockerIds: ['normalized-only-all-attribute-pools'],
+  },
+  {
+    outerId: 'boots', label: 'Boots', normalizedItemClasses: ['Boots'],
+    normalizedPoolIds: [
+      'boots_str', 'boots_dex', 'boots_int', 'boots_str_dex',
+      'boots_str_int', 'boots_dex_int', 'boots_str_dex_int',
+    ],
+    blockerIds: ['normalized-only-all-attribute-pools'],
+  },
+  {
+    outerId: 'body_armours', label: 'Body Armours', normalizedItemClasses: ['Body Armour'],
+    normalizedPoolIds: [
+      'body_armours_str', 'body_armours_dex', 'body_armours_int', 'body_armours_str_dex',
+      'body_armours_str_int', 'body_armours_dex_int', 'body_armours_str_dex_int',
+    ],
+  },
+  {
+    outerId: 'helmets', label: 'Helmets', normalizedItemClasses: ['Helmet'],
+    normalizedPoolIds: [
+      'helmets_str', 'helmets_dex', 'helmets_int', 'helmets_str_dex',
+      'helmets_str_int', 'helmets_dex_int', 'helmets_str_dex_int',
+    ],
+    blockerIds: ['normalized-only-all-attribute-pools'],
+  },
+  { outerId: 'quivers', label: 'Quivers', normalizedItemClasses: ['Quiver'], normalizedPoolIds: ['quivers'] },
+  {
+    outerId: 'shields', label: 'Shields', normalizedItemClasses: ['Shield'],
+    normalizedPoolIds: ['shields_str', 'shields_str_dex', 'shields_str_int', 'shields_str_dex_int'],
+    blockerIds: ['normalized-only-all-attribute-pools'],
+  },
+  { outerId: 'bucklers', label: 'Bucklers', normalizedItemClasses: ['Buckler'], normalizedPoolIds: ['bucklers'] },
+  { outerId: 'foci', label: 'Foci', normalizedItemClasses: ['Focus'], normalizedPoolIds: ['foci'] },
+  { outerId: 'claws', label: 'Claws', normalizedItemClasses: ['Claw'], normalizedPoolIds: ['claws'] },
+  { outerId: 'daggers', label: 'Daggers', normalizedItemClasses: ['Dagger'], normalizedPoolIds: ['daggers'] },
+  { outerId: 'wands', label: 'Wands', normalizedItemClasses: ['Wand'], normalizedPoolIds: ['wands'] },
+  { outerId: 'one_hand_swords', label: 'One Hand Swords', normalizedItemClasses: ['One Hand Sword'], normalizedPoolIds: ['one_hand_swords'] },
+  { outerId: 'one_hand_axes', label: 'One Hand Axes', normalizedItemClasses: ['One Hand Axe'], normalizedPoolIds: ['one_hand_axes'] },
+  { outerId: 'one_hand_maces', label: 'One Hand Maces', normalizedItemClasses: ['One Hand Mace'], normalizedPoolIds: ['one_hand_maces'] },
+  { outerId: 'sceptres', label: 'Sceptres', normalizedItemClasses: ['Sceptre'], normalizedPoolIds: ['sceptres'] },
+  { outerId: 'spears', label: 'Spears', normalizedItemClasses: ['Spear'], normalizedPoolIds: ['spears'] },
+  { outerId: 'flails', label: 'Flails', normalizedItemClasses: ['Flail'], normalizedPoolIds: ['flails'] },
+  { outerId: 'bows', label: 'Bows', normalizedItemClasses: ['Bow'], normalizedPoolIds: ['bows'] },
+  { outerId: 'staves', label: 'Staves', normalizedItemClasses: ['Staff'], normalizedPoolIds: ['staves'] },
+  { outerId: 'two_hand_swords', label: 'Two Hand Swords', normalizedItemClasses: ['Two Hand Sword'], normalizedPoolIds: ['two_hand_swords'] },
+  { outerId: 'two_hand_axes', label: 'Two Hand Axes', normalizedItemClasses: ['Two Hand Axe'], normalizedPoolIds: ['two_hand_axes'] },
+  { outerId: 'two_hand_maces', label: 'Two Hand Maces', normalizedItemClasses: ['Two Hand Mace'], normalizedPoolIds: ['two_hand_maces'] },
+  { outerId: 'quarterstaves', label: 'Quarterstaves', normalizedItemClasses: ['Warstaff'], normalizedPoolIds: ['quarterstaves'] },
+  { outerId: 'crossbows', label: 'Crossbows', normalizedItemClasses: ['Crossbow'], normalizedPoolIds: ['crossbows'] },
+  { outerId: 'life_flasks', label: 'Life Flasks', normalizedItemClasses: ['LifeFlask'], normalizedPoolIds: ['life_flasks'] },
+  { outerId: 'mana_flasks', label: 'Mana Flasks', normalizedItemClasses: ['ManaFlask'], normalizedPoolIds: ['mana_flasks'] },
+  { outerId: 'charms', label: 'Charms', normalizedItemClasses: ['UtilityFlask'], normalizedPoolIds: ['charms'] },
+];
+
+function concreteIdsForPools(baseItems, poolIds) {
+  return [...new Set(poolIds.flatMap(poolId => baseItems.simulatorBaseMap[poolId]?.concreteBaseIds || []))];
+}
+
+function buildTask02ClassCoverage(baseItems, compiledPoolIds) {
+  const compiled = new Set(compiledPoolIds);
+  return TASK02_OUTER_CLASSES.map(definition => {
+    const compiledIds = definition.normalizedPoolIds.filter(poolId => compiled.has(poolId));
+    const selectorIds = definition.selectorPoolIds || compiledIds;
+    const normalizedClasses = new Set(definition.normalizedItemClasses);
+    return {
+      outerId: definition.outerId,
+      label: definition.label,
+      normalizedItemClasses: definition.normalizedItemClasses,
+      normalizedPoolIds: definition.normalizedPoolIds,
+      compiledPoolIds: compiledIds,
+      selectorPoolIds: selectorIds,
+      normalizedConcreteBaseCount: baseItems.bases.filter(base => normalizedClasses.has(base.itemClass)).length,
+      mappedConcreteBaseCount: concreteIdsForPools(baseItems, definition.normalizedPoolIds).length,
+      compiledConcreteBaseCount: concreteIdsForPools(baseItems, compiledIds).length,
+      selectorConcreteBaseCount: concreteIdsForPools(baseItems, selectorIds).length,
+      blockerIds: definition.blockerIds || [],
+    };
+  });
+}
+
+function duplicateDisplayNameStats(baseItems, reverseMappings) {
+  const byName = new Map();
+  const byPoolAndName = new Map();
+  for (const base of baseItems.bases) {
+    if (!byName.has(base.displayName)) byName.set(base.displayName, []);
+    byName.get(base.displayName).push(base.id);
+    const poolId = reverseMappings.get(String(base.id));
+    if (!poolId) continue;
+    const key = `${poolId}\u0000${base.displayName}`;
+    if (!byPoolAndName.has(key)) byPoolAndName.set(key, []);
+    byPoolAndName.get(key).push(base.id);
+  }
+  const duplicateNames = [...byName.values()].filter(ids => ids.length > 1);
+  const duplicatePoolNames = [...byPoolAndName.values()].filter(ids => ids.length > 1);
+  return {
+    groups: duplicateNames.length,
+    records: duplicateNames.reduce((sum, ids) => sum + ids.length, 0),
+    samePoolGroups: duplicatePoolNames.length,
+    samePoolRecords: duplicatePoolNames.reduce((sum, ids) => sum + ids.length, 0),
+  };
+}
+
 const { sourcePath } = parseArguments(process.argv.slice(2));
 
 console.log('Repository data validation\n');
@@ -175,6 +489,95 @@ const classIds = new Set(actual.baseItems.classes.map(record => record.id));
 const baseIds = new Set(actual.baseItems.bases.map(record => record.id));
 const modifierIds = new Set(actual.modifiers.modifiers.map(record => record.id));
 const craftingItemIds = new Set(actual.craftingItems.items.map(record => record.id));
+
+const baseCatalogValidation = validateNormalizedBaseCatalog(
+  actual.baseItems,
+  actual.modifiers,
+  actual.manifest,
+  {
+    allowedUnmappedBaseIds: [613],
+    allowedDuplicateTagBaseIds: [5333],
+    allowedMalformedBasePropertyIds: [2647, 2977, 2978],
+  },
+);
+check('normalized concrete-base catalog passes the generic Task 02 contract',
+  baseCatalogValidation.valid,
+  baseCatalogValidation.errors.map(error => `${error.code}: ${error.message}`).join('; '));
+check('known source anomalies require explicit validator allowances',
+  stable(baseCatalogValidation.warnings.map(warning => [warning.code, warning.baseId])) === stable([
+    ['allowed_malformed_source_base_properties', 2647],
+    ['allowed_malformed_source_base_properties', 2977],
+    ['allowed_malformed_source_base_properties', 2978],
+    ['allowed_duplicate_source_tag', 5333],
+    ['allowed_unmapped_source_base', 613],
+  ]));
+
+function makeBaseValidationFixture() {
+  return {
+    baseItems: {
+      classes: [{ id: 1, itemClass: 'Ring', equipmentSlot: 'Ring' }],
+      bases: [{
+        id: 1,
+        metadataKey: 'Metadata/Items/Rings/TestRing',
+        displayName: 'Test Ring',
+        classId: 1,
+        itemClass: 'Ring',
+        equipmentSlot: 'Ring',
+        modifierPoolClassId: 1,
+        tags: ['ring'],
+        implicitModifierIds: [10],
+        socketCount: 0,
+        dropLevel: 1,
+        baseProperties: { armour: 1 },
+      }],
+      simulatorBaseMap: { rings: { classIds: [1], concreteBaseIds: [1] } },
+    },
+    modifiers: { modifiers: [{ id: 10 }] },
+    manifest: { targetGameVersion: '0.5.4' },
+  };
+}
+
+function fixtureHasError(code, mutate) {
+  const fixture = structuredClone(makeBaseValidationFixture());
+  mutate(fixture);
+  return validateNormalizedBaseCatalog(fixture.baseItems, fixture.modifiers, fixture.manifest)
+    .errors.some(error => error.code === code);
+}
+
+check('base validator accepts missing icons for graceful runtime fallback', (() => {
+  const fixture = makeBaseValidationFixture();
+  delete fixture.baseItems.bases[0].icon;
+  return validateNormalizedBaseCatalog(fixture.baseItems, fixture.modifiers, fixture.manifest).valid;
+})());
+check('base validator rejects missing stable IDs',
+  fixtureHasError('missing_stable_id', fixture => { delete fixture.baseItems.bases[0].id; }));
+check('base validator rejects duplicate stable IDs',
+  fixtureHasError('duplicate_stable_id', fixture => { fixture.baseItems.bases.push(structuredClone(fixture.baseItems.bases[0])); }));
+check('base validator rejects missing display names',
+  fixtureHasError('missing_display_name', fixture => { fixture.baseItems.bases[0].displayName = ''; }));
+check('base validator rejects unknown item classes',
+  fixtureHasError('unknown_item_class', fixture => { fixture.baseItems.bases[0].itemClass = 'Unknown'; }));
+check('base validator rejects missing simulator-pool mappings',
+  fixtureHasError('missing_simulator_pool_mapping', fixture => { fixture.baseItems.simulatorBaseMap = {}; }));
+check('base validator rejects ambiguous simulator-pool mappings',
+  fixtureHasError('ambiguous_simulator_pool_mapping', fixture => {
+    fixture.baseItems.simulatorBaseMap.alternate_rings = { classIds: [1], concreteBaseIds: [1] };
+  }));
+check('base validator rejects malformed tags',
+  fixtureHasError('malformed_tags', fixture => { fixture.baseItems.bases[0].tags = ['ring', 'ring']; }));
+check('base validator rejects malformed implicit data',
+  fixtureHasError('malformed_implicit_data', fixture => { fixture.baseItems.bases[0].implicitModifierIds = [999]; }));
+check('base validator rejects invalid required levels',
+  fixtureHasError('invalid_required_level', fixture => { fixture.baseItems.bases[0].requiredLevel = -1; }));
+check('base validator rejects invalid socket limits',
+  fixtureHasError('invalid_socket_limit', fixture => {
+    fixture.baseItems.bases[0].maximumSockets = 1;
+    fixture.baseItems.bases[0].defaultSockets = 2;
+  }));
+check('base validator rejects malformed base-property values',
+  fixtureHasError('malformed_base_properties', fixture => { fixture.baseItems.bases[0].baseProperties.armour = Infinity; }));
+check('base validator rejects unsupported version mixing',
+  fixtureHasError('unsupported_version_mixing', fixture => { fixture.baseItems.bases[0].targetGameVersion = '0.5.3'; }));
 
 const mappingsValid = Object.values(actual.baseItems.simulatorBaseMap).every(mapping =>
   mapping.classIds.length > 0 && mapping.classIds.every(id => classIds.has(id)) &&
@@ -266,6 +669,189 @@ check('known empty legacy pools remain explicit',
   stable(coverage.emptyPools) === stable([
     'diamond', 'time_lost_diamond', 'time_lost_emerald', 'time_lost_ruby', 'time_lost_sapphire',
   ]));
+
+const task02ClassCoverage = buildTask02ClassCoverage(actual.baseItems, coverage.poolIds);
+const mappedConcreteIds = new Set(baseCatalogValidation.reverseMappings.keys());
+const compiledMappedIds = new Set(concreteIdsForPools(actual.baseItems, coverage.poolIds).map(String));
+const selectorPoolIds = [...new Set(task02ClassCoverage.flatMap(entry => entry.selectorPoolIds))];
+const selectorConcreteIds = new Set(concreteIdsForPools(actual.baseItems, selectorPoolIds).map(String));
+const disabledUnmodifiableBases = actual.baseItems.bases
+  .filter(base => selectorConcreteIds.has(String(base.id)) && base.unmodifiable)
+  .map(base => ({ id: base.id, displayName: base.displayName, classification: 'disabled_unmodifiable_source_base' }));
+const normalizedOnlyMappingDetails = coverage.normalizedOnly.map(poolId => ({
+  poolId,
+  baseIds: actual.baseItems.simulatorBaseMap[poolId].concreteBaseIds,
+  classification: 'blocked_missing_compiled_modifier_pool',
+}));
+const emptyCompiledPoolDetails = coverage.emptyPools.map(poolId => ({
+  poolId,
+  baseIds: actual.baseItems.simulatorBaseMap[poolId].concreteBaseIds,
+  classification: 'blocked_empty_modifier_pool',
+}));
+const unmappedBaseDetails = baseCatalogValidation.unmappedBaseIds.map(id => {
+  const base = actual.baseItems.bases.find(record => record.id === id);
+  return {
+    id,
+    displayName: base?.displayName,
+    metadataKey: base?.metadataKey,
+    classification: 'blocked_missing_simulator_pool_mapping',
+  };
+});
+const explicitlyBlockedIds = new Set([
+  ...baseCatalogValidation.unmappedBaseIds,
+  ...normalizedOnlyMappingDetails.flatMap(entry => entry.baseIds),
+  ...emptyCompiledPoolDetails.flatMap(entry => entry.baseIds),
+].map(String));
+const task02ExpectedCounts = {
+  outerClasses: TASK02_OUTER_CLASSES.length,
+  normalizedMappings: Object.keys(actual.baseItems.simulatorBaseMap).length,
+  compiledSimulatorPools: coverage.poolIds.length,
+  normalizedConcreteBases: actual.baseItems.bases.length,
+  uniquelyMappedConcreteBases: mappedConcreteIds.size,
+  compiledMappedConcreteBases: compiledMappedIds.size,
+  selectorConcreteBases: selectorConcreteIds.size,
+  craftSelectableConcreteBases: selectorConcreteIds.size - disabledUnmodifiableBases.length,
+  disabledUnmodifiableConcreteBases: disabledUnmodifiableBases.length,
+  explicitlyBlockedConcreteBases: explicitlyBlockedIds.size,
+};
+const duplicateNames = duplicateDisplayNameStats(actual.baseItems, baseCatalogValidation.reverseMappings);
+
+check('Task 02 parity counts match normalized and compiled coverage',
+  stable(baseParity.task02?.counts) === stable(task02ExpectedCounts));
+check('Task 02 parity covers all 31 outer classes with exact pool and base counts',
+  stable(baseParity.task02?.classCoverage) === stable(task02ClassCoverage) &&
+  task02ClassCoverage.reduce((sum, entry) => sum + entry.normalizedConcreteBaseCount, 0) === actual.baseItems.bases.length &&
+  task02ClassCoverage.reduce((sum, entry) => sum + entry.selectorConcreteBaseCount, 0) === selectorConcreteIds.size);
+const attributeFamilyIconMap = {
+  attr_str: 'str',
+  attr_dex: 'dex',
+  attr_int: 'int',
+  attr_strdex: 'str_dex',
+  attr_strint: 'str_int',
+  attr_dexint: 'dex_int',
+  attr_all: 'str_dex_int',
+};
+const attributeFamilyPools = {
+  body_armours: {
+    str: 'body_armours_str', dex: 'body_armours_dex', int: 'body_armours_int',
+    str_dex: 'body_armours_str_dex', str_int: 'body_armours_str_int',
+    dex_int: 'body_armours_dex_int', str_dex_int: 'body_armours_str_dex_int',
+  },
+  gloves: {
+    str: 'gloves_str', dex: 'gloves_dex', int: 'gloves_int', str_dex: 'gloves_str_dex',
+    str_int: 'gloves_str_int', dex_int: 'gloves_dex_int', str_dex_int: 'gloves_str_dex_int',
+  },
+  boots: {
+    str: 'boots_str', dex: 'boots_dex', int: 'boots_int', str_dex: 'boots_str_dex',
+    str_int: 'boots_str_int', dex_int: 'boots_dex_int', str_dex_int: 'boots_str_dex_int',
+  },
+  helmets: {
+    str: 'helmets_str', dex: 'helmets_dex', int: 'helmets_int', str_dex: 'helmets_str_dex',
+    str_int: 'helmets_str_int', dex_int: 'helmets_dex_int', str_dex_int: 'helmets_str_dex_int',
+  },
+  shields: {
+    str: 'shields_str', str_dex: 'shields_str_dex', str_int: 'shields_str_int',
+    str_dex_int: 'shields_str_dex_int',
+  },
+};
+const attributeFamilyCoverage = Object.fromEntries(Object.entries(attributeFamilyPools).map(([outerId, families]) => [
+  outerId,
+  Object.fromEntries(Object.entries(families).map(([family, poolId]) => [
+    family,
+    actual.baseItems.simulatorBaseMap[poolId].concreteBaseIds.length,
+  ])),
+]));
+const classByNormalizedId = new Map(actual.baseItems.classes.map(sourceClass => [sourceClass.id, sourceClass]));
+const attributeFamiliesMatchSourceClasses = Object.values(attributeFamilyPools).every(families =>
+  Object.entries(families).every(([family, poolId]) =>
+    actual.baseItems.simulatorBaseMap[poolId].classIds.every(classId =>
+      attributeFamilyIconMap[classByNormalizedId.get(classId)?.iconKey] === family)));
+check('attribute families derive from normalized source classes and remain filters, not concrete bases',
+  stable(baseParity.task02?.attributeFamilies) === stable({
+    derivation: 'Use the normalized source-class iconKey; attribute family is a filter and never a concrete base identity.',
+    iconKeyMap: attributeFamilyIconMap,
+    coverage: attributeFamilyCoverage,
+  }) && attributeFamiliesMatchSourceClasses);
+check('Task 02 mapping integrity and duplicate-name statistics are exact',
+  stable(baseParity.task02?.mappingIntegrity) === stable({
+    ambiguousBaseIds: baseCatalogValidation.ambiguousBaseIds,
+    unknownMappingBaseIds: baseCatalogValidation.unknownMappingBaseIds,
+    unmappedBaseIds: baseCatalogValidation.unmappedBaseIds,
+    duplicateDisplayNameGroups: duplicateNames.groups,
+    duplicateDisplayNameRecords: duplicateNames.records,
+    samePoolDuplicateDisplayNameGroups: duplicateNames.samePoolGroups,
+    samePoolDuplicateDisplayNameRecords: duplicateNames.samePoolRecords,
+    identityRule: 'Stable numeric base ID, never display name.',
+  }));
+check('Task 02 parity records every unsupported concrete base as an explicit blocker',
+  stable(baseParity.task02?.blockers) === stable({
+    unmappedBases: unmappedBaseDetails,
+    normalizedOnlyMappings: normalizedOnlyMappingDetails,
+    emptyCompiledPools: emptyCompiledPoolDetails,
+  }) && explicitlyBlockedIds.size === 17);
+check('Task 02 parity distinguishes surfaced unmodifiable bases from data blockers',
+  stable(baseParity.task02?.disabledBases) === stable(disabledUnmodifiableBases) &&
+  stable(disabledUnmodifiableBases.map(base => base.id)) === stable([2977, 2978]));
+
+const requiredLevelCount = actual.baseItems.bases.filter(base =>
+  base.requiredLevel != null || base.requirements?.level != null).length;
+const dropLevels = actual.baseItems.bases.map(base => base.dropLevel);
+const plainBasePropertyCount = actual.baseItems.bases.filter(base =>
+  isPlainObject(base.baseProperties) && isValidBasePropertyValue(base.baseProperties)).length;
+const missingBasePropertyCount = actual.baseItems.bases.filter(base =>
+  !Object.prototype.hasOwnProperty.call(base, 'baseProperties')).length;
+const malformedBasePropertyIds = actual.baseItems.bases.filter(base =>
+  Object.prototype.hasOwnProperty.call(base, 'baseProperties') &&
+  (!isPlainObject(base.baseProperties) || !isValidBasePropertyValue(base.baseProperties))).map(base => base.id);
+const sourceSocketDistribution = Object.fromEntries([...new Set(actual.baseItems.bases.map(base => base.socketCount))]
+  .sort((a, b) => a - b)
+  .map(value => [String(value), actual.baseItems.bases.filter(base => base.socketCount === value).length]));
+
+check('required level remains unavailable and distinct from complete drop-level data',
+  stable(baseParity.task02?.fieldCoverage?.requiredLevel) === stable({
+    availableCount: requiredLevelCount,
+    unavailableCount: actual.baseItems.bases.length - requiredLevelCount,
+    status: 'blocked_missing_verified_data',
+    handling: 'Drop level remains separate and is never substituted.',
+  }) &&
+  stable(baseParity.task02?.fieldCoverage?.dropLevel) === stable({
+    availableCount: dropLevels.filter(Number.isFinite).length,
+    minimum: Math.min(...dropLevels),
+    maximum: Math.max(...dropLevels),
+  }) && requiredLevelCount === 0);
+check('socketCount remains a sourced field with maximum/default semantics explicitly unverified',
+  stable(baseParity.task02?.fieldCoverage?.socketFields) === stable({
+    sourceSocketCountAvailable: actual.baseItems.bases.filter(base => Number.isInteger(base.socketCount)).length,
+    sourceSocketCountDistribution: sourceSocketDistribution,
+    verifiedMaximumSocketsAvailable: actual.baseItems.bases.filter(base => base.maximumSockets != null || base.maxSockets != null).length,
+    verifiedDefaultSocketsAvailable: actual.baseItems.bases.filter(base => base.defaultSockets != null).length,
+    status: 'blocked_semantics_unverified',
+    handling: 'Retain socketCount as a sourced value; do not reinterpret it as maximum or default sockets.',
+  }));
+check('base-property and icon field coverage remains exact with graceful icon fallback',
+  stable(baseParity.task02?.fieldCoverage?.baseProperties) === stable({
+    availableCount: plainBasePropertyCount,
+    unavailableCount: missingBasePropertyCount,
+    malformedSourcePayloadCount: malformedBasePropertyIds.length,
+  }) &&
+  baseParity.task02?.fieldCoverage?.perBaseIcon?.availableCount === actual.baseItems.bases.filter(base => !!base.icon).length &&
+  baseParity.task02?.fieldCoverage?.classIcon?.availableCount === actual.baseItems.classes.filter(sourceClass => !!sourceClass.iconKey).length &&
+  baseParity.task02?.fieldCoverage?.classIcon?.classCount === actual.baseItems.classes.length);
+check('per-base source version absence remains an explicit blocker',
+  stable(baseParity.task02?.fieldCoverage?.perBaseSourceVersion) === stable({
+    availableCount: actual.baseItems.bases.filter(base => base.sourceVersion != null).length,
+    status: 'blocked_source_export_has_no_embedded_game_version',
+  }));
+check('source anomalies remain explicit without rewriting normalized records',
+  stable(malformedBasePropertyIds) === stable([2647, 2977, 2978]) &&
+  stable(baseParity.task02?.sourceAnomalies?.duplicateTagRecords?.map(record => [record.id, record.tag, record.occurrences])) === stable([[5333, 'runeforged', 2]]) &&
+  stable(baseParity.task02?.sourceAnomalies?.incompleteBasePropertyRecords?.map(record => [record.id, record.missingField])) === stable([[3533, 'physical_damage_min']]) &&
+  stable(baseParity.task02?.sourceAnomalies?.malformedBasePropertyPayloads?.map(record => record.id)) === stable(malformedBasePropertyIds));
+check('Task 02 parity declares item-state schema and deterministic legacy migration',
+  baseParity.task02?.itemStateSchemaVersion === 3 &&
+  typeof baseParity.task02?.migration?.legacyWithoutBaseItemId === 'string' &&
+  typeof baseParity.task02?.migration?.invalidOrBlockedMapping === 'string' &&
+  baseParity.fullParityClaim === false);
 
 check('active provenance snapshot exists', !!activeSnapshot);
 if (activeSnapshot) {

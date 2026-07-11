@@ -479,20 +479,45 @@
       <header class="base-picker-header">
         <div>
           <p class="base-picker-kicker">Concrete base</p>
-          <h3 id="base-picker-title">Choose an Amulet</h3>
+          <h3 id="base-picker-title">Choose a concrete base</h3>
         </div>
         <button id="base-picker-close" class="base-picker-close" type="button" aria-label="Close base selector">&times;</button>
       </header>
       <div class="base-picker-toolbar">
         <label class="base-picker-search" for="base-picker-search">
           <span aria-hidden="true">&#x2315;</span>
-          <span class="base-picker-search-label">Search Amulet bases</span>
-          <input id="base-picker-search" type="search" placeholder="Search name or implicit" autocomplete="off">
+          <span class="base-picker-search-label">Search concrete bases</span>
+          <input id="base-picker-search" type="search" placeholder="Search name, property, or implicit" autocomplete="off">
         </label>
-        <button id="base-picker-reset" class="base-picker-reset" type="button">Reset search</button>
+        <button id="base-picker-reset" class="base-picker-reset" type="button">Reset filters</button>
+      </div>
+      <div class="base-picker-filters" aria-label="Concrete base filters">
+        <label class="base-picker-filter" for="base-picker-required-filter">
+          <span>Required level</span>
+          <select id="base-picker-required-filter" disabled>
+            <option value="">Required level unavailable</option>
+          </select>
+        </label>
+        <label class="base-picker-filter" for="base-picker-drop-level-filter">
+          <span>Drop level</span>
+          <select id="base-picker-drop-level-filter">
+            <option value="">All drop levels</option>
+            <option value="10">Drop level 10 or lower</option>
+            <option value="20">Drop level 20 or lower</option>
+            <option value="40">Drop level 40 or lower</option>
+            <option value="60">Drop level 60 or lower</option>
+            <option value="80">Drop level 80 or lower</option>
+          </select>
+        </label>
+        <label id="base-picker-attribute-field" class="base-picker-filter" for="base-picker-attribute-filter" hidden>
+          <span>Attribute family</span>
+          <select id="base-picker-attribute-filter">
+            <option value="">All attribute families</option>
+          </select>
+        </label>
       </div>
       <p id="base-picker-count" class="base-picker-count" aria-live="polite"></p>
-      <div id="base-picker-list" class="base-picker-list" role="listbox" aria-label="Available Amulet bases"></div>
+      <div id="base-picker-list" class="base-picker-list" role="listbox" aria-label="Available concrete bases"></div>
       <div id="base-picker-empty" class="base-picker-state" hidden>
         <strong>No bases found</strong>
         <span>Try a different name, property, or implicit.</span>

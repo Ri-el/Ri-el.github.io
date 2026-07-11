@@ -342,7 +342,7 @@
   }
 }
 
-/* ---------- Concrete Amulet picker ---------- */
+/* ---------- Generic concrete-base picker ---------- */
 #jewel-panel .workbench-heading .concrete-base-trigger {
   min-width: 190px;
   max-width: min(300px, 44vw);
@@ -391,7 +391,7 @@
 
 .base-picker-dialog {
   display: grid;
-  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto auto auto minmax(0, 1fr) auto;
   max-height: min(88dvh, 820px);
   padding: 20px;
 }
@@ -436,6 +436,55 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
+}
+
+.base-picker-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.base-picker-filter {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+  color: #9f9278;
+  font: 600 0.6rem/1.2 'Inter', sans-serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.base-picker-filter[hidden] {
+  display: none !important;
+}
+
+.base-picker-filter select {
+  width: 100%;
+  min-height: 37px;
+  box-sizing: border-box;
+  padding: 7px 28px 7px 9px;
+  border: 1px solid rgba(205, 162, 83, 0.28);
+  border-radius: 0;
+  outline: 0;
+  background: #0b0d0f;
+  color: #d8c9a7;
+  font: 400 0.68rem/1.2 'Inter', sans-serif;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.base-picker-filter select:focus-visible {
+  border-color: rgba(225, 184, 105, 0.86);
+  box-shadow: 0 0 0 2px rgba(225, 184, 105, 0.14);
+}
+
+.base-picker-filter select:disabled {
+  border-color: rgba(144, 128, 98, 0.18);
+  color: #716b60;
+  cursor: not-allowed;
+  opacity: 1;
 }
 
 .base-picker-search {
@@ -522,7 +571,7 @@
   cursor: pointer;
 }
 
-.concrete-base-option:hover,
+.concrete-base-option:not(:disabled):hover,
 .concrete-base-option:focus-visible,
 .base-picker-close:hover,
 .base-picker-close:focus-visible,
@@ -539,6 +588,14 @@
   border-color: rgba(225, 184, 105, 0.9);
   background: linear-gradient(135deg, rgba(67, 48, 23, 0.72), rgba(18, 17, 15, 0.96));
   box-shadow: inset 3px 0 #c79b50;
+}
+
+.concrete-base-option:disabled {
+  border-color: rgba(141, 116, 78, 0.14);
+  background: rgba(10, 11, 12, 0.72);
+  color: #817968;
+  cursor: not-allowed;
+  opacity: 0.72;
 }
 
 .base-option-icon {
@@ -578,7 +635,8 @@
 
 .base-option-identity,
 .base-option-levels,
-.base-option-implicit {
+.base-option-implicit,
+.base-option-disabled {
   overflow: hidden;
   font: 400 0.61rem/1.25 'Inter', sans-serif;
   text-overflow: ellipsis;
@@ -588,6 +646,7 @@
 .base-option-identity { color: #9f8050; }
 .base-option-levels { color: #9f9682; }
 .base-option-implicit { color: #789bc1; }
+.base-option-disabled { color: #c18475; }
 
 .base-picker-state {
   display: flex;
@@ -682,6 +741,7 @@
   }
 
   .base-picker-toolbar { grid-template-columns: 1fr; }
+  .base-picker-filters { grid-template-columns: 1fr; }
   .base-picker-list { grid-template-columns: 1fr; }
   .concrete-base-option { min-height: 76px; }
 

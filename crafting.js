@@ -6,6 +6,8 @@
 // key) and per-base affix limits. Jewels remain the default base.
 
 class CraftingEngine {
+  static ITEM_SCHEMA_VERSION = 3;
+
   // Ordinary equipment can hold three prefixes and three suffixes. Jewels are
   // the exception at two of each; flasks and charms are Magic-only.
   static LIMITS = {
@@ -189,6 +191,7 @@ class CraftingEngine {
     this._sourceModifierOverlay = sourceModifierOverlay instanceof Map ? sourceModifierOverlay : new Map();
     this._typeBaseTags = new Set(typeData.baseTags || typeData.tags || []);
     this._concreteBase = this._normalizeConcreteBaseDefinition(concreteBase);
+    this._assertConcreteBaseSelectable(this._concreteBase);
     this._refreshBaseTags();
     const globalQualityRules = typeof globalThis !== 'undefined' ? globalThis.QUALITY_RULES : null;
     const suppliedQualityRules = qualityRules || globalQualityRules;
@@ -198,13 +201,14 @@ class CraftingEngine {
         : CraftingEngine.DEFAULT_QUALITY_RULES
     );
 
-    this._limits = typeData.limits || (
+    this._classLimits = structuredClone(typeData.limits || (
       CraftingEngine.MAGIC_ONLY_BASE_TYPES.has(baseType)
         ? CraftingEngine.MAGIC_ONLY_LIMITS
         : CraftingEngine.JEWEL_BASE_TYPES.has(baseType)
           ? CraftingEngine.JEWEL_LIMITS
           : CraftingEngine.LIMITS
-    );
+    ));
+    this._refreshLimits();
 
     this._prefixPool = typeData.prefixes || [];
     this._suffixPool = typeData.suffixes || [];
@@ -223,7 +227,15 @@ class CraftingEngine {
     this._suffixCandidates = this._buildCandidatePool(this._suffixPool, 'suffix');
   }
 
-  getItem() { return structuredClone(this._item); }
+  getItem() {
+    const item = structuredClone(this._item);
+    // Per-mod `fractured` flags are authoritative. Rebuild this convenience
+    // list at serialization time so it can never drift from the actual affixes.
+    item.fracturedMods = [...(item.prefixes || []), ...(item.suffixes || [])]
+      .filter(modifier => !!modifier?.fractured)
+      .map(modifier => structuredClone(modifier));
+    return item;
+  }
 
   // Concrete base identity is independent from the simulator modifier pool.
   // The browser controller hydrates this record exclusively from the checked-in
@@ -237,24 +249,69 @@ class CraftingEngine {
       const parsed = Number(value);
       return Number.isFinite(parsed) ? parsed : null;
     };
-    return {
+    const socketValue = (value, label) => {
+      if (value == null || value === '') return null;
+      const parsed = Number(value);
+      if (!Number.isInteger(parsed) || parsed < 0) {
+        throw new Error(`Concrete base ${base.id} has an invalid ${label}.`);
+      }
+      return parsed;
+    };
+    const sourceSocketCount = socketValue(
+      base.sourceSocketCount != null ? base.sourceSocketCount : base.socketCount,
+      'source socket count'
+    );
+    const defaultSockets = socketValue(base.defaultSockets, 'default socket count');
+    const maximumSockets = socketValue(base.maximumSockets, 'maximum socket count');
+    if (defaultSockets != null && maximumSockets != null && defaultSockets > maximumSockets) {
+      throw new Error(`Concrete base ${base.id} has default sockets above its maximum.`);
+    }
+    const normalized = {
       id: base.id,
+      sourceId: base.sourceId != null ? base.sourceId : base.id,
       metadataKey: base.metadataKey || null,
       displayName: String(base.displayName),
       itemClass: base.itemClass || null,
+      sourceItemClass: base.sourceItemClass || base.itemClass || null,
+      equipmentSlot: base.equipmentSlot || null,
+      classId: numericOrNull(base.classId),
+      modifierPoolClassId: numericOrNull(base.modifierPoolClassId),
       simulatorPoolId: base.simulatorPoolId || this.baseType,
+      attributeFamily: base.attributeFamily || null,
+      variantFamily: base.variantFamily || null,
       requiredLevel: numericOrNull(base.requiredLevel),
       dropLevel: numericOrNull(base.dropLevel != null ? base.dropLevel : base.baseLevel),
       tags: Array.isArray(base.tags) ? base.tags.map(String) : [],
-      baseProperties: base.baseProperties && typeof base.baseProperties === 'object'
+      requirements: base.requirements && typeof base.requirements === 'object' && !Array.isArray(base.requirements)
+        ? structuredClone(base.requirements)
+        : {},
+      baseProperties: base.baseProperties && typeof base.baseProperties === 'object' && !Array.isArray(base.baseProperties)
         ? structuredClone(base.baseProperties)
         : {},
       implicits: Array.isArray(base.implicits) ? structuredClone(base.implicits) : [],
-      socketCount: numericOrNull(base.socketCount),
+      // The normalized source calls this value `socketCount`, but its exact
+      // gameplay meaning is not verified. Keep it as source metadata instead
+      // of claiming it is either the default or maximum socket count.
+      sourceSocketCount,
+      defaultSockets,
+      maximumSockets,
       icon: base.icon || null,
       targetGameVersion: base.targetGameVersion || null,
+      sourceVersion: base.sourceVersion || null,
       verificationState: base.verificationState || null,
+      selectable: base.selectable !== false && !base.unmodifiable,
+      disabledReason: base.disabledReason || (base.unmodifiable ? 'This concrete base is marked unmodifiable.' : ''),
+      provenance: base.provenance && typeof base.provenance === 'object'
+        ? structuredClone(base.provenance)
+        : null,
     };
+    return normalized;
+  }
+
+  _assertConcreteBaseSelectable(base) {
+    if (base?.selectable === false) {
+      throw new Error(base.disabledReason || `Concrete base ${base.id} cannot be modified.`);
+    }
   }
 
   _refreshBaseTags() {
@@ -262,29 +319,83 @@ class CraftingEngine {
     for (const tag of this._concreteBase?.tags || []) this._baseTags.add(tag);
   }
 
+  _concreteAffixLimitDeltas() {
+    const deltas = { prefixes: 0, suffixes: 0 };
+    const statToSide = {
+      'local_maximum_prefixes_allowed_+': 'prefixes',
+      'local_maximum_suffixes_allowed_+': 'suffixes',
+    };
+    for (const implicit of this._concreteBase?.implicits || []) {
+      for (const stat of implicit?.stats || []) {
+        const side = statToSide[stat?.id];
+        const range = Array.isArray(stat?.range) ? stat.range : [];
+        if (!side || range.length === 0) continue;
+        const first = Number(range[0]);
+        if (!Number.isInteger(first) || range.some(value => Number(value) !== first)) continue;
+        deltas[side] += first;
+      }
+    }
+    return deltas;
+  }
+
+  _refreshLimits() {
+    const limits = structuredClone(this._classLimits || {});
+    const deltas = this._concreteAffixLimitDeltas();
+    for (const rarity of ['magic', 'rare']) {
+      if (!limits[rarity]) continue;
+      for (const side of ['prefixes', 'suffixes']) {
+        const baseLimit = Number(limits[rarity][side]);
+        if (!Number.isFinite(baseLimit)) continue;
+        limits[rarity][side] = Math.max(0, baseLimit + deltas[side]);
+      }
+    }
+    this._limits = limits;
+  }
+
   _applyConcreteBaseDefinition(item) {
     const base = this._concreteBase;
     if (!base || !item) return item;
     const previousBaseName = item.baseName;
-    item.schemaVersion = Math.max(2, Number(item.schemaVersion) || 0);
+    item.schemaVersion = CraftingEngine.ITEM_SCHEMA_VERSION;
     item.baseItemId = base.id;
+    item.baseSourceId = base.sourceId;
     item.baseMetadataKey = base.metadataKey;
     item.simulatorPoolId = base.simulatorPoolId || this.baseType;
     item.itemClass = base.itemClass;
+    item.sourceItemClass = base.sourceItemClass;
+    item.equipmentSlot = base.equipmentSlot;
+    item.baseClassId = base.classId;
+    item.modifierPoolClassId = base.modifierPoolClassId;
+    item.attributeFamily = base.attributeFamily;
+    item.variantFamily = base.variantFamily;
     item.requiredLevel = base.requiredLevel;
     item.dropLevel = base.dropLevel;
     item.baseTags = base.tags.slice();
+    item.requirements = structuredClone(base.requirements);
     item.baseProperties = structuredClone(base.baseProperties);
     item.implicits = structuredClone(base.implicits);
-    item.baseSocketCount = base.socketCount;
+    item.sourceSocketCount = base.sourceSocketCount;
+    // Task 01 compatibility alias. This is source metadata, not a verified
+    // default or cap; new code must use the explicit source field above.
+    item.baseSocketCount = base.sourceSocketCount;
+    item.defaultSockets = base.defaultSockets;
+    item.maximumSockets = base.maximumSockets;
+    if (item.socketCount == null && base.defaultSockets != null) item.socketCount = base.defaultSockets;
     item.baseIcon = base.icon;
     item.targetGameVersion = base.targetGameVersion;
+    item.sourceVersion = base.sourceVersion;
     item.baseVerificationState = base.verificationState;
+    item.baseSelectable = base.selectable;
+    item.baseDisabledReason = base.disabledReason;
+    item.baseProvenance = base.provenance ? structuredClone(base.provenance) : null;
     item.baseName = base.displayName;
     item.baseType = this.baseType;
     item.jewelType = this.jewelType;
     if (item.rarity === 'normal' || !item.name || item.name === previousBaseName) {
       item.name = base.displayName;
+      item.generatedName = null;
+    } else if (!item.generatedName && item.name !== base.displayName) {
+      item.generatedName = item.name;
     }
     return item;
   }
@@ -296,14 +407,16 @@ class CraftingEngine {
   setConcreteBase(base, options = {}) {
     const next = this._normalizeConcreteBaseDefinition(base);
     if (!next) throw new Error('Invalid concrete base definition.');
+    this._assertConcreteBaseSelectable(next);
     if (next.simulatorPoolId !== this.baseType) {
       throw new Error(`Concrete base ${next.id} does not map to simulator pool ${this.baseType}.`);
     }
     const preserveItemLevel = options.preserveItemLevel !== false;
     const resetItem = options.resetItem !== false;
-    const itemLevel = this._item?.ilvl;
+    const itemLevel = this._item?.ilvl != null ? this._item.ilvl : this._item?.itemLevel;
     this._concreteBase = next;
     this._refreshBaseTags();
+    this._refreshLimits();
     if (resetItem) {
       this._item = this._createBlankItem(next.displayName);
       if (preserveItemLevel && Number.isFinite(Number(itemLevel))) {
@@ -322,6 +435,7 @@ class CraftingEngine {
 
   isFreshItem(item = this._item) {
     if (!item || item.rarity !== 'normal') return false;
+    if (item.generatedName) return false;
     if ((item.prefixes || []).length || (item.suffixes || []).length || (item.enchantments || []).length) return false;
     const quality = item.quality && typeof item.quality === 'object'
       ? item.quality
@@ -336,7 +450,11 @@ class CraftingEngine {
       if (value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length) return false;
       if (value != null && typeof value !== 'object' && value !== false && Number(value) !== 0) return false;
     }
-    if (item.socketCount != null && Number(item.socketCount) !== Number(item.baseSocketCount || 0)) return false;
+    // `baseSocketCount` is retained source metadata with unverified semantics;
+    // it must not be treated as the fresh-item default. Any non-zero legacy
+    // instantiated count therefore remains conservatively crafted state.
+    const verifiedDefaultSockets = item.defaultSockets == null ? 0 : Number(item.defaultSockets);
+    if (item.socketCount != null && Number(item.socketCount) !== verifiedDefaultSockets) return false;
     if (item.flags && typeof item.flags === 'object' && Object.keys(item.flags).length) return false;
     return true;
   }
@@ -376,6 +494,132 @@ class CraftingEngine {
     return item.quality;
   }
 
+  _normalizeItemLevelState(item) {
+    const raw = item?.ilvl != null ? item.ilvl : item?.itemLevel;
+    const parsed = Number(raw);
+    const level = Number.isFinite(parsed)
+      ? Math.max(1, Math.min(100, Math.round(parsed)))
+      : 83;
+    item.ilvl = level;
+    item.itemLevel = level;
+    return level;
+  }
+
+  _migrateItemState(rawItem) {
+    if (!rawItem || typeof rawItem !== 'object' || Array.isArray(rawItem)) {
+      throw new Error('Saved item state must be an object.');
+    }
+
+    const item = structuredClone(rawItem);
+    const parsedVersion = item.schemaVersion == null ? 1 : Number(item.schemaVersion);
+    if (!Number.isInteger(parsedVersion) || parsedVersion < 1) {
+      throw new Error(`Unsupported saved item schema version: ${String(item.schemaVersion)}.`);
+    }
+    if (parsedVersion > CraftingEngine.ITEM_SCHEMA_VERSION) {
+      throw new Error(
+        `Saved item schema version ${parsedVersion} is newer than supported version ${CraftingEngine.ITEM_SCHEMA_VERSION}.`
+      );
+    }
+
+    const declaredPool = item.simulatorPoolId || item.baseType || item.jewelType || null;
+    if (declaredPool && declaredPool !== this.baseType) {
+      throw new Error(`Saved item simulator pool ${declaredPool} does not match ${this.baseType}.`);
+    }
+    if (this._concreteBase && item.baseItemId != null &&
+        String(item.baseItemId) !== String(this._concreteBase.id)) {
+      throw new Error(
+        `Saved concrete base ${item.baseItemId} does not match resolved base ${this._concreteBase.id}.`
+      );
+    }
+    const savedGameVersion = item.targetGameVersion || null;
+    const activeGameVersion = this._concreteBase?.targetGameVersion || null;
+    if (savedGameVersion && activeGameVersion && savedGameVersion !== activeGameVersion) {
+      throw new Error(
+        `Saved item targets game version ${savedGameVersion}; active data targets ${activeGameVersion}.`
+      );
+    }
+
+    for (const key of ['prefixes', 'suffixes', 'enchantments', 'runes', 'soulCores']) {
+      if (!Array.isArray(item[key])) item[key] = [];
+    }
+    // Per-mod flags are authoritative; ignore any stale redundant list from an
+    // older save. getItem() derives the public convenience list on demand.
+    delete item.fracturedMods;
+    if (!item.flags || typeof item.flags !== 'object' || Array.isArray(item.flags)) item.flags = {};
+    if (item.socketedContent == null) item.socketedContent = [];
+
+    // Task 02 does not know whether the legacy/source count means defaults,
+    // capacity, or instantiated slots. Preserve a valid numeric count as
+    // compatibility state, but never manufacture slot entries or mechanics.
+    let legacySocketCount = null;
+    let legacySocketSource = null;
+    let legacySocketPayload = null;
+    if (item.sockets == null) {
+      item.sockets = [];
+    } else if (!Array.isArray(item.sockets)) {
+      const numericSockets = Number(item.sockets);
+      if ((typeof item.sockets === 'number' || typeof item.sockets === 'string') && Number.isFinite(numericSockets)) {
+        legacySocketCount = numericSockets;
+        legacySocketSource = 'sockets';
+      } else {
+        legacySocketPayload = structuredClone(item.sockets);
+      }
+      item.sockets = [];
+    }
+    if (parsedVersion < CraftingEngine.ITEM_SCHEMA_VERSION && item.socketCount != null) {
+      const savedCount = Number(item.socketCount);
+      if (legacySocketCount != null && savedCount !== legacySocketCount) {
+        throw new Error('Saved item has conflicting legacy socket counts.');
+      }
+      legacySocketCount = savedCount;
+      legacySocketSource = legacySocketSource || 'socketCount';
+    }
+    if (legacySocketCount != null || legacySocketPayload != null) {
+      if (!Number.isInteger(legacySocketCount) || legacySocketCount < 0) {
+        if (legacySocketCount != null) {
+          throw new Error(`Saved item has an invalid legacy socket count: ${String(legacySocketCount)}.`);
+        }
+      }
+      item.legacySocketState = {
+        ...(item.legacySocketState && typeof item.legacySocketState === 'object'
+          ? structuredClone(item.legacySocketState)
+          : {}),
+        count: legacySocketCount,
+        sourceField: legacySocketSource || 'sockets',
+        payload: legacySocketPayload,
+        status: 'preserved-unverified',
+        mechanicsApplied: false,
+      };
+      if (legacySocketCount != null) item.socketCount = legacySocketCount;
+    }
+
+    if (!item.currencyUsed || typeof item.currencyUsed !== 'object' || Array.isArray(item.currencyUsed)) {
+      item.currencyUsed = {};
+    }
+    if (item.mirrored == null) item.mirrored = !!item.isMirrored;
+    for (const key of ['corrupted', 'sanctified', 'mirrored', 'hinekoraLocked']) {
+      item[key] = !!item[key];
+    }
+    if (item.desecratedState == null) item.desecratedState = null;
+    if (item.omenState == null) item.omenState = null;
+    if (item.hinekoraState == null) item.hinekoraState = null;
+
+    if (!item.baseName) item.baseName = this._typeData.name;
+    if (!item.name) item.name = item.baseName;
+    if (typeof item.generatedName !== 'string' || !item.generatedName.trim()) {
+      item.generatedName = item.rarity === 'rare' && item.name !== item.baseName
+        ? String(item.name)
+        : null;
+    } else if (item.rarity === 'rare') {
+      item.name = item.generatedName;
+    }
+
+    this._normalizeItemLevelState(item);
+    this._normalizeQualityState(item);
+    item.schemaVersion = CraftingEngine.ITEM_SCHEMA_VERSION;
+    return item;
+  }
+
   resetItem() {
     this._item = this._createBlankItem(this._typeData.name);
     this._pendingDesecration = null;
@@ -385,16 +629,8 @@ class CraftingEngine {
   }
 
   loadItem(item, pending = null) {
-    this._item = structuredClone(item);
-    if (!this._item.currencyUsed) this._item.currencyUsed = {};
-    if (!Array.isArray(this._item.enchantments)) this._item.enchantments = [];
-    if (!Array.isArray(this._item.prefixes)) this._item.prefixes = [];
-    if (!Array.isArray(this._item.suffixes)) this._item.suffixes = [];
-    if (this._item.sanctified == null) this._item.sanctified = false;
-    if (this._item.mirrored == null) this._item.mirrored = !!this._item.isMirrored;
-    if (this._item.ilvl == null) this._item.ilvl = 83;
+    this._item = this._migrateItemState(item);
     this._applyConcreteBaseDefinition(this._item);
-    this._normalizeQualityState(this._item);
     // Rebuild the ilvl-eligible candidate pools to match the loaded item's Item
     // Level. Without this, an item loaded from the stash (or restored by
     // undo/redo) keeps whatever ilvl the engine was constructed with (the blank
@@ -417,6 +653,7 @@ class CraftingEngine {
     if (this._item.corrupted || this._item.sanctified) return this._item.ilvl;
     const n = Math.max(1, Math.min(100, Math.round(Number(level) || 0)));
     this._item.ilvl = n;
+    this._item.itemLevel = n;
     this._prefixCandidates = this._buildCandidatePool(this._prefixPool, 'prefix');
     this._suffixCandidates = this._buildCandidatePool(this._suffixPool, 'suffix');
     return n;
@@ -465,12 +702,15 @@ class CraftingEngine {
     if (!this.supportsRarity('rare')) return this._fail(`${this._item.baseName} cannot be upgraded to Rare.`);
     const previousRarity = this._item.rarity;
     const previousName = this._item.name;
+    const previousGeneratedName = this._item.generatedName;
     this._item.rarity = 'rare';
-    this._item.name = this._generateRareName();
+    this._item.generatedName = this._generateRareName();
+    this._item.name = this._item.generatedName;
     const added = this._addRandomMod('rare', options);
     if (!added) {
       this._item.rarity = previousRarity;
       this._item.name = previousName;
+      this._item.generatedName = previousGeneratedName;
       return this._fail('No eligible mods available.');
     }
     return this._success({ action: 'transform', addedMods: [added], previousRarity });
@@ -553,7 +793,8 @@ class CraftingEngine {
     }
 
     this._item.rarity = 'rare';
-    this._item.name = this._generateRareName();
+    this._item.generatedName = this._generateRareName();
+    this._item.name = this._item.generatedName;
 
     const totalMods = 4;
     const addedMods = [];
@@ -1256,11 +1497,23 @@ class CraftingEngine {
 
   _createBlankItem(baseName) {
     const item = {
+      schemaVersion: CraftingEngine.ITEM_SCHEMA_VERSION,
       rarity: 'normal',
       baseName,
       name: baseName,
+      generatedName: null,
       baseType: this.baseType,
       jewelType: this.jewelType,
+      simulatorPoolId: this.baseType,
+      itemClass: null,
+      sourceItemClass: null,
+      equipmentSlot: null,
+      requiredLevel: null,
+      dropLevel: null,
+      baseTags: [],
+      requirements: {},
+      baseProperties: {},
+      implicits: [],
       prefixes: [],
       suffixes: [],
       enchantments: [],
@@ -1269,6 +1522,20 @@ class CraftingEngine {
       mirrored: false,
       quality: { amount: 0, type: 'normal', source: null },
       ilvl: 83,
+      itemLevel: 83,
+      sourceSocketCount: null,
+      baseSocketCount: null,
+      defaultSockets: null,
+      maximumSockets: null,
+      sockets: [],
+      socketedContent: [],
+      runes: [],
+      soulCores: [],
+      flags: {},
+      desecratedState: null,
+      omenState: null,
+      hinekoraState: null,
+      sourceVersion: null,
       currencyUsed: {},
       hinekoraLocked: false,
     };

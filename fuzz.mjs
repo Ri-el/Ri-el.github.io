@@ -134,6 +134,65 @@ function loadDesecData() {
 	return existsSync(file) ? readJSON(file) : null
 }
 
+function loadConcreteBaseDefinitions(fuzzable) {
+	const normalizedDir = path.join(DATA, 'normalized')
+	const baseData = readJSON(path.join(normalizedDir, 'base-items.json'))
+	const modifierData = readJSON(path.join(normalizedDir, 'modifiers.json'))
+	const manifest = readJSON(path.join(normalizedDir, 'version-manifest.json'))
+	const basesById = new Map(baseData.bases.map(base => [base.id, base]))
+	const classesById = new Map(baseData.classes.map(sourceClass => [sourceClass.id, sourceClass]))
+	const modifiersById = new Map(modifierData.modifiers.map(modifier => [modifier.id, modifier]))
+	const canonicalClass = base => {
+		if (base.itemClass === 'LifeFlask') return 'Life Flask'
+		if (base.itemClass === 'ManaFlask') return 'Mana Flask'
+		if (base.itemClass === 'UtilityFlask' && base.equipmentSlot === 'Charm') return 'Charm'
+		return base.itemClass
+	}
+	const out = new Map()
+	for (const simulatorPoolId of fuzzable) {
+		const mapping = baseData.simulatorBaseMap[simulatorPoolId]
+		if (!mapping) throw new Error(`Fuzzable pool ${simulatorPoolId} has no normalized concrete-base mapping.`)
+		const base = (mapping.concreteBaseIds || []).map(id => basesById.get(id)).find(record => record && !record.unmodifiable)
+		if (!base) throw new Error(`Fuzzable pool ${simulatorPoolId} has no selectable normalized concrete base.`)
+		const sourceClass = classesById.get(base.classId)
+		const attributeFamily = ({
+			attr_str: 'str', attr_dex: 'dex', attr_int: 'int', attr_strdex: 'str_dex',
+			attr_strint: 'str_int', attr_dexint: 'dex_int', attr_all: 'str_dex_int',
+		})[sourceClass?.iconKey] || null
+		out.set(simulatorPoolId, {
+			id: base.id,
+			sourceId: base.id,
+			metadataKey: base.metadataKey || null,
+			displayName: base.displayName,
+			itemClass: canonicalClass(base),
+			sourceItemClass: base.itemClass,
+			equipmentSlot: base.equipmentSlot || null,
+			classId: base.classId,
+			modifierPoolClassId: base.modifierPoolClassId,
+			simulatorPoolId,
+			attributeFamily,
+			variantFamily: simulatorPoolId,
+			requiredLevel: null,
+			dropLevel: base.dropLevel,
+			tags: [...new Set(base.tags || [])],
+			requirements: isRecord(base.requirements) ? base.requirements : {},
+			baseProperties: isRecord(base.baseProperties) ? base.baseProperties : {},
+			implicits: (base.implicitModifierIds || []).map(id => {
+				const modifier = modifiersById.get(id)
+				return { id, key: modifier?.key || null, stats: modifier?.stats || [], displayText: modifier?.key || `Modifier ${id}` }
+			}),
+			sourceSocketCount: Number.isInteger(base.socketCount) ? base.socketCount : null,
+			defaultSockets: null,
+			maximumSockets: null,
+			targetGameVersion: manifest.targetGameVersion,
+			sourceVersion: manifest.source?.embeddedGameVersion || null,
+			verificationState: manifest.source?.versionStatus || null,
+			provenance: { normalizedPath: 'data/normalized/base-items.json', sourceSha256: manifest.source?.sha256 || null },
+		})
+	}
+	return out
+}
+
 // ---------- invariants ----------
 const PLACEHOLDERS = new Set(['__desecrated_pending__', '__mark_of_abyssal_lord__'])
 const EPS = 1e-9
@@ -196,6 +255,7 @@ function checkItemShape(engine, item) {
 		v.push(`item baseType ${item.baseType} does not match engine baseType ${engine.baseType}`)
 	}
 	if (item.baseItemId != null) {
+		if (!Number.isInteger(item.schemaVersion) || item.schemaVersion < 3) v.push('concrete item must use item-state schema version 3 or newer')
 		if (!['string', 'number'].includes(typeof item.baseItemId) || String(item.baseItemId).length === 0) {
 			v.push('baseItemId must be a stable string or number')
 		}
@@ -204,6 +264,19 @@ function checkItemShape(engine, item) {
 		}
 		if (!Array.isArray(item.baseTags)) v.push('baseTags must be an array when baseItemId is present')
 		if (!Array.isArray(item.implicits)) v.push('implicits must be an array when baseItemId is present')
+		if (!isRecord(item.baseProperties)) v.push('baseProperties must be an object when baseItemId is present')
+		if (item.itemLevel !== item.ilvl) v.push(`itemLevel ${String(item.itemLevel)} does not match ilvl ${String(item.ilvl)}`)
+		for (const key of ['sockets', 'runes', 'soulCores']) {
+			if (!Array.isArray(item[key])) v.push(`${key} must be a structured array`)
+		}
+		if (!isRecord(item.flags)) v.push('flags must be an object')
+		const concrete = typeof engine?.getConcreteBase === 'function' ? engine.getConcreteBase() : null
+		if (concrete) {
+			if (String(concrete.id) !== String(item.baseItemId)) v.push('concrete-base ID drifted from engine template')
+			const expectedImplicitIds = (concrete.implicits || []).map(implicit => implicit.id)
+			const actualImplicitIds = item.implicits.map(implicit => implicit?.id)
+			if (stableStringify(actualImplicitIds) !== stableStringify(expectedImplicitIds)) v.push('base implicits drifted during crafting')
+		}
 		if (item.requiredLevel != null && (!Number.isInteger(item.requiredLevel) || item.requiredLevel < 0)) {
 			v.push('requiredLevel must be null or a non-negative integer')
 		}
@@ -326,6 +399,7 @@ function checkImmutableTransition(action, before, after) {
 const Engine = await loadEngine()
 const { modData, fuzzable } = buildModData()
 const desecData = loadDesecData()
+const concreteBases = loadConcreteBaseDefinitions(fuzzable)
 
 if (fuzzable.length === 0) {
 	console.error('No fuzzable bases found in data/bases (need non-empty prefixes/suffixes).')
@@ -439,7 +513,7 @@ const perBase = Math.ceil(ITERATIONS / fuzzable.length)
 for (const base of fuzzable) {
 	let engine
 	try {
-		engine = new Engine(modData, base, desecData)
+		engine = new Engine(modData, base, desecData, null, null, concreteBases.get(base))
 	} catch (e) {
 		stats.harnessErrors++
 		stats.exceptionSamples.push(`[${base}] constructor: ${e && e.message}`)

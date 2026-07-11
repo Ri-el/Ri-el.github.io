@@ -184,6 +184,10 @@ let currentItemClass = 'Jewel';
 // currentJewelType/baseType; this ID only identifies the in-game base selected
 // inside the workbench.
 let currentConcreteBaseId = null;
+// Every outer item-class selection owns one or more compatible simulator
+// pools. Concrete bases may switch between these pools without leaving the
+// workbench (for example Strength to Dexterity Gloves).
+let currentSelectablePoolIds = ['ruby', 'sapphire', 'emerald'];
 // True while crafting a Jewel (keeps the Ruby/Sapphire/Emerald header selector
 // visible). Every other base picks its base on the select screen and hides it.
 let isJewelMode = true;
@@ -312,6 +316,7 @@ function buildNormalizedDataIndexes(data) {
     const indexes = {
       basesById: new Map(),
       basesByItemClass: new Map(),
+      simulatorPoolByBaseId: new Map(),
       classesById: new Map(),
       modifiersById: new Map(),
       modifiersByBase: new Map(),
@@ -356,9 +361,24 @@ function buildNormalizedDataIndexes(data) {
       }
     }
 
-    for (const [baseId, mapping] of Object.entries(data.baseItems.simulatorBaseMap || {})) {
+    for (const [simulatorPoolId, mapping] of Object.entries(data.baseItems.simulatorBaseMap || {})) {
       const seen = new Set();
       const pool = [];
+      for (const concreteBaseId of mapping.concreteBaseIds || []) {
+        const concreteBase = indexes.basesById.get(concreteBaseId);
+        if (!concreteBase) {
+          throw new Error(`Simulator pool ${simulatorPoolId} references unknown concrete base ${concreteBaseId}.`);
+        }
+        const existingPoolId = indexes.simulatorPoolByBaseId.get(concreteBaseId);
+        if (existingPoolId && existingPoolId !== simulatorPoolId) {
+          throw new Error(`Concrete base ${concreteBaseId} maps to both ${existingPoolId} and ${simulatorPoolId}.`);
+        }
+        if (!(mapping.classIds || []).includes(concreteBase.classId) ||
+            !(mapping.classIds || []).includes(concreteBase.modifierPoolClassId)) {
+          throw new Error(`Concrete base ${concreteBaseId} does not match simulator pool ${simulatorPoolId}.`);
+        }
+        indexes.simulatorPoolByBaseId.set(concreteBaseId, simulatorPoolId);
+      }
       for (const classId of mapping.classIds || []) {
         const sourceClass = indexes.classesById.get(classId);
         for (const [modifierId] of sourceClass?.modifierWeights || []) {
@@ -367,7 +387,7 @@ function buildNormalizedDataIndexes(data) {
           if (modifier) { seen.add(modifierId); pool.push(modifier); }
         }
       }
-      indexes.modifiersByBase.set(baseId, pool);
+      indexes.modifiersByBase.set(simulatorPoolId, pool);
     }
 
     for (const item of data.craftingItems.items || []) indexes.craftingDefinitions.set(item.id, item);
@@ -385,6 +405,13 @@ function normalizedRequiredLevel(base) {
   if (value == null || value === '') return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
+
+function canonicalItemClassName(sourceItemClass, equipmentSlot) {
+  if (sourceItemClass === 'LifeFlask') return 'Life Flask';
+  if (sourceItemClass === 'ManaFlask') return 'Mana Flask';
+  if (sourceItemClass === 'UtilityFlask' && equipmentSlot === 'Charm') return 'Charm';
+  return sourceItemClass || null;
 }
 
 function normalizedStatText(stat) {
@@ -419,23 +446,51 @@ function normalizedImplicitSnapshot(modifierId) {
 function concreteBaseDefinition(base, simulatorPoolId) {
   if (!base) return null;
   const sourceClass = normalizedIndexes?.classesById.get(base.classId);
+  const attributeFamily = ({
+    attr_str: 'str',
+    attr_dex: 'dex',
+    attr_int: 'int',
+    attr_strdex: 'str_dex',
+    attr_strint: 'str_int',
+    attr_dexint: 'dex_int',
+    attr_all: 'str_dex_int',
+  })[sourceClass?.iconKey] || null;
   return {
     id: base.id,
+    sourceId: base.id,
     metadataKey: base.metadataKey || null,
     displayName: base.displayName,
-    itemClass: base.itemClass,
+    itemClass: canonicalItemClassName(base.itemClass, base.equipmentSlot),
+    sourceItemClass: base.itemClass,
+    equipmentSlot: base.equipmentSlot || null,
+    classId: base.classId,
+    modifierPoolClassId: base.modifierPoolClassId,
     simulatorPoolId,
+    attributeFamily,
+    variantFamily: simulatorPoolId,
     requiredLevel: normalizedRequiredLevel(base),
     dropLevel: base.dropLevel != null && Number.isFinite(Number(base.dropLevel)) ? Number(base.dropLevel) : null,
-    tags: Array.isArray(base.tags) ? base.tags.slice() : [],
-    baseProperties: base.baseProperties && typeof base.baseProperties === 'object'
+    tags: Array.isArray(base.tags) ? [...new Set(base.tags.map(String))] : [],
+    requirements: base.requirements && typeof base.requirements === 'object'
+      ? structuredClone(base.requirements)
+      : {},
+    baseProperties: base.baseProperties && typeof base.baseProperties === 'object' && !Array.isArray(base.baseProperties)
       ? structuredClone(base.baseProperties)
       : {},
     implicits: (base.implicitModifierIds || []).map(normalizedImplicitSnapshot),
-    socketCount: base.socketCount != null && Number.isFinite(Number(base.socketCount)) ? Number(base.socketCount) : null,
+    sourceSocketCount: base.socketCount != null && Number.isFinite(Number(base.socketCount)) ? Number(base.socketCount) : null,
+    defaultSockets: null,
+    maximumSockets: null,
     icon: base.icon || sourceClass?.iconKey || null,
+    selectable: !base.unmodifiable,
+    disabledReason: base.unmodifiable ? 'This normalized base is marked unmodifiable.' : '',
     targetGameVersion: normalizedData?.manifest?.targetGameVersion || null,
+    sourceVersion: normalizedData?.manifest?.source?.embeddedGameVersion || null,
     verificationState: normalizedData?.manifest?.source?.versionStatus || null,
+    provenance: {
+      normalizedPath: 'data/normalized/base-items.json',
+      sourceSha256: normalizedData?.manifest?.source?.sha256 || null,
+    },
   };
 }
 
@@ -448,31 +503,71 @@ function concreteBasesForPool(simulatorPoolId) {
     .map(base => concreteBaseDefinition(base, simulatorPoolId));
 }
 
+function concreteBasesForPools(simulatorPoolIds) {
+  return (simulatorPoolIds || []).flatMap(concreteBasesForPool);
+}
+
+function poolHasCraftableData(simulatorPoolId) {
+  const pool = modData?.bases?.[simulatorPoolId];
+  return !!pool && ((pool.prefixes || []).length > 0 || (pool.suffixes || []).length > 0);
+}
+
+function selectablePoolsFor(simulatorPoolId) {
+  if (JEWEL_BASES.has(simulatorPoolId)) {
+    return ['ruby', 'sapphire', 'emerald']
+      .filter(poolId => poolHasCraftableData(poolId) && concreteBasesForPool(poolId).length > 0);
+  }
+  const itemClass = concreteBasesForPool(simulatorPoolId)[0]?.sourceItemClass;
+  if (!itemClass) return poolHasCraftableData(simulatorPoolId) ? [simulatorPoolId] : [];
+  return Object.keys(normalizedData?.baseItems?.simulatorBaseMap || {})
+    .filter(poolId => poolHasCraftableData(poolId))
+    .filter(poolId => concreteBasesForPool(poolId)[0]?.sourceItemClass === itemClass)
+    .sort();
+}
+
 function concreteBaseById(baseItemId, simulatorPoolId = currentJewelType) {
   const numericId = Number(baseItemId);
   return concreteBasesForPool(simulatorPoolId)
     .find(base => Number(base.id) === numericId) || null;
 }
 
+function concreteBaseByIdAcrossMappings(baseItemId) {
+  const numericId = Number(baseItemId);
+  const simulatorPoolId = normalizedIndexes?.simulatorPoolByBaseId.get(numericId);
+  return simulatorPoolId ? concreteBaseById(numericId, simulatorPoolId) : null;
+}
+
+function concreteBaseByIdInCurrentClass(baseItemId) {
+  const numericId = Number(baseItemId);
+  return concreteBasesForPools(currentSelectablePoolIds)
+    .find(base => Number(base.id) === numericId) || null;
+}
+
 function defaultConcreteBaseForPool(simulatorPoolId) {
-  // Normalized mappings are emitted in stable numeric ID order. For Amulets,
-  // the first retained record is 2546 (Crimson Amulet).
-  return concreteBasesForPool(simulatorPoolId)[0] || null;
+  // Normalized mappings are emitted in stable numeric ID order.
+  return concreteBasesForPool(simulatorPoolId).find(base => base.selectable) || null;
 }
 
 function concreteBaseContext() {
-  const bases = currentJewelType === 'amulets' ? concreteBasesForPool(currentJewelType) : [];
+  const bases = concreteBasesForPools(currentSelectablePoolIds);
   const item = engine ? engine.getItem() : null;
+  const attributeFamilies = [...new Set(bases.map(base => base.attributeFamily).filter(Boolean))].sort();
   return {
-    enabled: currentJewelType === 'amulets',
+    enabled: bases.length > 0,
     workbenchBaseId: isJewelMode ? 'jewels' : currentJewelType,
     simulatorPoolId: currentJewelType,
+    simulatorPoolIds: currentSelectablePoolIds.slice(),
     itemClass: item?.itemClass || null,
     classLabel: currentItemClass,
     selectedBaseItemId: item?.baseItemId ?? currentConcreteBaseId,
     bases,
-    error: currentJewelType === 'amulets' && bases.length === 0
-      ? 'Normalized Amulet base data is unavailable.'
+    attributeFamilies,
+    hasRequiredLevel: bases.some(base => base.requiredLevel != null),
+    requiredLevelBlocker: bases.some(base => base.requiredLevel != null)
+      ? ''
+      : 'Required levels are unavailable in the verified normalized source.',
+    error: bases.length === 0
+      ? `Normalized concrete base data is unavailable for ${currentItemClass}.`
       : '',
   };
 }
@@ -481,6 +576,13 @@ function notifyConcreteBaseChange() {
   if (typeof window.CustomEvent !== 'function') return;
   window.dispatchEvent(new CustomEvent('craftforge:concrete-base-changed', {
     detail: concreteBaseContext(),
+  }));
+}
+
+function requestConcreteBaseConfirmation(result) {
+  if (typeof window.CustomEvent !== 'function') return;
+  window.dispatchEvent(new CustomEvent('craftforge:base-change-confirmation-requested', {
+    detail: result,
   }));
 }
 
@@ -613,7 +715,7 @@ function resetOmenState() {
 
 function createEngine(type, concreteBase = null) {
   return measureOperation('base-selection', () => {
-    const selectedConcreteBase = concreteBase || (type === 'amulets' ? defaultConcreteBaseForPool(type) : null);
+    const selectedConcreteBase = concreteBase || defaultConcreteBaseForPool(type);
     currentConcreteBaseId = selectedConcreteBase?.id ?? null;
     engine = new CraftingEngine(
       modData,
@@ -660,11 +762,11 @@ function loadBase(baseId, classLabel) {
     // selector so Ruby/Sapphire/Emerald can be swapped without leaving craft.
     isJewelMode = true;
     currentItemClass = 'Jewel';
-    if (!JEWEL_BASES.has(currentJewelType)) currentJewelType = 'ruby';
+    if (!['ruby', 'sapphire', 'emerald'].includes(currentJewelType)) currentJewelType = 'ruby';
     setJewelSelectorVisible(true);
     syncJewelSelectorActive();
   } else {
-    if (!modData || !modData.bases || !modData.bases[baseId]) {
+    if (!modData || !modData.bases || !modData.bases[baseId] || !poolHasCraftableData(baseId)) {
       showError('That base has no data yet -- run build (build.cmd) after adding it.');
       return false;
     }
@@ -673,21 +775,33 @@ function loadBase(baseId, classLabel) {
     currentItemClass = classLabel || 'Item';
     setJewelSelectorVisible(false);
   }
+  currentSelectablePoolIds = selectablePoolsFor(currentJewelType);
+  if (!currentSelectablePoolIds.length || !currentSelectablePoolIds.includes(currentJewelType)) {
+    showError('No verified concrete bases are available for this item class.');
+    return false;
+  }
+  const defaultBase = defaultConcreteBaseForPool(currentJewelType);
+  if (!defaultBase) {
+    showError('No selectable concrete base is available for this simulator pool.');
+    return false;
+  }
   disarmCurrency();
-  createEngine(
-    currentJewelType,
-    currentJewelType === 'amulets' ? defaultConcreteBaseForPool('amulets') : null,
-  );
+  createEngine(currentJewelType, defaultBase);
   return true;
 }
 
 function selectConcreteBase(baseItemId, options = {}) {
-  if (!engine || currentJewelType !== 'amulets') {
-    return { success: false, error: 'Concrete base selection is not available for this item class yet.' };
+  if (!engine || currentSelectablePoolIds.length === 0) {
+    return { success: false, error: 'Concrete base selection is not available for this item class.' };
   }
-  const nextBase = concreteBaseById(baseItemId, currentJewelType);
+  const nextBase = concreteBaseByIdInCurrentClass(baseItemId);
   if (!nextBase) {
-    const error = 'That concrete base is not available for the active simulator pool.';
+    const error = 'That concrete base is not available for the active item class.';
+    showError(error);
+    return { success: false, error };
+  }
+  if (!nextBase.selectable) {
+    const error = nextBase.disabledReason || 'That concrete base cannot be modified.';
     showError(error);
     return { success: false, error };
   }
@@ -705,13 +819,28 @@ function selectConcreteBase(baseItemId, options = {}) {
       currentBaseName: currentItem.baseName,
       nextBaseName: nextBase.displayName,
       nextBaseItemId: nextBase.id,
+      nextSimulatorPoolId: nextBase.simulatorPoolId,
     };
   }
 
   const before = snapshotState(currentItem);
   pushUndo(before);
-  engine.setConcreteBase(nextBase, { resetItem: true, preserveItemLevel: true });
+  if (nextBase.simulatorPoolId === currentJewelType) {
+    engine.setConcreteBase(nextBase, { resetItem: true, preserveItemLevel: true });
+  } else {
+    engine = new CraftingEngine(
+      modData,
+      nextBase.simulatorPoolId,
+      desecData,
+      buildSourceModifierOverlay(nextBase.simulatorPoolId),
+      null,
+      nextBase,
+    );
+    engine.setItemLevel(currentItem.itemLevel ?? currentItem.ilvl);
+    currentJewelType = nextBase.simulatorPoolId;
+  }
   currentConcreteBaseId = nextBase.id;
+  syncJewelSelectorActive();
   resetOmenState();
   clearDesecration();
   foreseenSeals = {};
@@ -724,11 +853,31 @@ function selectConcreteBase(baseItemId, options = {}) {
 }
 
 function syncConcreteBaseTemplateFromItem(item) {
-  if (!engine || currentJewelType !== 'amulets') return null;
-  const base = concreteBaseById(item?.baseItemId, currentJewelType) || defaultConcreteBaseForPool(currentJewelType);
+  if (!item) return null;
+  const simulatorPoolId = item.simulatorPoolId || item.baseType || item.jewelType || currentJewelType;
+  if (!modData?.bases?.[simulatorPoolId]) return null;
+  currentJewelType = simulatorPoolId;
+  if (!currentSelectablePoolIds.includes(simulatorPoolId)) {
+    currentSelectablePoolIds = selectablePoolsFor(simulatorPoolId);
+  }
+  const base = concreteBaseById(item.baseItemId, simulatorPoolId) || defaultConcreteBaseForPool(simulatorPoolId);
   if (!base) return null;
-  engine.setConcreteBase(base, { resetItem: false });
+  if (!engine || engine.baseType !== simulatorPoolId) {
+    engine = new CraftingEngine(
+      modData,
+      simulatorPoolId,
+      desecData,
+      buildSourceModifierOverlay(simulatorPoolId),
+      null,
+      base,
+    );
+  } else {
+    engine.setConcreteBase(base, { resetItem: false });
+  }
   currentConcreteBaseId = base.id;
+  isJewelMode = JEWEL_BASES.has(simulatorPoolId);
+  setJewelSelectorVisible(isJewelMode);
+  syncJewelSelectorActive();
   return base;
 }
 
@@ -948,11 +1097,13 @@ function setupEventListeners() {
 
   elements.jewelBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      elements.jewelBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentJewelType = btn.dataset.type;
-      disarmCurrency();
-      createEngine(currentJewelType);
+      const targetBase = defaultConcreteBaseForPool(btn.dataset.type);
+      if (!targetBase) {
+        showError('Normalized Jewel base data is unavailable.');
+        return;
+      }
+      const result = selectConcreteBase(targetBase.id);
+      if (result?.requiresConfirmation) requestConcreteBaseConfirmation(result);
     });
   });
 
@@ -1638,6 +1789,11 @@ function snapshotState(item) {
     omens: Array.from(selectedOmens),
     omenOfLight: omenOfLightActive,
     craftOmen: selectedCraftOmen,
+    workbench: {
+      categoryLabel: currentItemClass,
+      selectablePoolIds: currentSelectablePoolIds.slice(),
+      isJewelMode,
+    },
   };
 }
 
@@ -1649,6 +1805,13 @@ function pushUndo(beforeState) {
 }
 
 function restoreSnapshot(snap) {
+  if (snap.workbench && typeof snap.workbench === 'object') {
+    currentItemClass = snap.workbench.categoryLabel || currentItemClass;
+    currentSelectablePoolIds = Array.isArray(snap.workbench.selectablePoolIds)
+      ? snap.workbench.selectablePoolIds.slice()
+      : currentSelectablePoolIds;
+    isJewelMode = !!snap.workbench.isJewelMode;
+  }
   syncConcreteBaseTemplateFromItem(snap.item);
   engine.loadItem(snap.item, snap.pending);
   clearDesecration();
@@ -2682,9 +2845,50 @@ function loadFromStash(index) {
   const saved = stash[index];
   if (!saved) return;
 
-  // Restore the saved item's base. Jewels keep the header swatch selector; any
-  // other base hides it and shows that base's class label instead.
-  currentJewelType = saved.simulatorPoolId || saved.jewelType || saved.baseType;
+  const savedPoolId = saved.simulatorPoolId || saved.jewelType || saved.baseType;
+  const targetGameVersion = normalizedData?.manifest?.targetGameVersion || null;
+  if (saved.targetGameVersion && targetGameVersion && saved.targetGameVersion !== targetGameVersion) {
+    showError(`This saved item targets ${saved.targetGameVersion}; this workbench targets ${targetGameVersion}.`);
+    return;
+  }
+  if (!savedPoolId || !modData?.bases?.[savedPoolId]) {
+    showError('This saved item uses a simulator pool that is not available in this version.');
+    return;
+  }
+  if (!poolHasCraftableData(savedPoolId)) {
+    showError(`This saved item's ${savedPoolId} pool has no verified crafting data in this version.`);
+    return;
+  }
+
+  const authoritativePoolId = saved.baseItemId == null
+    ? savedPoolId
+    : normalizedIndexes?.simulatorPoolByBaseId.get(Number(saved.baseItemId));
+  if (saved.baseItemId != null && !authoritativePoolId) {
+    showError(`Saved concrete base ${saved.baseItemId} is not mapped in this version.`);
+    return;
+  }
+  if (authoritativePoolId !== savedPoolId) {
+    showError(`Saved concrete base ${saved.baseItemId} belongs to ${authoritativePoolId}, not ${savedPoolId}.`);
+    return;
+  }
+
+  const savedConcreteBase = saved.baseItemId == null
+    ? defaultConcreteBaseForPool(savedPoolId)
+    : concreteBaseByIdAcrossMappings(saved.baseItemId);
+  if (!savedConcreteBase || !savedConcreteBase.selectable) {
+    showError(savedConcreteBase?.disabledReason || 'This saved item has no compatible selectable concrete base.');
+    return;
+  }
+  const selectablePoolIds = selectablePoolsFor(savedPoolId);
+  if (!selectablePoolIds.includes(savedPoolId)) {
+    showError('This saved item is outside the supported pool set for its item class.');
+    return;
+  }
+
+  // Only mutate the live workbench after all compatibility checks pass.
+  currentJewelType = savedPoolId;
+  currentSelectablePoolIds = selectablePoolIds;
+  currentConcreteBaseId = savedConcreteBase.id;
   if (JEWEL_BASES.has(currentJewelType)) {
     isJewelMode = true;
     currentItemClass = 'Jewel';
@@ -2695,18 +2899,6 @@ function loadFromStash(index) {
     currentItemClass = saved.categoryLabel || saved.itemClass || 'Item';
     setJewelSelectorVisible(false);
   }
-
-  let savedConcreteBase = null;
-  if (currentJewelType === 'amulets') {
-    savedConcreteBase = concreteBaseById(saved.baseItemId, currentJewelType);
-    if (!savedConcreteBase) {
-      savedConcreteBase = defaultConcreteBaseForPool(currentJewelType);
-      if (saved.baseItemId != null && savedConcreteBase) {
-        showError(`Saved base ${saved.baseItemId} is unavailable; loaded ${savedConcreteBase.displayName}.`);
-      }
-    }
-  }
-  currentConcreteBaseId = savedConcreteBase?.id ?? null;
 
   engine = new CraftingEngine(
     modData,
@@ -2726,6 +2918,13 @@ function loadFromStash(index) {
   const item = structuredClone(saved);
   delete item._pendingDesecration;
   delete item._desecState;
+  if (saved.baseItemId == null) {
+    item.migrationWarnings = Array.isArray(item.migrationWarnings) ? item.migrationWarnings.slice() : [];
+    item.migrationWarnings.push({
+      code: 'legacy_base_defaulted',
+      message: `Legacy save used deterministic base ${savedConcreteBase.displayName} (${savedConcreteBase.id}) for ${savedPoolId}.`,
+    });
+  }
 
   engine.loadItem(item, pending);
   undoStack = [];
@@ -2738,6 +2937,9 @@ function loadFromStash(index) {
   desecState = savedDesecState;
   renderItem();
   notifyConcreteBaseChange();
+  if (saved.baseItemId == null) {
+    showError(`Legacy save migrated to ${savedConcreteBase.displayName}.`);
+  }
   playSound('regal');
 }
 
@@ -2763,18 +2965,19 @@ function renderStash() {
 
       // Jewel icon: use the real PNG (assets/icons/<type>.png) when present,
       // falling back to the coloured dot if the image is missing.
+      const savedPoolId = item.simulatorPoolId || item.jewelType || item.baseType || '';
       const dot = document.createElement('div');
-      dot.className = `jewel-dot ${item.jewelType}`;
+      dot.className = `jewel-dot ${savedPoolId}`;
       const img = new Image();
       img.className = 'stash-img';
       img.alt = '';
       img.addEventListener('load', () => slot.classList.add('has-real-icon'));
       img.addEventListener('error', () => img.remove());
-      img.src = `assets/icons/${iconIdForAction(item.jewelType)}.png`;
+      img.src = `assets/icons/${iconIdForAction(savedPoolId)}.png`;
       dot.appendChild(img);
       slot.appendChild(dot);
 
-      const modCount = item.prefixes.length + item.suffixes.length;
+      const modCount = (item.prefixes || []).length + (item.suffixes || []).length;
       if (modCount > 0) {
         const badge = document.createElement('span');
         badge.className = 'stash-badge';

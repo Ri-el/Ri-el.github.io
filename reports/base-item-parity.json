@@ -50,5 +50,324 @@
       "directFile": "blocked_browser_local_file_url_policy",
       "serviceWorker": "pending_local_network_approval"
     }
+  },
+  "task02": {
+    "itemStateSchemaVersion": 3,
+    "counts": {
+      "outerClasses": 31,
+      "normalizedMappings": 65,
+      "compiledSimulatorPools": 61,
+      "normalizedConcreteBases": 1760,
+      "uniquelyMappedConcreteBases": 1759,
+      "compiledMappedConcreteBases": 1748,
+      "selectorConcreteBases": 1743,
+      "craftSelectableConcreteBases": 1741,
+      "disabledUnmodifiableConcreteBases": 2,
+      "explicitlyBlockedConcreteBases": 17
+    },
+    "mappingIntegrity": {
+      "ambiguousBaseIds": [],
+      "unknownMappingBaseIds": [],
+      "unmappedBaseIds": [613],
+      "duplicateDisplayNameGroups": 27,
+      "duplicateDisplayNameRecords": 81,
+      "samePoolDuplicateDisplayNameGroups": 26,
+      "samePoolDuplicateDisplayNameRecords": 79,
+      "identityRule": "Stable numeric base ID, never display name."
+    },
+    "classCoverage": [
+      {
+        "outerId": "jewels",
+        "label": "Jewels",
+        "normalizedItemClasses": ["Jewel"],
+        "normalizedPoolIds": ["ruby", "sapphire", "emerald", "diamond", "time_lost_ruby", "time_lost_sapphire", "time_lost_emerald", "time_lost_diamond"],
+        "compiledPoolIds": ["ruby", "sapphire", "emerald", "diamond", "time_lost_ruby", "time_lost_sapphire", "time_lost_emerald", "time_lost_diamond"],
+        "selectorPoolIds": ["ruby", "sapphire", "emerald"],
+        "normalizedConcreteBaseCount": 9,
+        "mappedConcreteBaseCount": 8,
+        "compiledConcreteBaseCount": 8,
+        "selectorConcreteBaseCount": 3,
+        "blockerIds": ["empty-jewel-engine-pools", "unmapped-timeless-jewel"]
+      },
+      {
+        "outerId": "amulets", "label": "Amulets", "normalizedItemClasses": ["Amulet"],
+        "normalizedPoolIds": ["amulets"], "compiledPoolIds": ["amulets"], "selectorPoolIds": ["amulets"],
+        "normalizedConcreteBaseCount": 25, "mappedConcreteBaseCount": 25, "compiledConcreteBaseCount": 25, "selectorConcreteBaseCount": 25, "blockerIds": []
+      },
+      {
+        "outerId": "rings", "label": "Rings", "normalizedItemClasses": ["Ring"],
+        "normalizedPoolIds": ["rings"], "compiledPoolIds": ["rings"], "selectorPoolIds": ["rings"],
+        "normalizedConcreteBaseCount": 29, "mappedConcreteBaseCount": 29, "compiledConcreteBaseCount": 29, "selectorConcreteBaseCount": 29, "blockerIds": []
+      },
+      {
+        "outerId": "belts", "label": "Belts", "normalizedItemClasses": ["Belt"],
+        "normalizedPoolIds": ["belts"], "compiledPoolIds": ["belts"], "selectorPoolIds": ["belts"],
+        "normalizedConcreteBaseCount": 20, "mappedConcreteBaseCount": 20, "compiledConcreteBaseCount": 20, "selectorConcreteBaseCount": 20, "blockerIds": []
+      },
+      {
+        "outerId": "gloves", "label": "Gloves", "normalizedItemClasses": ["Gloves"],
+        "normalizedPoolIds": ["gloves_str", "gloves_dex", "gloves_int", "gloves_str_dex", "gloves_str_int", "gloves_dex_int", "gloves_str_dex_int"],
+        "compiledPoolIds": ["gloves_str", "gloves_dex", "gloves_int", "gloves_str_dex", "gloves_str_int", "gloves_dex_int"],
+        "selectorPoolIds": ["gloves_str", "gloves_dex", "gloves_int", "gloves_str_dex", "gloves_str_int", "gloves_dex_int"],
+        "normalizedConcreteBaseCount": 201, "mappedConcreteBaseCount": 201, "compiledConcreteBaseCount": 198, "selectorConcreteBaseCount": 198,
+        "blockerIds": ["normalized-only-all-attribute-pools"]
+      },
+      {
+        "outerId": "boots", "label": "Boots", "normalizedItemClasses": ["Boots"],
+        "normalizedPoolIds": ["boots_str", "boots_dex", "boots_int", "boots_str_dex", "boots_str_int", "boots_dex_int", "boots_str_dex_int"],
+        "compiledPoolIds": ["boots_str", "boots_dex", "boots_int", "boots_str_dex", "boots_str_int", "boots_dex_int"],
+        "selectorPoolIds": ["boots_str", "boots_dex", "boots_int", "boots_str_dex", "boots_str_int", "boots_dex_int"],
+        "normalizedConcreteBaseCount": 190, "mappedConcreteBaseCount": 190, "compiledConcreteBaseCount": 187, "selectorConcreteBaseCount": 187,
+        "blockerIds": ["normalized-only-all-attribute-pools"]
+      },
+      {
+        "outerId": "body_armours", "label": "Body Armours", "normalizedItemClasses": ["Body Armour"],
+        "normalizedPoolIds": ["body_armours_str", "body_armours_dex", "body_armours_int", "body_armours_str_dex", "body_armours_str_int", "body_armours_dex_int", "body_armours_str_dex_int"],
+        "compiledPoolIds": ["body_armours_str", "body_armours_dex", "body_armours_int", "body_armours_str_dex", "body_armours_str_int", "body_armours_dex_int", "body_armours_str_dex_int"],
+        "selectorPoolIds": ["body_armours_str", "body_armours_dex", "body_armours_int", "body_armours_str_dex", "body_armours_str_int", "body_armours_dex_int", "body_armours_str_dex_int"],
+        "normalizedConcreteBaseCount": 358, "mappedConcreteBaseCount": 358, "compiledConcreteBaseCount": 358, "selectorConcreteBaseCount": 358, "blockerIds": []
+      },
+      {
+        "outerId": "helmets", "label": "Helmets", "normalizedItemClasses": ["Helmet"],
+        "normalizedPoolIds": ["helmets_str", "helmets_dex", "helmets_int", "helmets_str_dex", "helmets_str_int", "helmets_dex_int", "helmets_str_dex_int"],
+        "compiledPoolIds": ["helmets_str", "helmets_dex", "helmets_int", "helmets_str_dex", "helmets_str_int", "helmets_dex_int"],
+        "selectorPoolIds": ["helmets_str", "helmets_dex", "helmets_int", "helmets_str_dex", "helmets_str_int", "helmets_dex_int"],
+        "normalizedConcreteBaseCount": 259, "mappedConcreteBaseCount": 259, "compiledConcreteBaseCount": 256, "selectorConcreteBaseCount": 256,
+        "blockerIds": ["normalized-only-all-attribute-pools"]
+      },
+      {
+        "outerId": "quivers", "label": "Quivers", "normalizedItemClasses": ["Quiver"],
+        "normalizedPoolIds": ["quivers"], "compiledPoolIds": ["quivers"], "selectorPoolIds": ["quivers"],
+        "normalizedConcreteBaseCount": 11, "mappedConcreteBaseCount": 11, "compiledConcreteBaseCount": 11, "selectorConcreteBaseCount": 11, "blockerIds": []
+      },
+      {
+        "outerId": "shields", "label": "Shields", "normalizedItemClasses": ["Shield"],
+        "normalizedPoolIds": ["shields_str", "shields_str_dex", "shields_str_int", "shields_str_dex_int"],
+        "compiledPoolIds": ["shields_str", "shields_str_dex", "shields_str_int"],
+        "selectorPoolIds": ["shields_str", "shields_str_dex", "shields_str_int"],
+        "normalizedConcreteBaseCount": 150, "mappedConcreteBaseCount": 150, "compiledConcreteBaseCount": 148, "selectorConcreteBaseCount": 148,
+        "blockerIds": ["normalized-only-all-attribute-pools"]
+      },
+      {
+        "outerId": "bucklers", "label": "Bucklers", "normalizedItemClasses": ["Buckler"],
+        "normalizedPoolIds": ["bucklers"], "compiledPoolIds": ["bucklers"], "selectorPoolIds": ["bucklers"],
+        "normalizedConcreteBaseCount": 51, "mappedConcreteBaseCount": 51, "compiledConcreteBaseCount": 51, "selectorConcreteBaseCount": 51, "blockerIds": []
+      },
+      {
+        "outerId": "foci", "label": "Foci", "normalizedItemClasses": ["Focus"],
+        "normalizedPoolIds": ["foci"], "compiledPoolIds": ["foci"], "selectorPoolIds": ["foci"],
+        "normalizedConcreteBaseCount": 51, "mappedConcreteBaseCount": 51, "compiledConcreteBaseCount": 51, "selectorConcreteBaseCount": 51, "blockerIds": []
+      },
+      {
+        "outerId": "claws", "label": "Claws", "normalizedItemClasses": ["Claw"],
+        "normalizedPoolIds": ["claws"], "compiledPoolIds": ["claws"], "selectorPoolIds": ["claws"],
+        "normalizedConcreteBaseCount": 13, "mappedConcreteBaseCount": 13, "compiledConcreteBaseCount": 13, "selectorConcreteBaseCount": 13, "blockerIds": []
+      },
+      {
+        "outerId": "daggers", "label": "Daggers", "normalizedItemClasses": ["Dagger"],
+        "normalizedPoolIds": ["daggers"], "compiledPoolIds": ["daggers"], "selectorPoolIds": ["daggers"],
+        "normalizedConcreteBaseCount": 13, "mappedConcreteBaseCount": 13, "compiledConcreteBaseCount": 13, "selectorConcreteBaseCount": 13, "blockerIds": []
+      },
+      {
+        "outerId": "wands", "label": "Wands", "normalizedItemClasses": ["Wand"],
+        "normalizedPoolIds": ["wands"], "compiledPoolIds": ["wands"], "selectorPoolIds": ["wands"],
+        "normalizedConcreteBaseCount": 18, "mappedConcreteBaseCount": 18, "compiledConcreteBaseCount": 18, "selectorConcreteBaseCount": 18, "blockerIds": []
+      },
+      {
+        "outerId": "one_hand_swords", "label": "One Hand Swords", "normalizedItemClasses": ["One Hand Sword"],
+        "normalizedPoolIds": ["one_hand_swords"], "compiledPoolIds": ["one_hand_swords"], "selectorPoolIds": ["one_hand_swords"],
+        "normalizedConcreteBaseCount": 16, "mappedConcreteBaseCount": 16, "compiledConcreteBaseCount": 16, "selectorConcreteBaseCount": 16, "blockerIds": []
+      },
+      {
+        "outerId": "one_hand_axes", "label": "One Hand Axes", "normalizedItemClasses": ["One Hand Axe"],
+        "normalizedPoolIds": ["one_hand_axes"], "compiledPoolIds": ["one_hand_axes"], "selectorPoolIds": ["one_hand_axes"],
+        "normalizedConcreteBaseCount": 13, "mappedConcreteBaseCount": 13, "compiledConcreteBaseCount": 13, "selectorConcreteBaseCount": 13, "blockerIds": []
+      },
+      {
+        "outerId": "one_hand_maces", "label": "One Hand Maces", "normalizedItemClasses": ["One Hand Mace"],
+        "normalizedPoolIds": ["one_hand_maces"], "compiledPoolIds": ["one_hand_maces"], "selectorPoolIds": ["one_hand_maces"],
+        "normalizedConcreteBaseCount": 44, "mappedConcreteBaseCount": 44, "compiledConcreteBaseCount": 44, "selectorConcreteBaseCount": 44, "blockerIds": []
+      },
+      {
+        "outerId": "sceptres", "label": "Sceptres", "normalizedItemClasses": ["Sceptre"],
+        "normalizedPoolIds": ["sceptres"], "compiledPoolIds": ["sceptres"], "selectorPoolIds": ["sceptres"],
+        "normalizedConcreteBaseCount": 16, "mappedConcreteBaseCount": 16, "compiledConcreteBaseCount": 16, "selectorConcreteBaseCount": 16, "blockerIds": []
+      },
+      {
+        "outerId": "spears", "label": "Spears", "normalizedItemClasses": ["Spear"],
+        "normalizedPoolIds": ["spears"], "compiledPoolIds": ["spears"], "selectorPoolIds": ["spears"],
+        "normalizedConcreteBaseCount": 36, "mappedConcreteBaseCount": 36, "compiledConcreteBaseCount": 36, "selectorConcreteBaseCount": 36, "blockerIds": []
+      },
+      {
+        "outerId": "flails", "label": "Flails", "normalizedItemClasses": ["Flail"],
+        "normalizedPoolIds": ["flails"], "compiledPoolIds": ["flails"], "selectorPoolIds": ["flails"],
+        "normalizedConcreteBaseCount": 13, "mappedConcreteBaseCount": 13, "compiledConcreteBaseCount": 13, "selectorConcreteBaseCount": 13, "blockerIds": []
+      },
+      {
+        "outerId": "bows", "label": "Bows", "normalizedItemClasses": ["Bow"],
+        "normalizedPoolIds": ["bows"], "compiledPoolIds": ["bows"], "selectorPoolIds": ["bows"],
+        "normalizedConcreteBaseCount": 34, "mappedConcreteBaseCount": 34, "compiledConcreteBaseCount": 34, "selectorConcreteBaseCount": 34, "blockerIds": []
+      },
+      {
+        "outerId": "staves", "label": "Staves", "normalizedItemClasses": ["Staff"],
+        "normalizedPoolIds": ["staves"], "compiledPoolIds": ["staves"], "selectorPoolIds": ["staves"],
+        "normalizedConcreteBaseCount": 17, "mappedConcreteBaseCount": 17, "compiledConcreteBaseCount": 17, "selectorConcreteBaseCount": 17, "blockerIds": []
+      },
+      {
+        "outerId": "two_hand_swords", "label": "Two Hand Swords", "normalizedItemClasses": ["Two Hand Sword"],
+        "normalizedPoolIds": ["two_hand_swords"], "compiledPoolIds": ["two_hand_swords"], "selectorPoolIds": ["two_hand_swords"],
+        "normalizedConcreteBaseCount": 14, "mappedConcreteBaseCount": 14, "compiledConcreteBaseCount": 14, "selectorConcreteBaseCount": 14, "blockerIds": []
+      },
+      {
+        "outerId": "two_hand_axes", "label": "Two Hand Axes", "normalizedItemClasses": ["Two Hand Axe"],
+        "normalizedPoolIds": ["two_hand_axes"], "compiledPoolIds": ["two_hand_axes"], "selectorPoolIds": ["two_hand_axes"],
+        "normalizedConcreteBaseCount": 13, "mappedConcreteBaseCount": 13, "compiledConcreteBaseCount": 13, "selectorConcreteBaseCount": 13, "blockerIds": []
+      },
+      {
+        "outerId": "two_hand_maces", "label": "Two Hand Maces", "normalizedItemClasses": ["Two Hand Mace"],
+        "normalizedPoolIds": ["two_hand_maces"], "compiledPoolIds": ["two_hand_maces"], "selectorPoolIds": ["two_hand_maces"],
+        "normalizedConcreteBaseCount": 43, "mappedConcreteBaseCount": 43, "compiledConcreteBaseCount": 43, "selectorConcreteBaseCount": 43, "blockerIds": []
+      },
+      {
+        "outerId": "quarterstaves", "label": "Quarterstaves", "normalizedItemClasses": ["Warstaff"],
+        "normalizedPoolIds": ["quarterstaves"], "compiledPoolIds": ["quarterstaves"], "selectorPoolIds": ["quarterstaves"],
+        "normalizedConcreteBaseCount": 38, "mappedConcreteBaseCount": 38, "compiledConcreteBaseCount": 38, "selectorConcreteBaseCount": 38, "blockerIds": []
+      },
+      {
+        "outerId": "crossbows", "label": "Crossbows", "normalizedItemClasses": ["Crossbow"],
+        "normalizedPoolIds": ["crossbows"], "compiledPoolIds": ["crossbows"], "selectorPoolIds": ["crossbows"],
+        "normalizedConcreteBaseCount": 34, "mappedConcreteBaseCount": 34, "compiledConcreteBaseCount": 34, "selectorConcreteBaseCount": 34, "blockerIds": []
+      },
+      {
+        "outerId": "life_flasks", "label": "Life Flasks", "normalizedItemClasses": ["LifeFlask"],
+        "normalizedPoolIds": ["life_flasks"], "compiledPoolIds": ["life_flasks"], "selectorPoolIds": ["life_flasks"],
+        "normalizedConcreteBaseCount": 9, "mappedConcreteBaseCount": 9, "compiledConcreteBaseCount": 9, "selectorConcreteBaseCount": 9, "blockerIds": []
+      },
+      {
+        "outerId": "mana_flasks", "label": "Mana Flasks", "normalizedItemClasses": ["ManaFlask"],
+        "normalizedPoolIds": ["mana_flasks"], "compiledPoolIds": ["mana_flasks"], "selectorPoolIds": ["mana_flasks"],
+        "normalizedConcreteBaseCount": 9, "mappedConcreteBaseCount": 9, "compiledConcreteBaseCount": 9, "selectorConcreteBaseCount": 9, "blockerIds": []
+      },
+      {
+        "outerId": "charms", "label": "Charms", "normalizedItemClasses": ["UtilityFlask"],
+        "normalizedPoolIds": ["charms"], "compiledPoolIds": ["charms"], "selectorPoolIds": ["charms"],
+        "normalizedConcreteBaseCount": 13, "mappedConcreteBaseCount": 13, "compiledConcreteBaseCount": 13, "selectorConcreteBaseCount": 13, "blockerIds": []
+      }
+    ],
+    "attributeFamilies": {
+      "derivation": "Use the normalized source-class iconKey; attribute family is a filter and never a concrete base identity.",
+      "iconKeyMap": {
+        "attr_str": "str",
+        "attr_dex": "dex",
+        "attr_int": "int",
+        "attr_strdex": "str_dex",
+        "attr_strint": "str_int",
+        "attr_dexint": "dex_int",
+        "attr_all": "str_dex_int"
+      },
+      "coverage": {
+        "body_armours": { "str": 55, "dex": 59, "int": 59, "str_dex": 60, "str_int": 59, "dex_int": 53, "str_dex_int": 13 },
+        "gloves": { "str": 36, "dex": 35, "int": 37, "str_dex": 30, "str_int": 29, "dex_int": 31, "str_dex_int": 3 },
+        "boots": { "str": 35, "dex": 35, "int": 35, "str_dex": 28, "str_int": 27, "dex_int": 27, "str_dex_int": 3 },
+        "helmets": { "str": 44, "dex": 47, "int": 47, "str_dex": 39, "str_int": 41, "dex_int": 38, "str_dex_int": 3 },
+        "shields": { "str": 58, "str_dex": 45, "str_int": 45, "str_dex_int": 2 }
+      }
+    },
+    "disabledBases": [
+      { "id": 2977, "displayName": "Fists of Stone", "classification": "disabled_unmodifiable_source_base" },
+      { "id": 2978, "displayName": "Runeforged Fists of Stone", "classification": "disabled_unmodifiable_source_base" }
+    ],
+    "blockers": {
+      "unmappedBases": [
+        {
+          "id": 613,
+          "displayName": "Timeless Jewel",
+          "metadataKey": "Metadata/Items/Jewels/JewelTimeless",
+          "classification": "blocked_missing_simulator_pool_mapping"
+        }
+      ],
+      "normalizedOnlyMappings": [
+        { "poolId": "boots_str_dex_int", "baseIds": [2662, 3309, 5428], "classification": "blocked_missing_compiled_modifier_pool" },
+        { "poolId": "gloves_str_dex_int", "baseIds": [2661, 3257, 5396], "classification": "blocked_missing_compiled_modifier_pool" },
+        { "poolId": "helmets_str_dex_int", "baseIds": [2660, 3205, 5355], "classification": "blocked_missing_compiled_modifier_pool" },
+        { "poolId": "shields_str_dex_int", "baseIds": [373, 2667], "classification": "blocked_missing_compiled_modifier_pool" }
+      ],
+      "emptyCompiledPools": [
+        { "poolId": "diamond", "baseIds": [617], "classification": "blocked_empty_modifier_pool" },
+        { "poolId": "time_lost_diamond", "baseIds": [621], "classification": "blocked_empty_modifier_pool" },
+        { "poolId": "time_lost_emerald", "baseIds": [619], "classification": "blocked_empty_modifier_pool" },
+        { "poolId": "time_lost_ruby", "baseIds": [618], "classification": "blocked_empty_modifier_pool" },
+        { "poolId": "time_lost_sapphire", "baseIds": [620], "classification": "blocked_empty_modifier_pool" }
+      ]
+    },
+    "fieldCoverage": {
+      "requiredLevel": {
+        "availableCount": 0,
+        "unavailableCount": 1760,
+        "status": "blocked_missing_verified_data",
+        "handling": "Drop level remains separate and is never substituted."
+      },
+      "dropLevel": { "availableCount": 1760, "minimum": 1, "maximum": 80 },
+      "baseProperties": { "availableCount": 1628, "unavailableCount": 129, "malformedSourcePayloadCount": 3 },
+      "perBaseIcon": { "availableCount": 0, "handling": "Graceful class-icon or monogram fallback; validation does not fail." },
+      "classIcon": { "availableCount": 71, "classCount": 76 },
+      "socketFields": {
+        "sourceSocketCountAvailable": 1760,
+        "sourceSocketCountDistribution": { "0": 125, "1": 1084, "2": 551 },
+        "verifiedMaximumSocketsAvailable": 0,
+        "verifiedDefaultSocketsAvailable": 0,
+        "status": "blocked_semantics_unverified",
+        "handling": "Retain socketCount as a sourced value; do not reinterpret it as maximum or default sockets."
+      },
+      "perBaseSourceVersion": {
+        "availableCount": 0,
+        "status": "blocked_source_export_has_no_embedded_game_version"
+      }
+    },
+    "sourceAnomalies": {
+      "duplicateTagRecords": [
+        {
+          "id": 5333,
+          "displayName": "Runemastered Chain Tiara",
+          "tag": "runeforged",
+          "occurrences": 2,
+          "handling": "Explicit validator allowance for this source record; normalized data is not silently rewritten."
+        }
+      ],
+      "incompleteBasePropertyRecords": [
+        {
+          "id": 3533,
+          "displayName": "Runeforged Winged Spear",
+          "missingField": "physical_damage_min",
+          "handling": "Preserve the sourced payload and do not fabricate a minimum value."
+        }
+      ],
+      "malformedBasePropertyPayloads": [
+        {
+          "id": 2647,
+          "displayName": "Garment",
+          "observedShape": "empty_array",
+          "handling": "Explicit validator allowance for this source record; expose an empty property object at runtime."
+        },
+        {
+          "id": 2977,
+          "displayName": "Fists of Stone",
+          "observedShape": "empty_array",
+          "handling": "Explicit validator allowance for this source record; expose an empty property object at runtime."
+        },
+        {
+          "id": 2978,
+          "displayName": "Runeforged Fists of Stone",
+          "observedShape": "empty_array",
+          "handling": "Explicit validator allowance for this source record; expose an empty property object at runtime."
+        }
+      ]
+    },
+    "migration": {
+      "legacyWithoutBaseItemId": "Choose the first supported concrete base in the saved simulator pool by stable numeric ID.",
+      "invalidOrBlockedMapping": "Show a compatibility message and do not crash or map by display name.",
+      "legacyQuality": "Normalize to the structured quality shape.",
+      "socketSemantics": "Preserve unknown legacy socket state without inventing verified maximum/default limits."
+    }
   }
 }

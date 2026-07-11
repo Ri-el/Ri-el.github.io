@@ -24,6 +24,16 @@ Required level is not present for any retained Amulet, so the UI reports it as u
 
 The Codex in-app browser rejected direct `file://` navigation under its local-file URL policy. Direct-file compatibility is therefore covered at this checkpoint by classic deferred script order, absence of runtime fetches, locally bundled data, and source contracts, but interactive `file://` verification is recorded as blocked rather than claimed. The local HTTP/service-worker verification remains pending the repository-required approval for local network access.
 
+## Task 02 generic concrete-base state
+
+The Task 01 workbench component now serves all 31 outer item classes without changing their cards or direct-entry behavior. The 56 populated simulator pools map to 1,743 surfaced normalized records. Two unmodifiable Gloves are disabled, leaving 1,741 craft-selectable records. The selector searches sourced names, IDs, requirements, properties, and implicit text; it also provides Drop Level and attribute-family filters. Because none of the 1,760 normalized records has a verified required level, that distinct filter is disabled with an explicit source-data message and never substitutes Drop Level.
+
+Concrete choices from another attribute family rebuild the engine for that base's exact simulator pool while preserving item level and one undo snapshot. Crafted switches, including Jewel swatches, require confirmation and reset incompatible state; fresh switches are immediate. Undo/redo, stash loading, and Hinekora previews retain concrete ID and pool identity. Ruby, Sapphire, and Emerald keep their existing header control, and attribute-family pool IDs are never presented as concrete bases.
+
+Item-state schema version 3 adds versioned migration and generic concrete metadata while retaining the existing prefix/suffix engine. Legacy saves without `baseItemId` deterministically use the first selectable mapped base in their saved pool. Malformed IDs, pool mismatches, newer schemas, target-version mismatches, empty pools, and unsupported versions are rejected with compatibility messages. Legacy socket counts are retained as explicitly unverified metadata; maximum/default limits and socket effects are not invented. Concrete tags participate in modifier eligibility, and fixed sourced prefix/suffix-cap implicit deltas are enforced.
+
+The 17 normalized-data blockers are explicit: 11 all-attribute armour/shield records lack compiled pools, five Diamond/Time-Lost Jewel pools are empty, and Timeless Jewel ID `613` has no simulator mapping. No retained base maps ambiguously. The source `socketCount` field remains a source datum until Task 06 verifies its gameplay semantics.
+
 ## Selection calculation
 
 The corrected ordinary-currency path is:
@@ -57,14 +67,14 @@ Chaos first removes one removable modifier. Omen of Whittling selects the minimu
 
 These prevent a claim of complete game parity:
 
-- The converted modifier data still has 61 class-level files, 56 populated. Separate normalized data now retains 1,760 concrete IDs and tags, including 25 Amulets, but required levels, per-base icons, localized implicit templates, and some per-base properties/limits remain unavailable. Exact base-specific mechanics cannot be claimed where those fields or enforcement rules are missing.
+- The converted modifier data still has 61 class-level files, 56 populated. Normalized data retains 1,760 concrete records; 1,743 map to populated pools, while 17 have documented pool/mapping blockers. Required levels, per-base icons, localized implicit templates, maximum/default socket semantics, and some per-base properties/limits remain unavailable. Exact base-specific mechanics cannot be claimed where fields or enforcement rules are missing.
 - Eight populated pools have every weight collapsed to `1`: `body_armours_str_dex_int`, `claws`, `daggers`, `flails`, `one_hand_axes`, `one_hand_swords`, `two_hand_axes`, and `two_hand_swords`. Their probabilities are equalised and cannot be certified against 0.5.4 until the weights are re-imported from the source export.
 - All 700 Desecrated entries lack numeric modifier levels. Whittling therefore cannot accurately compare a revealed Desecrated modifier with ordinary modifiers; the engine conservatively ranks unknown levels last.
 - Desecrated pools are empty for `sceptres`, `life_flasks`, `mana_flasks`, and `charms`.
 - `diamond` and all four `time_lost_*` jewel pools are empty and not selectable.
 - Essence of the Breach is still a hard-coded no-op, and generic enforcement of the 0.5.4 one-crafted-modifier rule is not implemented.
 - Well of Souls options are deliberately selected uniformly in the current engine rather than by configured weight.
-- Concrete Amulet identity is now distinguishable, including reduced-capacity base implicit IDs, but Task 01 does not yet enforce every base-specific prefix/suffix-cap mutation. That belongs to the generic state/invariant work and remains unclaimed.
+- Concrete tags and fixed sourced prefix/suffix-cap implicit deltas are enforced generically. Other inherent effects remain state/display data until their exact operation hooks are verified.
 
 Every one of the 56 currently selectable populated class/attribute pools constructs and accepts a valid basic craft without an exception. That is not the same as supporting every concrete base available in PoE2 0.5.4.
 

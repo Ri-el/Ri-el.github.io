@@ -61,10 +61,14 @@ function record(modGroup, ilvlReq, extra = {}) {
 
 function rareItem(baseType, prefixes = [], suffixes = []) {
   return {
+    schemaVersion: 3,
     rarity: 'rare', baseName: baseType, name: 'Test Item', baseType, jewelType: baseType,
+    generatedName: 'Test Item',
     prefixes, suffixes, enchantments: [], corrupted: false, sanctified: false,
     mirrored: false, quality: { amount: 0, type: 'normal', source: null },
-    ilvl: 83, currencyUsed: {}, hinekoraLocked: false,
+    ilvl: 83, itemLevel: 83, currencyUsed: {}, hinekoraLocked: false,
+    sockets: [], socketedContent: [], runes: [], soulCores: [], flags: {},
+    desecratedState: null, omenState: null, hinekoraState: null, fracturedMods: [],
   };
 }
 
@@ -86,6 +90,29 @@ function concreteAmulet(id, displayName, dropLevel, implicitId) {
       displayText: `Test stat ${implicitId}: 1\u20132`,
     }],
     socketCount: 0,
+    targetGameVersion: '0.5.4',
+    verificationState: 'fixture',
+  };
+}
+
+function concreteLimitBase({ id, simulatorPoolId, itemClass, prefixRange, suffixRange }) {
+  const stats = [];
+  if (prefixRange) stats.push({ id: 'local_maximum_prefixes_allowed_+', range: prefixRange });
+  if (suffixRange) stats.push({ id: 'local_maximum_suffixes_allowed_+', range: suffixRange });
+  return {
+    id,
+    sourceId: id,
+    metadataKey: `Metadata/Items/${itemClass}/${id}`,
+    displayName: `${itemClass} Limit Base ${id}`,
+    itemClass,
+    simulatorPoolId,
+    requiredLevel: null,
+    dropLevel: 1,
+    tags: [simulatorPoolId, 'default'],
+    requirements: {},
+    baseProperties: {},
+    implicits: [{ id: id + 10000, key: `LimitImplicit${id}`, stats, displayText: 'Limit fixture' }],
+    sourceSocketCount: 1,
     targetGameVersion: '0.5.4',
     verificationState: 'fixture',
   };
@@ -150,6 +177,7 @@ test('legacy quality state migrates to the structured shape without changing mec
   assert.deepEqual(engine.getItem().quality, { amount: 0, type: 'normal', source: null });
 
   const legacy = rareItem('quality_migration_test');
+  legacy.schemaVersion = 1;
   legacy.quality = 7;
   engine.loadItem(legacy);
   assert.deepEqual(engine.getItem().quality, { amount: 7, type: 'normal', source: null });
@@ -164,6 +192,191 @@ test('legacy quality state migrates to the structured shape without changing mec
   });
 });
 
+test('schema v3 keeps generic concrete-base metadata and item-level aliases distinct', () => {
+  const data = { bases: { amulets: syntheticBase() } };
+  const crimson = {
+    ...concreteAmulet(2546, 'Crimson Amulet', 1, 1564),
+    sourceId: 'source-2546',
+    sourceItemClass: 'Amulet',
+    equipmentSlot: 'Amulet',
+    classId: 34,
+    modifierPoolClassId: 34,
+    attributeFamily: 'str',
+    variantFamily: 'amulets',
+    requirements: { strength: 10 },
+    baseProperties: { spirit: 5 },
+    sourceSocketCount: 2,
+    defaultSockets: null,
+    maximumSockets: null,
+    sourceVersion: '0.5.4.1.2',
+    provenance: { normalizedPath: 'data/normalized/base-items.json' },
+  };
+  const engine = new Engine(data, 'amulets', null, null, null, crimson);
+  const item = engine.getItem();
+
+  assert.equal(item.schemaVersion, 3);
+  assert.equal(item.baseItemId, 2546);
+  assert.equal(item.baseSourceId, 'source-2546');
+  assert.equal(item.sourceItemClass, 'Amulet');
+  assert.equal(item.equipmentSlot, 'Amulet');
+  assert.equal(item.baseClassId, 34);
+  assert.equal(item.modifierPoolClassId, 34);
+  assert.equal(item.attributeFamily, 'str');
+  assert.equal(item.variantFamily, 'amulets');
+  assert.deepEqual(item.requirements, { strength: 10 });
+  assert.deepEqual(item.baseProperties, { spirit: 5 });
+  assert.equal(item.sourceSocketCount, 2);
+  assert.equal(item.baseSocketCount, 2);
+  assert.equal(item.defaultSockets, null);
+  assert.equal(item.maximumSockets, null);
+  assert.equal(item.socketCount, undefined);
+  assert.equal(item.sourceVersion, '0.5.4.1.2');
+  assert.deepEqual(item.baseProvenance, { normalizedPath: 'data/normalized/base-items.json' });
+  assert.deepEqual(item.sockets, []);
+  assert.deepEqual(item.runes, []);
+  assert.deepEqual(item.soulCores, []);
+  assert.deepEqual(item.flags, {});
+  assert.deepEqual(item.fracturedMods, []);
+  assert.equal(item.generatedName, null);
+  assert.equal(item.ilvl, 83);
+  assert.equal(item.itemLevel, 83);
+
+  engine.setItemLevel(67);
+  assert.equal(engine.getItem().ilvl, 67);
+  assert.equal(engine.getItem().itemLevel, 67);
+  withRandom(() => 0, () => {
+    assert(engine.applyTransmutation().success);
+    assert(engine.applyRegal().success);
+  });
+  const rare = engine.getItem();
+  assert.equal(rare.name, rare.generatedName);
+  assert.notEqual(rare.generatedName, rare.baseName);
+});
+
+test('schema v3 migration preserves legacy socket payloads without inventing mechanics', () => {
+  const data = { bases: { amulets: syntheticBase() } };
+  const crimson = concreteAmulet(2546, 'Crimson Amulet', 1, 1564);
+  const engine = new Engine(data, 'amulets', null, null, null, crimson);
+
+  const numericLegacy = rareItem('amulets');
+  numericLegacy.schemaVersion = 1;
+  numericLegacy.baseItemId = 2546;
+  numericLegacy.simulatorPoolId = 'amulets';
+  delete numericLegacy.ilvl;
+  numericLegacy.itemLevel = 67;
+  numericLegacy.quality = 7;
+  numericLegacy.sockets = 2;
+  delete numericLegacy.socketCount;
+  delete numericLegacy.runes;
+  delete numericLegacy.soulCores;
+  delete numericLegacy.flags;
+  engine.loadItem(numericLegacy);
+  const migrated = engine.getItem();
+  assert.equal(migrated.schemaVersion, 3);
+  assert.equal(migrated.ilvl, 67);
+  assert.equal(migrated.itemLevel, 67);
+  assert.deepEqual(migrated.quality, { amount: 7, type: 'normal', source: null });
+  assert.deepEqual(migrated.sockets, []);
+  assert.equal(migrated.socketCount, 2);
+  assert.deepEqual(migrated.legacySocketState, {
+    count: 2,
+    sourceField: 'sockets',
+    payload: null,
+    status: 'preserved-unverified',
+    mechanicsApplied: false,
+  });
+  assert.deepEqual(migrated.runes, []);
+  assert.deepEqual(migrated.soulCores, []);
+  assert.deepEqual(migrated.flags, {});
+  assert.equal(migrated.generatedName, 'Test Item');
+  assert.equal(migrated.implicits[0].id, 1564);
+
+  const opaqueLegacy = rareItem('amulets');
+  opaqueLegacy.schemaVersion = 1;
+  opaqueLegacy.baseItemId = 2546;
+  opaqueLegacy.sockets = { count: 1, contents: ['legacy-rune'] };
+  delete opaqueLegacy.socketCount;
+  engine.loadItem(opaqueLegacy);
+  const opaque = engine.getItem();
+  assert.deepEqual(opaque.sockets, []);
+  assert.deepEqual(opaque.legacySocketState.payload, { count: 1, contents: ['legacy-rune'] });
+  assert.equal(opaque.legacySocketState.status, 'preserved-unverified');
+  assert.equal(opaque.legacySocketState.mechanicsApplied, false);
+});
+
+test('schema migration rejects incompatible state without mutating the live item', () => {
+  const data = { bases: { amulets: syntheticBase(), rings: syntheticBase() } };
+  const crimson = concreteAmulet(2546, 'Crimson Amulet', 1, 1564);
+  const engine = new Engine(data, 'amulets', null, null, null, crimson);
+  const before = engine.getItem();
+
+  assert.throws(() => engine.loadItem({ ...before, schemaVersion: 4 }), /newer than supported/);
+  assert.throws(() => engine.loadItem({ ...before, simulatorPoolId: 'rings' }), /does not match/);
+  assert.throws(() => engine.loadItem({ ...before, baseItemId: 999999 }), /does not match resolved base/);
+  assert.throws(() => engine.loadItem({ ...before, targetGameVersion: '0.4.0' }), /targets game version/);
+  const invalidSockets = { ...before, schemaVersion: 1, sockets: -1 };
+  assert.throws(() => engine.loadItem(invalidSockets), /invalid legacy socket count/);
+  assert.deepEqual(engine.getItem(), before);
+});
+
+test('concrete bases enforce selectable state and verified socket bounds non-mutatingly', () => {
+  const data = { bases: { amulets: syntheticBase() } };
+  const crimson = concreteAmulet(2546, 'Crimson Amulet', 1, 1564);
+  const disabled = { ...concreteAmulet(2547, 'Disabled Amulet', 1, 1565), selectable: false, disabledReason: 'Fixture base is unmodifiable.' };
+  assert.throws(() => new Engine(data, 'amulets', null, null, null, disabled), /Fixture base is unmodifiable/);
+
+  const engine = new Engine(data, 'amulets', null, null, null, crimson);
+  const before = engine.getItem();
+  assert.throws(() => engine.setConcreteBase(disabled), /Fixture base is unmodifiable/);
+  assert.deepEqual(engine.getItem(), before);
+  assert.throws(
+    () => engine.setConcreteBase({ ...crimson, defaultSockets: 2, maximumSockets: 1 }),
+    /default sockets above its maximum/
+  );
+  assert.deepEqual(engine.getItem(), before);
+});
+
+test('fixed concrete implicit stats adjust Amulet and Ring affix capacity only', () => {
+  const data = { bases: { amulets: syntheticBase(8, 8), rings: syntheticBase(8, 8) } };
+  const amuletBase = concreteLimitBase({
+    id: 7001, simulatorPoolId: 'amulets', itemClass: 'Amulet',
+    prefixRange: [1, 1], suffixRange: [-1, -1],
+  });
+  const amulet = new Engine(data, 'amulets', null, null, null, amuletBase);
+  assert.deepEqual(amulet.getLimits('magic'), { prefixes: 2, suffixes: 0 });
+  assert.deepEqual(amulet.getLimits('rare'), { prefixes: 4, suffixes: 2 });
+  const fullAmulet = rareItem('amulets',
+    [0, 1, 2, 3].map(i => record(`P${i}`, 1)),
+    [0, 1].map(i => record(`S${i}`, 1)));
+  amulet.loadItem(fullAmulet);
+  assert.equal(amulet.applyExalted().success, false);
+
+  const ringBase = concreteLimitBase({
+    id: 7002, simulatorPoolId: 'rings', itemClass: 'Ring',
+    prefixRange: [-2, -2], suffixRange: [2, 2],
+  });
+  const ring = new Engine(data, 'rings', null, null, null, ringBase);
+  assert.deepEqual(ring.getLimits('magic'), { prefixes: 0, suffixes: 3 });
+  assert.deepEqual(ring.getLimits('rare'), { prefixes: 1, suffixes: 5 });
+  const fullRing = rareItem('rings',
+    [record('P0', 1)],
+    [0, 1, 2, 3, 4].map(i => record(`S${i}`, 1)));
+  ring.loadItem(fullRing);
+  assert.equal(ring.applyExalted().success, false);
+
+  const variableBase = concreteLimitBase({
+    id: 7003, simulatorPoolId: 'rings', itemClass: 'Ring',
+    prefixRange: [1, 2], suffixRange: [-2, -1],
+  });
+  const variable = new Engine(data, 'rings', null, null, null, variableBase);
+  assert.deepEqual(variable.getLimits('magic'), { prefixes: 1, suffixes: 1 });
+  assert.deepEqual(variable.getLimits('rare'), { prefixes: 3, suffixes: 3 });
+  assert.deepEqual(Engine.LIMITS, {
+    magic: { prefixes: 1, suffixes: 1 },
+    rare: { prefixes: 3, suffixes: 3 },
+  });
+});
+
 test('concrete Amulet identity remains separate from the simulator pool', () => {
   const data = { bases: { amulets: syntheticBase() } };
   const crimson = concreteAmulet(2546, 'Crimson Amulet', 1, 1564);
@@ -171,7 +384,7 @@ test('concrete Amulet identity remains separate from the simulator pool', () => 
   const engine = new Engine(data, 'amulets', null, null, null, crimson);
   const initial = engine.getItem();
 
-  assert.equal(initial.schemaVersion, 2);
+  assert.equal(initial.schemaVersion, 3);
   assert.equal(initial.baseType, 'amulets');
   assert.equal(initial.jewelType, 'amulets');
   assert.equal(initial.simulatorPoolId, 'amulets');
