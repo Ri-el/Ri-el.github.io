@@ -1,0 +1,35 @@
+diff --git a/push.cmd b/push.cmd
+--- a/push.cmd
++++ b/push.cmd
+@@
+-REM  One-click upload of THIS folder to GitHub (Ri-el/poe2-crafting).
++REM  One-click upload of THIS folder to GitHub (Ri-el/Ri-el.github.io).
+@@
+-echo     https://github.com/Ri-el/poe2-crafting  (branch: main)
++echo     https://github.com/Ri-el/Ri-el.github.io  (branch: main)
+@@
+ if not exist ".git" (
+   git init
+   git branch -M main
+-  git remote add origin https://github.com/Ri-el/poe2-crafting.git
+ )
++
++git remote get-url origin >nul 2>nul
++if errorlevel 1 (
++  git remote add origin https://github.com/Ri-el/Ri-el.github.io.git
++) else (
++  git remote set-url origin https://github.com/Ri-el/Ri-el.github.io.git
++)
+@@
+-git commit -m "Update: file:// build, bug fixes, and mod-pool scaffolding for all item categories"
++git commit -m "Update website"
+
+diff --git a/README.md b/README.md
+--- a/README.md
++++ b/README.md
+@@
+-- **Upload to GitHub:** double-click `push.cmd` (home PC only) → pushes to `Ri-el/poe2-crafting`.
++- **Upload to GitHub:** double-click `push.cmd` (home PC only) → pushes to `Ri-el/Ri-el.github.io`.
+@@
+-| `push.cmd` | **Double-click to upload everything to GitHub.** Inits git if needed, then force-pushes the whole folder to `Ri-el/poe2-crafting` (`main`). | Home PC only. Force-push overwrites the old version on GitHub — pull/sync first if the repo changed elsewhere. |
++| `push.cmd` | **Double-click to upload everything to GitHub.** Inits git if needed, ensures `origin` points to `Ri-el/Ri-el.github.io`, then force-pushes the whole folder to `main`. | Home PC only. Force-push overwrites the old version on GitHub — pull/sync first if the repo changed elsewhere. |

@@ -1,6 +1,6 @@
 @echo off
 REM ============================================================
-REM  One-click upload of THIS folder to GitHub (Ri-el/poe2-crafting).
+REM  One-click upload of THIS folder to GitHub (Ri-el/Ri-el.github.io).
 REM  Your local copy is the source of truth; this replaces the old
 REM  version on GitHub. Run from home (needs internet + Git).
 REM ============================================================
@@ -14,7 +14,7 @@ if errorlevel 1 (
 )
 
 echo This will push EVERYTHING in this folder to:
-echo     https://github.com/Ri-el/poe2-crafting  (branch: main)
+echo     https://github.com/Ri-el/Ri-el.github.io  (branch: main)
 echo and overwrite the old version there.
 echo.
 pause
@@ -22,11 +22,17 @@ pause
 if not exist ".git" (
   git init
   git branch -M main
-  git remote add origin https://github.com/Ri-el/poe2-crafting.git
+)
+
+git remote get-url origin >nul 2>nul
+if errorlevel 1 (
+  git remote add origin https://github.com/Ri-el/Ri-el.github.io.git
+) else (
+  git remote set-url origin https://github.com/Ri-el/Ri-el.github.io.git
 )
 
 git add -A
-git commit -m "Update: file:// build, bug fixes, and mod-pool scaffolding for all item categories"
+git commit -m "Update website"
 git push -u origin main --force
 
 echo.
