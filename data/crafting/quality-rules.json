@@ -378,7 +378,7 @@
       ],
       "known": "Each use grants an item-level-dependent amount, with less quality at higher item levels.",
       "missing": "The exact 0.5.4 formula, breakpoints, rounding rule, and any distribution needed for deterministic simulation.",
-      "behavior": "Applicability and cap validation are active, but preview/apply fail atomically with the operation's verification-required reason."
+      "behavior": "Applicability, quality-type, and cap validation are active; preview/apply fail atomically with the operation's verification-required reason until the exact item-level formula is verified."
     }
   ]
 }

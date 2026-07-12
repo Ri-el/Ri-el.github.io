@@ -4,11 +4,11 @@
   "fullParityClaim": false,
   "inventorySource": "data/crafting/currency-index.json",
   "registrySource": "data/crafting/currency-index.json#craftRegistry",
-  "entryDetailStatus": "authoritative_registry_task03",
+  "entryDetailStatus": "authoritative_registry_task04",
   "counts": {
     "sourceEntries": 530,
     "registryDefinitions": 531,
-    "visibleDefinitions": 37,
+    "visibleDefinitions": 45,
     "unresolvedSourceIdentities": 1,
     "unclassified": 0,
     "sourceByClassification": {
@@ -33,7 +33,7 @@
       "implemented": 32,
       "conditional": 0,
       "non_item_currency": 0,
-      "blocked_missing_data": 4,
+      "blocked_missing_data": 12,
       "probability_unverified": 1,
       "intentionally_out_of_scope": 0,
       "deprecated_for_target_version": 0
@@ -55,6 +55,7 @@
       "breach": 1,
       "corruption": 1,
       "currency": 20,
+      "quality": 8,
       "ritual": 13
     }
   },
@@ -941,7 +942,7 @@
       },
       "handler": null,
       "disabledReasonHandler": "staticDisabledReason",
-      "disabledReason": "Mechanic blocked because its exact quality applicability, increment, and cap behavior for Blacksmith's Whetstone is not verified for target version 0.5.4.",
+      "disabledReason": "Mechanic blocked because the exact target-version 0.5.4 item-level increment formula, breakpoints, and rounding for Blacksmith's Whetstone are not verified.",
       "triggeringAction": null,
       "omenInteraction": {
         "omenId": null,
@@ -954,9 +955,9 @@
         "data/normalized/crafting-items.json#item:0"
       ],
       "testReferences": [],
-      "blocker": "Mechanic blocked because its exact quality applicability, increment, and cap behavior for Blacksmith's Whetstone is not verified for target version 0.5.4.",
+      "blocker": "Mechanic blocked because the exact target-version 0.5.4 item-level increment formula, breakpoints, and rounding for Blacksmith's Whetstone are not verified.",
       "supported": false,
-      "visible": false
+      "visible": true
     },
     {
       "stableId": "source-item:1",
@@ -981,7 +982,7 @@
       },
       "handler": null,
       "disabledReasonHandler": "staticDisabledReason",
-      "disabledReason": "Mechanic blocked because its exact quality applicability, increment, and cap behavior for Arcanist's Etcher is not verified for target version 0.5.4.",
+      "disabledReason": "Mechanic blocked because the exact target-version 0.5.4 item-level increment formula, breakpoints, and rounding for Arcanist's Etcher are not verified.",
       "triggeringAction": null,
       "omenInteraction": {
         "omenId": null,
@@ -994,9 +995,9 @@
         "data/normalized/crafting-items.json#item:1"
       ],
       "testReferences": [],
-      "blocker": "Mechanic blocked because its exact quality applicability, increment, and cap behavior for Arcanist's Etcher is not verified for target version 0.5.4.",
+      "blocker": "Mechanic blocked because the exact target-version 0.5.4 item-level increment formula, breakpoints, and rounding for Arcanist's Etcher are not verified.",
       "supported": false,
-      "visible": false
+      "visible": true
     },
     {
       "stableId": "source-item:6",
@@ -1021,7 +1022,7 @@
       },
       "handler": null,
       "disabledReasonHandler": "staticDisabledReason",
-      "disabledReason": "Mechanic blocked because its exact quality applicability, increment, and cap behavior for Armourer's Scrap is not verified for target version 0.5.4.",
+      "disabledReason": "Mechanic blocked because the exact target-version 0.5.4 item-level increment formula, breakpoints, and rounding for Armourer's Scrap are not verified.",
       "triggeringAction": null,
       "omenInteraction": {
         "omenId": null,
@@ -1034,9 +1035,9 @@
         "data/normalized/crafting-items.json#item:6"
       ],
       "testReferences": [],
-      "blocker": "Mechanic blocked because its exact quality applicability, increment, and cap behavior for Armourer's Scrap is not verified for target version 0.5.4.",
+      "blocker": "Mechanic blocked because the exact target-version 0.5.4 item-level increment formula, breakpoints, and rounding for Armourer's Scrap are not verified.",
       "supported": false,
-      "visible": false
+      "visible": true
     },
     {
       "stableId": "source-item:28",
@@ -1061,7 +1062,7 @@
       },
       "handler": null,
       "disabledReasonHandler": "staticDisabledReason",
-      "disabledReason": "Mechanic blocked because its exact quality applicability, increment, and cap behavior for Glassblower's Bauble is not verified for target version 0.5.4.",
+      "disabledReason": "Mechanic blocked because the exact target-version 0.5.4 item-level increment formula, breakpoints, and rounding for Glassblower's Bauble are not verified.",
       "triggeringAction": null,
       "omenInteraction": {
         "omenId": null,
@@ -1074,9 +1075,9 @@
         "data/normalized/crafting-items.json#item:28"
       ],
       "testReferences": [],
-      "blocker": "Mechanic blocked because its exact quality applicability, increment, and cap behavior for Glassblower's Bauble is not verified for target version 0.5.4.",
+      "blocker": "Mechanic blocked because the exact target-version 0.5.4 item-level increment formula, breakpoints, and rounding for Glassblower's Bauble are not verified.",
       "supported": false,
-      "visible": false
+      "visible": true
     },
     {
       "stableId": "source-item:65",
@@ -1101,7 +1102,7 @@
       },
       "handler": null,
       "disabledReasonHandler": "staticDisabledReason",
-      "disabledReason": "Mechanic blocked because its exact quality applicability, increment, and cap behavior for Vaal Armourer's Infuser is not verified for target version 0.5.4.",
+      "disabledReason": "Mechanic blocked because the exact target-version Vaal Armourer's Infuser quality mutation, cap, corruption outcome, and increment are not verified.",
       "triggeringAction": null,
       "omenInteraction": {
         "omenId": null,
@@ -1114,9 +1115,9 @@
         "data/normalized/crafting-items.json#item:65"
       ],
       "testReferences": [],
-      "blocker": "Mechanic blocked because its exact quality applicability, increment, and cap behavior for Vaal Armourer's Infuser is not verified for target version 0.5.4.",
+      "blocker": "Mechanic blocked because the exact target-version Vaal Armourer's Infuser quality mutation, cap, corruption outcome, and increment are not verified.",
       "supported": false,
-      "visible": false
+      "visible": true
     },
     {
       "stableId": "source-item:66",
@@ -1141,7 +1142,7 @@
       },
       "handler": null,
       "disabledReasonHandler": "staticDisabledReason",
-      "disabledReason": "Mechanic blocked because its exact quality applicability, increment, and cap behavior for Vaal Blacksmith's Infuser is not verified for target version 0.5.4.",
+      "disabledReason": "Mechanic blocked because the exact target-version Vaal Blacksmith's Infuser quality mutation, cap, corruption outcome, and increment are not verified.",
       "triggeringAction": null,
       "omenInteraction": {
         "omenId": null,
@@ -1154,9 +1155,9 @@
         "data/normalized/crafting-items.json#item:66"
       ],
       "testReferences": [],
-      "blocker": "Mechanic blocked because its exact quality applicability, increment, and cap behavior for Vaal Blacksmith's Infuser is not verified for target version 0.5.4.",
+      "blocker": "Mechanic blocked because the exact target-version Vaal Blacksmith's Infuser quality mutation, cap, corruption outcome, and increment are not verified.",
       "supported": false,
-      "visible": false
+      "visible": true
     },
     {
       "stableId": "source-item:67",
@@ -1181,7 +1182,7 @@
       },
       "handler": null,
       "disabledReasonHandler": "staticDisabledReason",
-      "disabledReason": "Mechanic blocked because its exact quality applicability, increment, and cap behavior for Vaal Arcanist's Infuser is not verified for target version 0.5.4.",
+      "disabledReason": "Mechanic blocked because the exact target-version Vaal Arcanist's Infuser quality mutation, cap, corruption outcome, and increment are not verified.",
       "triggeringAction": null,
       "omenInteraction": {
         "omenId": null,
@@ -1194,9 +1195,9 @@
         "data/normalized/crafting-items.json#item:67"
       ],
       "testReferences": [],
-      "blocker": "Mechanic blocked because its exact quality applicability, increment, and cap behavior for Vaal Arcanist's Infuser is not verified for target version 0.5.4.",
+      "blocker": "Mechanic blocked because the exact target-version Vaal Arcanist's Infuser quality mutation, cap, corruption outcome, and increment are not verified.",
       "supported": false,
-      "visible": false
+      "visible": true
     },
     {
       "stableId": "source-item:68",
@@ -1221,7 +1222,7 @@
       },
       "handler": null,
       "disabledReasonHandler": "staticDisabledReason",
-      "disabledReason": "Mechanic blocked because its exact quality applicability, increment, and cap behavior for Vaal Catalysing Infuser is not verified for target version 0.5.4.",
+      "disabledReason": "Mechanic blocked because the exact target-version Vaal Catalysing Infuser quality mutation, cap, corruption outcome, and increment are not verified.",
       "triggeringAction": null,
       "omenInteraction": {
         "omenId": null,
@@ -1234,9 +1235,9 @@
         "data/normalized/crafting-items.json#item:68"
       ],
       "testReferences": [],
-      "blocker": "Mechanic blocked because its exact quality applicability, increment, and cap behavior for Vaal Catalysing Infuser is not verified for target version 0.5.4.",
+      "blocker": "Mechanic blocked because the exact target-version Vaal Catalysing Infuser quality mutation, cap, corruption outcome, and increment are not verified.",
       "supported": false,
-      "visible": false
+      "visible": true
     },
     {
       "stableId": "source-item:35",
@@ -21258,18 +21259,18 @@
       "category": "corruption",
       "tab": "corruption",
       "implementationStatus": "probability_unverified",
-      "verificationStatus": "mutation_present_probability_unverified",
+      "verificationStatus": "probability_unverified_blocked",
       "applicability": {
-        "predicate": "currencyDisabledReason",
+        "predicate": "unsupportedReason",
         "validItemClasses": [],
         "validItemTags": [],
         "corruptionRestriction": "allowed_only_while_uncorrupted_and_unsanctified",
         "qualityRestriction": "none",
         "socketRestriction": "none"
       },
-      "handler": "applyVaal",
-      "disabledReasonHandler": "currencyDisabledReason",
-      "disabledReason": "",
+      "handler": null,
+      "disabledReasonHandler": "staticDisabledReason",
+      "disabledReason": "Mechanic blocked because exact target-version Vaal Orb outcomes and probabilities are not verified.",
       "triggeringAction": null,
       "omenInteraction": {
         "omenId": null,
@@ -21287,7 +21288,7 @@
         "ui:vaal-in-corruption-tab"
       ],
       "blocker": "Exact target-version Vaal Orb outcome probabilities are not encoded by the retained public data.",
-      "supported": true,
+      "supported": false,
       "visible": true
     },
     {
@@ -21411,13 +21412,20 @@
       "visible": false
     }
   ],
-  "task03Change": {
-    "craftingItemStatusesChanged": 0,
-    "note": "Task 03 centralizes registry metadata, UI generation, and dispatch without claiming new crafting mechanics."
+  "task04Change": {
+    "coreCorrections": [
+      "alchemy_normal_only",
+      "annulment_non_normal_only",
+      "divine_non_normal_only",
+      "mirrored_items_immutable"
+    ],
+    "qualityAuditCardsSurfaced": 8,
+    "vaalBlocked": true,
+    "note": "Task 04 adds structured quality caps and blocked quality audit cards, corrects source-backed core restrictions, and blocks unverified Vaal outcomes."
   },
   "blockers": [
     "Full parity remains blocked while retained registry definitions still have implementation or verification blockers.",
     "Hinekora's Lock remains implemented for compatibility but has no normalized source-item identity in the checked-in export.",
-    "Tasks 04-07 must resolve mechanic-specific blocked_missing_data and probability_unverified records from verified target-version evidence."
+    "Tasks 05-07 must resolve remaining mechanic-specific blocked_missing_data and probability_unverified records from verified target-version evidence."
   ]
 }

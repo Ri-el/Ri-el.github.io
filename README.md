@@ -18,7 +18,7 @@ This README explains **what every file does** and **where to look when something
 
 ## 🗺️ Architecture in one paragraph
 
-You edit **one small JSON file per base item** in `data/bases/` (e.g. `ruby.json`, `helmets_str.json`). `build.cmd` runs `build_data.ps1`, which validates those files and compiles local browser-loadable `.data.js` bundles. `app.js` reads those globals and hands the selected pool to `crafting.js`; no external site is contacted at runtime, so direct `file://` use still works. The workbench's ten tabs and 37 visible crafting controls are generated from the browser form of one 531-definition registry. Repository-owned normalized source data, provenance, and the classified crafting inventory are kept separately so development-time validation does not depend on `../upload/data.json`.
+You edit **one small JSON file per base item** in `data/bases/` (e.g. `ruby.json`, `helmets_str.json`). `build.cmd` runs `build_data.ps1`, which validates those files and compiles local browser-loadable `.data.js` bundles. `app.js` reads those globals and hands the selected pool to `crafting.js`; no external site is contacted at runtime, so direct `file://` use still works. The workbench's ten tabs and 45 visible cards (37 runtime controls plus eight disabled quality audit cards) are generated from the browser form of one 531-definition registry. Repository-owned normalized source data, provenance, and the classified crafting inventory are kept separately so development-time validation does not depend on `../upload/data.json`.
 
 ---
 
@@ -28,7 +28,7 @@ You edit **one small JSON file per base item** in `data/bases/` (e.g. `ruby.json
 |---|---|---|
 | `index.html` | The page itself. Loads every script/style in order. The `<script>` tags at the bottom decide what code runs. | A file you added isn't loading, or you need to add a new script/style tag. |
 | `app.js` | **Boot + UI glue.** Wraps everything in an IIFE (`window.CraftingEngine`), reads the compiled data, generates crafting tabs/cards from the authoritative registry, and routes pointer, keyboard, context-menu, and drag interactions through shared validation/dispatch. It also owns the cursor orb, animations, stash, and ALT tier tooltips. | Buttons/clicks/tooltips/animations misbehave, or data isn't loading into the UI. |
-| `crafting.js` | **The crafting engine (the rules).** Currency behavior lives here — Transmute, Augment, Regal, Exalt, Chaos, Annul, Alchemy, Divine, Vaal, Essence of the Abyss, Desecrate, plus prefix/suffix caps and tier rolling. Item-state schema v3 keeps concrete identity, structured quality/socket placeholders, and versioned legacy migration without enabling unverified mechanics. | An orb does the wrong thing, mods roll incorrectly, or affix caps are off. **Engine bugs live here, NOT in the data files.** |
+| `crafting.js` | **The crafting engine (the rules).** Currency behavior lives here — Transmute, Augment, Regal, Exalt, Chaos, Annul, Alchemy, Divine, blocked Vaal, Essence of the Abyss, Desecrate, plus prefix/suffix caps and tier rolling. Item-state schema v4 keeps concrete identity, structured quality `{ amount, type, source, cap }`, and versioned legacy migration without enabling unverified mechanics. | An orb does the wrong thing, mods roll incorrectly, or affix caps are off. **Engine bugs live here, NOT in the data files.** |
 | `select.js` | **Item-class menu and workbench base selector.** Defines the outer category tree without inserting a concrete-base screen. Inside the workbench one generic normalized picker serves every non-Jewel class; Jewels retain Ruby/Sapphire/Emerald controls. It owns search, filters, keyboard behavior, and reset confirmation. | A class/category is missing, or the in-workbench base picker misbehaves. |
 | `style.css` | Main look — item tooltip, stash panel, dark PoE2 theme, layout. | General visual styling. |
 | `overhaul.css` | Final in-game-inspired layout layer: three-column workbench, currency stash tab, item stash, Omens row, and responsive selection screen. | Current UI layout and visual polish. |
@@ -51,8 +51,8 @@ You edit **one small JSON file per base item** in `data/bases/` (e.g. `ruby.json
 | `data/normalized/*.json` | Repository-owned normalized base, modifier, crafting-item, and Essence records plus a version manifest and output hashes. `base-items.json` retains 1,760 concrete records; Task 02 exposes the 1,743 records mapped to populated compiled pools and documents every remaining blocker. | A source mapping, concrete-base identity, or normalized reference fails validation. |
 | `data/normalized.data.js` | **Auto-generated** `file://` wrapper for the normalized records. | Never edit by hand; run the build. |
 | `data/source-cache/` | Source policy and provenance for the normalized data. The manifest explicitly records that the legacy raw export is unavailable rather than fabricating a fixture. | Auditing source identity, target version, parser version, or hashes. |
-| `data/crafting/runtime-registry.json` | Hand-authored tab metadata and the 37 existing visible runtime definitions. It references normalized records by exact source ID and metadata key, never by display-name matching. | Changing a verified visible craft's presentation or declarative runtime binding. |
-| `data/crafting/currency-index.json` | **Generated authoritative registry.** It audits all 530 retained source records plus runtime-only Hinekora's Lock: 531 unique definitions, ten tabs, 37 visible controls, exact blockers, evidence, fixtures, applicability, and handlers. | Adding or auditing a crafting item. Generate it with `tools/build-currency-index.mjs`. |
+| `data/crafting/runtime-registry.json` | Hand-authored tab metadata and the 37 runtime definitions. The generated inventory also surfaces eight disabled quality audit cards from retained source records. It references normalized records by exact source ID and metadata key, never by display-name matching. | Changing a verified visible craft's presentation or declarative runtime binding. |
+| `data/crafting/currency-index.json` | **Generated authoritative registry.** It audits all 530 retained source records plus runtime-only Hinekora's Lock: 531 unique definitions, ten tabs, 37 runtime controls and 45 visible cards including eight disabled quality audit cards, exact blockers, evidence, fixtures, applicability, and handlers. | Adding or auditing a crafting item. Generate it with `tools/build-currency-index.mjs`. |
 | `data/crafting/quality-rules.json` | Attributed 0.5.4 quality target/cap data and explicit blocked reasons for rules whose exact formula is unavailable. | Reviewing quality support; this file is not permission to enable a button without an engine operation and tests. |
 
 ### The 61 base files at a glance
@@ -63,12 +63,19 @@ You edit **one small JSON file per base item** in `data/bases/` (e.g. `ruby.json
 
 ### Quality support at the current checkpoint
 
-- **Implemented infrastructure:** structured item state `quality: { amount, type, source }`, migration of legacy numeric/missing values, target-class definitions, the normal 20% cap record, and explicit evidence/status metadata.
+- **Implemented infrastructure:** structured item state `quality: { amount, type, source, cap }`, migration of legacy numeric/missing values, target-class and cap validation, a dedicated quality tooltip section, and explicit evidence/status metadata.
 - **Not runtime-enabled:** Armourer's Scrap, Blacksmith's Whetstone, Arcanist's Etcher, and Glassblower's Bauble. Their valid target classes are known, but the exact Path of Exile 2 0.5.4 item-level increment formula is not present in the retained sources, so the data marks them `blocked_missing_formula`.
-- **Verified rule but not end-to-end implemented:** Gemcutter's Prism has a fixed +5% rule in the data, but the simulator has no Skill Gem item model or quality operation/UI, so it remains unavailable.
+- **Verified engine rule, not a workbench control:** Gemcutter's Prism has a fixed +5% rule and cap-20 transition in the generic engine handler, but the simulator has no normalized Skill Gem item model or registry control, so it remains unavailable in the workbench.
 - **Unsupported:** Catalysts and other alternate-quality mechanics. They require their own verified mutations and supporting tables.
 
 No quality currency button is enabled merely from a known description.
+
+### Task 04 core and quality checkpoint
+
+- Item-state schema is now version 4. Every quality record carries `amount`, `type`, `source`, and `cap`; normal legacy quality at or below the verified 20% cap migrates to `cap: 20`, while alternate or above-cap quality preserves an unknown cap instead of inheriting an unverified rule.
+- Source-backed core corrections are enforced in both engine and UI: Alchemy is Normal-only; Annulment and Divine reject Normal items; mirrored items cannot be modified or have their item level changed. Greater/Perfect minimum modifier-level floors and their documented below-floor group fallback remain unchanged.
+- Vaal Orb is still visible in the Corruption tab for parity, but is disabled and atomically rejected because the retained 0.5.4 evidence does not encode its outcome probabilities/transitions. The former uniform outcome path is no longer reachable through the workbench or engine.
+- Eight retained quality records are visible as disabled audit cards with specific blockers: four ordinary currencies lack the exact 0.5.4 item-level increment formula, and four Vaal Infusers remain reserved for the specialized Task 07 audit. Gemcutter's Prism has a verified generic +5/cap-20 engine rule but no normalized Skill Gem workbench target.
 
 ---
 

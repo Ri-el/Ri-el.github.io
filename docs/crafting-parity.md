@@ -3,6 +3,12 @@
 Target game version: **0.5.4**  
 Full parity claimed: **No**
 
+## Task 04 core and quality checkpoint
+
+The generated registry remains **531 definitions** for target version **0.5.4**. It now renders **45 visible cards**: the original 37 authored runtime controls plus eight disabled quality audit cards from retained normalized records. The eight cards are disabled with specific blockers and expose no handlers; their presence does not claim quality-mechanic parity.
+
+Task 04 corrections are reflected in runtime and parity metadata: Alchemy is Normal-only, Annulment and Divine require non-Normal rarity, mirrored items are immutable, and Vaal Orb is visible but blocked because target-version outcome transitions/probabilities are unverified. Structured quality state now includes `amount`, `type`, `source`, and `cap`; ordinary quality formulas and Vaal Infuser mutations remain blocked. `fullParityClaim` remains false.
+
 ## Task 03 authoritative-registry checkpoint
 
 `data/crafting/currency-index.json#craftRegistry` is the authoritative crafting-item registry. It contains all **530** retained normalized crafting items plus the existing runtime-only Hinekora's Lock definition, for **531** stable definitions. Exactly **37** definitions remain visible in this task, preserving the existing crafting surface while presentation and dispatch move to generated registry data.

@@ -104,6 +104,20 @@ Task 01 also corrected a reset invariant: `resetItem()` previously created an it
 
 ## Repeatable results
 
+## Task 04 core and quality currency checkpoint
+
+The engine now uses item-state schema version 4 with structured quality `{ amount, type, source, cap }`. Legacy normal quality at or below the verified 20% cap migrates to `cap: 20`; alternate and above-cap legacy quality keeps `cap: null` unless a saved cap is explicit and valid. Quality target/cap validation is active, the verified fixed Gemcutter's Prism +5 transition is covered by a synthetic Skill Gem fixture, and no unsupported quality formula is enabled in the equipment workbench.
+
+Normalized core constraints corrected in the engine and registry are: Orb of Alchemy requires Normal rarity; Orb of Annulment and Divine Orb require non-Normal rarity; and mirrored items reject core currency and item-level changes. Greater/Perfect floors remain 44/70 for Transmutation and Augmentation and 35/50 for Regal, Exalted, and Chaos, with the existing documented fallback to the best eligible tier when a modifier group has no tier at the floor.
+
+Vaal Orb remains a visible but disabled parity card. Its prior uniform outcome implementation was removed from the reachable operation path because retained 0.5.4 data does not verify outcome transitions or probabilities. Hinekora seals are invalidated when item level, Omen state, or crafting RNG context changes, so a preview cannot be committed under stale context.
+
+Quality parity now surfaces eight disabled audit cards: four ordinary quality currencies blocked on the exact item-level increment formula and four Vaal Infusers blocked on specialized mutation/corruption data reserved for Task 07. The generated registry remains 531 definitions with 45 visible cards (37 authored runtime controls plus eight quality audit cards); `fullParityClaim` remains false.
+
+Task 04 deterministic boundary: **44/44 engine**, **121/121 UI**, **67/67 data**, normalized/currency/parity generators current, sync verification passing, and fuzz **30,016 operations / 4,178 meaningful mutations / 405 Hinekora consumptions / 0 exceptions / 0 invariant violations**, reviewed digest `85d16590e2ed6e7a8fb4dd55d5a53ab4af980a40a360fd4633e469c3b59c37fe`. Interactive direct-file browser verification remains blocked by the Codex browser's local-file URL policy; static file:// contracts and generated bundles pass.
+
+The next numbered task is **Task 05 — Abyss, Breach, Essences, and Omens**.
+
 - Baseline deterministic suite against the original engine: **11/17 passed**. Failures covered the stale browser bundle, equipment limits, Magic-only classes, Alchemy count, Whittling ties, and Greater/Perfect semantics.
 - Current deterministic suite: **39/39 passed** with `node validation.mjs`.
 - Current UI DOM/CSS contract suite: **117/117 passed** with `node ui-validation.mjs`.

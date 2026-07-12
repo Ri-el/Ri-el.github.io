@@ -255,7 +255,7 @@ function checkItemShape(engine, item) {
 		v.push(`item baseType ${item.baseType} does not match engine baseType ${engine.baseType}`)
 	}
 	if (item.baseItemId != null) {
-		if (!Number.isInteger(item.schemaVersion) || item.schemaVersion < 3) v.push('concrete item must use item-state schema version 3 or newer')
+		if (!Number.isInteger(item.schemaVersion) || item.schemaVersion < 4) v.push('concrete item must use item-state schema version 4 or newer')
 		if (!['string', 'number'].includes(typeof item.baseItemId) || String(item.baseItemId).length === 0) {
 			v.push('baseItemId must be a stable string or number')
 		}
@@ -289,6 +289,15 @@ function checkItemShape(engine, item) {
 	}
 	for (const key of ['corrupted', 'sanctified', 'hinekoraLocked']) {
 		if (typeof item[key] !== 'boolean') v.push(`${key} must be boolean`)
+	}
+	if (!isRecord(item.quality)) {
+		v.push('quality must be a structured object')
+	} else {
+		const amount = Number(item.quality.amount)
+		const cap = item.quality.cap == null ? null : Number(item.quality.cap)
+		if (!Number.isFinite(amount) || amount < 0) v.push(`quality amount must be non-negative: ${item.quality.amount}`)
+		if (typeof item.quality.type !== 'string' || !item.quality.type.trim()) v.push('quality type must be a non-empty string')
+		if (cap != null && (!Number.isFinite(cap) || cap < amount)) v.push(`quality cap must be null or >= amount: ${item.quality.cap}`)
 	}
 	if (!Number.isInteger(item.ilvl) || item.ilvl < 1 || item.ilvl > 100) v.push(`ilvl must be an integer in [1,100]: ${item.ilvl}`)
 	if (!isRecord(item.currencyUsed)) {
@@ -413,12 +422,12 @@ const DIVINE_OMENS = [null, 'sanctification']
 const DESEC_OMENS = ['sinistral_necromancy', 'dextral_necromancy', 'abyssal_echoes']
 const CONSUMING_ACTIONS = new Set([
 	'transmutation', 'augmentation', 'regal', 'exalted', 'chaos', 'alchemy',
-	'annulment', 'divine', 'vaal', 'fracturing', 'essenceOfAbyss',
+	'annulment', 'divine', 'fracturing', 'essenceOfAbyss',
 	'essenceOfBreach', 'desecration',
 ])
 const MEANINGFUL_MUTATION_ACTIONS = new Set([
 	'transmutation', 'augmentation', 'regal', 'exalted', 'chaos', 'alchemy',
-	'annulment', 'divine', 'vaal', 'fracturing', 'essenceOfAbyss', 'desecration',
+	'annulment', 'divine', 'fracturing', 'essenceOfAbyss', 'desecration',
 ])
 
 const ACTIONS = [
@@ -443,7 +452,7 @@ const ACTIONS = [
 	['essenceOfBreach', (e) => e.applyEssenceOfBreach()],
 	['hinekoraLock', (e) => {
 		const item = e.getItem()
-		if (item.corrupted || item.sanctified) return { success: false, error: 'Item is immutable.' }
+		if (item.corrupted || item.sanctified || item.mirrored || item.isMirrored) return { success: false, error: 'Item is immutable.' }
 		if (rnd() < 0.5) e.setHinekoraLock()
 		else e.clearHinekoraLock()
 		return { success: true, action: 'hinekora-lock', item: e.getItem() }
@@ -486,7 +495,10 @@ const ACTIONS = [
 const FIXED_SNAPSHOT = {
 	iterations: 30000,
 	seed: 542026,
-	digest: '46984d739488e00aea6bfd0664a34741306ec273e68542df96d574695f1f5104',
+ // Task 04 checkpoint: Vaal no longer consumes RNG while its unverified
+ // outcome model is blocked; structured quality state and strict core rarity
+ // guards also change the deterministic event stream.
+ digest: '85d16590e2ed6e7a8fb4dd55d5a53ab4af980a40a360fd4633e469c3b59c37fe',
 }
 const runHash = createHash('sha256')
 function hashEvent(event) {

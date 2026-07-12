@@ -85,7 +85,7 @@ export function buildReport(index) {
     fullParityClaim: false,
     inventorySource: 'data/crafting/currency-index.json',
     registrySource: 'data/crafting/currency-index.json#craftRegistry',
-    entryDetailStatus: 'authoritative_registry_task03',
+    entryDetailStatus: 'authoritative_registry_task04',
     counts: {
       sourceEntries: index.counts.entries,
       registryDefinitions: definitions.length,
@@ -99,14 +99,16 @@ export function buildReport(index) {
       visibleByTab: countByField(visibleDefinitions, 'tab'),
     },
     entries,
-    task03Change: {
-      craftingItemStatusesChanged: 0,
-      note: 'Task 03 centralizes registry metadata, UI generation, and dispatch without claiming new crafting mechanics.',
+    task04Change: {
+      coreCorrections: ['alchemy_normal_only', 'annulment_non_normal_only', 'divine_non_normal_only', 'mirrored_items_immutable'],
+      qualityAuditCardsSurfaced: visibleDefinitions.filter(definition => definition.category === 'quality').length,
+      vaalBlocked: definitions.some(definition => definition.craftId === 'vaal' && !definition.supported),
+      note: 'Task 04 adds structured quality caps and blocked quality audit cards, corrects source-backed core restrictions, and blocks unverified Vaal outcomes.',
     },
     blockers: [
       'Full parity remains blocked while retained registry definitions still have implementation or verification blockers.',
       'Hinekora\'s Lock remains implemented for compatibility but has no normalized source-item identity in the checked-in export.',
-      'Tasks 04-07 must resolve mechanic-specific blocked_missing_data and probability_unverified records from verified target-version evidence.',
+      'Tasks 05-07 must resolve remaining mechanic-specific blocked_missing_data and probability_unverified records from verified target-version evidence.',
     ],
   };
 }

@@ -624,6 +624,65 @@ test('Alchemy produces exactly four fresh modifiers', () => {
   });
 });
 
+test('core rarity constraints reject invalid Alchemy, Annulment, and Divine uses atomically', () => {
+  const data = { bases: { test_equipment: syntheticBase() } };
+
+  const magic = new Engine(data, 'test_equipment');
+  assert(magic.applyTransmutation().success);
+  const magicBefore = magic.getItem();
+  const alchemy = magic.applyAlchemy();
+  assert.equal(alchemy.success, false);
+  assert.match(alchemy.error, /Normal items/i);
+  assert.deepEqual(magic.getItem(), magicBefore);
+
+  const normal = new Engine(data, 'test_equipment');
+  const normalBefore = normal.getItem();
+  assert.equal(normal.applyAnnulment().success, false);
+  assert.equal(normal.applyDivine().success, false);
+  assert.deepEqual(normal.getItem(), normalBefore);
+});
+
+test('mirrored items reject every core mutation and item-level changes', () => {
+  const data = { bases: { test_equipment: syntheticBase() } };
+  const operations = [
+    engine => engine.applyTransmutation(),
+    engine => engine.applyAlchemy(),
+    engine => engine.applyAnnulment(),
+    engine => engine.applyDivine(),
+    engine => engine.applyFracturing(),
+    engine => engine.applyEssenceOfAbyss(),
+  ];
+  for (const operation of operations) {
+    const engine = new Engine(data, 'test_equipment');
+    const item = engine.getItem();
+    item.mirrored = true;
+    engine.loadItem(item);
+    const before = engine.getItem();
+    const result = operation(engine);
+    assert.equal(result.success, false);
+    assert.match(result.error, /mirrored/i);
+    assert.deepEqual(engine.getItem(), before);
+  }
+  const levelEngine = new Engine(data, 'test_equipment');
+  const levelItem = levelEngine.getItem();
+  levelItem.mirrored = true;
+  levelEngine.loadItem(levelItem);
+  assert.equal(levelEngine.setItemLevel(12), 83);
+  assert.equal(levelEngine.getItem().ilvl, 83);
+});
+
+test('blocked Vaal is atomic and consumes no injected RNG', () => {
+  const data = { bases: { test_equipment: syntheticBase() } };
+  let calls = 0;
+  const engine = new Engine(data, 'test_equipment', null, null, null, null, () => { calls++; return 0; });
+  const before = engine.getItem();
+  const result = engine.applyVaal();
+  assert.equal(result.success, false);
+  assert.match(result.error, /Vaal Orb outcomes and probabilities/i);
+  assert.equal(calls, 0);
+  assert.deepEqual(engine.getItem(), before);
+});
+
 test('a full prefix or suffix side forces Exalted onto the open side', () => {
   const data = { bases: { test_equipment: syntheticBase() } };
   const prefixesFull = new Engine(data, 'test_equipment');

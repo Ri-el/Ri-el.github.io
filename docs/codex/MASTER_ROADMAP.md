@@ -229,6 +229,8 @@ Unknown mechanics must receive specific blockers, not fabricated behavior.
 
 Current local checkpoint: numbered Tasks 01–03 are implemented and tested. Task 03 preserves the existing 37-control surface while generating it from a 531-definition authoritative registry; no unverified mechanic was enabled. The next numbered task is Task 04, Core and Quality Currency.
 
+Task 04 is implemented and tested. The registry still has 531 definitions and now surfaces 45 visible cards (37 runtime controls plus eight disabled quality audit cards). Core rarity/mirror restrictions are corrected, structured quality includes a cap, and Vaal remains blocked pending verified target-version outcomes. The next numbered task is Task 05, Abyss, Breach, Essences, and Omens.
+
 Each task must end with:
 
 - relevant tests passing

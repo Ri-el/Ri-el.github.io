@@ -637,6 +637,11 @@ const expectedRegistryClassificationCounts = {
   ...currencyIndex.counts.byClassification,
   implemented: currencyIndex.counts.byClassification.implemented + 1,
 };
+const expectedVisibleClassificationCounts = {
+  ...currencyIndex.counts.runtimeByClassification,
+  blocked_missing_data: (currencyIndex.counts.runtimeByClassification.blocked_missing_data || 0) +
+    visibleCraftDefinitions.filter(definition => definition.category === 'quality').length,
+};
 
 function countCraftDefinitionsBy(definitions, field, orderedValues = null) {
   const counts = new Map((orderedValues || []).map(value => [value, 0]));
@@ -651,16 +656,16 @@ function countCraftDefinitionsBy(definitions, field, orderedValues = null) {
   return Object.fromEntries(pairs);
 }
 
-check('Task 03 authoritative crafting registry has complete stable coverage',
+check('Task 04 authoritative crafting registry has complete stable coverage',
   currencyIndex.schemaVersion >= 2 &&
   craftRegistry.length === 531 &&
   sourceBackedCraftDefinitions.length === currencyIndex.entries.length &&
   runtimeOnlyCraftDefinitions.length === 1 &&
   runtimeOnlyCraftDefinitions[0].craftId === 'hinekora' &&
-  visibleCraftDefinitions.length === currencyIndex.counts.runtimeDefinitions &&
+  visibleCraftDefinitions.length === currencyIndex.counts.visibleCraftDefinitions &&
   registryCraftIds.size === craftRegistry.length &&
   new Set(craftRegistry.map(definition => definition.id)).size === craftRegistry.length);
-check('every crafting definition exposes the complete Task 03 data contract',
+check('every crafting definition exposes the complete Task 04 data contract',
   craftRegistry.every(definition =>
     requiredCraftDefinitionFields.every(field => Object.prototype.hasOwnProperty.call(definition, field)) &&
     typeof definition.craftId === 'string' && definition.craftId.length > 0 &&
@@ -684,18 +689,19 @@ check('registry source identities exactly cover the retained crafting inventory'
   }) &&
   runtimeOnlyCraftDefinitions[0].metadataKey == null &&
   runtimeOnlyCraftDefinitions[0].sourceIdentityStatus !== 'resolved');
-check('registry tabs and visible definitions preserve the existing inventory surface',
+check('registry tabs preserve runtime controls and surface quality audit cards',
   craftTabs.length === 10 &&
   registryTabIds.size === craftTabs.length &&
   craftRegistry.every(definition => registryTabIds.has(definition.tab)) &&
-  stable([...visibleCraftDefinitions.map(definition => definition.craftId)].sort()) ===
-    stable(Object.keys(currencyIndex.runtimeRegistry).sort()));
-check('registry implementation classifications are exclusive and unchanged by Task 03',
+  stable([...visibleCraftDefinitions.filter(definition => definition.category !== 'quality').map(definition => definition.craftId)].sort()) ===
+    stable(Object.keys(currencyIndex.runtimeRegistry).sort()) &&
+  visibleCraftDefinitions.filter(definition => definition.category === 'quality').length === 8);
+check('registry implementation classifications are exclusive after Task 04 audit surfacing',
   craftRegistry.every(definition => currencyIndex.allowedClassifications.includes(definition.implementationStatus)) &&
   stable(countCraftDefinitionsBy(craftRegistry, 'implementationStatus', currencyIndex.allowedClassifications)) ===
     stable(expectedRegistryClassificationCounts) &&
   stable(countCraftDefinitionsBy(visibleCraftDefinitions, 'implementationStatus', currencyIndex.allowedClassifications)) ===
-    stable(currencyIndex.counts.runtimeByClassification));
+    stable(expectedVisibleClassificationCounts));
 check('supported registry entries resolve declarative validators and handlers',
   craftRegistry.filter(definition => definition.supported).every(definition =>
     typeof definition.applicabilityPredicate === 'string' && definition.applicabilityPredicate.length > 0 &&
@@ -710,17 +716,18 @@ check('registry evidence and fixtures never replace unresolved blockers with inv
   craftRegistry.every(definition =>
     definition.testFixtureIds.length > 0 ||
     (typeof definition.blocker === 'string' && definition.blocker.length > 0)) &&
-  visibleCraftDefinitions.every(definition => definition.testFixtureIds.length > 0));
+  visibleCraftDefinitions.every(definition => definition.testFixtureIds.length > 0 ||
+    (definition.category === 'quality' && !definition.supported)));
 check('all Omen trigger craft references resolve inside the authoritative registry',
   craftRegistry.every(definition => {
     const triggerCraftId = definition.omenInteraction?.triggerCraftId;
     return triggerCraftId == null || registryCraftIds.has(triggerCraftId);
   }));
-check('Task 03 crafting parity is a direct complete projection of the registry',
+check('Task 04 crafting parity is a direct complete projection of the registry',
   craftingParity.schemaVersion === 2 &&
   craftingParity.targetGameVersion === currencyIndex.targetGameVersion &&
   craftingParity.fullParityClaim === false &&
-  craftingParity.entryDetailStatus === 'authoritative_registry_task03' &&
+  craftingParity.entryDetailStatus === 'authoritative_registry_task04' &&
   craftingParity.entries.length === craftRegistry.length &&
   parityByCraftId.size === craftRegistry.length &&
   craftRegistry.every(definition => {

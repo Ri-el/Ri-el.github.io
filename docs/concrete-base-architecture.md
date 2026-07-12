@@ -30,7 +30,7 @@ Mappings and defaults are ID-based. The deterministic legacy/default rule is the
 
 ## Item state
 
-Task 02 item-state schema version 3 records:
+Task 02 item-state schema version 3 records (Task 04 migrates the runtime state to schema version 4 for the quality-cap field):
 
 - `schemaVersion`
 - `baseItemId`
@@ -52,6 +52,8 @@ Task 02 item-state schema version 3 records:
 - the source socket-count datum, kept separate from unverified default/maximum limits
 - corruption, sanctification, Hinekora, Desecrate/Omen, flags, and controller history state
 - target-version and verification metadata
+
+Quality is now persisted as `{ amount, type, source, cap }`. The verified ordinary default cap is 20; legacy alternate or above-cap quality retains an unknown cap unless the save carries an explicit valid cap.
 
 Implicits remain separate from enchantments, prefixes, and suffixes. Normal affix operations therefore do not remove or reroll the base implicit snapshot. Concrete tags are merged into the engine's eligibility tags. Fixed sourced `local_maximum_prefixes_allowed_+` and `local_maximum_suffixes_allowed_+` implicit deltas adjust the engine limits; other base-specific effects remain presentation-only until their transition rules are verified.
 

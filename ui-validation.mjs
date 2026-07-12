@@ -38,7 +38,7 @@ for (const id of [
   'craft-item-description-title', 'craft-item-description-text',
   'craft-tab-list', 'craft-tab-panels', 'well-modal', 'stash-grid', 'jewel-tooltip',
   'undo-btn', 'redo-btn', 'reset-btn',
-  'base-detail-list', 'implicit-list', 'concrete-base-picker',
+  'base-detail-list', 'quality-list', 'implicit-list', 'concrete-base-picker',
   'base-picker-search', 'base-picker-reset', 'base-picker-list',
   'base-picker-required-filter', 'base-picker-drop-level-filter',
   'base-picker-attribute-field', 'base-picker-attribute-filter',
@@ -89,12 +89,13 @@ check('crafting inventory classifies every retained source item exactly once',
   currencyIndex.entries.every(entry => currencyIndex.allowedClassifications.includes(entry.classification)));
 const visibleCraftDefinitions = craftRegistry.filter(definition => definition.visible === true);
 const craftIds = visibleCraftDefinitions.map(definition => definition.craftId);
-check('authoritative registry audits 531 definitions and exposes exactly 37 unique controls',
+check('authoritative registry audits 531 definitions and exposes runtime controls plus quality audit cards',
   currencyIndex.counts.runtimeDefinitions === 37 &&
   Object.keys(currencyIndex.runtimeRegistry).length === 37 &&
-  craftRegistry.length === 531 && visibleCraftDefinitions.length === 37 &&
+  craftRegistry.length === 531 && visibleCraftDefinitions.length === 45 &&
   craftIds.length === new Set(craftIds).size &&
-  craftIds.every(id => currencyIndex.runtimeRegistry[id]));
+  craftIds.every(id => currencyIndex.runtimeRegistry[id] ||
+    craftRegistry.find(definition => definition.craftId === id)?.sourceItemId != null));
 check('every visible definition has generated-UI metadata and a valid tab',
   visibleCraftDefinitions.every(definition =>
     definition.craftId && definition.displayName && definition.description && definition.iconId &&
@@ -115,6 +116,15 @@ check('unsupported visible definitions carry a specific blocker',
     const reason = definition.disabledReason || definition.blocker || '';
     return reason.length > 'Unsupported — verification required'.length;
   }));
+check('quality audit cards remain visible but cannot dispatch unverified mutations',
+  visibleCraftDefinitions.filter(definition => definition.category === 'quality').length === 8 &&
+  visibleCraftDefinitions.filter(definition => definition.category === 'quality').every(definition =>
+    definition.supported === false && definition.handler == null &&
+    /quality|increment|mutation|cap/i.test(definition.disabledReason || definition.blocker || '')));
+check('Vaal remains visible but blocked while outcome probabilities are unverified',
+  craftRegistry.find(definition => definition.craftId === 'vaal')?.supported === false &&
+  craftRegistry.find(definition => definition.craftId === 'vaal')?.handler == null &&
+  /Vaal Orb outcomes and probabilities are not verified/i.test(craftRegistry.find(definition => definition.craftId === 'vaal')?.disabledReason || ''));
 check('encounter resources are retained for parity but are not workbench controls',
   !visibleCraftDefinitions.some(definition => /verisium|liquid[_-]verisium|hiveblood|wombgift/i.test(
     `${definition.craftId} ${definition.engineAction || ''} ${definition.displayName}`)));
@@ -226,7 +236,8 @@ check('central operation pipeline records history and consumes Omens only after 
 check('browser and engine crafting RNG can share an injected deterministic source',
   /window\.CraftForge\.setCraftingRandomSource\s*=/.test(app) &&
   /craftingRandomSource\s*=\s*source[\s\S]*?engine\.setRandomSource\(source\)/.test(app) &&
-  /function craftingRandom\(\)[\s\S]*?craftingRandomSource[\s\S]*?Math\.random\(\)/.test(app));
+  /setRandomSource\(rng = null\)/.test(fs.readFileSync(new URL('./crafting.js', import.meta.url), 'utf8')) &&
+  /_randomFloat\(\)[\s\S]*?this\._rng \? this\._rng\(\) : Math\.random\(\)/.test(fs.readFileSync(new URL('./crafting.js', import.meta.url), 'utf8')));
 const commitForesightStart = app.indexOf('function commitForesight(currency)');
 const commitForesightEnd = app.indexOf('\nfunction commitDesecrationForesight', commitForesightStart);
 const commitForesightSource = app.slice(commitForesightStart, commitForesightEnd);
@@ -443,13 +454,17 @@ check('tooltip separates concrete details and implicits from explicit modifiers'
   /id="implicit-list"[^>]*hidden/.test(html) &&
   /renderConcreteBaseDetails\(item\);[\s\S]*?const allMods =/.test(app) &&
   /Required Level', 'Unavailable in normalized source'/.test(app));
+check('tooltip renders structured quality without mixing it into explicit modifiers',
+  /id="quality-list"[^>]*hidden/.test(html) &&
+  /function renderQualityDetails\(item\)[\s\S]*?quality\.type[\s\S]*?quality\.cap/.test(app) &&
+  /renderConcreteBaseDetails\(item\);[\s\S]*?renderQualityDetails\(item\);/.test(app));
 check('Jewel-only flavor text is conditional on Jewel mode',
   /flavorEl\.hidden = !isJewelMode/.test(app) &&
   /Place into an allocated Jewel Socket on the Passive Skill Tree/.test(html));
-check('runtime selector stylesheet is versioned in the Task 03 offline shell',
-  /header-fix\.css\?v=16/.test(select) &&
-  /CACHE_NAME = 'poe2-craft-task03-regression-fix-v1'/.test(serviceWorker) &&
-  serviceWorker.includes("'./header-fix.css?v=16'"));
+check('runtime selector and quality stylesheet is versioned in the Task 04 offline shell',
+  /header-fix\.css\?v=17/.test(select) &&
+  /CACHE_NAME = 'poe2-craft-task04-quality-core-v1'/.test(serviceWorker) &&
+  serviceWorker.includes("'./header-fix.css?v=17'"));
 
 console.log(`\nRESULT: ${passed}/${passed + failed} checks passed`);
 if (failed) process.exitCode = 1;
