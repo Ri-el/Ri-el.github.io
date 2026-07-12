@@ -273,8 +273,6 @@ function renderCraftingInventory() {
   }
 }
 
-renderCraftingInventory();
-
 const elements = {
   tooltip: document.getElementById('jewel-tooltip'),
   itemName: document.getElementById('item-name'),
@@ -329,6 +327,19 @@ const elements = {
   wellCancel: document.getElementById('well-cancel'),
   itemFlavor: document.getElementById('item-flavor'),
 };
+
+let craftingInventoryReady = false;
+function refreshCraftInventoryElements() {
+  elements.currencyGrid = document.getElementById('currency-grid');
+  elements.craftButtons = document.querySelectorAll('[data-craft-id]');
+  elements.currencyBtns = document.querySelectorAll('.currency-btn');
+  elements.boneBtns = document.querySelectorAll('.bone-btn');
+  elements.omenBtns = document.querySelectorAll('.omen-btn');
+  elements.craftOmenBtns = document.querySelectorAll('.craft-omen-btn');
+  elements.essenceBtns = document.querySelectorAll('.essence-btn');
+  elements.craftTabs = document.querySelectorAll('[data-craft-tab]');
+  elements.craftTabPanels = document.querySelectorAll('[data-craft-panel]');
+}
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c =>
@@ -775,17 +786,31 @@ async function init() {
       // Desecrated (Abyssal) mod pools — optional. Desecration is disabled if absent.
       desecData = window.DESECRATED_MODS_RAW || null;
 
-      validateCraftRegistry();
       loadStash();
       if (USE_SOUND_FILES) preloadSounds();
-      setupCurrencyIcons();
+      // Core base selection and the CraftForge bridge must remain usable even
+      // if the independent crafting-inventory renderer has invalid data.
       createEngine(currentJewelType);
+
+      try {
+        renderCraftingInventory();
+        refreshCraftInventoryElements();
+        validateCraftRegistry();
+        setupCurrencyIcons();
+        craftingInventoryReady = true;
+        renderItem();
+      } catch (registryError) {
+        craftingInventoryReady = false;
+        console.error('Crafting registry initialization failed:', registryError);
+        showError(`Crafting inventory unavailable: ${registryError.message}`);
+      }
       setupEventListeners();
     });
     if (typeof performance !== 'undefined') {
       performanceMetrics.push({ name: 'app-boot', duration: performance.now() - APP_BOOT_STARTED });
     }
   } catch (err) {
+    console.error('Error initializing simulator:', err);
     showError('Error initializing simulator: ' + err.message);
   }
 }
@@ -1382,7 +1407,7 @@ function setupEventListeners() {
   // hot-reload wrapper, or restored page lifecycle.
   if (eventsBound) return;
   eventsBound = true;
-  setupCraftTabs();
+  if (craftingInventoryReady) setupCraftTabs();
 
   document.addEventListener('contextmenu', e => e.preventDefault());
 
@@ -1397,7 +1422,7 @@ function setupEventListeners() {
       if (result?.requiresConfirmation) requestConcreteBaseConfirmation(result);
     });
   });
-  setupCraftInventoryEvents();
+  if (craftingInventoryReady) setupCraftInventoryEvents();
 
   const applyArmedToItem = (e) => {
     if (!armedCurrency) return;
@@ -1794,13 +1819,6 @@ function clearCraftOmen() {
 // Consume the armed crafting omen if it matched the currency just applied.
 function consumeCraftOmen(currency) {
   const base = ORB_VARIANTS[currency] ? ORB_VARIANTS[currency].base : currency;
-  const craftOptions = ORB_VARIANTS[currency]
-    ? { minModLevel: ORB_VARIANTS[currency].minModLevel }
-    : {};
-  const noEligibleModifier = (rarity, options = {}) =>
-    engine.getEligibleModifierCount(rarity, craftOptions, options) === 0
-      ? 'No eligible modifier at this item level.'
-      : '';
   if (selectedCraftOmen && CRAFT_OMENS[selectedCraftOmen]
       && CRAFT_OMENS[selectedCraftOmen].currency === base) {
     engine.recordCurrencyUse(selectedCraftOmen);
@@ -2555,6 +2573,13 @@ function currencyDisabledReason(currency, item) {
   const removable = removableItemMods(item);
   const rareLimits = engine.getLimits('rare');
   const magicLimits = engine.getLimits('magic');
+  const craftOptions = ORB_VARIANTS[currency]
+    ? { minModLevel: ORB_VARIANTS[currency].minModLevel }
+    : {};
+  const noEligibleModifier = (rarity, options = {}) =>
+    engine.getEligibleModifierCount(rarity, craftOptions, options) === 0
+      ? 'No eligible modifier at this item level.'
+      : '';
 
   switch (base) {
     case 'transmutation':

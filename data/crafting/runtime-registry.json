@@ -1072,12 +1072,12 @@
       "disabledReason": "",
       "handler": "toggleOmen",
       "sourceHandler": null,
-      "triggeringAction": "well-of-souls-reveal",
+      "triggeringAction": "preserved-cranium",
       "omenInteraction": {
         "omenId": "sinistral_necromancy",
         "exclusiveGroup": "desecration_direction",
-        "consumeOn": "well_of_souls_reveal",
-        "triggerCraftId": null
+        "consumeOn": "successful_triggering_operation",
+        "triggerCraftId": "preserved-cranium"
       },
       "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
       "validItemClasses": [],
@@ -1180,7 +1180,7 @@
       "omenInteraction": {
         "omenId": "abyssal_echoes",
         "exclusiveGroup": "desecration_reroll",
-        "consumeOn": "successful_triggering_operation",
+        "consumeOn": "well_of_souls_reveal",
         "triggerCraftId": "preserved-cranium"
       },
       "corruptionRestriction": "blocked_if_corrupted_or_sanctified",

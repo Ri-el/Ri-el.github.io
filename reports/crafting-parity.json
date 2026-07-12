@@ -41,10 +41,10 @@
     "registryByCategory": {
       "abyss": 12,
       "breach": 28,
-      "corruption": 8,
+      "corruption": 4,
       "currency": 20,
       "delirium": 26,
-      "essences": 76,
+      "essences": 80,
       "quality": 8,
       "ritual": 38,
       "runeforging": 19,
@@ -13192,7 +13192,7 @@
       "omenInteraction": {
         "omenId": "abyssal_echoes",
         "exclusiveGroup": "desecration_reroll",
-        "consumeOn": "successful_triggering_operation",
+        "consumeOn": "well_of_souls_reveal",
         "triggerCraftId": "preserved-cranium"
       },
       "sourceEvidence": [
@@ -16714,6 +16714,166 @@
       ],
       "testReferences": [],
       "blocker": "Mechanic blocked because its guaranteed modifier mapping and item-class applicability for Perfect Essence of Seeking is not verified for target version 0.5.4.",
+      "supported": false,
+      "visible": false
+    },
+    {
+      "stableId": "source-item:139",
+      "craftId": "source-item:139",
+      "sourceItemId": 139,
+      "metadataKey": "Metadata/Items/Currency/CurrencyCorruptedEssenceHysteria",
+      "sourceIdentityStatus": "normalized_exact",
+      "exactName": "Essence of Hysteria",
+      "targetGameVersion": "0.5.4",
+      "equipmentRelevance": "equipment_crafting_candidate_unverified",
+      "category": "essences",
+      "tab": "essences",
+      "implementationStatus": "blocked_missing_data",
+      "verificationStatus": "not_verified",
+      "applicability": {
+        "predicate": "unsupportedReason",
+        "validItemClasses": [],
+        "validItemTags": [],
+        "corruptionRestriction": "unverified",
+        "qualityRestriction": "none",
+        "socketRestriction": "none"
+      },
+      "handler": null,
+      "disabledReasonHandler": "staticDisabledReason",
+      "disabledReason": "Mechanic blocked because its guaranteed modifier mapping and item-class applicability for Essence of Hysteria is not verified for target version 0.5.4.",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "never",
+        "triggerCraftId": null
+      },
+      "sourceEvidence": [
+        "data/crafting/currency-index.json#source-item:139",
+        "data/normalized/crafting-items.json#item:139"
+      ],
+      "testReferences": [],
+      "blocker": "Mechanic blocked because its guaranteed modifier mapping and item-class applicability for Essence of Hysteria is not verified for target version 0.5.4.",
+      "supported": false,
+      "visible": false
+    },
+    {
+      "stableId": "source-item:140",
+      "craftId": "source-item:140",
+      "sourceItemId": 140,
+      "metadataKey": "Metadata/Items/Currency/CurrencyCorruptedEssenceDelirium",
+      "sourceIdentityStatus": "normalized_exact",
+      "exactName": "Essence of Delirium",
+      "targetGameVersion": "0.5.4",
+      "equipmentRelevance": "equipment_crafting_candidate_unverified",
+      "category": "essences",
+      "tab": "essences",
+      "implementationStatus": "blocked_missing_data",
+      "verificationStatus": "not_verified",
+      "applicability": {
+        "predicate": "unsupportedReason",
+        "validItemClasses": [],
+        "validItemTags": [],
+        "corruptionRestriction": "unverified",
+        "qualityRestriction": "none",
+        "socketRestriction": "none"
+      },
+      "handler": null,
+      "disabledReasonHandler": "staticDisabledReason",
+      "disabledReason": "Mechanic blocked because its guaranteed modifier mapping and item-class applicability for Essence of Delirium is not verified for target version 0.5.4.",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "never",
+        "triggerCraftId": null
+      },
+      "sourceEvidence": [
+        "data/crafting/currency-index.json#source-item:140",
+        "data/normalized/crafting-items.json#item:140"
+      ],
+      "testReferences": [],
+      "blocker": "Mechanic blocked because its guaranteed modifier mapping and item-class applicability for Essence of Delirium is not verified for target version 0.5.4.",
+      "supported": false,
+      "visible": false
+    },
+    {
+      "stableId": "source-item:141",
+      "craftId": "source-item:141",
+      "sourceItemId": 141,
+      "metadataKey": "Metadata/Items/Currency/CurrencyCorruptedEssenceHorror",
+      "sourceIdentityStatus": "normalized_exact",
+      "exactName": "Essence of Horror",
+      "targetGameVersion": "0.5.4",
+      "equipmentRelevance": "equipment_crafting_candidate_unverified",
+      "category": "essences",
+      "tab": "essences",
+      "implementationStatus": "blocked_missing_data",
+      "verificationStatus": "not_verified",
+      "applicability": {
+        "predicate": "unsupportedReason",
+        "validItemClasses": [],
+        "validItemTags": [],
+        "corruptionRestriction": "unverified",
+        "qualityRestriction": "none",
+        "socketRestriction": "none"
+      },
+      "handler": null,
+      "disabledReasonHandler": "staticDisabledReason",
+      "disabledReason": "Mechanic blocked because its guaranteed modifier mapping and item-class applicability for Essence of Horror is not verified for target version 0.5.4.",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "never",
+        "triggerCraftId": null
+      },
+      "sourceEvidence": [
+        "data/crafting/currency-index.json#source-item:141",
+        "data/normalized/crafting-items.json#item:141"
+      ],
+      "testReferences": [],
+      "blocker": "Mechanic blocked because its guaranteed modifier mapping and item-class applicability for Essence of Horror is not verified for target version 0.5.4.",
+      "supported": false,
+      "visible": false
+    },
+    {
+      "stableId": "source-item:142",
+      "craftId": "source-item:142",
+      "sourceItemId": 142,
+      "metadataKey": "Metadata/Items/Currency/CurrencyCorruptedEssenceInsanity",
+      "sourceIdentityStatus": "normalized_exact",
+      "exactName": "Essence of Insanity",
+      "targetGameVersion": "0.5.4",
+      "equipmentRelevance": "equipment_crafting_candidate_unverified",
+      "category": "essences",
+      "tab": "essences",
+      "implementationStatus": "blocked_missing_data",
+      "verificationStatus": "not_verified",
+      "applicability": {
+        "predicate": "unsupportedReason",
+        "validItemClasses": [],
+        "validItemTags": [],
+        "corruptionRestriction": "unverified",
+        "qualityRestriction": "none",
+        "socketRestriction": "none"
+      },
+      "handler": null,
+      "disabledReasonHandler": "staticDisabledReason",
+      "disabledReason": "Mechanic blocked because its guaranteed modifier mapping and item-class applicability for Essence of Insanity is not verified for target version 0.5.4.",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "never",
+        "triggerCraftId": null
+      },
+      "sourceEvidence": [
+        "data/crafting/currency-index.json#source-item:142",
+        "data/normalized/crafting-items.json#item:142"
+      ],
+      "testReferences": [],
+      "blocker": "Mechanic blocked because its guaranteed modifier mapping and item-class applicability for Essence of Insanity is not verified for target version 0.5.4.",
       "supported": false,
       "visible": false
     },
@@ -21207,166 +21367,6 @@
       ],
       "testReferences": [],
       "blocker": "Mechanic blocked because its exact corruption, sacrifice, or Temple outcome behavior for Ancient Infuser is not verified for target version 0.5.4.",
-      "supported": false,
-      "visible": false
-    },
-    {
-      "stableId": "source-item:139",
-      "craftId": "source-item:139",
-      "sourceItemId": 139,
-      "metadataKey": "Metadata/Items/Currency/CurrencyCorruptedEssenceHysteria",
-      "sourceIdentityStatus": "normalized_exact",
-      "exactName": "Essence of Hysteria",
-      "targetGameVersion": "0.5.4",
-      "equipmentRelevance": "equipment_crafting_candidate_unverified",
-      "category": "corruption",
-      "tab": "corruption",
-      "implementationStatus": "blocked_missing_data",
-      "verificationStatus": "not_verified",
-      "applicability": {
-        "predicate": "unsupportedReason",
-        "validItemClasses": [],
-        "validItemTags": [],
-        "corruptionRestriction": "unverified",
-        "qualityRestriction": "none",
-        "socketRestriction": "none"
-      },
-      "handler": null,
-      "disabledReasonHandler": "staticDisabledReason",
-      "disabledReason": "Mechanic blocked because its exact corruption, sacrifice, or Temple outcome behavior for Essence of Hysteria is not verified for target version 0.5.4.",
-      "triggeringAction": null,
-      "omenInteraction": {
-        "omenId": null,
-        "exclusiveGroup": null,
-        "consumeOn": "never",
-        "triggerCraftId": null
-      },
-      "sourceEvidence": [
-        "data/crafting/currency-index.json#source-item:139",
-        "data/normalized/crafting-items.json#item:139"
-      ],
-      "testReferences": [],
-      "blocker": "Mechanic blocked because its exact corruption, sacrifice, or Temple outcome behavior for Essence of Hysteria is not verified for target version 0.5.4.",
-      "supported": false,
-      "visible": false
-    },
-    {
-      "stableId": "source-item:140",
-      "craftId": "source-item:140",
-      "sourceItemId": 140,
-      "metadataKey": "Metadata/Items/Currency/CurrencyCorruptedEssenceDelirium",
-      "sourceIdentityStatus": "normalized_exact",
-      "exactName": "Essence of Delirium",
-      "targetGameVersion": "0.5.4",
-      "equipmentRelevance": "equipment_crafting_candidate_unverified",
-      "category": "corruption",
-      "tab": "corruption",
-      "implementationStatus": "blocked_missing_data",
-      "verificationStatus": "not_verified",
-      "applicability": {
-        "predicate": "unsupportedReason",
-        "validItemClasses": [],
-        "validItemTags": [],
-        "corruptionRestriction": "unverified",
-        "qualityRestriction": "none",
-        "socketRestriction": "none"
-      },
-      "handler": null,
-      "disabledReasonHandler": "staticDisabledReason",
-      "disabledReason": "Mechanic blocked because its exact corruption, sacrifice, or Temple outcome behavior for Essence of Delirium is not verified for target version 0.5.4.",
-      "triggeringAction": null,
-      "omenInteraction": {
-        "omenId": null,
-        "exclusiveGroup": null,
-        "consumeOn": "never",
-        "triggerCraftId": null
-      },
-      "sourceEvidence": [
-        "data/crafting/currency-index.json#source-item:140",
-        "data/normalized/crafting-items.json#item:140"
-      ],
-      "testReferences": [],
-      "blocker": "Mechanic blocked because its exact corruption, sacrifice, or Temple outcome behavior for Essence of Delirium is not verified for target version 0.5.4.",
-      "supported": false,
-      "visible": false
-    },
-    {
-      "stableId": "source-item:141",
-      "craftId": "source-item:141",
-      "sourceItemId": 141,
-      "metadataKey": "Metadata/Items/Currency/CurrencyCorruptedEssenceHorror",
-      "sourceIdentityStatus": "normalized_exact",
-      "exactName": "Essence of Horror",
-      "targetGameVersion": "0.5.4",
-      "equipmentRelevance": "equipment_crafting_candidate_unverified",
-      "category": "corruption",
-      "tab": "corruption",
-      "implementationStatus": "blocked_missing_data",
-      "verificationStatus": "not_verified",
-      "applicability": {
-        "predicate": "unsupportedReason",
-        "validItemClasses": [],
-        "validItemTags": [],
-        "corruptionRestriction": "unverified",
-        "qualityRestriction": "none",
-        "socketRestriction": "none"
-      },
-      "handler": null,
-      "disabledReasonHandler": "staticDisabledReason",
-      "disabledReason": "Mechanic blocked because its exact corruption, sacrifice, or Temple outcome behavior for Essence of Horror is not verified for target version 0.5.4.",
-      "triggeringAction": null,
-      "omenInteraction": {
-        "omenId": null,
-        "exclusiveGroup": null,
-        "consumeOn": "never",
-        "triggerCraftId": null
-      },
-      "sourceEvidence": [
-        "data/crafting/currency-index.json#source-item:141",
-        "data/normalized/crafting-items.json#item:141"
-      ],
-      "testReferences": [],
-      "blocker": "Mechanic blocked because its exact corruption, sacrifice, or Temple outcome behavior for Essence of Horror is not verified for target version 0.5.4.",
-      "supported": false,
-      "visible": false
-    },
-    {
-      "stableId": "source-item:142",
-      "craftId": "source-item:142",
-      "sourceItemId": 142,
-      "metadataKey": "Metadata/Items/Currency/CurrencyCorruptedEssenceInsanity",
-      "sourceIdentityStatus": "normalized_exact",
-      "exactName": "Essence of Insanity",
-      "targetGameVersion": "0.5.4",
-      "equipmentRelevance": "equipment_crafting_candidate_unverified",
-      "category": "corruption",
-      "tab": "corruption",
-      "implementationStatus": "blocked_missing_data",
-      "verificationStatus": "not_verified",
-      "applicability": {
-        "predicate": "unsupportedReason",
-        "validItemClasses": [],
-        "validItemTags": [],
-        "corruptionRestriction": "unverified",
-        "qualityRestriction": "none",
-        "socketRestriction": "none"
-      },
-      "handler": null,
-      "disabledReasonHandler": "staticDisabledReason",
-      "disabledReason": "Mechanic blocked because its exact corruption, sacrifice, or Temple outcome behavior for Essence of Insanity is not verified for target version 0.5.4.",
-      "triggeringAction": null,
-      "omenInteraction": {
-        "omenId": null,
-        "exclusiveGroup": null,
-        "consumeOn": "never",
-        "triggerCraftId": null
-      },
-      "sourceEvidence": [
-        "data/crafting/currency-index.json#source-item:142",
-        "data/normalized/crafting-items.json#item:142"
-      ],
-      "testReferences": [],
-      "blocker": "Mechanic blocked because its exact corruption, sacrifice, or Temple outcome behavior for Essence of Insanity is not verified for target version 0.5.4.",
       "supported": false,
       "visible": false
     },

@@ -6,6 +6,7 @@ const headerCss = fs.readFileSync(new URL('./header-fix.css', import.meta.url), 
 const app = fs.readFileSync(new URL('./app.js', import.meta.url), 'utf8');
 const select = fs.readFileSync(new URL('./select.js', import.meta.url), 'utf8');
 const serviceWorker = fs.readFileSync(new URL('./sw.js', import.meta.url), 'utf8');
+const browserSmoke = fs.readFileSync(new URL('./tools/browser-smoke.mjs', import.meta.url), 'utf8');
 const currencyIndex = JSON.parse(fs.readFileSync(new URL('./data/crafting/currency-index.json', import.meta.url), 'utf8'));
 const craftTabs = Array.isArray(currencyIndex.craftTabs) ? currencyIndex.craftTabs : [];
 const craftRegistry = Array.isArray(currencyIndex.craftRegistry) ? currencyIndex.craftRegistry : [];
@@ -190,6 +191,21 @@ check('tab controls support keyboard navigation',
 check('event listener setup is guarded against duplicate binding',
   /if \(eventsBound\) return;[\s\S]*?eventsBound = true;[\s\S]*?setupCraftTabs\(\);/.test(app) &&
   renderInventoryStart >= 0);
+const initStart = app.indexOf('async function init()');
+const initEnd = app.indexOf('\n// Reset all omen-related UI state', initStart);
+const initSource = app.slice(initStart, initEnd);
+check('core engine initialization precedes and survives registry UI initialization',
+  initSource.indexOf('normalizedIndexes = buildNormalizedDataIndexes') >= 0 &&
+  initSource.indexOf('createEngine(currentJewelType)') > initSource.indexOf('normalizedIndexes = buildNormalizedDataIndexes') &&
+  initSource.indexOf('renderCraftingInventory()') > initSource.indexOf('createEngine(currentJewelType)') &&
+  initSource.indexOf('validateCraftRegistry()') > initSource.indexOf('renderCraftingInventory()') &&
+  /catch \(registryError\)[\s\S]*?Crafting inventory unavailable:[\s\S]*?setupEventListeners\(\)/.test(initSource));
+check('real-browser entry smoke covers representative released item classes',
+  ['Jewels', 'Amulets', 'Rings', 'Gloves', 'Body Armours', 'Bows', 'Life Flasks', 'Charms']
+    .every(label => browserSmoke.includes(`['${label}',`)) &&
+  /window\.MOD_BASES[\s\S]*?craftRegistryLength[\s\S]*?getNormalizedIndexCounts/.test(browserSmoke) &&
+  /selectHidden[\s\S]*?craftVisible[\s\S]*?selectedBaseItemId[\s\S]*?tooltipRendered/.test(browserSmoke) &&
+  /#back-to-select/.test(browserSmoke));
 check('history snapshots preserve armed and consumed Omen state',
   /omens:\s*Array\.from\(selectedOmens\)[\s\S]*?omenOfLight:\s*omenOfLightActive[\s\S]*?craftOmen:\s*selectedCraftOmen/.test(app) &&
   /selectedOmens\s*=\s*new Set\([\s\S]*?selectedCraftOmen\s*=\s*snap\.craftOmen/.test(app));
@@ -220,7 +236,7 @@ check('Essence of the Abyss uses the Hinekora foresight commit path',
   /const FORESEEABLE = new Set\(VISIBLE_CRAFT_DEFINITIONS[\s\S]*?definition\.actionType === 'direct'/.test(app) &&
   /engine\.getItem\(\)\.hinekoraLocked && FORESEEABLE\.has\(currency\)[\s\S]*?commitForesight\(currency\)/.test(executeCraftSource));
 check('foresight commit preserves undo and consumes Hinekora lock',
-  /const before = snapshotState\(engine\.getItem\(\)\);[\s\S]*?pushUndo\(before\);[\s\S]*?engine\.loadItem\(seal\.afterItem\);[\s\S]*?engine\.recordCurrencyUse\(currency\);[\s\S]*?engine\.clearHinekoraLock\(\)/.test(commitForesightSource));
+  /const before = snapshotState\(engine\.getItem\(\)\);[\s\S]*?engine\.loadItem\(seal\.afterItem\);[\s\S]*?engine\.recordCurrencyUse\(currency\);[\s\S]*?engine\.clearHinekoraLock\(\);[\s\S]*?pushUndo\(before\)/.test(commitForesightSource));
 check('foresight rollback preserves pending Desecration state',
   /function computeForesight\(currency\)[\s\S]*?const snapshotPending = engine\.getPendingDesecration\(\)[\s\S]*?engine\.loadItem\(snapshot, snapshotPending\)/.test(app) &&
   /function computeDesecrationForesight\(bone\)[\s\S]*?const snapshotPending = engine\.getPendingDesecration\(\)[\s\S]*?engine\.loadItem\(snapshot, snapshotPending\)/.test(app));
@@ -301,6 +317,16 @@ check('incompatible stash migration is transactional and preserves the live engi
 check('requested performance paths are instrumented',
   ['initial-data-load', 'base-selection', 'item-level-change', 'chaos-with-whittling', 'tab-switch', 'undo', 'redo']
     .every(metric => app.includes(metric)) && /`craft-\$\{baseCurrency\}`/.test(app));
+const currencyReasonStart = app.indexOf('function currencyDisabledReason(');
+const currencyReasonEnd = app.indexOf('\nfunction unsupportedReason', currencyReasonStart);
+const currencyReasonSource = app.slice(currencyReasonStart, currencyReasonEnd);
+const consumeOmenStart = app.indexOf('function consumeCraftOmen(');
+const consumeOmenEnd = app.indexOf('\nfunction ', consumeOmenStart + 10);
+const consumeOmenSource = app.slice(consumeOmenStart, consumeOmenEnd);
+check('item-level eligibility helper is scoped to currency validation',
+  /const noEligibleModifier\s*=/.test(currencyReasonSource) &&
+  /return noEligibleModifier\(['"]magic['"]\)/.test(currencyReasonSource) &&
+  !/noEligibleModifier/.test(consumeOmenSource));
 check('Whittling blocks unknown modifier levels in the UI',
   /Unsupported — verification required: a removable modifier has no numeric modifier level/.test(app));
 check('base search still filters rendered cards',
@@ -422,7 +448,7 @@ check('Jewel-only flavor text is conditional on Jewel mode',
   /Place into an allocated Jewel Socket on the Passive Skill Tree/.test(html));
 check('runtime selector stylesheet is versioned in the Task 03 offline shell',
   /header-fix\.css\?v=16/.test(select) &&
-  /CACHE_NAME = 'poe2-craft-task03-v1'/.test(serviceWorker) &&
+  /CACHE_NAME = 'poe2-craft-task03-regression-fix-v1'/.test(serviceWorker) &&
   serviceWorker.includes("'./header-fix.css?v=16'"));
 
 console.log(`\nRESULT: ${passed}/${passed + failed} checks passed`);

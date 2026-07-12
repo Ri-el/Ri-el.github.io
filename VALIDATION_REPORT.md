@@ -44,7 +44,17 @@ Click, keyboard, context-menu, and drag interactions resolve the same stable cra
 
 The parity report is generated directly from the registry rather than reconstructed from names or source tags. It records 531 definitions, 37 visible controls, 32 implemented definitions, one probability-unverified Vaal definition, 489 blocked definitions, and nine deprecated target-version records. The four visible unavailable controls retain item-specific blockers. No new crafting mechanic was enabled in Task 03.
 
-Interactive direct-`file://` verification remains explicitly blocked by the Codex in-app browser's local-file URL policy. Compatibility is covered by the unchanged classic deferred script model, local `.data.js` bundle, absence of runtime fetches, generated-asset freshness checks, service-worker shell inclusion, and source contracts. No local server was started because repository rules require approval for local network access.
+Interactive direct-`file://` verification remains explicitly blocked by the Codex in-app browser's local-file URL policy. Compatibility is covered by the unchanged classic deferred script model, local `.data.js` bundle, absence of runtime fetches, generated-asset freshness checks, service-worker shell inclusion, and source contracts. The later regression-fix instruction explicitly authorized the local-server verification described below.
+
+### Task 03 production entry regression fix
+
+Commit `72a5f0b` initially failed during default-engine rendering. The first visible browser exception was `Error initializing simulator: noEligibleModifier is not defined`; the app caught it and displayed the error toast, so the browser console itself remained empty. `noEligibleModifier` had been declared inside `consumeCraftOmen()` but was called from `currencyDisabledReason()` during the initial `renderItem()`. That aborted `createEngine()` before normalized indexes were exposed through the working bridge, so every outer class stayed on the selection screen.
+
+The helper now lives in `currencyDisabledReason()`. Core modifier/normalized data and the default engine initialize before the crafting registry UI; registry rendering/validation has its own prominently reported failure boundary, and non-crafting category navigation is still bound. The service-worker cache is `poe2-craft-task03-regression-fix-v1`, preventing the previous Task 03 shell from mixing old and fixed runtime assets.
+
+Real HTTP browser smoke testing used the repository's `serve.ps1` workflow. All 31 released item classes entered the workbench, selected a deterministic concrete base, rendered the tooltip, and returned through the Item Categories button without a toast or console error. The mandatory representative set passed with Ruby, Crimson Amulet, Golden Hoop, Stocky Mitts, Rusted Cuirass, Crude Bow, Lesser Life Flask, and Thawing Charm. `tools/browser-smoke.mjs` now automates the same real-script assertions, including the 531-definition/ten-tab globals and service-worker unregister/cache-clear step, when an existing Playwright browser is available.
+
+The in-app browser rejected `file://` navigation under its URL security policy and explicitly prohibited switching to another automation surface as a workaround. Direct-file click-through therefore remains pending external/manual execution and is not claimed as verified here. The checked-in classic-script bundle itself passes JavaScript evaluation and assigns 531 registry definitions and ten tabs without fetching JSON.
 
 ## Selection calculation
 
@@ -96,7 +106,7 @@ Task 01 also corrected a reset invariant: `resetItem()` previously created an it
 
 - Baseline deterministic suite against the original engine: **11/17 passed**. Failures covered the stale browser bundle, equipment limits, Magic-only classes, Alchemy count, Whittling ties, and Greater/Perfect semantics.
 - Current deterministic suite: **39/39 passed** with `node validation.mjs`.
-- Current UI DOM/CSS contract suite: **114/114 passed** with `node ui-validation.mjs`.
+- Current UI DOM/CSS contract suite: **117/117 passed** with `node ui-validation.mjs`.
 - Current normalized/registry-data suite: **67/67 passed** with `node data-validation.mjs`.
 - Generated registry and parity checks passed with `node tools/build-currency-index.mjs --check` and `node tools/build-crafting-parity.mjs --check`.
 - Seeded fuzz suite: **30,016 operations across 56 populated pools, 2,573 meaningful mutations, 206 Hinekora consumptions, 0 exceptions, and 0 invariant violations** with `node fuzz.mjs 30000 542026`. Reviewed digest: `46984d739488e00aea6bfd0664a34741306ec273e68542df96d574695f1f5104`. The intentional Task 02 digest change comes from deterministic schema-v3 concrete-base state being included for every pool.

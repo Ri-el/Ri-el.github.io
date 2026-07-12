@@ -81,6 +81,7 @@ No quality currency button is enabled merely from a known description.
 | `tools/build-normalized-data.mjs` | Rebuilds `data/normalized.data.js` from repository-owned normalized JSON. | Run through the normal build. |
 | `tools/build-currency-index.mjs` | Rebuilds the 530-entry source inventory, complete 531-definition registry, classic-script browser wrapper, and coverage report. `--check` fails if generated files are stale. | Development-time only; no runtime fetches. |
 | `tools/build-crafting-parity.mjs` | Projects `reports/crafting-parity.json` directly from the authoritative registry without inferring missing mechanics; `docs/crafting-parity.md` explains that generated report. | Run after registry or classification changes. |
+| `tools/browser-smoke.mjs` | Optional real-browser regression harness for explicit `file://` and local-HTTP targets. It clears HTTP service-worker state, executes the actual `index.html` scripts, and click-tests representative outer classes, engine context, concrete defaults, tooltip rendering, and the back button. | Run with an existing Playwright installation; it is not a runtime dependency. |
 | `tools/sync-poe2-data.mjs` | Staging-only public-source sync/import utility with HTTPS/public-host checks, rate limits, response limits, hashes, and provenance. `verify` validates the active repository snapshot without downloading. | New fetches are candidates; they do not auto-promote runtime data. |
 | `push.cmd` | **Double-click to upload everything to GitHub.** Inits git if needed, then force-pushes the whole folder to `Ri-el/Ri-el.github.io` (`main`). | Home PC only. Force-push overwrites the old version on GitHub — pull/sync first if the repo changed elsewhere. |
 | `serve.ps1` | Optional: starts a tiny local web server (only needed if you ever want to test PWA/service-worker features that `file://` can't do). | Not needed for normal play. |
@@ -95,7 +96,7 @@ No quality currency button is enabled merely from a known description.
 | `_scaffold_data.mjs` | One-off Node generator that split the jewel data into per-base files and created the empty scaffolds. Already done its job; kept for reference. Git-ignored. |
 | `fuzz.mjs` | **Node fuzz / regression harness for the crafting engine.** It treats malformed data, engine exceptions, malformed item state, zero meaningful mutations, invariant violations, and fixed-seed digest drift as fatal. The reviewed Task 02 checkpoint is `node fuzz.mjs 30000 542026`: 30,016 operations, 2,573 meaningful mutations, 206 Hinekora consumptions, digest `46984d739488e00aea6bfd0664a34741306ec273e68542df96d574695f1f5104`. The intentional digest change comes from attaching deterministic schema-v3 concrete-base state to every populated pool. |
 | `validation.mjs` | Deterministic 0.5.4-oriented engine/data regression suite, including injectable crafting RNG, generic concrete identity/state migration, source overlays, base-specific tags/affix limits, structured quality/socket preservation, and all 56 populated pools. Current checkpoint: **39/39**. |
-| `ui-validation.mjs` | Dependency-free DOM/CSS contract checks for generated registry tabs/cards, shared dispatch, filters, accessibility, the workbench grid, concrete-base flow, and stash markup. Current checkpoint: **114/114**. |
+| `ui-validation.mjs` | Dependency-free DOM/CSS contract checks for generated registry tabs/cards, shared dispatch, startup isolation, eligibility scope, filters, accessibility, the workbench grid, concrete-base flow, and stash markup. Current checkpoint: **117/117**. |
 | `data-validation.mjs` | Validates normalized schemas, all 1,760 concrete records, the complete crafting registry/parity projection, 31-class base parity, provenance, hashes, browser bundles, and explicit blockers using only repository-owned files. Current checkpoint: **67/67**. |
 
 ### Validation commands
@@ -111,7 +112,7 @@ node tools/sync-poe2-data.mjs verify
 node fuzz.mjs 30000 542026
 ```
 
-The Task 03 checkpoint passes **39/39 engine**, **114/114 UI**, and **67/67 data** checks. The fixed-seed fuzz run remains unchanged and passes with zero exceptions, harness errors, or invariant violations.
+The Task 03 regression-fix checkpoint passes **39/39 engine**, **117/117 UI**, and **67/67 data** checks. The fixed-seed fuzz run remains unchanged and passes with zero exceptions, harness errors, or invariant violations. `tools/browser-smoke.mjs` performs real-script click-through checks against explicit `file://` or local-HTTP targets when Playwright is already available.
 
 ---
 
