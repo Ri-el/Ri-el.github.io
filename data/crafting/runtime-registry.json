@@ -1889,14 +1889,14 @@
       "cssClasses": [
         "currency-btn"
       ],
-      "description": "Corrupts the item and applies one eligible implemented corruption outcome.",
-      "actionType": "direct",
-      "activation": "arm",
-      "engineAction": "vaal",
-      "applicabilityPredicate": "currencyDisabledReason",
-      "disabledReasonHandler": "currencyDisabledReason",
-      "disabledReason": "",
-      "handler": "applyVaal",
+    "description": "Retained for parity, but exact target-version corruption outcomes and probabilities are not verified.",
+    "actionType": "unsupported",
+    "activation": "none",
+    "engineAction": null,
+    "applicabilityPredicate": "unsupportedReason",
+    "disabledReasonHandler": "staticDisabledReason",
+    "disabledReason": "Mechanic blocked because exact target-version Vaal Orb outcomes and probabilities are not verified.",
+    "handler": null,
       "sourceHandler": "poe2_vaal",
       "triggeringAction": null,
       "omenInteraction": {
@@ -1918,13 +1918,13 @@
         "crafting.js#applyVaal"
       ],
       "implementationStatus": "probability_unverified",
-      "verificationStatus": "mutation_present_probability_unverified",
+    "verificationStatus": "probability_unverified_blocked",
       "blocker": "Exact target-version Vaal Orb outcome probabilities are not encoded by the retained public data.",
       "testFixtureIds": [
         "validation:crafting-rng-injectable",
         "ui:vaal-in-corruption-tab"
       ],
-      "supported": true,
+    "supported": false,
       "visible": true
     }
   ]

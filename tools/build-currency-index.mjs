@@ -283,6 +283,15 @@ function fallbackBlocker(entry, category) {
   if (entry.classification === 'probability_unverified') {
     return `Mechanic blocked because exact target-version outcome probabilities for ${entry.displayName} are not verified.`;
   }
+  if (category === 'quality') {
+    const sourceId = Number(entry.sourceItemId);
+    if ([0, 1, 6, 28].includes(sourceId)) {
+      return `Mechanic blocked because the exact target-version 0.5.4 item-level increment formula, breakpoints, and rounding for ${entry.displayName} are not verified.`;
+    }
+    if ([65, 66, 67, 68].includes(sourceId)) {
+      return `Mechanic blocked because the exact target-version ${entry.displayName} quality mutation, cap, corruption outcome, and increment are not verified.`;
+    }
+  }
   const details = {
     currency: 'its exact applicability and item-state mutation',
     quality: 'its exact quality applicability, increment, and cap behavior',
@@ -407,7 +416,10 @@ function fallbackDefinition(entry, tabById) {
     blocker,
     testFixtureIds: [],
     supported: false,
-    visible: false,
+    // Quality records are surfaced as disabled audit cards so the workbench
+    // can explain their verified target taxonomy and the exact missing rule;
+    // they never acquire an operation handler from source descriptions alone.
+    visible: category === 'quality',
     targetGameVersion: TARGET_VERSION,
     sourceClassifications: entry.sourceClassifications,
     sourceTags: entry.sourceTags,
@@ -419,8 +431,8 @@ function validateGeneratedRegistry(craftRegistry, sourceEntries, craftTabs) {
   assert(craftRegistry.length === 531, `Generated crafting registry has ${craftRegistry.length} definitions; expected 531.`);
   assert(new Set(craftRegistry.map(definition => definition.craftId)).size === craftRegistry.length,
     'Generated crafting registry contains duplicate craft IDs.');
-  assert(craftRegistry.filter(definition => definition.visible).length === 37,
-    'Generated crafting registry must preserve exactly 37 visible definitions.');
+  assert(craftRegistry.filter(definition => definition.visible).length === 45,
+    'Generated crafting registry must contain 37 runtime controls plus 8 visible quality audit cards.');
   const sourceIds = craftRegistry.filter(definition => definition.sourceItemId != null).map(definition => String(definition.sourceItemId));
   const metadataKeys = craftRegistry.filter(definition => definition.metadataKey != null).map(definition => definition.metadataKey);
   assert(sourceIds.length === sourceEntries.length && new Set(sourceIds).size === sourceEntries.length,

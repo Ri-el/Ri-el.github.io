@@ -92,11 +92,6 @@ function measureOperation(name, operation) {
 
 let engine = null;
 let craftingRandomSource = null;
-function craftingRandom() {
-  const value = Number(craftingRandomSource ? craftingRandomSource() : Math.random());
-  if (!Number.isFinite(value)) throw new Error('Crafting RNG returned a non-finite value.');
-  return Math.min(Math.max(value, 0), 1 - Number.EPSILON);
-}
 // Legacy name kept for compatibility: this now holds the ACTIVE base id for any
 // category (e.g. 'ruby', 'rings', 'gloves_str'), not only jewels.
 let currentJewelType = 'ruby';
@@ -279,6 +274,7 @@ const elements = {
   modList: document.getElementById('mod-list'),
   enchantList: document.getElementById('enchant-list'),
   baseDetailList: document.getElementById('base-detail-list'),
+  qualityList: document.getElementById('quality-list'),
   implicitList: document.getElementById('implicit-list'),
   corruptedLabel: document.getElementById('corrupted-label'),
   itemLevel: document.getElementById('item-level'),
@@ -1015,6 +1011,7 @@ window.CraftForge.setCraftingRandomSource = source => {
   if (source != null && typeof source !== 'function') throw new TypeError('Crafting RNG must be a function or null.');
   craftingRandomSource = source;
   if (engine) engine.setRandomSource(source);
+  invalidateForesightContext();
 };
 window.CraftForge.getPerformanceMetrics = () => performanceMetrics.map(metric => ({ ...metric }));
 window.CraftForge.reloadCraftIcons = () => setupCurrencyIcons();
@@ -1555,7 +1552,6 @@ function applyCurrencyToEngine(currency, eng = engine) {
       case 'applyRegal':
       case 'applyExalted': return eng[definition.handler](craftOptions);
       case 'applyAlchemy':
-      case 'applyVaal':
       case 'applyFracturing':
       case 'applyEssenceOfAbyss':
       case 'applyEssenceOfBreach': return eng[definition.handler]();
@@ -1566,8 +1562,14 @@ function applyCurrencyToEngine(currency, eng = engine) {
 
 function toggleCurrency(currency) {
   if (!currency) return;
-  if (engine.getItem().corrupted) {
-    showError('Item is corrupted and cannot be modified.');
+  const item = engine.getItem();
+  if (item.corrupted || item.sanctified || item.mirrored || item.isMirrored) {
+    const reason = item.corrupted
+      ? 'Item is corrupted and cannot be modified.'
+      : item.sanctified
+        ? 'Item is sanctified and cannot be modified further.'
+        : 'Item is mirrored and cannot be modified.';
+    showError(reason);
     return;
   }
   if (armedCurrency === currency) disarmCurrency();
@@ -1709,7 +1711,12 @@ function setupIlvlSlider() {
     return Math.round(1 + ratio * 99);
   };
 
-  const applyValue = (v) => measureOperation('item-level-change', () => updateIlvlUI(engine.setItemLevel(v)));
+  const applyValue = (v) => measureOperation('item-level-change', () => {
+    const previous = engine.getItem().ilvl;
+    const next = engine.setItemLevel(v);
+    if (next !== previous) invalidateForesightContext({ restorePreview: true });
+    updateIlvlUI(next);
+  });
 
   slider.addEventListener('pointerdown', (e) => {
     // Keep the press off the tooltip so it can't apply an armed currency.
@@ -1768,6 +1775,7 @@ function toggleOmen(omen) {
   // Desecrated modifier. The other omens influence the Well of Souls.
   if (omen === 'omen_of_light') {
     omenOfLightActive = !omenOfLightActive;
+    invalidateForesightContext({ restorePreview: true });
     const btn = Array.from(elements.omenBtns).find(b => omenForElement(b) === 'omen_of_light');
     if (btn) {
       btn.classList.toggle('active', omenOfLightActive);
@@ -1792,6 +1800,7 @@ function toggleOmen(omen) {
     b.classList.toggle('active', active);
     b.setAttribute('aria-pressed', String(active));
   });
+  invalidateForesightContext({ restorePreview: true });
 }
 
 // ---- Crafting omens (Chaos / Annulment / Divine augments) ----
@@ -1807,6 +1816,7 @@ function updateCraftOmenButtons() {
 function toggleCraftOmen(omen) {
   if (!CRAFT_OMENS[omen]) return;
   selectedCraftOmen = (selectedCraftOmen === omen) ? null : omen;
+  invalidateForesightContext({ restorePreview: true });
   updateCraftOmenButtons();
   renderItem();
 }
@@ -2119,15 +2129,6 @@ function applyHinekoraLock(shiftKey = false) {
   return { success: true, item: engine.getItem(), action: 'hinekora-lock' };
 }
 
-// --- Hinekora's Lock: the Vaal is consumed, but the player picks the outcome ---
-const VAAL_CHOICES = {
-  none:    { title: 'Corrupt \u2014 Unchanged', desc: 'Becomes Corrupted with no other change.' },
-  reroll:  { title: 'Corrupt \u2014 Reroll', desc: 'Destroy and re-add 1\u20133 random modifiers, then Corrupt.' },
-  enchant: { title: 'Sanctify \u2014 Corrupted Implicit', desc: 'Add a corrupted implicit modifier, then Corrupt.' },
-  modify:  { title: 'Corrupt \u2014 Modify', desc: 'Add a corrupted implicit OR remove a modifier, then Corrupt.' },
-};
-const VAAL_OUTCOME_NUM = { none: 1, reroll: 2, enchant: 3, modify: 4 };
-
 // Currencies whose effect Hinekora's Lock can foresee (everything that directly
 // modifies the item — not the Lock itself or the Well-of-Souls bone).
 const FORESEEABLE = new Set(VISIBLE_CRAFT_DEFINITIONS
@@ -2163,6 +2164,11 @@ function getCorruptionModalEl() {
 }
 
 function openCorruptionChoice() {
+  const blocked = 'Mechanic blocked because exact target-version Vaal Orb outcomes and probabilities are not verified.';
+  showError(blocked);
+  return { success: false, error: blocked };
+  /* Retained only as an unreachable compatibility body until verified data
+     exists; no UI path invokes this function while Vaal is blocked. */
   if (engine.getItem().corrupted) {
     showError('Item is corrupted and cannot be modified.');
     return;
@@ -2281,6 +2287,18 @@ function clearForesightPreview() {
   renderItem(); // restore the real, still-Locked item
 }
 
+// A sealed Hinekora result is tied to the exact item-level, Omen, and RNG
+// context under which it was rolled. Discard cached seals whenever any of
+// those inputs changes; optionally restore the live item if a preview is
+// currently painted over the tooltip.
+function invalidateForesightContext({ restorePreview = false } = {}) {
+  const hadPreview = foreseenHover !== null;
+  foreseenSeals = {};
+  foreseenHover = null;
+  hideForeseenBanner();
+  if (restorePreview && hadPreview && engine) renderItem();
+}
+
 function commitForesight(currency) {
   const seal = foreseenSeals[currency] || computeForesight(currency);
   if (!seal.afterItem) {
@@ -2395,22 +2413,9 @@ function hideForeseenBanner() {
 }
 
 function applyChosenCorruption(key) {
-  const before = snapshotState(engine.getItem());
-  const result = engine.applyVaal(VAAL_OUTCOME_NUM[key]);
-  if (result.success) {
-    pushUndo(before);
-    engine.recordCurrencyUse('vaal');
-    engine.clearHinekoraLock();
-    playSound('vaal');
-    triggerCraftAnimation('vaal');
-    renderItem(result);
-    disarmCurrency();
-  } else {
-    playSound('error');
-    triggerErrorAnimation();
-    showError(result.error);
-  }
-  closeCorruptionChoice();
+  const error = 'Mechanic blocked because exact target-version Vaal Orb outcomes and probabilities are not verified.';
+  showError(error);
+  return { success: false, error };
 }
 
 function renderCraftCounter(item) {
@@ -2568,6 +2573,8 @@ function currencyDisabledReason(currency, item) {
   if (item.corrupted) return 'Item is corrupted and cannot be modified.';
   if (item.sanctified) return 'Item is sanctified and cannot be modified further.';
 
+  if (item.mirrored || item.isMirrored) return 'Item is mirrored and cannot be modified.';
+
   const base = ORB_VARIANTS[currency] ? ORB_VARIANTS[currency].base : currency;
   const mods = allItemMods(item);
   const removable = removableItemMods(item);
@@ -2592,7 +2599,7 @@ function currencyDisabledReason(currency, item) {
       }
       return noEligibleModifier('magic');
     case 'alchemy':
-      if (item.rarity !== 'normal' && item.rarity !== 'magic') return 'Requires a Normal or Magic item.';
+      if (item.rarity !== 'normal') return 'Requires a Normal item.';
       if (!engine.supportsRarity('rare')) return `${item.baseName} cannot be upgraded to Rare.`;
       return noEligibleModifier('rare', { clearExisting: true });
     case 'regal':
@@ -2621,12 +2628,14 @@ function currencyDisabledReason(currency, item) {
       return '';
     }
     case 'annulment':
+      if (item.rarity === 'normal') return 'Requires a Magic or Rare item.';
       if (!removable.length) return 'No removable modifier; fractured and unrevealed modifiers are protected.';
       if (omenOfLightActive && !removable.some(mod => mod.desecrated)) return 'Omen of Light requires a revealed Desecrated modifier.';
       if (selectedCraftOmen === 'sinistral_annulment' && !removableItemMods(item, 'prefix').length) return 'Omen of Sinistral Annulment requires a removable Prefix.';
       if (selectedCraftOmen === 'dextral_annulment' && !removableItemMods(item, 'suffix').length) return 'Omen of Dextral Annulment requires a removable Suffix.';
       return '';
     case 'divine':
+      if (item.rarity === 'normal') return 'Requires a Magic or Rare item.';
       if (selectedCraftOmen === 'sanctification') {
         if (item.rarity !== 'rare') return 'Omen of Sanctification requires a Rare item.';
         return removable.length ? '' : 'Omen of Sanctification requires a non-fractured modifier.';
@@ -2640,7 +2649,7 @@ function currencyDisabledReason(currency, item) {
     case 'hinekora':
       return item.hinekoraLocked ? "Hinekora's Lock is already applied." : '';
     case 'vaal':
-      return '';
+      return 'Mechanic blocked because exact target-version Vaal Orb outcomes and probabilities are not verified.';
     default:
       return 'Unsupported — verification required';
   }
@@ -2654,6 +2663,7 @@ function boneDisabledReason(item) {
   const alreadyDesecrated = allItemMods(item).some(mod => mod.desecrated && !mod.mark);
   if (item.corrupted) return 'Item is corrupted and cannot be modified.';
   if (item.sanctified) return 'Item is sanctified and cannot be modified further.';
+  if (item.mirrored || item.isMirrored) return 'Item is mirrored and cannot be modified.';
   if (!desecData) return 'Unsupported — verification required: Desecrated modifier data is unavailable.';
   if (item.rarity !== 'rare') return 'Requires a Rare item.';
   if (alreadyDesecrated) return 'Item already has a Desecrated modifier.';
@@ -2664,6 +2674,7 @@ function essenceDisabledReason(action, item) {
   if (action !== 'essence_abyss') return UNSUPPORTED_REASON;
   if (item.corrupted) return 'Item is corrupted and cannot be modified.';
   if (item.sanctified) return 'Item is sanctified and cannot be modified further.';
+  if (item.mirrored || item.isMirrored) return 'Item is mirrored and cannot be modified.';
   if (item.rarity !== 'rare') return 'Requires a Rare item.';
   if (!removableItemMods(item).length) return 'Requires at least one removable modifier.';
   if (allItemMods(item).some(mod => mod.mark)) return 'Item already carries the Mark of the Abyssal Lord.';
@@ -2675,6 +2686,7 @@ function omenDisabledReason(definition, item) {
   if (!definition?.supported) return definition?.unsupportedReason || UNSUPPORTED_REASON;
   if (item.corrupted) return 'Item is corrupted and cannot be modified.';
   if (item.sanctified) return 'Item is sanctified and cannot be modified further.';
+  if (item.mirrored || item.isMirrored) return 'Item is mirrored and cannot be modified.';
   const omen = definition.omenId;
   const removable = removableItemMods(item);
 
@@ -2752,6 +2764,33 @@ function renderConcreteBaseDetails(item) {
   }
 }
 
+function renderQualityDetails(item) {
+  if (!elements.qualityList) return;
+  const quality = item?.quality && typeof item.quality === 'object' ? item.quality : null;
+  const amount = Number(quality?.amount);
+  const visible = Number.isFinite(amount) && amount > 0;
+  elements.qualityList.hidden = !visible;
+  if (!visible) {
+    elements.qualityList.replaceChildren();
+    return;
+  }
+
+  const type = typeof quality.type === 'string' && quality.type.trim() ? quality.type.trim() : 'normal';
+  const cap = Number(quality.cap);
+  const capText = quality.cap != null && Number.isFinite(cap) ? ` / ${cap}%` : '';
+  const line = document.createElement('div');
+  line.className = 'quality-line';
+  line.textContent = `Quality (${capitalize(type)}): +${amount}%${capText}`;
+  const sourceName = typeof quality.source === 'string'
+    ? quality.source
+    : quality.source?.displayName || quality.source?.operationId || '';
+  if (sourceName) {
+    line.dataset.qualitySource = sourceName;
+    line.title = `Quality source: ${sourceName}`;
+  }
+  elements.qualityList.replaceChildren(line);
+}
+
 function renderItem(actionResult = null, overrideItem = null) {
   const item = overrideItem || engine.getItem();
   const liveItem = overrideItem ? engine.getItem() : item;
@@ -2819,6 +2858,7 @@ function renderItem(actionResult = null, overrideItem = null) {
     updateIlvlUI(item.ilvl);
   }
   renderConcreteBaseDetails(item);
+  renderQualityDetails(item);
 
   const allMods = [
     ...item.prefixes.map(m => ({ ...m, type: 'prefix' })),

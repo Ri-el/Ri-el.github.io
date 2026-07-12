@@ -61,11 +61,11 @@ function record(modGroup, ilvlReq, extra = {}) {
 
 function rareItem(baseType, prefixes = [], suffixes = []) {
   return {
-    schemaVersion: 3,
+    schemaVersion: 4,
     rarity: 'rare', baseName: baseType, name: 'Test Item', baseType, jewelType: baseType,
     generatedName: 'Test Item',
     prefixes, suffixes, enchantments: [], corrupted: false, sanctified: false,
-    mirrored: false, quality: { amount: 0, type: 'normal', source: null },
+    mirrored: false, quality: { amount: 0, type: 'normal', source: null, cap: 20 },
     ilvl: 83, itemLevel: 83, currencyUsed: {}, hinekoraLocked: false,
     sockets: [], socketedContent: [], runes: [], soulCores: [], flags: {},
     desecratedState: null, omenState: null, hinekoraState: null, fracturedMods: [],
@@ -174,13 +174,13 @@ test('equal-weight fallback pools are explicitly marked unverified', () => {
 test('legacy quality state migrates to the structured shape without changing mechanics', () => {
   const data = { bases: { quality_migration_test: syntheticBase() } };
   const engine = new Engine(data, 'quality_migration_test');
-  assert.deepEqual(engine.getItem().quality, { amount: 0, type: 'normal', source: null });
+  assert.deepEqual(engine.getItem().quality, { amount: 0, type: 'normal', source: null, cap: 20 });
 
   const legacy = rareItem('quality_migration_test');
   legacy.schemaVersion = 1;
   legacy.quality = 7;
   engine.loadItem(legacy);
-  assert.deepEqual(engine.getItem().quality, { amount: 7, type: 'normal', source: null });
+  assert.deepEqual(engine.getItem().quality, { amount: 7, type: 'normal', source: null, cap: 20 });
 
   const structured = rareItem('quality_migration_test');
   structured.quality = { amount: '12', type: 'preserved', source: { id: 'saved-state' } };
@@ -189,10 +189,76 @@ test('legacy quality state migrates to the structured shape without changing mec
     amount: 12,
     type: 'preserved',
     source: { id: 'saved-state' },
+    cap: null,
   });
 });
 
-test('schema v3 keeps generic concrete-base metadata and item-level aliases distinct', () => {
+test('quality state preserves alternate and explicit caps without conflating types', () => {
+  const data = { bases: { quality_state_test: syntheticBase() } };
+  const engine = new Engine(data, 'quality_state_test');
+
+  const aboveDefault = rareItem('quality_state_test');
+  aboveDefault.quality = { amount: 25, type: 'normal', source: { id: 'infuser' } };
+  engine.loadItem(aboveDefault);
+  assert.deepEqual(engine.getItem().quality, {
+    amount: 25, type: 'normal', source: { id: 'infuser' }, cap: null,
+  });
+
+  const explicit = rareItem('quality_state_test');
+  explicit.quality = { amount: 12, type: 'catalyst', source: { id: 'catalyst' }, cap: 30 };
+  engine.loadItem(explicit);
+  assert.deepEqual(engine.getItem().quality, explicit.quality);
+  assert.throws(() => engine.loadItem({ ...explicit, quality: { ...explicit.quality, cap: 10 } }), /exceeds its verified cap/);
+  assert.deepEqual(engine.getItem().quality, explicit.quality);
+});
+
+test('verified fixed quality operation enforces target, cap, type, save/load, and atomic failures', () => {
+  const skillGemBase = {
+    name: 'Synthetic Skill Gem',
+    baseTags: ['skill_gem'],
+    prefixes: [],
+    suffixes: [],
+  };
+  const data = { bases: { skill_gem: skillGemBase, amulets: syntheticBase() } };
+  const engine = new Engine(data, 'skill_gem');
+  assert.deepEqual(engine.getItem().quality, { amount: 0, type: 'normal', source: null, cap: 20 });
+
+  assert(engine.applyQualityCurrency('gemcutters_prism').success);
+  assert.equal(engine.getItem().quality.amount, 5);
+  assert.equal(engine.getItem().quality.cap, 20);
+  assert.equal(engine.getItem().quality.source.operationId, 'gemcutters_prism');
+  assert(engine.applyQualityCurrency('gemcutters_prism').success);
+  assert(engine.applyQualityCurrency('gemcutters_prism').success);
+  assert(engine.applyQualityCurrency('gemcutters_prism').success);
+  const atCap = engine.applyQualityCurrency('gemcutters_prism');
+  assert.equal(atCap.success, false);
+  assert.match(atCap.error, /maximum quality/i);
+  assert.equal(engine.getItem().quality.amount, 20);
+
+  const saved = JSON.parse(JSON.stringify(engine.getItem()));
+  const restored = new Engine(data, 'skill_gem');
+  restored.loadItem(saved);
+  assert.deepEqual(restored.getItem().quality, saved.quality);
+
+  const alternate = new Engine(data, 'skill_gem');
+  const alternateItem = alternate.getItem();
+  alternateItem.quality = { amount: 1, type: 'catalyst', source: { id: 'c' }, cap: 20 };
+  alternate.loadItem(alternateItem);
+  const before = alternate.getItem();
+  const incompatible = alternate.applyQualityCurrency('gemcutters_prism');
+  assert.equal(incompatible.success, false);
+  assert.match(incompatible.error, /cannot replace catalyst/i);
+  assert.deepEqual(alternate.getItem(), before);
+
+  const invalidTarget = new Engine(data, 'amulets');
+  const invalidBefore = invalidTarget.getItem();
+  const invalid = invalidTarget.applyQualityCurrency('gemcutters_prism');
+  assert.equal(invalid.success, false);
+  assert.match(invalid.error, /requires a Skill Gem/i);
+  assert.deepEqual(invalidTarget.getItem(), invalidBefore);
+});
+
+test('schema v4 keeps generic concrete-base metadata and item-level aliases distinct', () => {
   const data = { bases: { amulets: syntheticBase() } };
   const crimson = {
     ...concreteAmulet(2546, 'Crimson Amulet', 1, 1564),
@@ -214,7 +280,7 @@ test('schema v3 keeps generic concrete-base metadata and item-level aliases dist
   const engine = new Engine(data, 'amulets', null, null, null, crimson);
   const item = engine.getItem();
 
-  assert.equal(item.schemaVersion, 3);
+  assert.equal(item.schemaVersion, 4);
   assert.equal(item.baseItemId, 2546);
   assert.equal(item.baseSourceId, 'source-2546');
   assert.equal(item.sourceItemClass, 'Amulet');
@@ -253,7 +319,7 @@ test('schema v3 keeps generic concrete-base metadata and item-level aliases dist
   assert.notEqual(rare.generatedName, rare.baseName);
 });
 
-test('schema v3 migration preserves legacy socket payloads without inventing mechanics', () => {
+test('schema v4 migration preserves legacy socket payloads without inventing mechanics', () => {
   const data = { bases: { amulets: syntheticBase() } };
   const crimson = concreteAmulet(2546, 'Crimson Amulet', 1, 1564);
   const engine = new Engine(data, 'amulets', null, null, null, crimson);
@@ -272,10 +338,10 @@ test('schema v3 migration preserves legacy socket payloads without inventing mec
   delete numericLegacy.flags;
   engine.loadItem(numericLegacy);
   const migrated = engine.getItem();
-  assert.equal(migrated.schemaVersion, 3);
+  assert.equal(migrated.schemaVersion, 4);
   assert.equal(migrated.ilvl, 67);
   assert.equal(migrated.itemLevel, 67);
-  assert.deepEqual(migrated.quality, { amount: 7, type: 'normal', source: null });
+  assert.deepEqual(migrated.quality, { amount: 7, type: 'normal', source: null, cap: 20 });
   assert.deepEqual(migrated.sockets, []);
   assert.equal(migrated.socketCount, 2);
   assert.deepEqual(migrated.legacySocketState, {
@@ -310,7 +376,7 @@ test('schema migration rejects incompatible state without mutating the live item
   const engine = new Engine(data, 'amulets', null, null, null, crimson);
   const before = engine.getItem();
 
-  assert.throws(() => engine.loadItem({ ...before, schemaVersion: 4 }), /newer than supported/);
+  assert.throws(() => engine.loadItem({ ...before, schemaVersion: 5 }), /newer than supported/);
   assert.throws(() => engine.loadItem({ ...before, simulatorPoolId: 'rings' }), /does not match/);
   assert.throws(() => engine.loadItem({ ...before, baseItemId: 999999 }), /does not match resolved base/);
   assert.throws(() => engine.loadItem({ ...before, targetGameVersion: '0.4.0' }), /targets game version/);
@@ -384,7 +450,7 @@ test('concrete Amulet identity remains separate from the simulator pool', () => 
   const engine = new Engine(data, 'amulets', null, null, null, crimson);
   const initial = engine.getItem();
 
-  assert.equal(initial.schemaVersion, 3);
+  assert.equal(initial.schemaVersion, 4);
   assert.equal(initial.baseType, 'amulets');
   assert.equal(initial.jewelType, 'amulets');
   assert.equal(initial.simulatorPoolId, 'amulets');

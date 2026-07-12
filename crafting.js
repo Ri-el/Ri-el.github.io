@@ -6,7 +6,7 @@
 // key) and per-base affix limits. Jewels remain the default base.
 
 class CraftingEngine {
-  static ITEM_SCHEMA_VERSION = 3;
+  static ITEM_SCHEMA_VERSION = 4;
 
   // Ordinary equipment can hold three prefixes and three suffixes. Jewels are
   // the exception at two of each; flasks and charms are Magic-only.
@@ -475,9 +475,15 @@ class CraftingEngine {
 
   // Item saves created before quality became structured may contain a number
   // (or no quality field at all). Normalise that legacy shape at every engine
-  // entry point without inventing an effect, source, or target-version cap.
+  // entry point. The verified ordinary-quality cap is attached only to normal
+  // quality at or below that cap; alternate or above-cap legacy quality keeps
+  // an unknown cap rather than inheriting a rule that may not apply.
   _normalizeQualityState(item) {
-    const fallback = { amount: 0, type: 'normal', source: null };
+    const configuredDefaultCap = Number(this._qualityRules?.defaultMaximumQuality);
+    const defaultCap = Number.isFinite(configuredDefaultCap) && configuredDefaultCap >= 0
+      ? configuredDefaultCap
+      : 20;
+    const fallback = { amount: 0, type: 'normal', source: null, cap: defaultCap };
     if (!item || typeof item !== 'object') return fallback;
 
     const raw = item.quality;
@@ -497,8 +503,111 @@ class CraftingEngine {
       source = item.qualitySource == null ? null : structuredClone(item.qualitySource);
     }
 
-    item.quality = { amount, type, source };
+    const rawCap = structured && Object.prototype.hasOwnProperty.call(raw, 'cap')
+      ? raw.cap
+      : item.qualityCap;
+    let cap = null;
+    if (rawCap != null && rawCap !== '') {
+      const parsedCap = Number(rawCap);
+      if (!Number.isFinite(parsedCap) || parsedCap < 0) {
+        throw new Error(`Saved item has an invalid quality cap: ${String(rawCap)}.`);
+      }
+      cap = parsedCap;
+    } else if (type === 'normal' && amount <= defaultCap) {
+      cap = defaultCap;
+    }
+    if (cap != null && amount > cap) {
+      throw new Error(`Saved item quality ${amount} exceeds its verified cap ${cap}.`);
+    }
+
+    item.quality = { amount, type, source, cap };
     return item.quality;
+  }
+
+  _qualityTargetMatches(rule) {
+    const classRules = this._qualityRules?.itemClasses || {};
+    const baseType = String(this.baseType || '').toLocaleLowerCase();
+    const itemClassNames = [this._item?.itemClass, this._item?.sourceItemClass]
+      .filter(Boolean)
+      .map(value => String(value).toLocaleLowerCase());
+    const tags = new Set([
+      ...(this._item?.baseTags || []),
+      ...this._baseTags,
+    ].map(value => String(value).toLocaleLowerCase()));
+
+    return (rule?.targetClasses || []).some(classId => {
+      const target = classRules[classId];
+      if (!target) return false;
+      if ((target.baseTypes || []).some(value => String(value).toLocaleLowerCase() === baseType)) return true;
+      if ((target.baseTypePrefixes || []).some(value => baseType.startsWith(String(value).toLocaleLowerCase()))) return true;
+      if ((target.itemClassNames || []).some(value => itemClassNames.includes(String(value).toLocaleLowerCase()))) return true;
+      return (target.tags || []).some(value => tags.has(String(value).toLocaleLowerCase()));
+    });
+  }
+
+  validateQualityCurrency(operationId) {
+    const rule = this._qualityRules?.operations?.[operationId];
+    if (!rule) return this._fail(`Unknown quality currency operation: ${String(operationId)}.`);
+    const immutable = this._checkCorrupted();
+    if (immutable) return immutable;
+    if (!this._qualityTargetMatches(rule)) {
+      return this._fail(`${rule.displayName} requires ${rule.targetDescription || 'a verified target item class'}.`);
+    }
+
+    const quality = this._normalizeQualityState(this._item);
+    const qualityType = rule.qualityType || 'normal';
+    if (quality.type !== qualityType) {
+      return this._fail(
+        `${rule.displayName} cannot replace ${quality.type} quality; the target-version replacement rule is not verified.`
+      );
+    }
+    const maximumQuality = Number(rule.maximumQuality);
+    if (!Number.isFinite(maximumQuality) || maximumQuality < 0) {
+      return this._fail(`Unsupported — verification required: ${rule.displayName} has no verified quality cap.`);
+    }
+    if (quality.amount >= maximumQuality) {
+      return this._fail(`${rule.displayName} cannot be used because the item is already at maximum quality (${maximumQuality}%).`);
+    }
+    if (rule.increment?.status !== 'verified') {
+      return this._fail(
+        rule.increment?.reason ||
+        `Unsupported — verification required: ${rule.displayName} has no verified increment formula.`
+      );
+    }
+    if (rule.increment.kind !== 'fixed' || !Number.isFinite(Number(rule.increment.amount)) || Number(rule.increment.amount) <= 0) {
+      return this._fail(`Unsupported — verification required: ${rule.displayName} has no executable verified increment.`);
+    }
+    return {
+      success: true,
+      item: this.getItem(),
+      operationId,
+      rule: structuredClone(rule),
+      maximumQuality,
+      increment: Number(rule.increment.amount),
+    };
+  }
+
+  applyQualityCurrency(operationId) {
+    const validation = this.validateQualityCurrency(operationId);
+    if (!validation.success) return validation;
+    const previousQuality = structuredClone(this._item.quality);
+    const amount = Math.min(validation.maximumQuality, previousQuality.amount + validation.increment);
+    this._item.quality = {
+      amount,
+      type: validation.rule.qualityType || 'normal',
+      source: {
+        operationId,
+        displayName: validation.rule.displayName,
+        targetGameVersion: this._qualityRules?.targetGameVersion || null,
+      },
+      cap: validation.maximumQuality,
+    };
+    return this._success({
+      action: 'quality',
+      operationId,
+      previousQuality,
+      quality: structuredClone(this._item.quality),
+    });
   }
 
   _normalizeItemLevelState(item) {
@@ -657,7 +766,7 @@ class CraftingEngine {
     // A corrupted or sanctified item is locked: its mod pool must not change,
     // and silently re-rolling the eligible candidate pools here would let later
     // crafts (or a reveal) behave as if the item were still editable.
-    if (this._item.corrupted || this._item.sanctified) return this._item.ilvl;
+    if (this._item.corrupted || this._item.sanctified || this._item.mirrored || this._item.isMirrored) return this._item.ilvl;
     const n = Math.max(1, Math.min(100, Math.round(Number(level) || 0)));
     this._item.ilvl = n;
     this._item.itemLevel = n;
@@ -678,6 +787,7 @@ class CraftingEngine {
   _checkCorrupted() {
     if (this._item.corrupted) return this._fail('Item is corrupted and cannot be modified.');
     if (this._item.sanctified) return this._fail('Item is sanctified and cannot be modified further.');
+    if (this._item.mirrored || this._item.isMirrored) return this._fail('Item is mirrored and cannot be modified.');
     return null;
   }
 
@@ -784,20 +894,11 @@ class CraftingEngine {
 
   applyAlchemy() {
     const err = this._checkCorrupted(); if (err) return err;
-    if (this._item.rarity !== 'normal' && this._item.rarity !== 'magic') {
-      return this._fail('Orb of Alchemy can only be used on Normal or Magic items.');
-    }
+    if (this._item.rarity !== 'normal') return this._fail('Orb of Alchemy can only be used on Normal items.');
     if (!this.supportsRarity('rare')) return this._fail(`${this._item.baseName} cannot be upgraded to Rare.`);
 
     const snapshot = structuredClone(this._item);
     const previousRarity = this._item.rarity;
-
-    const removedMods = [];
-    if (this._item.rarity === 'magic') {
-      for (const e of this._allModEntries()) removedMods.push(e.mod);
-      this._item.prefixes = [];
-      this._item.suffixes = [];
-    }
 
     this._item.rarity = 'rare';
     this._item.generatedName = this._generateRareName();
@@ -821,11 +922,12 @@ class CraftingEngine {
       this._item = snapshot;
       return this._fail('No eligible mods available.');
     }
-    return this._success({ action: 'transform', addedMods, removedMods, previousRarity });
+    return this._success({ action: 'transform', addedMods, removedMods: [], previousRarity });
   }
 
   applyAnnulment(opts = {}) {
     const err = this._checkCorrupted(); if (err) return err;
+    if (this._item.rarity === 'normal') return this._fail('Orb of Annulment cannot be used on Normal items.');
     if (this._allModEntries().length === 0) return this._fail('Item has no mods to remove.');
     const previousRarity = this._item.rarity;
 
@@ -867,6 +969,7 @@ class CraftingEngine {
   // locking the item from any further modification.
   applyDivine(omen = null) {
     const err = this._checkCorrupted(); if (err) return err;
+    if (this._item.rarity === 'normal') return this._fail('Divine Orb cannot be used on Normal items.');
     if (this._allModEntries().length === 0) return this._fail('Item has no mods to re-roll values on.');
 
     if (omen === 'sanctification') {
@@ -913,64 +1016,17 @@ class CraftingEngine {
     return this._success({ action: 'reroll', previousRarity: this._item.rarity });
   }
 
-  // Which corruption outcomes are currently valid (used by Hinekora's Lock).
+  // Exact 0.5.4 Vaal outcome transitions and weights are not present in the
+  // checked-in sources. Keep the public entry points atomic and blocked rather
+  // than executing the former uniform four-outcome approximation.
   vaalOutcomeOptions() {
-    const hasMods = this._allModEntries().length > 0;
-    const affixRarity = this._item.rarity === 'magic' || this._item.rarity === 'rare';
-    const opts = [{ outcome: 1, key: 'none' }];
-    if (hasMods && affixRarity) opts.push({ outcome: 2, key: 'reroll' });
-    opts.push({ outcome: 3, key: 'enchant' });
-    opts.push({ outcome: 4, key: 'modify' });
-    return opts;
+    return [];
   }
 
-  applyVaal(forcedOutcome = null) {
-    const err = this._checkCorrupted(); if (err) return err;
-
-    this._item.corrupted = true;
-    const previousRarity = this._item.rarity;
-    const hasMods = this._allModEntries().length > 0;
-
-    const affixRarity = this._item.rarity === 'magic' ? 'magic'
-                      : this._item.rarity === 'rare' ? 'rare'
-                      : null;
-
-    let outcome = forcedOutcome != null ? forcedOutcome : this._randomInt(1, 4);
-    if (outcome === 2 && (!hasMods || !affixRarity)) outcome = 3;
-
-    let vaalOutcome = 'none';
-    const addedMods = [];
-    const removedMods = [];
-
-    if (outcome === 1) {
-      vaalOutcome = 'none';
-    } else if (outcome === 2) {
-      vaalOutcome = 'reroll';
-      const times = this._randomInt(1, 3);
-      for (let i = 0; i < times; i++) {
-        if (this._allModEntries().length === 0) break;
-        const removed = this._removeRandomMod();
-        if (removed) removedMods.push(removed);
-        const added = this._addRandomMod(affixRarity);
-        if (added) addedMods.push(added);
-      }
-    } else if (outcome === 3) {
-      vaalOutcome = 'enchant';
-      const ench = this._rollCorruptedImplicit();
-      if (ench) { this._item.enchantments.push(ench.text); addedMods.push(ench.mod); }
-    } else {
-      vaalOutcome = 'modify';
-      const isAdd = this._randomInt(1, 2) === 1;
-      if (isAdd || !hasMods) {
-        const ench = this._rollCorruptedImplicit();
-        if (ench) { this._item.enchantments.push(ench.text); addedMods.push(ench.mod); }
-      } else {
-        const removed = this._removeRandomMod();
-        if (removed) removedMods.push(removed);
-      }
-    }
-
-    return this._success({ action: 'corrupt', vaalOutcome, addedMods, removedMods, previousRarity });
+  applyVaal() {
+    return this._fail(
+      'Mechanic blocked because exact target-version Vaal Orb outcomes and probabilities are not verified.'
+    );
   }
 
   applyFracturing() {
@@ -1527,7 +1583,12 @@ class CraftingEngine {
       corrupted: false,
       sanctified: false,
       mirrored: false,
-      quality: { amount: 0, type: 'normal', source: null },
+      quality: {
+        amount: 0,
+        type: 'normal',
+        source: null,
+        cap: Number(this._qualityRules?.defaultMaximumQuality) || 20,
+      },
       ilvl: 83,
       itemLevel: 83,
       sourceSocketCount: null,

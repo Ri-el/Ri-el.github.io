@@ -16,7 +16,7 @@ This report is generated from `data/crafting/currency-index.json`. Classificatio
 
 - Total source inventory entries: **530**
 - Authoritative registry definitions: **531**
-- Visible workbench definitions: **37**
+- Visible workbench definitions: **45**
 - Existing runtime definitions preserved: **37**
 - Unclassified entries: **0**
 
