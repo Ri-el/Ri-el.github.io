@@ -168,264 +168,35 @@
           <h2 class="panel-title">Crafting Stash</h2>
         </div>
 
+        <div id="craft-inventory-controls" class="craft-inventory-controls" role="group" aria-label="Crafting inventory filters">
+          <label class="craft-inventory-search" for="craft-item-search">
+            <span>Search</span>
+            <input id="craft-item-search" type="search" placeholder="Search crafting items" autocomplete="off">
+          </label>
+          <label class="craft-inventory-filter" for="craft-category-filter">
+            <span>Category</span>
+            <select id="craft-category-filter">
+              <option value="">All categories</option>
+            </select>
+          </label>
+          <label class="craft-applicable-filter" for="craft-applicable-only">
+            <input id="craft-applicable-only" type="checkbox">
+            <span>Applicable only</span>
+          </label>
+          <p id="craft-result-count" class="craft-result-count" aria-live="polite">Loading crafting registry...</p>
+        </div>
+
+        <div id="craft-item-description" class="craft-item-description" role="status" aria-live="polite" aria-atomic="true">
+          <strong id="craft-item-description-title">Choose a crafting item</strong>
+          <span id="craft-item-description-text">Hover or focus an item to see its description and current applicability.</span>
+        </div>
+
         <div id="craft-tab-list" class="craft-tab-list" role="tablist" aria-label="Crafting item categories">
-          <button id="craft-tab-currency" class="craft-tab active" type="button" role="tab" aria-selected="true" aria-controls="craft-panel-currency" data-craft-tab="currency">Currency</button>
-          <button id="craft-tab-quality" class="craft-tab" type="button" role="tab" aria-selected="false" aria-controls="craft-panel-quality" data-craft-tab="quality" tabindex="-1">Quality</button>
-          <button id="craft-tab-socketing" class="craft-tab" type="button" role="tab" aria-selected="false" aria-controls="craft-panel-socketing" data-craft-tab="socketing" tabindex="-1">Socketing / Augments</button>
-          <button id="craft-tab-ritual" class="craft-tab" type="button" role="tab" aria-selected="false" aria-controls="craft-panel-ritual" data-craft-tab="ritual" tabindex="-1">Ritual / Omens</button>
-          <button id="craft-tab-essences" class="craft-tab" type="button" role="tab" aria-selected="false" aria-controls="craft-panel-essences" data-craft-tab="essences" tabindex="-1">Essences</button>
-          <button id="craft-tab-abyss" class="craft-tab" type="button" role="tab" aria-selected="false" aria-controls="craft-panel-abyss" data-craft-tab="abyss" tabindex="-1">Abyss</button>
-          <button id="craft-tab-breach" class="craft-tab" type="button" role="tab" aria-selected="false" aria-controls="craft-panel-breach" data-craft-tab="breach" tabindex="-1">Breach / Genesis</button>
-          <button id="craft-tab-delirium" class="craft-tab" type="button" role="tab" aria-selected="false" aria-controls="craft-panel-delirium" data-craft-tab="delirium" tabindex="-1">Delirium / Instilling</button>
-          <button id="craft-tab-runeforging" class="craft-tab" type="button" role="tab" aria-selected="false" aria-controls="craft-panel-runeforging" data-craft-tab="runeforging" tabindex="-1">Runeforging</button>
-          <button id="craft-tab-corruption" class="craft-tab" type="button" role="tab" aria-selected="false" aria-controls="craft-panel-corruption" data-craft-tab="corruption" tabindex="-1">Corruption / Sacrifice</button>
+          <!-- Crafting tabs rendered from the authoritative registry by app.js. -->
         </div>
 
-        <div class="craft-tab-panels">
-        <section id="craft-panel-currency" class="craft-tab-panel" role="tabpanel" aria-labelledby="craft-tab-currency" data-craft-panel="currency">
-        <div id="currency-grid" class="currency-grid crafting-card-grid">
-          <div class="cur-cluster">
-            <button class="currency-btn" data-craft-id="transmutation" data-icon-id="transmutation" data-currency="transmutation" title="Orb of Transmutation — Normal → Magic">
-              <div class="currency-icon transmutation-icon"><span class="currency-abbr">Trans</span></div>
-              <span class="currency-label">Transmutation</span>
-            </button>
-            <div class="cur-tiers">
-              <button class="currency-btn tier-badge" data-craft-id="greater-transmutation" data-icon-id="transmutation" data-currency="greater_transmutation" title="Greater Orb of Transmutation — Normal → Magic; Minimum Modifier Level 44">
-                <div class="currency-icon transmutation-icon"></div><span class="tier-num">II</span>
-              </button>
-              <button class="currency-btn tier-badge" data-craft-id="perfect-transmutation" data-icon-id="transmutation" data-currency="perfect_transmutation" title="Perfect Orb of Transmutation — Normal → Magic; Minimum Modifier Level 70">
-                <div class="currency-icon transmutation-icon"></div><span class="tier-num">III</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="cur-cluster">
-            <button class="currency-btn" data-craft-id="augmentation" data-icon-id="augmentation" data-currency="augmentation" title="Orb of Augmentation — Add mod to Magic">
-              <div class="currency-icon augmentation-icon"><span class="currency-abbr">Aug</span></div>
-              <span class="currency-label">Augmentation</span>
-            </button>
-            <div class="cur-tiers">
-              <button class="currency-btn tier-badge" data-craft-id="greater-augmentation" data-icon-id="augmentation" data-currency="greater_augmentation" title="Greater Orb of Augmentation — Add mod to Magic; Minimum Modifier Level 44">
-                <div class="currency-icon augmentation-icon"></div><span class="tier-num">II</span>
-              </button>
-              <button class="currency-btn tier-badge" data-craft-id="perfect-augmentation" data-icon-id="augmentation" data-currency="perfect_augmentation" title="Perfect Orb of Augmentation — Add mod to Magic; Minimum Modifier Level 70">
-                <div class="currency-icon augmentation-icon"></div><span class="tier-num">III</span>
-              </button>
-            </div>
-          </div>
-
-          <button class="currency-btn" data-craft-id="alchemy" data-icon-id="alchemy" data-currency="alchemy" title="Orb of Alchemy — Normal → Rare">
-            <div class="currency-icon alchemy-icon">
-              <span class="currency-abbr">Alch</span>
-            </div>
-            <span class="currency-label">Alchemy</span>
-          </button>
-
-          <div class="cur-cluster">
-            <button class="currency-btn" data-craft-id="regal" data-icon-id="regal" data-currency="regal" title="Regal Orb — Magic → Rare">
-              <div class="currency-icon regal-icon"><span class="currency-abbr">Regal</span></div>
-              <span class="currency-label">Regal</span>
-            </button>
-            <div class="cur-tiers">
-              <button class="currency-btn tier-badge" data-craft-id="greater-regal" data-icon-id="regal" data-currency="greater_regal" title="Greater Regal Orb — Magic → Rare; Minimum Modifier Level 35">
-                <div class="currency-icon regal-icon"></div><span class="tier-num">II</span>
-              </button>
-              <button class="currency-btn tier-badge" data-craft-id="perfect-regal" data-icon-id="regal" data-currency="perfect_regal" title="Perfect Regal Orb — Magic → Rare; Minimum Modifier Level 50">
-                <div class="currency-icon regal-icon"></div><span class="tier-num">III</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="cur-cluster">
-            <button class="currency-btn" data-craft-id="exalted" data-icon-id="exalted" data-currency="exalted" title="Exalted Orb — Add mod to Rare">
-              <div class="currency-icon exalted-icon"><span class="currency-abbr">Exalt</span></div>
-              <span class="currency-label">Exalted</span>
-            </button>
-            <div class="cur-tiers">
-              <button class="currency-btn tier-badge" data-craft-id="greater-exalted" data-icon-id="exalted" data-currency="greater_exalted" title="Greater Exalted Orb — Add mod to Rare; Minimum Modifier Level 35">
-                <div class="currency-icon exalted-icon"></div><span class="tier-num">II</span>
-              </button>
-              <button class="currency-btn tier-badge" data-craft-id="perfect-exalted" data-icon-id="exalted" data-currency="perfect_exalted" title="Perfect Exalted Orb — Add mod to Rare; Minimum Modifier Level 50">
-                <div class="currency-icon exalted-icon"></div><span class="tier-num">III</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="cur-cluster">
-            <button class="currency-btn" data-craft-id="chaos" data-icon-id="chaos" data-currency="chaos" title="Chaos Orb — Modify Rare">
-              <div class="currency-icon chaos-icon"><span class="currency-abbr">Chaos</span></div>
-              <span class="currency-label">Chaos</span>
-            </button>
-            <div class="cur-tiers">
-              <button class="currency-btn tier-badge" data-craft-id="greater-chaos" data-icon-id="chaos" data-currency="greater_chaos" title="Greater Chaos Orb — Modify Rare; Minimum Modifier Level 35">
-                <div class="currency-icon chaos-icon"></div><span class="tier-num">II</span>
-              </button>
-              <button class="currency-btn tier-badge" data-craft-id="perfect-chaos" data-icon-id="chaos" data-currency="perfect_chaos" title="Perfect Chaos Orb — Modify Rare; Minimum Modifier Level 50">
-                <div class="currency-icon chaos-icon"></div><span class="tier-num">III</span>
-              </button>
-            </div>
-          </div>
-
-          <button class="currency-btn" data-craft-id="annulment" data-icon-id="annulment" data-currency="annulment" title="Orb of Annulment — Remove a mod">
-            <div class="currency-icon annulment-icon">
-              <span class="currency-abbr">Annul</span>
-            </div>
-            <span class="currency-label">Annulment</span>
-          </button>
-
-          <button class="currency-btn" data-craft-id="divine" data-icon-id="divine" data-currency="divine" title="Divine Orb — Reroll values">
-            <div class="currency-icon divine-icon">
-              <span class="currency-abbr">Divine</span>
-            </div>
-            <span class="currency-label">Divine</span>
-          </button>
-
-          <button class="currency-btn" data-craft-id="fracturing" data-icon-id="fracturing" data-currency="fracturing" title="Fracturing Orb — Lock a random mod on a Rare item with 4 mods">
-            <div class="currency-icon fracturing-icon">
-              <span class="currency-abbr">Frac</span>
-            </div>
-            <span class="currency-label">Fracturing</span>
-          </button>
-
-          <button class="currency-btn" data-craft-id="hinekora" data-icon-id="hinekora" data-currency="hinekora" title="Hinekora's Lock — marks the item; the mark is consumed when you use another currency">
-            <div class="currency-icon hinekora-icon">
-              <span class="currency-abbr">Lock</span>
-            </div>
-            <span class="currency-label">Hinekora's Lock</span>
-          </button>
-        </div>
-        </section>
-
-        <section id="craft-panel-quality" class="craft-tab-panel" role="tabpanel" aria-labelledby="craft-tab-quality" data-craft-panel="quality" hidden>
-          <div class="unsupported-notice" role="note">
-            <strong>Unsupported — verification required</strong>
-            <span>Quality state and legacy migration are present, but no quality currency is runtime-enabled. The four equipment currencies still lack a verified 0.5.4 item-level increment formula; Gemcutter's Prism lacks a Skill Gem item model; Catalysts and alternate quality need separate verified mutations.</span>
-          </div>
-        </section>
-
-        <section id="craft-panel-socketing" class="craft-tab-panel" role="tabpanel" aria-labelledby="craft-tab-socketing" data-craft-panel="socketing" hidden>
-          <div class="unsupported-notice" role="note">
-            <strong>Unsupported — verification required</strong>
-            <span>Artificer's Orbs, Jeweller's Orbs, Runes, Soul Cores, Idols, and 0.5.4 Augments require socket limits, granted-skill data, item tags, and socket-effect tables.</span>
-          </div>
-        </section>
-
-        <section id="craft-panel-ritual" class="craft-tab-panel" role="tabpanel" aria-labelledby="craft-tab-ritual" data-craft-panel="ritual" hidden>
-          <p class="tab-help">Right-click an Omen to arm it. The matching craft consumes it only after a successful use.</p>
-          <div class="crafting-card-grid omen-card-grid">
-            <button class="abyss-btn omen-btn" type="button" data-craft-id="omen-sinistral-necromancy" data-icon-id="sinistral-necromancy" data-omen="sinistral_necromancy" title="Omen of Sinistral Necromancy — your next Desecration adds only a Prefix. Right-click to activate.">
-              <div class="currency-icon abyss-icon sinistral_necromancy-icon"><span class="currency-abbr">Sin</span></div>
-              <span class="currency-label">Sinistral Necromancy</span>
-            </button>
-            <button class="abyss-btn omen-btn" type="button" data-craft-id="omen-dextral-necromancy" data-icon-id="dextral-necromancy" data-omen="dextral_necromancy" title="Omen of Dextral Necromancy — your next Desecration adds only a Suffix. Right-click to activate.">
-              <div class="currency-icon abyss-icon dextral_necromancy-icon"><span class="currency-abbr">Dex</span></div>
-              <span class="currency-label">Dextral Necromancy</span>
-            </button>
-            <button class="abyss-btn omen-btn" type="button" data-craft-id="omen-abyssal-echoes" data-icon-id="abyssal-echoes" data-omen="abyssal_echoes" title="Omen of Abyssal Echoes — reroll the revealed options once at the Well of Souls. Right-click to activate.">
-              <div class="currency-icon abyss-icon abyssal_echoes-icon"><span class="currency-abbr">Echo</span></div>
-              <span class="currency-label">Abyssal Echoes</span>
-            </button>
-            <button class="abyss-btn omen-btn" type="button" data-craft-id="omen-light" data-icon-id="light" data-omen="omen_of_light" title="Omen of Light — your next Orb of Annulment removes only a Desecrated modifier. Right-click to activate.">
-              <div class="currency-icon abyss-icon omen_of_light-icon"><span class="currency-abbr">Light</span></div>
-              <span class="currency-label">Omen of Light</span>
-            </button>
-            <button class="abyss-btn omen-btn" type="button" data-craft-id="omen-sovereign" data-icon-id="sovereign" data-omen="omen_of_the_sovereign" data-jewel-disabled="true" title="Unsupported — verification required">
-              <div class="currency-icon abyss-icon omen_of_the_sovereign-icon"><span class="currency-abbr">Sov</span></div>
-              <span class="currency-label">Omen of the Sovereign</span>
-            </button>
-            <button class="abyss-btn omen-btn" type="button" data-craft-id="omen-liege" data-icon-id="liege" data-omen="omen_of_the_liege" data-jewel-disabled="true" title="Unsupported — verification required">
-              <div class="currency-icon abyss-icon omen_of_the_liege-icon"><span class="currency-abbr">Liege</span></div>
-              <span class="currency-label">Omen of the Liege</span>
-            </button>
-            <button class="abyss-btn omen-btn" type="button" data-craft-id="omen-blackblooded" data-icon-id="blackblooded" data-omen="omen_of_the_blackblooded" data-jewel-disabled="true" title="Unsupported — verification required">
-              <div class="currency-icon abyss-icon omen_of_the_blackblooded-icon"><span class="currency-abbr">Blk</span></div>
-              <span class="currency-label">Omen of the Blackblooded</span>
-            </button>
-            <button class="abyss-btn craft-omen-btn" type="button" data-craft-id="omen-whittling" data-icon-id="whittling" data-craft-omen="whittling" title="Omen of Whittling — your next Chaos Orb removes the modifier with the lowest modifier level. Right-click to activate.">
-              <div class="currency-icon abyss-icon whittling-icon"><span class="currency-abbr">Whit</span></div>
-              <span class="currency-label">Whittling</span>
-            </button>
-            <button class="abyss-btn craft-omen-btn" type="button" data-craft-id="omen-sinistral-erasure" data-icon-id="sinistral-erasure" data-craft-omen="sinistral_erasure" title="Omen of Sinistral Erasure — your next Chaos Orb removes a Prefix. Right-click to activate.">
-              <div class="currency-icon abyss-icon sinistral_erasure-icon"><span class="currency-abbr">SinE</span></div>
-              <span class="currency-label">Sinistral Erasure</span>
-            </button>
-            <button class="abyss-btn craft-omen-btn" type="button" data-craft-id="omen-dextral-erasure" data-icon-id="dextral-erasure" data-craft-omen="dextral_erasure" title="Omen of Dextral Erasure — your next Chaos Orb removes a Suffix. Right-click to activate.">
-              <div class="currency-icon abyss-icon dextral_erasure-icon"><span class="currency-abbr">DexE</span></div>
-              <span class="currency-label">Dextral Erasure</span>
-            </button>
-            <button class="abyss-btn craft-omen-btn" type="button" data-craft-id="omen-sinistral-annulment" data-icon-id="sinistral-annulment" data-craft-omen="sinistral_annulment" title="Omen of Sinistral Annulment — your next Orb of Annulment removes a Prefix. Right-click to activate.">
-              <div class="currency-icon abyss-icon sinistral_annulment-icon"><span class="currency-abbr">SinA</span></div>
-              <span class="currency-label">Sinistral Annulment</span>
-            </button>
-            <button class="abyss-btn craft-omen-btn" type="button" data-craft-id="omen-dextral-annulment" data-icon-id="dextral-annulment" data-craft-omen="dextral_annulment" title="Omen of Dextral Annulment — your next Orb of Annulment removes a Suffix. Right-click to activate.">
-              <div class="currency-icon abyss-icon dextral_annulment-icon"><span class="currency-abbr">DexA</span></div>
-              <span class="currency-label">Dextral Annulment</span>
-            </button>
-            <button class="abyss-btn craft-omen-btn" type="button" data-craft-id="omen-sanctification" data-icon-id="sanctification" data-craft-omen="sanctification" title="Omen of Sanctification — your next Divine Orb sanctifies the item, multiplies modifier values, and locks it. Right-click to activate.">
-              <div class="currency-icon abyss-icon sanctification-icon"><span class="currency-abbr">Sanct</span></div>
-              <span class="currency-label">Sanctification</span>
-            </button>
-          </div>
-        </section>
-
-        <section id="craft-panel-essences" class="craft-tab-panel" role="tabpanel" aria-labelledby="craft-tab-essences" data-craft-panel="essences" hidden>
-          <div class="unsupported-notice" role="note">
-            <strong>Unsupported — verification required</strong>
-            <span>Standard, Greater, and Perfect Essences need guaranteed-modifier tables by concrete item class. This repository's class-level pools do not contain those mappings.</span>
-          </div>
-        </section>
-
-        <section id="craft-panel-abyss" class="craft-tab-panel" role="tabpanel" aria-labelledby="craft-tab-abyss" data-craft-panel="abyss" hidden>
-          <p class="tab-help">Preserved Cranium opens the Well of Souls. Essence of the Abyss applies its guaranteed Mark before Desecration.</p>
-          <div class="crafting-card-grid abyss-card-grid">
-            <button id="bone-btn" class="abyss-btn bone-btn" data-craft-id="preserved-cranium" data-icon-id="cranium" data-bone="preserved_cranium" type="button" title="Preserved Cranium — desecrate a Rare item using the verified pool for its base. Left-click to use.">
-              <div class="currency-icon abyss-icon preserved_cranium-icon"><span class="currency-abbr">Bone</span></div>
-              <span class="currency-label">Preserved Cranium</span>
-            </button>
-            <button class="abyss-btn essence-btn" type="button" data-craft-id="essence-abyss" data-icon-id="abyss-essence" data-currency="essence_abyss" title="Essence of the Abyss — removes a random modifier and adds the guaranteed Mark of the Abyssal Lord. Desecrating consumes the Mark for a guaranteed Desecrated modifier.">
-              <div class="currency-icon abyss-icon essence_abyss-icon"><span class="currency-abbr">EAby</span></div>
-              <span class="currency-label">Essence of the Abyss</span>
-            </button>
-          </div>
-        </section>
-
-        <section id="craft-panel-breach" class="craft-tab-panel" role="tabpanel" aria-labelledby="craft-tab-breach" data-craft-panel="breach" hidden>
-          <div class="unsupported-item-card" data-craft-id="essence-breach" data-icon-id="breach-essence" aria-disabled="true">
-            <span class="unsupported-item-name">Essence of the Breach</span>
-            <strong>Unsupported — verification required</strong>
-          </div>
-          <div class="unsupported-notice" role="note">
-            <strong>Unsupported — verification required</strong>
-            <span>Catalysts and Genesis Tree crafting require quality-modifier, concrete base, node-allocation, and Caster/Minion mod data. Hiveblood and Wombgifts are encounter resources, so they are not workbench buttons.</span>
-          </div>
-        </section>
-
-        <section id="craft-panel-delirium" class="craft-tab-panel" role="tabpanel" aria-labelledby="craft-tab-delirium" data-craft-panel="delirium" hidden>
-          <div class="unsupported-notice" role="note">
-            <strong>Unsupported — verification required</strong>
-            <span>Liquid, Potent, and Ancient Emotions need their guaranteed Jewel modifiers and complete instilling recipe/passive data.</span>
-          </div>
-        </section>
-
-        <section id="craft-panel-runeforging" class="craft-tab-panel" role="tabpanel" aria-labelledby="craft-tab-runeforging" data-craft-panel="runeforging" hidden>
-          <div class="unsupported-notice" role="note">
-            <strong>Unsupported — verification required</strong>
-            <span>Alloys, Fluxes, Runic Ward conversion, and Runes of Aldur crafting need concrete base defences, item tags, crafted-modifier tables, and recipe data. Verisium remains an encounter resource.</span>
-          </div>
-        </section>
-
-        <section id="craft-panel-corruption" class="craft-tab-panel" role="tabpanel" aria-labelledby="craft-tab-corruption" data-craft-panel="corruption" hidden>
-          <div class="crafting-card-grid corruption-card-grid">
-            <button class="currency-btn" data-craft-id="vaal" data-icon-id="vaal" data-currency="vaal" title="Vaal Orb — Corrupt item">
-              <div class="currency-icon vaal-icon"><span class="currency-abbr">Vaal</span></div>
-              <span class="currency-label">Vaal</span>
-            </button>
-          </div>
-          <div class="unsupported-notice" role="note">
-            <strong>Unsupported — verification required</strong>
-            <span>The four 0.5.4 Orbs of Sacrifice upgrade specific Corrupted Enchantments while removing an explicit modifier. Exact enchantment tiers and orb mappings are not present in the project data.</span>
-          </div>
-        </section>
+        <div id="craft-tab-panels" class="craft-tab-panels">
+          <!-- Crafting item panels rendered from the authoritative registry by app.js. -->
         </div>
 
         <div class="crafting-actions">

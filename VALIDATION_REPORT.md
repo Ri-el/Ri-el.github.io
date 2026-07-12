@@ -34,6 +34,18 @@ Item-state schema version 3 adds versioned migration and generic concrete metada
 
 The 17 normalized-data blockers are explicit: 11 all-attribute armour/shield records lack compiled pools, five Diamond/Time-Lost Jewel pools are empty, and Timeless Jewel ID `613` has no simulator mapping. No retained base maps ambiguously. The source `socketCount` field remains a source datum until Task 06 verifies its gameplay semantics.
 
+## Task 03 authoritative crafting registry
+
+The crafting inventory now has one authoritative generated registry in `data/crafting/currency-index.json`. It contains all 530 retained normalized crafting records plus the existing runtime-only Hinekora's Lock definition: 531 unique craft IDs, 530 exact source ID/metadata-key mappings, ten ordered tabs, and exactly the same 37 visible controls as before this task. Classification counts did not change. Hinekora's missing normalized identity and every unimplemented mechanic remain explicit blockers; `fullParityClaim` remains false.
+
+`index.html` now contains structural inventory containers only. `app.js` generates tabs, focusable buttons, labels, icon fallbacks, descriptions, and supported/blocked state from the classic-script registry bundle. Search, category filtering, Applicable-only filtering, arrow-key navigation, persistent hover/focus descriptions, and mobile layout are covered by the UI contract suite. The existing outer item-class screen and direct workbench entry are unchanged, and concrete base selection remains inside the workbench.
+
+Click, keyboard, context-menu, and drag interactions resolve the same stable craft ID and enter a shared dispatcher. Item operations calculate their exact disabled reason before snapshots or handlers; successful ordinary operations alone consume matching crafting Omens and add history. Unsupported definitions have no mutation handler and stay focusable so their exact blocker can be inspected. Hinekora, Desecration, Essence of the Abyss, and ordinary currency all pass through registry validation before their existing specialized behavior. The engine and browser controller also accept an injectable RNG for deterministic preview/test paths while the default still reads live `Math.random` and preserves the reviewed fuzz digest.
+
+The parity report is generated directly from the registry rather than reconstructed from names or source tags. It records 531 definitions, 37 visible controls, 32 implemented definitions, one probability-unverified Vaal definition, 489 blocked definitions, and nine deprecated target-version records. The four visible unavailable controls retain item-specific blockers. No new crafting mechanic was enabled in Task 03.
+
+Interactive direct-`file://` verification remains explicitly blocked by the Codex in-app browser's local-file URL policy. Compatibility is covered by the unchanged classic deferred script model, local `.data.js` bundle, absence of runtime fetches, generated-asset freshness checks, service-worker shell inclusion, and source contracts. No local server was started because repository rules require approval for local network access.
+
 ## Selection calculation
 
 The corrected ordinary-currency path is:
@@ -83,8 +95,9 @@ Task 01 also corrected a reset invariant: `resetItem()` previously created an it
 ## Repeatable results
 
 - Baseline deterministic suite against the original engine: **11/17 passed**. Failures covered the stale browser bundle, equipment limits, Magic-only classes, Alchemy count, Whittling ties, and Greater/Perfect semantics.
-- Current deterministic suite: **38/38 passed** with `node validation.mjs`.
-- Current UI DOM/CSS contract suite: **100/100 passed** with `node ui-validation.mjs`.
-- Current normalized-data suite: **57/57 passed** with `node data-validation.mjs`.
+- Current deterministic suite: **39/39 passed** with `node validation.mjs`.
+- Current UI DOM/CSS contract suite: **114/114 passed** with `node ui-validation.mjs`.
+- Current normalized/registry-data suite: **67/67 passed** with `node data-validation.mjs`.
+- Generated registry and parity checks passed with `node tools/build-currency-index.mjs --check` and `node tools/build-crafting-parity.mjs --check`.
 - Seeded fuzz suite: **30,016 operations across 56 populated pools, 2,573 meaningful mutations, 206 Hinekora consumptions, 0 exceptions, and 0 invariant violations** with `node fuzz.mjs 30000 542026`. Reviewed digest: `46984d739488e00aea6bfd0664a34741306ec273e68542df96d574695f1f5104`. The intentional Task 02 digest change comes from deterministic schema-v3 concrete-base state being included for every pool.
 - Syntax and patch checks: `node --check` for engine/UI scripts and `git diff --check` passed.

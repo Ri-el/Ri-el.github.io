@@ -31,21 +31,6 @@ class CraftingEngine {
 
   static MAGIC_ONLY_BASE_TYPES = new Set(['life_flasks', 'mana_flasks', 'charms']);
 
-  // PoE2 0.5.4 minimum modifier levels. These filter tiers, not the numeric
-  // value rolled within a selected tier.
-  static CURRENCY_MIN_MODIFIER_LEVEL = {
-    greater_transmutation: 44,
-    perfect_transmutation: 70,
-    greater_augmentation: 44,
-    perfect_augmentation: 70,
-    greater_regal: 35,
-    perfect_regal: 50,
-    greater_exalted: 35,
-    perfect_exalted: 50,
-    greater_chaos: 35,
-    perfect_chaos: 50,
-  };
-
   // Runtime fallback for file:// use. A caller may inject the attributed rules
   // from data/crafting/quality-rules.json at development/test time; the browser
   // never fetches that JSON. This copy keeps state migration self-contained but
@@ -178,12 +163,16 @@ class CraftingEngine {
   };
 
   // `desecratedData` is the parsed contents of data/desecrated-mods.json (or null).
-  constructor(modData, baseType = 'ruby', desecratedData = null, sourceModifierOverlay = null, qualityRules = null, concreteBase = null) {
+  constructor(modData, baseType = 'ruby', desecratedData = null, sourceModifierOverlay = null, qualityRules = null, concreteBase = null, rng = null) {
     this._modData = modData;
     // Keep `jewelType` for backwards-compatibility (stash records, UI), and
     // expose `baseType` as the generic alias.
     this.baseType = baseType;
     this.jewelType = baseType;
+    // Tests and preview callers may inject a deterministic RNG. The default
+    // deliberately reads Math.random at call time so existing harnesses that
+    // temporarily replace it retain identical behavior.
+    this._rng = typeof rng === 'function' ? rng : null;
 
     const typeData = modData?.bases?.[baseType] ?? modData?.jewelTypes?.[baseType];
     if (!typeData) throw new Error(`Invalid base type: ${baseType}`);
@@ -225,6 +214,12 @@ class CraftingEngine {
 
     this._prefixCandidates = this._buildCandidatePool(this._prefixPool, 'prefix');
     this._suffixCandidates = this._buildCandidatePool(this._suffixPool, 'suffix');
+  }
+
+  setRandomSource(rng = null) {
+    if (rng != null && typeof rng !== 'function') throw new TypeError('Crafting RNG must be a function or null.');
+    this._rng = rng;
+    return this;
   }
 
   getItem() {
@@ -465,6 +460,18 @@ class CraftingEngine {
   }
 
   supportsRarity(rarity) { return !!this._limits[rarity]; }
+
+  getEligibleModifierCount(rarity, options = {}, { clearExisting = false } = {}) {
+    const limits = this._limits[rarity];
+    if (!limits) return 0;
+    const prefixCount = clearExisting ? 0 : this._item.prefixes.length;
+    const suffixCount = clearExisting ? 0 : this._item.suffixes.length;
+    const existingGroups = clearExisting ? new Set() : this._existingGroups();
+    const candidates = [];
+    if (prefixCount < limits.prefixes) candidates.push(...this._eligibleCandidates('prefix', existingGroups));
+    if (suffixCount < limits.suffixes) candidates.push(...this._eligibleCandidates('suffix', existingGroups));
+    return this._filterByMinModifierLevel(candidates, this._craftOptions(options).minModLevel).length;
+  }
 
   // Item saves created before quality became structured may contain a number
   // (or no quality field at all). Normalise that legacy shape at every engine
@@ -1487,7 +1494,7 @@ class CraftingEngine {
     if (!eligible.length) return -1;
     let total = 0;
     for (const { candidate } of eligible) total += Number(candidate.weight);
-    let roll = Math.random() * total;
+    let roll = this._randomFloat() * total;
     for (let i = 0; i < eligible.length; i++) {
       roll -= Number(eligible[i].candidate.weight);
       if (roll <= 0) return eligible[i].index;
@@ -1797,7 +1804,7 @@ class CraftingEngine {
   // Omen of Sanctification: roll every non-fractured modifier toward (and
   // possibly beyond) its range, then lock the item from further modification.
   _applySanctification() {
-    const sanctify = (base) => Math.round(Number(base) * (0.78 + Math.random() * 0.44));
+    const sanctify = (base) => Math.round(Number(base) * (0.78 + this._randomFloat() * 0.44));
     for (const { mod } of this._allModEntries()) {
       if (mod.fractured) continue;
       if (Array.isArray(mod.lines) && mod.lines.length) {
@@ -1844,7 +1851,7 @@ class CraftingEngine {
     if (!entries.length) return null;
     let total = 0;
     for (const [, weight] of entries) total += Number(weight);
-    let roll = Math.random() * total;
+    let roll = this._randomFloat() * total;
     for (const [key, weight] of entries) {
       roll -= Number(weight);
       if (roll <= 0) return key;
@@ -1857,7 +1864,7 @@ class CraftingEngine {
     if (!eligible.length) return null;
     let total = 0;
     for (const [, weight] of eligible) total += Number(weight);
-    let roll = Math.random() * total;
+    let roll = this._randomFloat() * total;
     for (const [item, weight] of eligible) {
       roll -= Number(weight);
       if (roll <= 0) return item;
@@ -1866,7 +1873,13 @@ class CraftingEngine {
   }
 
   _randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+    return Math.floor(this._randomFloat() * (max - min + 1)) + min;
+  }
+
+  _randomFloat() {
+    const value = Number(this._rng ? this._rng() : Math.random());
+    if (!Number.isFinite(value)) throw new Error('Crafting RNG returned a non-finite value.');
+    return Math.max(0, Math.min(1 - Number.EPSILON, value));
   }
 
   _success(payload) { return { success: true, item: this.getItem(), ...payload }; }

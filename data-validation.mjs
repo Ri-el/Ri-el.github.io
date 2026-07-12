@@ -614,13 +614,147 @@ check('base-item parity report matches Task 01 normalized Amulet coverage',
   baseParity.task01.normalizedConcreteBaseCount === normalizedAmulets.length &&
   baseParity.task01.selectorImplementedCount === normalizedAmulets.length &&
   baseParity.task01.defaultBase.id === normalizedAmulets[0].id);
-check('crafting parity baseline matches the classified currency index',
+const craftRegistry = Array.isArray(currencyIndex.craftRegistry) ? currencyIndex.craftRegistry : [];
+const craftTabs = Array.isArray(currencyIndex.craftTabs) ? currencyIndex.craftTabs : [];
+const visibleCraftDefinitions = craftRegistry.filter(definition => definition.visible);
+const sourceBackedCraftDefinitions = craftRegistry.filter(definition => definition.sourceItemId != null);
+const runtimeOnlyCraftDefinitions = craftRegistry.filter(definition => definition.sourceItemId == null);
+const registryCraftIds = new Set(craftRegistry.map(definition => definition.craftId));
+const registryTabIds = new Set(craftTabs.map(tab => tab.id));
+const inventoryBySourceId = new Map(currencyIndex.entries.map(entry => [String(entry.sourceItemId), entry]));
+const parityByCraftId = new Map((craftingParity.entries || []).map(entry => [entry.craftId, entry]));
+const requiredCraftDefinitionFields = [
+  'craftId', 'id', 'sourceItemId', 'metadataKey', 'sourceIdentityStatus', 'displayName',
+  'equipmentRelevance', 'category', 'tab', 'iconId', 'description', 'actionType',
+  'activation', 'engineAction', 'applicabilityPredicate', 'disabledReasonHandler',
+  'disabledReason', 'handler', 'triggeringAction', 'omenInteraction',
+  'corruptionRestriction', 'validItemClasses', 'validItemTags', 'qualityRestriction',
+  'socketRestriction', 'operationOptions', 'sourceEvidence', 'implementationStatus',
+  'verificationStatus', 'blocker', 'testFixtureIds', 'supported', 'visible',
+  'targetGameVersion',
+];
+const expectedRegistryClassificationCounts = {
+  ...currencyIndex.counts.byClassification,
+  implemented: currencyIndex.counts.byClassification.implemented + 1,
+};
+
+function countCraftDefinitionsBy(definitions, field, orderedValues = null) {
+  const counts = new Map((orderedValues || []).map(value => [value, 0]));
+  for (const definition of definitions) {
+    const value = definition[field];
+    if (value == null || value === '') continue;
+    counts.set(value, (counts.get(value) || 0) + 1);
+  }
+  const pairs = orderedValues
+    ? orderedValues.map(value => [value, counts.get(value) || 0])
+    : [...counts.entries()].sort(([a], [b]) => String(a).localeCompare(String(b)));
+  return Object.fromEntries(pairs);
+}
+
+check('Task 03 authoritative crafting registry has complete stable coverage',
+  currencyIndex.schemaVersion >= 2 &&
+  craftRegistry.length === 531 &&
+  sourceBackedCraftDefinitions.length === currencyIndex.entries.length &&
+  runtimeOnlyCraftDefinitions.length === 1 &&
+  runtimeOnlyCraftDefinitions[0].craftId === 'hinekora' &&
+  visibleCraftDefinitions.length === currencyIndex.counts.runtimeDefinitions &&
+  registryCraftIds.size === craftRegistry.length &&
+  new Set(craftRegistry.map(definition => definition.id)).size === craftRegistry.length);
+check('every crafting definition exposes the complete Task 03 data contract',
+  craftRegistry.every(definition =>
+    requiredCraftDefinitionFields.every(field => Object.prototype.hasOwnProperty.call(definition, field)) &&
+    typeof definition.craftId === 'string' && definition.craftId.length > 0 &&
+    typeof definition.displayName === 'string' && definition.displayName.length > 0 &&
+    typeof definition.equipmentRelevance === 'string' && definition.equipmentRelevance.length > 0 &&
+    definition.equipmentRelevance !== 'pending_audit' &&
+    Array.isArray(definition.validItemClasses) &&
+    Array.isArray(definition.validItemTags) &&
+    Array.isArray(definition.sourceEvidence) && definition.sourceEvidence.length > 0 &&
+    definition.sourceEvidence.every(evidence => typeof evidence === 'string' && evidence.length > 0) &&
+    Array.isArray(definition.testFixtureIds) &&
+    isPlainObject(definition.omenInteraction) &&
+    definition.targetGameVersion === currencyIndex.targetGameVersion));
+check('registry source identities exactly cover the retained crafting inventory',
+  new Set(sourceBackedCraftDefinitions.map(definition => String(definition.sourceItemId))).size === currencyIndex.entries.length &&
+  new Set(sourceBackedCraftDefinitions.map(definition => definition.metadataKey)).size === currencyIndex.entries.length &&
+  sourceBackedCraftDefinitions.every(definition => {
+    const source = inventoryBySourceId.get(String(definition.sourceItemId));
+    return source && source.metadataKey === definition.metadataKey &&
+      source.displayName === definition.displayName;
+  }) &&
+  runtimeOnlyCraftDefinitions[0].metadataKey == null &&
+  runtimeOnlyCraftDefinitions[0].sourceIdentityStatus !== 'resolved');
+check('registry tabs and visible definitions preserve the existing inventory surface',
+  craftTabs.length === 10 &&
+  registryTabIds.size === craftTabs.length &&
+  craftRegistry.every(definition => registryTabIds.has(definition.tab)) &&
+  stable([...visibleCraftDefinitions.map(definition => definition.craftId)].sort()) ===
+    stable(Object.keys(currencyIndex.runtimeRegistry).sort()));
+check('registry implementation classifications are exclusive and unchanged by Task 03',
+  craftRegistry.every(definition => currencyIndex.allowedClassifications.includes(definition.implementationStatus)) &&
+  stable(countCraftDefinitionsBy(craftRegistry, 'implementationStatus', currencyIndex.allowedClassifications)) ===
+    stable(expectedRegistryClassificationCounts) &&
+  stable(countCraftDefinitionsBy(visibleCraftDefinitions, 'implementationStatus', currencyIndex.allowedClassifications)) ===
+    stable(currencyIndex.counts.runtimeByClassification));
+check('supported registry entries resolve declarative validators and handlers',
+  craftRegistry.filter(definition => definition.supported).every(definition =>
+    typeof definition.applicabilityPredicate === 'string' && definition.applicabilityPredicate.length > 0 &&
+    typeof definition.disabledReasonHandler === 'string' && definition.disabledReasonHandler.length > 0 &&
+    typeof definition.handler === 'string' && definition.handler.length > 0));
+check('unavailable registry entries retain exact reasons and explicit blockers',
+  craftRegistry.filter(definition => !definition.supported).every(definition =>
+    typeof definition.disabledReason === 'string' && definition.disabledReason.length > 0 &&
+    definition.disabledReason !== 'Unsupported — verification required' &&
+    typeof definition.blocker === 'string' && definition.blocker.length > 0));
+check('registry evidence and fixtures never replace unresolved blockers with invented mechanics',
+  craftRegistry.every(definition =>
+    definition.testFixtureIds.length > 0 ||
+    (typeof definition.blocker === 'string' && definition.blocker.length > 0)) &&
+  visibleCraftDefinitions.every(definition => definition.testFixtureIds.length > 0));
+check('all Omen trigger craft references resolve inside the authoritative registry',
+  craftRegistry.every(definition => {
+    const triggerCraftId = definition.omenInteraction?.triggerCraftId;
+    return triggerCraftId == null || registryCraftIds.has(triggerCraftId);
+  }));
+check('Task 03 crafting parity is a direct complete projection of the registry',
+  craftingParity.schemaVersion === 2 &&
   craftingParity.targetGameVersion === currencyIndex.targetGameVersion &&
   craftingParity.fullParityClaim === false &&
+  craftingParity.entryDetailStatus === 'authoritative_registry_task03' &&
+  craftingParity.entries.length === craftRegistry.length &&
+  parityByCraftId.size === craftRegistry.length &&
+  craftRegistry.every(definition => {
+    const parity = parityByCraftId.get(definition.craftId);
+    return parity && parity.stableId === definition.id &&
+      parity.sourceItemId === definition.sourceItemId &&
+      parity.metadataKey === definition.metadataKey &&
+      parity.exactName === definition.displayName &&
+      parity.targetGameVersion === definition.targetGameVersion &&
+      parity.equipmentRelevance === definition.equipmentRelevance &&
+      parity.category === definition.category && parity.tab === definition.tab &&
+      parity.implementationStatus === definition.implementationStatus &&
+      parity.verificationStatus === definition.verificationStatus &&
+      parity.handler === definition.handler &&
+      stable(parity.sourceEvidence) === stable(definition.sourceEvidence) &&
+      stable(parity.testReferences) === stable(definition.testFixtureIds) &&
+      parity.blocker === definition.blocker;
+  }));
+check('Task 03 parity counts derive exactly from source, registry, and visible definitions',
   craftingParity.counts.sourceEntries === currencyIndex.counts.entries &&
-  craftingParity.counts.runtimeDefinitions === currencyIndex.counts.runtimeDefinitions &&
+  craftingParity.counts.registryDefinitions === craftRegistry.length &&
+  craftingParity.counts.visibleDefinitions === visibleCraftDefinitions.length &&
+  craftingParity.counts.unresolvedSourceIdentities === runtimeOnlyCraftDefinitions.length &&
+  craftingParity.counts.unclassified === 0 &&
   stable(craftingParity.counts.sourceByClassification) === stable(currencyIndex.counts.byClassification) &&
-  stable(craftingParity.counts.runtimeByClassification) === stable(currencyIndex.counts.runtimeByClassification));
+  stable(craftingParity.counts.registryByClassification) ===
+    stable(countCraftDefinitionsBy(craftRegistry, 'implementationStatus', currencyIndex.allowedClassifications)) &&
+  stable(craftingParity.counts.visibleByClassification) ===
+    stable(countCraftDefinitionsBy(visibleCraftDefinitions, 'implementationStatus', currencyIndex.allowedClassifications)) &&
+  stable(craftingParity.counts.registryByCategory) ===
+    stable(countCraftDefinitionsBy(craftRegistry, 'category')) &&
+  stable(craftingParity.counts.visibleByTab) ===
+    stable(countCraftDefinitionsBy(visibleCraftDefinitions, 'tab')) &&
+  Array.isArray(craftingParity.blockers) && craftingParity.blockers.length > 0);
 
 check('base records reference retained classes and implicit modifiers',
   actual.baseItems.bases.every(base =>

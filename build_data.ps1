@@ -233,3 +233,13 @@ if (Test-Path $currencyIndexBuilder) {
         throw "Failed to generate data\crafting\currency-index.data.js"
     }
 }
+
+# Project the human- and machine-readable parity reports directly from the
+# authoritative registry after it has been regenerated.
+$craftingParityBuilder = Join-Path (Get-Location) "tools\build-crafting-parity.mjs"
+if (Test-Path $craftingParityBuilder) {
+    & node $craftingParityBuilder
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to generate crafting parity reports"
+    }
+}

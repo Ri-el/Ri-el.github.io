@@ -227,6 +227,8 @@ Unknown mechanics must receive specific blockers, not fabricated behavior.
 8. Expedition and Temple/Atziri/Vaal systems
 9. Final parity report and full validation
 
+Current local checkpoint: numbered Tasks 01–03 are implemented and tested. Task 03 preserves the existing 37-control surface while generating it from a 531-definition authoritative registry; no unverified mechanic was enabled. The next numbered task is Task 04, Core and Quality Currency.
+
 Each task must end with:
 
 - relevant tests passing

@@ -15,15 +15,17 @@ This report is generated from `data/crafting/currency-index.json`. Classificatio
 | deprecated_for_target_version | 9 | 0 |
 
 - Total source inventory entries: **530**
+- Authoritative registry definitions: **531**
+- Visible workbench definitions: **37**
 - Existing runtime definitions preserved: **37**
 - Unclassified entries: **0**
 
 ## Disabled existing registry entries
 
-- `omen-sovereign` — Omen of the Sovereign: Visible registry entry omen-sovereign remains disabled until its exact target-version mutation is verified.
-- `omen-liege` — Omen of the Liege: Visible registry entry omen-liege remains disabled until its exact target-version mutation is verified.
-- `omen-blackblooded` — Omen of the Blackblooded: Visible registry entry omen-blackblooded remains disabled until its exact target-version mutation is verified.
-- `essence-breach` — Essence of the Breach: Visible registry entry essence-breach remains disabled until its exact target-version mutation is verified.
+- `omen-sovereign` — Omen of the Sovereign: Mechanic blocked because the exact target-version Omen of the Sovereign Lich-type modifier guarantee and applicable modifier table are not verified.
+- `omen-liege` — Omen of the Liege: Mechanic blocked because the exact target-version Omen of the Liege Lich-type modifier guarantee and applicable modifier table are not verified.
+- `omen-blackblooded` — Omen of the Blackblooded: Mechanic blocked because the exact target-version Omen of the Blackblooded Lich-type modifier guarantee and applicable modifier table are not verified.
+- `essence-breach` — Essence of the Breach: Mechanic blocked because the exact target-version Essence of the Breach Caster/Minion modifier mapping, applicable item classes, and replacement behavior are not verified.
 
 ## Runtime identities missing from normalized item names
 

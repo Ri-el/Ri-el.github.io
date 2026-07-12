@@ -82,4 +82,4 @@ The workbench header contains one generic concrete-base trigger for every non-Je
 
 The runtime remains classic deferred HTML/CSS/JavaScript with no fetch requirement. The versioned `header-fix.css` asset is included in the service-worker shell. Direct `file://` navigation is source-contract tested; interactive `file://` browser verification remains explicitly blocked in the Codex browser by its local-file URL policy at this checkpoint.
 
-Task 03 can now build its crafting registry against stable generic item and concrete-base identities without changing the outer selection flow.
+Task 03 now builds its authoritative crafting registry against these stable generic item and concrete-base identities without changing the outer selection flow.

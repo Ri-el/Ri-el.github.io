@@ -1,0 +1,1931 @@
+{
+  "schemaVersion": 1,
+  "targetGameVersion": "0.5.4",
+  "tabs": [
+    {
+      "id": "currency",
+      "label": "Currency",
+      "order": 10,
+      "description": "Core currency and its Greater and Perfect variants."
+    },
+    {
+      "id": "quality",
+      "label": "Quality",
+      "order": 20,
+      "description": "Equipment, flask, gem, jewellery, and alternate-quality currency."
+    },
+    {
+      "id": "socketing",
+      "label": "Socketing / Augments",
+      "order": 30,
+      "description": "Socket currency, Runes, Soul Cores, Idols, and other socketable augments."
+    },
+    {
+      "id": "ritual",
+      "label": "Ritual / Omens",
+      "order": 40,
+      "description": "Omens that modify a later qualifying crafting operation."
+    },
+    {
+      "id": "essences",
+      "label": "Essences",
+      "order": 50,
+      "description": "Standard, Greater, Perfect, and mechanic-specific Essences."
+    },
+    {
+      "id": "abyss",
+      "label": "Abyss",
+      "order": 60,
+      "description": "Desecration, Abyssal Bones, and Abyss-specific crafting items."
+    },
+    {
+      "id": "breach",
+      "label": "Breach / Genesis",
+      "order": 70,
+      "description": "Breach Catalysts, Genesis crafting, and Breach-specific items."
+    },
+    {
+      "id": "delirium",
+      "label": "Delirium / Instilling",
+      "order": 80,
+      "description": "Distilled Emotions and instilling recipes."
+    },
+    {
+      "id": "runeforging",
+      "label": "Runeforging",
+      "order": 90,
+      "description": "Expedition Alloys, Resistance Fluxes, and Runeforging resources."
+    },
+    {
+      "id": "corruption",
+      "label": "Corruption / Sacrifice",
+      "order": 100,
+      "description": "Vaal, Temple, Atziri, corruption, and sacrifice operations."
+    }
+  ],
+  "definitions": [
+    {
+      "craftId": "transmutation",
+      "sourceItemId": 13,
+      "metadataKey": "Metadata/Items/Currency/CurrencyUpgradeToMagic",
+      "displayName": "Orb of Transmutation",
+      "category": "currency",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 10,
+      "iconId": "transmutation",
+      "iconFallback": "Trans",
+      "accentColor": "#6888c8",
+      "cssClasses": ["currency-btn"],
+      "description": "Upgrades a Normal item to Magic and adds a modifier.",
+      "actionType": "direct",
+      "activation": "arm",
+      "engineAction": "transmutation",
+      "applicabilityPredicate": "currencyDisabledReason",
+      "disabledReasonHandler": "currencyDisabledReason",
+      "disabledReason": "",
+      "handler": "applyTransmutation",
+      "sourceHandler": "poe2_transmutation",
+      "triggeringAction": null,
+      "omenInteraction": {"omenId": null, "exclusiveGroup": null, "consumeOn": "successful_operation", "triggerCraftId": null},
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {},
+      "sourceEvidence": ["data/normalized/crafting-items.json#item:13", "crafting.js#applyTransmutation"],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": ["validation:every-populated-selectable-base-accepts-valid-craft"],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "greater-transmutation",
+      "sourceItemId": 14,
+      "metadataKey": "Metadata/Items/Currency/CurrencyUpgradeToMagic2",
+      "displayName": "Greater Orb of Transmutation",
+      "category": "currency",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 11,
+      "iconId": "transmutation",
+      "iconFallback": "II",
+      "accentColor": "#6888c8",
+      "cssClasses": ["currency-btn", "tier-badge"],
+      "description": "Upgrades a Normal item to Magic and adds a modifier with Minimum Modifier Level 44.",
+      "actionType": "direct",
+      "activation": "arm",
+      "engineAction": "greater_transmutation",
+      "applicabilityPredicate": "currencyDisabledReason",
+      "disabledReasonHandler": "currencyDisabledReason",
+      "disabledReason": "",
+      "handler": "applyTransmutation",
+      "sourceHandler": "poe2_transmutation_greater",
+      "triggeringAction": null,
+      "omenInteraction": {"omenId": null, "exclusiveGroup": null, "consumeOn": "successful_operation", "triggerCraftId": null},
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {"baseAction": "transmutation", "minModifierLevel": 44, "variantTier": 2},
+      "sourceEvidence": ["data/normalized/crafting-items.json#item:14", "crafting.js#applyTransmutation"],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": ["validation:greater-perfect-minimum-modifier-level"],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "perfect-transmutation",
+      "sourceItemId": 15,
+      "metadataKey": "Metadata/Items/Currency/CurrencyUpgradeToMagic3",
+      "displayName": "Perfect Orb of Transmutation",
+      "category": "currency",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 12,
+      "iconId": "transmutation",
+      "iconFallback": "III",
+      "accentColor": "#6888c8",
+      "cssClasses": ["currency-btn", "tier-badge"],
+      "description": "Upgrades a Normal item to Magic and adds a modifier with Minimum Modifier Level 70.",
+      "actionType": "direct",
+      "activation": "arm",
+      "engineAction": "perfect_transmutation",
+      "applicabilityPredicate": "currencyDisabledReason",
+      "disabledReasonHandler": "currencyDisabledReason",
+      "disabledReason": "",
+      "handler": "applyTransmutation",
+      "sourceHandler": "poe2_transmutation_perfect",
+      "triggeringAction": null,
+      "omenInteraction": {"omenId": null, "exclusiveGroup": null, "consumeOn": "successful_operation", "triggerCraftId": null},
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {"baseAction": "transmutation", "minModifierLevel": 70, "variantTier": 3},
+      "sourceEvidence": ["data/normalized/crafting-items.json#item:15", "crafting.js#applyTransmutation"],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": ["validation:greater-perfect-minimum-modifier-level"],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "augmentation",
+      "sourceItemId": 24,
+      "metadataKey": "Metadata/Items/Currency/CurrencyAddModToMagic",
+      "displayName": "Orb of Augmentation",
+      "category": "currency",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 20,
+      "iconId": "augmentation",
+      "iconFallback": "Aug",
+      "accentColor": "#88aaff",
+      "cssClasses": [
+        "currency-btn"
+      ],
+      "description": "Adds a modifier to a Magic item.",
+      "actionType": "direct",
+      "activation": "arm",
+      "engineAction": "augmentation",
+      "applicabilityPredicate": "currencyDisabledReason",
+      "disabledReasonHandler": "currencyDisabledReason",
+      "disabledReason": "",
+      "handler": "applyAugmentation",
+      "sourceHandler": "poe2_augmentation",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {},
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:24",
+        "crafting.js#applyAugmentation"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:every-populated-selectable-base-accepts-valid-craft"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "greater-augmentation",
+      "sourceItemId": 25,
+      "metadataKey": "Metadata/Items/Currency/CurrencyAddModToMagic2",
+      "displayName": "Greater Orb of Augmentation",
+      "category": "currency",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 21,
+      "iconId": "augmentation",
+      "iconFallback": "II",
+      "accentColor": "#88aaff",
+      "cssClasses": [
+        "currency-btn",
+        "tier-badge"
+      ],
+      "description": "Adds a modifier to a Magic item with Minimum Modifier Level 44.",
+      "actionType": "direct",
+      "activation": "arm",
+      "engineAction": "greater_augmentation",
+      "applicabilityPredicate": "currencyDisabledReason",
+      "disabledReasonHandler": "currencyDisabledReason",
+      "disabledReason": "",
+      "handler": "applyAugmentation",
+      "sourceHandler": "poe2_augmentation_greater",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "baseAction": "augmentation",
+        "minModifierLevel": 44,
+        "variantTier": 2
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:25",
+        "crafting.js#applyAugmentation"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:greater-perfect-minimum-modifier-level"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "perfect-augmentation",
+      "sourceItemId": 26,
+      "metadataKey": "Metadata/Items/Currency/CurrencyAddModToMagic3",
+      "displayName": "Perfect Orb of Augmentation",
+      "category": "currency",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 22,
+      "iconId": "augmentation",
+      "iconFallback": "III",
+      "accentColor": "#88aaff",
+      "cssClasses": [
+        "currency-btn",
+        "tier-badge"
+      ],
+      "description": "Adds a modifier to a Magic item with Minimum Modifier Level 70.",
+      "actionType": "direct",
+      "activation": "arm",
+      "engineAction": "perfect_augmentation",
+      "applicabilityPredicate": "currencyDisabledReason",
+      "disabledReasonHandler": "currencyDisabledReason",
+      "disabledReason": "",
+      "handler": "applyAugmentation",
+      "sourceHandler": "poe2_augmentation_perfect",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "baseAction": "augmentation",
+        "minModifierLevel": 70,
+        "variantTier": 3
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:26",
+        "crafting.js#applyAugmentation"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:greater-perfect-minimum-modifier-level"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "alchemy",
+      "sourceItemId": 9,
+      "metadataKey": "Metadata/Items/Currency/CurrencyUpgradeToRare",
+      "displayName": "Orb of Alchemy",
+      "category": "currency",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 30,
+      "iconId": "alchemy",
+      "iconFallback": "Alch",
+      "accentColor": "#c8a848",
+      "cssClasses": [
+        "currency-btn"
+      ],
+      "description": "Upgrades a Normal or Magic item to Rare and rolls four fresh modifiers.",
+      "actionType": "direct",
+      "activation": "arm",
+      "engineAction": "alchemy",
+      "applicabilityPredicate": "currencyDisabledReason",
+      "disabledReasonHandler": "currencyDisabledReason",
+      "disabledReason": "",
+      "handler": "applyAlchemy",
+      "sourceHandler": "poe2_alchemy",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {},
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:9",
+        "crafting.js#applyAlchemy"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:alchemy-produces-four-fresh-modifiers"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "regal",
+      "sourceItemId": 21,
+      "metadataKey": "Metadata/Items/Currency/CurrencyUpgradeMagicToRare",
+      "displayName": "Regal Orb",
+      "category": "currency",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 40,
+      "iconId": "regal",
+      "iconFallback": "Regal",
+      "accentColor": "#6888c8",
+      "cssClasses": [
+        "currency-btn"
+      ],
+      "description": "Upgrades a Magic item to Rare and adds a modifier.",
+      "actionType": "direct",
+      "activation": "arm",
+      "engineAction": "regal",
+      "applicabilityPredicate": "currencyDisabledReason",
+      "disabledReasonHandler": "currencyDisabledReason",
+      "disabledReason": "",
+      "handler": "applyRegal",
+      "sourceHandler": "poe2_regal",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {},
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:21",
+        "crafting.js#applyRegal"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:every-populated-selectable-base-accepts-valid-craft"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "greater-regal",
+      "sourceItemId": 22,
+      "metadataKey": "Metadata/Items/Currency/CurrencyUpgradeMagicToRare2",
+      "displayName": "Greater Regal Orb",
+      "category": "currency",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 41,
+      "iconId": "regal",
+      "iconFallback": "II",
+      "accentColor": "#6888c8",
+      "cssClasses": [
+        "currency-btn",
+        "tier-badge"
+      ],
+      "description": "Upgrades a Magic item to Rare and adds a modifier with Minimum Modifier Level 35.",
+      "actionType": "direct",
+      "activation": "arm",
+      "engineAction": "greater_regal",
+      "applicabilityPredicate": "currencyDisabledReason",
+      "disabledReasonHandler": "currencyDisabledReason",
+      "disabledReason": "",
+      "handler": "applyRegal",
+      "sourceHandler": "poe2_regal_greater",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "baseAction": "regal",
+        "minModifierLevel": 35,
+        "variantTier": 2
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:22",
+        "crafting.js#applyRegal"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:greater-perfect-minimum-modifier-level"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "perfect-regal",
+      "sourceItemId": 23,
+      "metadataKey": "Metadata/Items/Currency/CurrencyUpgradeMagicToRare3",
+      "displayName": "Perfect Regal Orb",
+      "category": "currency",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 42,
+      "iconId": "regal",
+      "iconFallback": "III",
+      "accentColor": "#6888c8",
+      "cssClasses": [
+        "currency-btn",
+        "tier-badge"
+      ],
+      "description": "Upgrades a Magic item to Rare and adds a modifier with Minimum Modifier Level 50.",
+      "actionType": "direct",
+      "activation": "arm",
+      "engineAction": "perfect_regal",
+      "applicabilityPredicate": "currencyDisabledReason",
+      "disabledReasonHandler": "currencyDisabledReason",
+      "disabledReason": "",
+      "handler": "applyRegal",
+      "sourceHandler": "poe2_regal_perfect",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "baseAction": "regal",
+        "minModifierLevel": 50,
+        "variantTier": 3
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:23",
+        "crafting.js#applyRegal"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:greater-perfect-minimum-modifier-level"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "exalted",
+      "sourceItemId": 18,
+      "metadataKey": "Metadata/Items/Currency/CurrencyAddModToRare",
+      "displayName": "Exalted Orb",
+      "category": "currency",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 50,
+      "iconId": "exalted",
+      "iconFallback": "Exalt",
+      "accentColor": "#c8a848",
+      "cssClasses": [
+        "currency-btn"
+      ],
+      "description": "Adds a modifier to a Rare item with an open affix slot.",
+      "actionType": "direct",
+      "activation": "arm",
+      "engineAction": "exalted",
+      "applicabilityPredicate": "currencyDisabledReason",
+      "disabledReasonHandler": "currencyDisabledReason",
+      "disabledReason": "",
+      "handler": "applyExalted",
+      "sourceHandler": "poe2_exalted",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {},
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:18",
+        "crafting.js#applyExalted"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:full-side-forces-exalted-open-side"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "greater-exalted",
+      "sourceItemId": 19,
+      "metadataKey": "Metadata/Items/Currency/CurrencyAddModToRare2",
+      "displayName": "Greater Exalted Orb",
+      "category": "currency",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 51,
+      "iconId": "exalted",
+      "iconFallback": "II",
+      "accentColor": "#c8a848",
+      "cssClasses": [
+        "currency-btn",
+        "tier-badge"
+      ],
+      "description": "Adds a modifier to a Rare item with Minimum Modifier Level 35.",
+      "actionType": "direct",
+      "activation": "arm",
+      "engineAction": "greater_exalted",
+      "applicabilityPredicate": "currencyDisabledReason",
+      "disabledReasonHandler": "currencyDisabledReason",
+      "disabledReason": "",
+      "handler": "applyExalted",
+      "sourceHandler": "poe2_exalted_greater",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "baseAction": "exalted",
+        "minModifierLevel": 35,
+        "variantTier": 2
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:19",
+        "crafting.js#applyExalted"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:greater-perfect-minimum-modifier-level"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "perfect-exalted",
+      "sourceItemId": 20,
+      "metadataKey": "Metadata/Items/Currency/CurrencyAddModToRare3",
+      "displayName": "Perfect Exalted Orb",
+      "category": "currency",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 52,
+      "iconId": "exalted",
+      "iconFallback": "III",
+      "accentColor": "#c8a848",
+      "cssClasses": [
+        "currency-btn",
+        "tier-badge"
+      ],
+      "description": "Adds a modifier to a Rare item with Minimum Modifier Level 50.",
+      "actionType": "direct",
+      "activation": "arm",
+      "engineAction": "perfect_exalted",
+      "applicabilityPredicate": "currencyDisabledReason",
+      "disabledReasonHandler": "currencyDisabledReason",
+      "disabledReason": "",
+      "handler": "applyExalted",
+      "sourceHandler": "poe2_exalted_perfect",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "baseAction": "exalted",
+        "minModifierLevel": 50,
+        "variantTier": 3
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:20",
+        "crafting.js#applyExalted"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:greater-perfect-minimum-modifier-level"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "chaos",
+      "sourceItemId": 3,
+      "metadataKey": "Metadata/Items/Currency/CurrencyRerollRare",
+      "displayName": "Chaos Orb",
+      "category": "currency",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 60,
+      "iconId": "chaos",
+      "iconFallback": "Chaos",
+      "accentColor": "#c8a848",
+      "cssClasses": [
+        "currency-btn"
+      ],
+      "description": "Removes one removable modifier from a Rare item and adds an eligible replacement.",
+      "actionType": "direct",
+      "activation": "arm",
+      "engineAction": "chaos",
+      "applicabilityPredicate": "currencyDisabledReason",
+      "disabledReasonHandler": "currencyDisabledReason",
+      "disabledReason": "",
+      "handler": "applyChaos",
+      "sourceHandler": "poe2_chaos",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {},
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:3",
+        "crafting.js#applyChaos"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:chaos-rolls-back-without-replacement"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "greater-chaos",
+      "sourceItemId": 4,
+      "metadataKey": "Metadata/Items/Currency/CurrencyRerollRare2",
+      "displayName": "Greater Chaos Orb",
+      "category": "currency",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 61,
+      "iconId": "chaos",
+      "iconFallback": "II",
+      "accentColor": "#c8a848",
+      "cssClasses": [
+        "currency-btn",
+        "tier-badge"
+      ],
+      "description": "Modifies a Rare item and applies Minimum Modifier Level 35 to the replacement.",
+      "actionType": "direct",
+      "activation": "arm",
+      "engineAction": "greater_chaos",
+      "applicabilityPredicate": "currencyDisabledReason",
+      "disabledReasonHandler": "currencyDisabledReason",
+      "disabledReason": "",
+      "handler": "applyChaos",
+      "sourceHandler": "poe2_chaos_greater",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "baseAction": "chaos",
+        "minModifierLevel": 35,
+        "variantTier": 2
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:4",
+        "crafting.js#applyChaos"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:greater-perfect-minimum-modifier-level"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "perfect-chaos",
+      "sourceItemId": 5,
+      "metadataKey": "Metadata/Items/Currency/CurrencyRerollRare3",
+      "displayName": "Perfect Chaos Orb",
+      "category": "currency",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 62,
+      "iconId": "chaos",
+      "iconFallback": "III",
+      "accentColor": "#c8a848",
+      "cssClasses": [
+        "currency-btn",
+        "tier-badge"
+      ],
+      "description": "Modifies a Rare item and applies Minimum Modifier Level 50 to the replacement.",
+      "actionType": "direct",
+      "activation": "arm",
+      "engineAction": "perfect_chaos",
+      "applicabilityPredicate": "currencyDisabledReason",
+      "disabledReasonHandler": "currencyDisabledReason",
+      "disabledReason": "",
+      "handler": "applyChaos",
+      "sourceHandler": "poe2_chaos_perfect",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "baseAction": "chaos",
+        "minModifierLevel": 50,
+        "variantTier": 3
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:5",
+        "crafting.js#applyChaos"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:omen-whittling-perfect-chaos-order"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "annulment",
+      "sourceItemId": 196,
+      "metadataKey": "Metadata/Items/Currency/CurrencyRemoveMod",
+      "displayName": "Orb of Annulment",
+      "category": "currency",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 70,
+      "iconId": "annulment",
+      "iconFallback": "Annul",
+      "accentColor": "#aaaaaa",
+      "cssClasses": [
+        "currency-btn"
+      ],
+      "description": "Removes a random removable explicit modifier.",
+      "actionType": "direct",
+      "activation": "arm",
+      "engineAction": "annulment",
+      "applicabilityPredicate": "currencyDisabledReason",
+      "disabledReasonHandler": "currencyDisabledReason",
+      "disabledReason": "",
+      "handler": "applyAnnulment",
+      "sourceHandler": "poe2_annulment",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {},
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:196",
+        "crafting.js#applyAnnulment"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:fractured-modifiers-survive-removal"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "divine",
+      "sourceItemId": 36,
+      "metadataKey": "Metadata/Items/Currency/CurrencyModValues",
+      "displayName": "Divine Orb",
+      "category": "currency",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 80,
+      "iconId": "divine",
+      "iconFallback": "Divine",
+      "accentColor": "#e8d898",
+      "cssClasses": [
+        "currency-btn"
+      ],
+      "description": "Rerolls eligible numeric values on non-fractured modifiers.",
+      "actionType": "direct",
+      "activation": "arm",
+      "engineAction": "divine",
+      "applicabilityPredicate": "currencyDisabledReason",
+      "disabledReasonHandler": "currencyDisabledReason",
+      "disabledReason": "",
+      "handler": "applyDivine",
+      "sourceHandler": "poe2_divine",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {},
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:36",
+        "crafting.js#applyDivine"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:crafting-rng-injectable"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "fracturing",
+      "sourceItemId": 203,
+      "metadataKey": "Metadata/Items/Currency/CurrencyFractureRare",
+      "displayName": "Fracturing Orb",
+      "category": "currency",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 90,
+      "iconId": "fracturing",
+      "iconFallback": "Frac",
+      "accentColor": "#6fb0a8",
+      "cssClasses": [
+        "currency-btn"
+      ],
+      "description": "Fractures a random revealed modifier on a Rare item with at least four modifiers.",
+      "actionType": "direct",
+      "activation": "arm",
+      "engineAction": "fracturing",
+      "applicabilityPredicate": "currencyDisabledReason",
+      "disabledReasonHandler": "currencyDisabledReason",
+      "disabledReason": "",
+      "handler": "applyFracturing",
+      "sourceHandler": "poe2_fracture",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {},
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:203",
+        "crafting.js#applyFracturing"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:fractured-modifiers-survive-chaos"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "hinekora",
+      "sourceItemId": null,
+      "metadataKey": null,
+      "displayName": "Hinekora's Lock",
+      "category": "currency",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 100,
+      "iconId": "hinekora",
+      "iconFallback": "Lock",
+      "accentColor": "#b061d6",
+      "cssClasses": [
+        "currency-btn"
+      ],
+      "description": "Applies a Lock that previews the next supported item mutation before it is committed.",
+      "actionType": "specialized",
+      "activation": "arm",
+      "engineAction": "hinekora",
+      "applicabilityPredicate": "currencyDisabledReason",
+      "disabledReasonHandler": "currencyDisabledReason",
+      "disabledReason": "",
+      "handler": "applyHinekoraLock",
+      "sourceHandler": null,
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {},
+      "sourceEvidence": [
+        "app.js#applyHinekoraLock",
+        "ui-validation.mjs#foresight-commit-preserves-undo-and-consumes-hinekora-lock"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_present_source_identity_unresolved",
+      "blocker": "Normalized source item identity is unavailable; existing runtime behavior is preserved without fabricating a source ID or metadata key.",
+      "testFixtureIds": [
+        "ui:foresight-commit-preserves-undo-and-consumes-lock"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "omen-sinistral-necromancy",
+      "sourceItemId": 4455,
+      "metadataKey": "Metadata/Items/Currency/OmenOnAbyssAddPrefixes",
+      "displayName": "Omen of Sinistral Necromancy",
+      "category": "ritual",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 10,
+      "iconId": "sinistral-necromancy",
+      "iconFallback": "Sin",
+      "accentColor": "#5fd38a",
+      "cssClasses": [
+        "abyss-btn",
+        "omen-btn"
+      ],
+      "description": "Adds only a Prefix during the next qualifying Desecration.",
+      "actionType": "omen",
+      "activation": "toggle_omen",
+      "engineAction": null,
+      "applicabilityPredicate": "omenDisabledReason",
+      "disabledReasonHandler": "omenDisabledReason",
+      "disabledReason": "",
+      "handler": "toggleOmen",
+      "sourceHandler": null,
+      "triggeringAction": "well-of-souls-reveal",
+      "omenInteraction": {
+        "omenId": "sinistral_necromancy",
+        "exclusiveGroup": "desecration_direction",
+        "consumeOn": "well_of_souls_reveal",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "omenId": "sinistral_necromancy"
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:4455",
+        "data/normalized/crafting-items.json#omens"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:omen-consumption-and-trigger-rules"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "omen-dextral-necromancy",
+      "sourceItemId": 4456,
+      "metadataKey": "Metadata/Items/Currency/OmenOnAbyssAddSuffixes",
+      "displayName": "Omen of Dextral Necromancy",
+      "category": "ritual",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 20,
+      "iconId": "dextral-necromancy",
+      "iconFallback": "Dex",
+      "accentColor": "#5fd38a",
+      "cssClasses": [
+        "abyss-btn",
+        "omen-btn"
+      ],
+      "description": "Adds only a Suffix during the next qualifying Desecration.",
+      "actionType": "omen",
+      "activation": "toggle_omen",
+      "engineAction": null,
+      "applicabilityPredicate": "omenDisabledReason",
+      "disabledReasonHandler": "omenDisabledReason",
+      "disabledReason": "",
+      "handler": "toggleOmen",
+      "sourceHandler": null,
+      "triggeringAction": "preserved-cranium",
+      "omenInteraction": {
+        "omenId": "dextral_necromancy",
+        "exclusiveGroup": "desecration_direction",
+        "consumeOn": "successful_triggering_operation",
+        "triggerCraftId": "preserved-cranium"
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "omenId": "dextral_necromancy"
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:4456",
+        "data/normalized/crafting-items.json#omens"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:omen-consumption-and-trigger-rules"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "omen-abyssal-echoes",
+      "sourceItemId": 4449,
+      "metadataKey": "Metadata/Items/Currency/OmenOnAbyssRerollOptions",
+      "displayName": "Omen of Abyssal Echoes",
+      "category": "ritual",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 30,
+      "iconId": "abyssal-echoes",
+      "iconFallback": "Echo",
+      "accentColor": "#5fd38a",
+      "cssClasses": [
+        "abyss-btn",
+        "omen-btn"
+      ],
+      "description": "Allows the next qualifying Well of Souls reveal to reroll its options once.",
+      "actionType": "omen",
+      "activation": "toggle_omen",
+      "engineAction": null,
+      "applicabilityPredicate": "omenDisabledReason",
+      "disabledReasonHandler": "omenDisabledReason",
+      "disabledReason": "",
+      "handler": "toggleOmen",
+      "sourceHandler": null,
+      "triggeringAction": "preserved-cranium",
+      "omenInteraction": {
+        "omenId": "abyssal_echoes",
+        "exclusiveGroup": "desecration_reroll",
+        "consumeOn": "successful_triggering_operation",
+        "triggerCraftId": "preserved-cranium"
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "omenId": "abyssal_echoes"
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:4449",
+        "data/normalized/crafting-items.json#omens"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:omen-consumption-and-trigger-rules"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "omen-light",
+      "sourceItemId": 4454,
+      "metadataKey": "Metadata/Items/Currency/OmenOnAnnulRemoveAbyssMod",
+      "displayName": "Omen of Light",
+      "category": "ritual",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 40,
+      "iconId": "light",
+      "iconFallback": "Light",
+      "accentColor": "#5fd38a",
+      "cssClasses": [
+        "abyss-btn",
+        "omen-btn"
+      ],
+      "description": "Makes the next qualifying Orb of Annulment remove only a revealed Desecrated modifier.",
+      "actionType": "omen",
+      "activation": "toggle_omen",
+      "engineAction": null,
+      "applicabilityPredicate": "omenDisabledReason",
+      "disabledReasonHandler": "omenDisabledReason",
+      "disabledReason": "",
+      "handler": "toggleOmen",
+      "sourceHandler": null,
+      "triggeringAction": "annulment",
+      "omenInteraction": {
+        "omenId": "omen_of_light",
+        "exclusiveGroup": "annulment_target",
+        "consumeOn": "successful_triggering_operation",
+        "triggerCraftId": "annulment"
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "omenId": "omen_of_light"
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:4454",
+        "data/normalized/crafting-items.json#omens"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:omen-consumption-and-trigger-rules"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "omen-sovereign",
+      "sourceItemId": 4450,
+      "metadataKey": "Metadata/Items/Currency/OmenOnAbyssGuarenteeLichTypeMod1",
+      "displayName": "Omen of the Sovereign",
+      "category": "ritual",
+      "equipmentRelevance": "equipment_relevant_blocked",
+      "displayOrder": 50,
+      "iconId": "sovereign",
+      "iconFallback": "Sov",
+      "accentColor": "#5fd38a",
+      "cssClasses": [
+        "abyss-btn",
+        "omen-btn"
+      ],
+      "description": "The target-version Sovereign Lich-type modifier guarantee is retained but not implemented.",
+      "actionType": "unsupported",
+      "activation": "none",
+      "engineAction": null,
+      "applicabilityPredicate": "omenDisabledReason",
+      "disabledReasonHandler": "staticDisabledReason",
+      "disabledReason": "Mechanic blocked because the exact target-version Omen of the Sovereign Lich-type modifier guarantee and applicable modifier table are not verified.",
+      "handler": null,
+      "sourceHandler": null,
+      "triggeringAction": "preserved-cranium",
+      "omenInteraction": {
+        "omenId": "omen_of_the_sovereign",
+        "exclusiveGroup": "desecration_lich_guarantee",
+        "consumeOn": "successful_triggering_operation",
+        "triggerCraftId": "preserved-cranium"
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "omenId": "omen_of_the_sovereign"
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:4450",
+        "data/normalized/crafting-items.json#omens"
+      ],
+      "implementationStatus": "blocked_missing_data",
+      "verificationStatus": "blocked_missing_target_version_data",
+      "blocker": "Mechanic blocked because the exact target-version Omen of the Sovereign Lich-type modifier guarantee and applicable modifier table are not verified.",
+      "testFixtureIds": [
+        "ui:unsupported-registry-entry-cannot-dispatch"
+      ],
+      "supported": false,
+      "visible": true
+    },
+    {
+      "craftId": "omen-liege",
+      "sourceItemId": 4451,
+      "metadataKey": "Metadata/Items/Currency/OmenOnAbyssGuarenteeLichTypeMod2",
+      "displayName": "Omen of the Liege",
+      "category": "ritual",
+      "equipmentRelevance": "equipment_relevant_blocked",
+      "displayOrder": 60,
+      "iconId": "liege",
+      "iconFallback": "Liege",
+      "accentColor": "#5fd38a",
+      "cssClasses": [
+        "abyss-btn",
+        "omen-btn"
+      ],
+      "description": "The target-version Liege Lich-type modifier guarantee is retained but not implemented.",
+      "actionType": "unsupported",
+      "activation": "none",
+      "engineAction": null,
+      "applicabilityPredicate": "omenDisabledReason",
+      "disabledReasonHandler": "staticDisabledReason",
+      "disabledReason": "Mechanic blocked because the exact target-version Omen of the Liege Lich-type modifier guarantee and applicable modifier table are not verified.",
+      "handler": null,
+      "sourceHandler": null,
+      "triggeringAction": "preserved-cranium",
+      "omenInteraction": {
+        "omenId": "omen_of_the_liege",
+        "exclusiveGroup": "desecration_lich_guarantee",
+        "consumeOn": "successful_triggering_operation",
+        "triggerCraftId": "preserved-cranium"
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "omenId": "omen_of_the_liege"
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:4451",
+        "data/normalized/crafting-items.json#omens"
+      ],
+      "implementationStatus": "blocked_missing_data",
+      "verificationStatus": "blocked_missing_target_version_data",
+      "blocker": "Mechanic blocked because the exact target-version Omen of the Liege Lich-type modifier guarantee and applicable modifier table are not verified.",
+      "testFixtureIds": [
+        "ui:unsupported-registry-entry-cannot-dispatch"
+      ],
+      "supported": false,
+      "visible": true
+    },
+    {
+      "craftId": "omen-blackblooded",
+      "sourceItemId": 4452,
+      "metadataKey": "Metadata/Items/Currency/OmenOnAbyssGuarenteeLichTypeMod3",
+      "displayName": "Omen of the Blackblooded",
+      "category": "ritual",
+      "equipmentRelevance": "equipment_relevant_blocked",
+      "displayOrder": 70,
+      "iconId": "blackblooded",
+      "iconFallback": "Blk",
+      "accentColor": "#5fd38a",
+      "cssClasses": [
+        "abyss-btn",
+        "omen-btn"
+      ],
+      "description": "The target-version Blackblooded Lich-type modifier guarantee is retained but not implemented.",
+      "actionType": "unsupported",
+      "activation": "none",
+      "engineAction": null,
+      "applicabilityPredicate": "omenDisabledReason",
+      "disabledReasonHandler": "staticDisabledReason",
+      "disabledReason": "Mechanic blocked because the exact target-version Omen of the Blackblooded Lich-type modifier guarantee and applicable modifier table are not verified.",
+      "handler": null,
+      "sourceHandler": null,
+      "triggeringAction": "preserved-cranium",
+      "omenInteraction": {
+        "omenId": "omen_of_the_blackblooded",
+        "exclusiveGroup": "desecration_lich_guarantee",
+        "consumeOn": "successful_triggering_operation",
+        "triggerCraftId": "preserved-cranium"
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "omenId": "omen_of_the_blackblooded"
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:4452",
+        "data/normalized/crafting-items.json#omens"
+      ],
+      "implementationStatus": "blocked_missing_data",
+      "verificationStatus": "blocked_missing_target_version_data",
+      "blocker": "Mechanic blocked because the exact target-version Omen of the Blackblooded Lich-type modifier guarantee and applicable modifier table are not verified.",
+      "testFixtureIds": [
+        "ui:unsupported-registry-entry-cannot-dispatch"
+      ],
+      "supported": false,
+      "visible": true
+    },
+    {
+      "craftId": "omen-whittling",
+      "sourceItemId": 4415,
+      "metadataKey": "Metadata/Items/Currency/OmenOnChaosLowestLevelMod",
+      "displayName": "Omen of Whittling",
+      "category": "ritual",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 80,
+      "iconId": "whittling",
+      "iconFallback": "Whit",
+      "accentColor": "#d4af5a",
+      "cssClasses": [
+        "abyss-btn",
+        "craft-omen-btn"
+      ],
+      "description": "Makes the next qualifying Chaos Orb remove a modifier with the lowest modifier level.",
+      "actionType": "omen",
+      "activation": "toggle_omen",
+      "engineAction": null,
+      "applicabilityPredicate": "omenDisabledReason",
+      "disabledReasonHandler": "omenDisabledReason",
+      "disabledReason": "",
+      "handler": "toggleCraftOmen",
+      "sourceHandler": null,
+      "triggeringAction": "chaos",
+      "omenInteraction": {
+        "omenId": "whittling",
+        "exclusiveGroup": "crafting_omen",
+        "consumeOn": "successful_triggering_operation",
+        "triggerCraftId": "chaos"
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "omenId": "whittling"
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:4415",
+        "data/normalized/crafting-items.json#omens"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:omen-consumption-and-trigger-rules"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "omen-sinistral-erasure",
+      "sourceItemId": 4416,
+      "metadataKey": "Metadata/Items/Currency/OmenOnChaosPrefix",
+      "displayName": "Omen of Sinistral Erasure",
+      "category": "ritual",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 90,
+      "iconId": "sinistral-erasure",
+      "iconFallback": "SinE",
+      "accentColor": "#d4af5a",
+      "cssClasses": [
+        "abyss-btn",
+        "craft-omen-btn"
+      ],
+      "description": "Makes the next qualifying Chaos Orb remove a Prefix.",
+      "actionType": "omen",
+      "activation": "toggle_omen",
+      "engineAction": null,
+      "applicabilityPredicate": "omenDisabledReason",
+      "disabledReasonHandler": "omenDisabledReason",
+      "disabledReason": "",
+      "handler": "toggleCraftOmen",
+      "sourceHandler": null,
+      "triggeringAction": "chaos",
+      "omenInteraction": {
+        "omenId": "sinistral_erasure",
+        "exclusiveGroup": "crafting_omen",
+        "consumeOn": "successful_triggering_operation",
+        "triggerCraftId": "chaos"
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "omenId": "sinistral_erasure"
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:4416",
+        "data/normalized/crafting-items.json#omens"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:omen-consumption-and-trigger-rules"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "omen-dextral-erasure",
+      "sourceItemId": 4417,
+      "metadataKey": "Metadata/Items/Currency/OmenOnChaosSuffix",
+      "displayName": "Omen of Dextral Erasure",
+      "category": "ritual",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 100,
+      "iconId": "dextral-erasure",
+      "iconFallback": "DexE",
+      "accentColor": "#d4af5a",
+      "cssClasses": [
+        "abyss-btn",
+        "craft-omen-btn"
+      ],
+      "description": "Makes the next qualifying Chaos Orb remove a Suffix.",
+      "actionType": "omen",
+      "activation": "toggle_omen",
+      "engineAction": null,
+      "applicabilityPredicate": "omenDisabledReason",
+      "disabledReasonHandler": "omenDisabledReason",
+      "disabledReason": "",
+      "handler": "toggleCraftOmen",
+      "sourceHandler": null,
+      "triggeringAction": "chaos",
+      "omenInteraction": {
+        "omenId": "dextral_erasure",
+        "exclusiveGroup": "crafting_omen",
+        "consumeOn": "successful_triggering_operation",
+        "triggerCraftId": "chaos"
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "omenId": "dextral_erasure"
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:4417",
+        "data/normalized/crafting-items.json#omens"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:omen-consumption-and-trigger-rules"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "omen-sinistral-annulment",
+      "sourceItemId": 4427,
+      "metadataKey": "Metadata/Items/Currency/OmenOnAnnulRemovePrefixes",
+      "displayName": "Omen of Sinistral Annulment",
+      "category": "ritual",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 110,
+      "iconId": "sinistral-annulment",
+      "iconFallback": "SinA",
+      "accentColor": "#d4af5a",
+      "cssClasses": [
+        "abyss-btn",
+        "craft-omen-btn"
+      ],
+      "description": "Makes the next qualifying Orb of Annulment remove a Prefix.",
+      "actionType": "omen",
+      "activation": "toggle_omen",
+      "engineAction": null,
+      "applicabilityPredicate": "omenDisabledReason",
+      "disabledReasonHandler": "omenDisabledReason",
+      "disabledReason": "",
+      "handler": "toggleCraftOmen",
+      "sourceHandler": null,
+      "triggeringAction": "annulment",
+      "omenInteraction": {
+        "omenId": "sinistral_annulment",
+        "exclusiveGroup": "crafting_omen",
+        "consumeOn": "successful_triggering_operation",
+        "triggerCraftId": "annulment"
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "omenId": "sinistral_annulment"
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:4427",
+        "data/normalized/crafting-items.json#omens"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:omen-consumption-and-trigger-rules"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "omen-dextral-annulment",
+      "sourceItemId": 4428,
+      "metadataKey": "Metadata/Items/Currency/OmenOnAnnulRemoveSuffixes",
+      "displayName": "Omen of Dextral Annulment",
+      "category": "ritual",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 120,
+      "iconId": "dextral-annulment",
+      "iconFallback": "DexA",
+      "accentColor": "#d4af5a",
+      "cssClasses": [
+        "abyss-btn",
+        "craft-omen-btn"
+      ],
+      "description": "Makes the next qualifying Orb of Annulment remove a Suffix.",
+      "actionType": "omen",
+      "activation": "toggle_omen",
+      "engineAction": null,
+      "applicabilityPredicate": "omenDisabledReason",
+      "disabledReasonHandler": "omenDisabledReason",
+      "disabledReason": "",
+      "handler": "toggleCraftOmen",
+      "sourceHandler": null,
+      "triggeringAction": "annulment",
+      "omenInteraction": {
+        "omenId": "dextral_annulment",
+        "exclusiveGroup": "crafting_omen",
+        "consumeOn": "successful_triggering_operation",
+        "triggerCraftId": "annulment"
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "omenId": "dextral_annulment"
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:4428",
+        "data/normalized/crafting-items.json#omens"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:omen-consumption-and-trigger-rules"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "omen-sanctification",
+      "sourceItemId": 4445,
+      "metadataKey": "Metadata/Items/Currency/OmenOnDivineSanctify",
+      "displayName": "Omen of Sanctification",
+      "category": "ritual",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 130,
+      "iconId": "sanctification",
+      "iconFallback": "Sanct",
+      "accentColor": "#d4af5a",
+      "cssClasses": [
+        "abyss-btn",
+        "craft-omen-btn"
+      ],
+      "description": "Makes the next qualifying Divine Orb sanctify the item and lock further modification.",
+      "actionType": "omen",
+      "activation": "toggle_omen",
+      "engineAction": null,
+      "applicabilityPredicate": "omenDisabledReason",
+      "disabledReasonHandler": "omenDisabledReason",
+      "disabledReason": "",
+      "handler": "toggleCraftOmen",
+      "sourceHandler": null,
+      "triggeringAction": "divine",
+      "omenInteraction": {
+        "omenId": "sanctification",
+        "exclusiveGroup": "crafting_omen",
+        "consumeOn": "successful_triggering_operation",
+        "triggerCraftId": "divine"
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "omenId": "sanctification"
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:4445",
+        "data/normalized/crafting-items.json#omens"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:omen-consumption-and-trigger-rules"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "preserved-cranium",
+      "sourceItemId": 4864,
+      "metadataKey": "Metadata/Items/Currency/AbyssalBenchTicketJewel",
+      "displayName": "Preserved Cranium",
+      "category": "abyss",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 10,
+      "iconId": "cranium",
+      "iconFallback": "Bone",
+      "accentColor": "#5fd38a",
+      "cssClasses": [
+        "abyss-btn",
+        "bone-btn"
+      ],
+      "description": "Starts a qualifying Desecration and opens the Well of Souls reveal flow.",
+      "actionType": "specialized",
+      "activation": "arm",
+      "engineAction": "preserved_cranium",
+      "applicabilityPredicate": "boneDisabledReason",
+      "disabledReasonHandler": "boneDisabledReason",
+      "disabledReason": "",
+      "handler": "startDesecrationFlow",
+      "sourceHandler": "poe2_desecrate_mid",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "boneId": "preserved_cranium"
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:4864",
+        "crafting.js#startDesecration"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:desecration-rerolls-enforced",
+        "validation:desecration-cancel-restores-state"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "essence-abyss",
+      "sourceItemId": 143,
+      "metadataKey": "Metadata/Items/Currency/CurrencyCorruptedEssenceAbyss",
+      "displayName": "Essence of the Abyss",
+      "category": "abyss",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 20,
+      "iconId": "abyss-essence",
+      "iconFallback": "EAby",
+      "accentColor": "#7a3da6",
+      "cssClasses": [
+        "abyss-btn",
+        "essence-btn"
+      ],
+      "description": "Removes a removable modifier from a Rare item and adds the Mark of the Abyssal Lord.",
+      "actionType": "direct",
+      "activation": "arm",
+      "engineAction": "essence_abyss",
+      "applicabilityPredicate": "essenceDisabledReason",
+      "disabledReasonHandler": "essenceDisabledReason",
+      "disabledReason": "",
+      "handler": "applyEssenceOfAbyss",
+      "sourceHandler": "poe2_essence",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {},
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:143",
+        "crafting.js#applyEssenceOfAbyss"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "runtime_behavior_regression_tested",
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:essence-abyss-mark-and-crafted-limit"
+      ],
+      "supported": true,
+      "visible": true
+    },
+    {
+      "craftId": "essence-breach",
+      "sourceItemId": 144,
+      "metadataKey": "Metadata/Items/Currency/CurrencyCorruptedEssenceBreach",
+      "displayName": "Essence of the Breach",
+      "category": "breach",
+      "equipmentRelevance": "equipment_relevant_blocked",
+      "displayOrder": 10,
+      "iconId": "breach-essence",
+      "iconFallback": "EBrc",
+      "accentColor": "#c0506f",
+      "cssClasses": [
+        "unsupported-item-card"
+      ],
+      "description": "The retained Breach Essence identity is visible, but its target-version equipment mutation is not enabled.",
+      "actionType": "unsupported",
+      "activation": "none",
+      "engineAction": "essence_breach",
+      "applicabilityPredicate": "unsupportedReason",
+      "disabledReasonHandler": "staticDisabledReason",
+      "disabledReason": "Mechanic blocked because the exact target-version Essence of the Breach Caster/Minion modifier mapping, applicable item classes, and replacement behavior are not verified.",
+      "handler": null,
+      "sourceHandler": null,
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "never",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "unverified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "unverified",
+      "socketRestriction": "none",
+      "operationOptions": {},
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:144"
+      ],
+      "implementationStatus": "blocked_missing_data",
+      "verificationStatus": "blocked_missing_target_version_data",
+      "blocker": "Mechanic blocked because the exact target-version Essence of the Breach Caster/Minion modifier mapping, applicable item classes, and replacement behavior are not verified.",
+      "testFixtureIds": [
+        "ui:unsupported-registry-entry-cannot-dispatch"
+      ],
+      "supported": false,
+      "visible": true
+    },
+    {
+      "craftId": "vaal",
+      "sourceItemId": 52,
+      "metadataKey": "Metadata/Items/Currency/CurrencyCorrupt",
+      "displayName": "Vaal Orb",
+      "category": "corruption",
+      "equipmentRelevance": "equipment_runtime",
+      "displayOrder": 10,
+      "iconId": "vaal",
+      "iconFallback": "Vaal",
+      "accentColor": "#c02040",
+      "cssClasses": [
+        "currency-btn"
+      ],
+      "description": "Corrupts the item and applies one eligible implemented corruption outcome.",
+      "actionType": "direct",
+      "activation": "arm",
+      "engineAction": "vaal",
+      "applicabilityPredicate": "currencyDisabledReason",
+      "disabledReasonHandler": "currencyDisabledReason",
+      "disabledReason": "",
+      "handler": "applyVaal",
+      "sourceHandler": "poe2_vaal",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "allowed_only_while_uncorrupted_and_unsanctified",
+      "validItemClasses": [],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "probabilityStatus": "unverified"
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:52",
+        "crafting.js#applyVaal"
+      ],
+      "implementationStatus": "probability_unverified",
+      "verificationStatus": "mutation_present_probability_unverified",
+      "blocker": "Exact target-version Vaal Orb outcome probabilities are not encoded by the retained public data.",
+      "testFixtureIds": [
+        "validation:crafting-rng-injectable",
+        "ui:vaal-in-corruption-tab"
+      ],
+      "supported": true,
+      "visible": true
+    }
+  ]
+}

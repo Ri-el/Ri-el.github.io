@@ -721,6 +721,23 @@ test('weights produce the expected 1:3 selection ratio', () => {
   assert(Math.abs(heavyShare - 0.75) < 0.025, `heavy share was ${heavyShare}`);
 });
 
+test('crafting RNG is injectable without changing the default Math.random contract', () => {
+  const data = { bases: { rng_test: syntheticBase() } };
+  const low = new Engine(data, 'rng_test', null, null, null, null, () => 0);
+  const high = new Engine(data, 'rng_test', null, null, null, null, () => 0.999999);
+  const weighted = [{ weight: 1 }, { weight: 3 }];
+  assert.equal(low._weightedIndex(weighted), 0);
+  assert.equal(high._weightedIndex(weighted), 1);
+  const invalid = new Engine(data, 'rng_test', null, null, null, null, () => Number.NaN);
+  assert.throws(() => invalid._randomInt(1, 2), /RNG returned a non-finite value/);
+  const switched = new Engine(data, 'rng_test');
+  assert.equal(switched.setRandomSource(() => 0), switched);
+  assert.equal(switched._weightedIndex(weighted), 0);
+  switched.setRandomSource(() => 0.999999);
+  assert.equal(switched._weightedIndex(weighted), 1);
+  assert.throws(() => switched.setRandomSource('not-a-function'), /RNG must be a function or null/);
+});
+
 test('zero-weight modifier tiers are excluded even at random roll zero', () => {
   const data = { bases: { weight_test: {
     name: 'Weight Test',
@@ -822,14 +839,7 @@ test('Essence of the Abyss creates one crafted Mark and respects the crafted-mod
   assert.deepEqual(blocked.getItem(), withCrafted);
 });
 
-test('Greater/Perfect currencies filter tiers by Minimum Modifier Level', () => {
-  assert.deepEqual(Engine.CURRENCY_MIN_MODIFIER_LEVEL, {
-    greater_transmutation: 44, perfect_transmutation: 70,
-    greater_augmentation: 44, perfect_augmentation: 70,
-    greater_regal: 35, perfect_regal: 50,
-    greater_exalted: 35, perfect_exalted: 50,
-    greater_chaos: 35, perfect_chaos: 50,
-  });
+test('Greater/Perfect modifier-level options filter tiers', () => {
   const data = { bases: { floor_test: {
     name: 'Floor Test',
     prefixes: [

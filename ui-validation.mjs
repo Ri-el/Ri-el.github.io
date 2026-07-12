@@ -7,6 +7,8 @@ const app = fs.readFileSync(new URL('./app.js', import.meta.url), 'utf8');
 const select = fs.readFileSync(new URL('./select.js', import.meta.url), 'utf8');
 const serviceWorker = fs.readFileSync(new URL('./sw.js', import.meta.url), 'utf8');
 const currencyIndex = JSON.parse(fs.readFileSync(new URL('./data/crafting/currency-index.json', import.meta.url), 'utf8'));
+const craftTabs = Array.isArray(currencyIndex.craftTabs) ? currencyIndex.craftTabs : [];
+const craftRegistry = Array.isArray(currencyIndex.craftRegistry) ? currencyIndex.craftRegistry : [];
 
 let passed = 0;
 let failed = 0;
@@ -30,7 +32,10 @@ check('all HTML ids are unique', ids.length === new Set(ids).size);
 
 for (const id of [
   'main-content', 'currency-panel', 'jewel-panel', 'stash-panel',
-  'craft-tab-list', 'well-modal', 'stash-grid', 'jewel-tooltip',
+  'craft-inventory-controls', 'craft-item-search', 'craft-category-filter',
+  'craft-applicable-only', 'craft-result-count', 'craft-item-description',
+  'craft-item-description-title', 'craft-item-description-text',
+  'craft-tab-list', 'craft-tab-panels', 'well-modal', 'stash-grid', 'jewel-tooltip',
   'undo-btn', 'redo-btn', 'reset-btn',
   'base-detail-list', 'implicit-list', 'concrete-base-picker',
   'base-picker-search', 'base-picker-reset', 'base-picker-list',
@@ -46,13 +51,25 @@ const expectedTabs = [
   'Abyss', 'Breach / Genesis', 'Delirium / Instilling', 'Runeforging',
   'Corruption / Sacrifice',
 ];
-const tabLabels = [...html.matchAll(/<button[^>]+data-craft-tab="[^"]+"[^>]*>([^<]+)<\/button>/g)]
-  .map(match => match[1].trim());
-check('all ten requested crafting tabs exist in order', JSON.stringify(tabLabels) === JSON.stringify(expectedTabs));
-check('each tab has exactly one panel', (html.match(/data-craft-panel=/g) || []).length === expectedTabs.length);
-check('only Currency panel starts visible',
-  /id="craft-panel-currency"[^>]*data-craft-panel="currency"(?![^>]*\shidden)/.test(html) &&
-  (html.match(/data-craft-panel="(?!currency)[^"]+"[^>]*hidden/g) || []).length === expectedTabs.length - 1);
+const expectedTabIds = [
+  'currency', 'quality', 'socketing', 'ritual', 'essences',
+  'abyss', 'breach', 'delirium', 'runeforging', 'corruption',
+];
+check('all ten crafting tabs are authoritative data in stable order',
+  craftTabs.length === 10 &&
+  JSON.stringify(craftTabs.map(tab => tab.id)) === JSON.stringify(expectedTabIds) &&
+  JSON.stringify(craftTabs.map(tab => tab.label)) === JSON.stringify(expectedTabs));
+check('HTML contains structural inventory containers instead of authored tabs or cards',
+  /id="craft-tab-list"[^>]*role="tablist"/.test(html) &&
+  /id="craft-tab-panels"[^>]*class="craft-tab-panels"/.test(html) &&
+  !/data-craft-tab=|data-craft-panel=|data-craft-id=/.test(html));
+check('crafting inventory controls are accessible structural markup',
+  /id="craft-inventory-controls"[^>]*role="group"[^>]*aria-label=/.test(html) &&
+  /id="craft-item-search"[^>]*type="search"/.test(html) &&
+  /id="craft-category-filter"/.test(html) &&
+  /id="craft-applicable-only"[^>]*type="checkbox"/.test(html) &&
+  /id="craft-result-count"[^>]*aria-live="polite"/.test(html) &&
+  /id="craft-item-description"[^>]*role="status"[^>]*aria-live="polite"/.test(html));
 
 check('obsolete crafting-stash labels are absent',
   !/Workbench items/i.test(html) && !/PoE2 0\.5\.4/i.test(html));
@@ -65,32 +82,41 @@ check('Active Item is absent and Crafting Workbench remains',
 check('workbench heading divider is removed',
   /\.workbench-heading\s*\{[\s\S]*?border-bottom:\s*0;/.test(css));
 
-const craftIds = [...html.matchAll(/data-craft-id="([^"]+)"/g)].map(match => match[1]);
-check('every crafting card has a unique stable crafting ID',
-  craftIds.length === 37 && craftIds.length === new Set(craftIds).size);
 check('crafting inventory classifies every retained source item exactly once',
   currencyIndex.counts.entries === currencyIndex.entries.length &&
   currencyIndex.counts.unclassified === 0 &&
   currencyIndex.entries.every(entry => currencyIndex.allowedClassifications.includes(entry.classification)));
-check('data-driven runtime registry preserves all 37 stable craft IDs',
+const visibleCraftDefinitions = craftRegistry.filter(definition => definition.visible === true);
+const craftIds = visibleCraftDefinitions.map(definition => definition.craftId);
+check('authoritative registry audits 531 definitions and exposes exactly 37 unique controls',
   currencyIndex.counts.runtimeDefinitions === 37 &&
   Object.keys(currencyIndex.runtimeRegistry).length === 37 &&
+  craftRegistry.length === 531 && visibleCraftDefinitions.length === 37 &&
+  craftIds.length === new Set(craftIds).size &&
   craftIds.every(id => currencyIndex.runtimeRegistry[id]));
-check('shared artwork uses explicit icon IDs',
-  /data-craft-id="greater-chaos" data-icon-id="chaos"/.test(html) &&
-  /data-craft-id="essence-abyss" data-icon-id="abyss-essence"/.test(html));
+check('every visible definition has generated-UI metadata and a valid tab',
+  visibleCraftDefinitions.every(definition =>
+    definition.craftId && definition.displayName && definition.description && definition.iconId &&
+    expectedTabIds.includes(definition.tab) && typeof definition.supported === 'boolean'));
+check('shared artwork is resolved by registry icon IDs',
+  craftRegistry.find(definition => definition.craftId === 'greater-chaos')?.iconId === 'chaos' &&
+  craftRegistry.find(definition => definition.craftId === 'essence-abyss')?.iconId === 'abyss-essence');
 
 check('legacy standalone Omens and Abyssal panel is removed', !/id="desecrate-panel"/.test(html));
-check('Omens were migrated into Ritual panel',
-  /id="craft-panel-ritual"[\s\S]*?data-craft-omen="whittling"[\s\S]*?<\/section>/.test(html));
-check('Preserved Cranium and Abyss essence were migrated into Abyss panel',
-  /id="craft-panel-abyss"[\s\S]*?data-bone="preserved_cranium"[\s\S]*?data-currency="essence_abyss"[\s\S]*?<\/section>/.test(html));
-check('Vaal Orb was migrated into Corruption panel',
-  /id="craft-panel-corruption"[\s\S]*?data-currency="vaal"[\s\S]*?<\/section>/.test(html));
-check('unsupported mechanics use the required wording',
-  (html.match(/Unsupported — verification required/g) || []).length >= 8);
-check('encounter resources are documented but not enabled as crafting controls',
-  !/data-(?:currency|bone)="(?:verisium|liquid_verisium|hiveblood|wombgift)"/.test(html));
+check('existing Ritual, Abyss, and Corruption controls retain their registry categories',
+  craftRegistry.find(definition => definition.craftId === 'omen-whittling')?.tab === 'ritual' &&
+  craftRegistry.find(definition => definition.craftId === 'preserved-cranium')?.tab === 'abyss' &&
+  craftRegistry.find(definition => definition.craftId === 'essence-abyss')?.tab === 'abyss' &&
+  craftRegistry.find(definition => definition.craftId === 'vaal')?.tab === 'corruption');
+check('unsupported visible definitions carry a specific blocker',
+  visibleCraftDefinitions.filter(definition => !definition.supported).length > 0 &&
+  visibleCraftDefinitions.filter(definition => !definition.supported).every(definition => {
+    const reason = definition.disabledReason || definition.blocker || '';
+    return reason.length > 'Unsupported — verification required'.length;
+  }));
+check('encounter resources are retained for parity but are not workbench controls',
+  !visibleCraftDefinitions.some(definition => /verisium|liquid[_-]verisium|hiveblood|wombgift/i.test(
+    `${definition.craftId} ${definition.engineAction || ''} ${definition.displayName}`)));
 
 check('Well of Souls starts hidden', /<div id="well-modal" class="well-modal" hidden>/.test(html));
 check('hidden state wins over panel rules', /\[hidden\]\s*\{\s*display:\s*none\s*!important;\s*\}/.test(css));
@@ -118,64 +144,143 @@ check('desktop does not use CSS zoom or scaled workspace layout',
   !/(?:^|[;{])\s*zoom\s*:/m.test(css) &&
   !/#(?:craft-view|main-content|currency-panel|jewel-panel|stash-panel)[^{]*\{[^}]*transform\s*:\s*scale/m.test(css));
 
+const renderInventoryMatch = app.match(/function (renderCraft(?:ing)?Inventory)\s*\(/);
+const renderInventoryStart = renderInventoryMatch ? app.indexOf(`function ${renderInventoryMatch[1]}(`) : -1;
+const renderInventoryEnd = renderInventoryStart >= 0 ? app.indexOf('\nfunction ', renderInventoryStart + 10) : -1;
+const renderInventoryBody = renderInventoryStart >= 0
+  ? app.slice(renderInventoryStart, renderInventoryEnd >= 0 ? renderInventoryEnd : app.length)
+  : '';
+const createCraftCardStart = app.indexOf('function createCraftCard(');
+const createCraftCardEnd = createCraftCardStart >= 0 ? app.indexOf('\nfunction ', createCraftCardStart + 10) : -1;
+const createCraftCardSource = createCraftCardStart >= 0
+  ? app.slice(createCraftCardStart, createCraftCardEnd >= 0 ? createCraftCardEnd : app.length)
+  : '';
+const renderInventorySource = createCraftCardSource + renderInventoryBody;
+check('craft tabs and controls are rendered from the local authoritative registry',
+  renderInventorySource.length > 0 &&
+  /CRAFTING_CURRENCY_INDEX(?:\?\.)?\.?(?:craftTabs|craftRegistry)/.test(app) &&
+  /createElement\(['"]button['"]\)/.test(renderInventorySource) &&
+  /dataset\.craftTab\s*=/.test(renderInventorySource) &&
+  /dataset\.craftPanel\s*=/.test(renderInventorySource) &&
+  /dataset\.craftId\s*=/.test(renderInventorySource) &&
+  /replaceChildren/.test(renderInventorySource));
+check('generated tabs retain the tablist and panel accessibility contract',
+  /setAttribute\(['"]role['"],\s*['"]tab['"]\)/.test(renderInventorySource) &&
+  /setAttribute\(['"]aria-controls['"]/.test(renderInventorySource) &&
+  /setAttribute\(['"]role['"],\s*['"]tabpanel['"]\)/.test(renderInventorySource) &&
+  /setAttribute\(['"]aria-labelledby['"]/.test(renderInventorySource));
+check('crafting search, category, and Applicable-only filters share one filter pass',
+  /getElementById\(['"]craft-item-search['"]\)/.test(app) &&
+  /getElementById\(['"]craft-category-filter['"]\)/.test(app) &&
+  /getElementById\(['"]craft-applicable-only['"]\)/.test(app) &&
+  /function filterCraft(?:ing)?Inventory\s*\(/.test(app) &&
+  /craftItemSearch[\s\S]*?addEventListener\(['"]input['"]/.test(app) &&
+  /craftCategoryFilter[\s\S]*?addEventListener\(['"]change['"]/.test(app) &&
+  /craftApplicableOnly[\s\S]*?addEventListener\(['"]change['"]/.test(app));
+check('hover and keyboard focus update the persistent registry description',
+  /getElementById\(['"]craft-item-description-title['"]\)/.test(app) &&
+  /getElementById\(['"]craft-item-description-text['"]\)/.test(app) &&
+  /function renderCraft(?:ing)?Description\s*\(/.test(app) &&
+  /addEventListener\(['"]focusin['"]/.test(app) &&
+  /addEventListener\(['"](?:pointerover|mouseover)['"]/.test(app));
 check('tab switching only updates tab presentation and persistence',
   /function setActiveCraftTab\([\s\S]*?panel\.hidden\s*=\s*panel\.dataset\.craftPanel\s*!==\s*tabId;[\s\S]*?localStorage\.setItem\(CRAFT_TAB_STORAGE_KEY/.test(app));
 check('tab controls support keyboard navigation',
   /event\.key === 'ArrowRight'[\s\S]*?event\.key === 'Home'[\s\S]*?event\.key === 'End'/.test(app));
 check('event listener setup is guarded against duplicate binding',
-  /if \(eventsBound\) return;[\s\S]*?eventsBound = true;[\s\S]*?setupCraftTabs\(\);/.test(app));
+  /if \(eventsBound\) return;[\s\S]*?eventsBound = true;[\s\S]*?setupCraftTabs\(\);/.test(app) &&
+  renderInventoryStart >= 0);
 check('history snapshots preserve armed and consumed Omen state',
   /omens:\s*Array\.from\(selectedOmens\)[\s\S]*?omenOfLight:\s*omenOfLightActive[\s\S]*?craftOmen:\s*selectedCraftOmen/.test(app) &&
   /selectedOmens\s*=\s*new Set\([\s\S]*?selectedCraftOmen\s*=\s*snap\.craftOmen/.test(app));
-check('history captures state before ordinary engine mutation',
-  /const before = snapshotState\(engine\.getItem\(\)\);\s*const result = applyCurrencyToEngine/.test(app));
-const useCurrencyStart = app.indexOf('function useCurrencyOnItem(currency, shiftKey)');
-const useCurrencyEnd = app.indexOf('\n  const applyArmedToItem', useCurrencyStart);
-const useCurrencySource = app.slice(useCurrencyStart, useCurrencyEnd);
-const foreseeableStart = app.indexOf('const FORESEEABLE = new Set([');
-const foreseeableEnd = app.indexOf(']);', foreseeableStart);
-const foreseeableSource = app.slice(foreseeableStart, foreseeableEnd);
+const executeCraftStart = app.indexOf('function executeCraftOperation(');
+const executeCraftEnd = executeCraftStart >= 0 ? app.indexOf('\nfunction ', executeCraftStart + 10) : -1;
+const executeCraftSource = executeCraftStart >= 0
+  ? app.slice(executeCraftStart, executeCraftEnd >= 0 ? executeCraftEnd : app.length)
+  : '';
+const prevalidationIndex = executeCraftSource.search(/(?:resolveCraftDisabledReason|disabledReasonForDefinition|validateCraftTarget)\s*\(/);
+const snapshotIndex = executeCraftSource.indexOf('snapshotState(');
+const handlerIndex = executeCraftSource.search(/(?:invokeCraftHandler|operationHandlers|definition\.handler)/);
+check('central operation pipeline prevalidates before snapshot and mutation dispatch',
+  executeCraftSource.length > 0 && prevalidationIndex >= 0 && snapshotIndex > prevalidationIndex &&
+  handlerIndex > snapshotIndex && /if\s*\([^)]*(?:reason|validation)[^)]*\)[\s\S]*?return/.test(executeCraftSource));
+check('central operation pipeline records history and consumes Omens only after success',
+  /result\.success[\s\S]*?pushUndo\(/.test(executeCraftSource) &&
+  /result\.success[\s\S]*?consumeCraftOmen\(/.test(executeCraftSource));
+check('browser and engine crafting RNG can share an injected deterministic source',
+  /window\.CraftForge\.setCraftingRandomSource\s*=/.test(app) &&
+  /craftingRandomSource\s*=\s*source[\s\S]*?engine\.setRandomSource\(source\)/.test(app) &&
+  /function craftingRandom\(\)[\s\S]*?craftingRandomSource[\s\S]*?Math\.random\(\)/.test(app));
 const commitForesightStart = app.indexOf('function commitForesight(currency)');
 const commitForesightEnd = app.indexOf('\nfunction commitDesecrationForesight', commitForesightStart);
 const commitForesightSource = app.slice(commitForesightStart, commitForesightEnd);
 check('Essence of the Abyss uses the Hinekora foresight commit path',
-  foreseeableSource.includes("'essence_abyss'") &&
-  /engine\.getItem\(\)\.hinekoraLocked && FORESEEABLE\.has\(currency\)[\s\S]*?commitForesight\(currency\)/.test(useCurrencySource));
+  visibleCraftDefinitions.some(definition => definition.craftId === 'essence-abyss' &&
+    definition.engineAction === 'essence_abyss' && definition.actionType === 'direct') &&
+  /const FORESEEABLE = new Set\(VISIBLE_CRAFT_DEFINITIONS[\s\S]*?definition\.actionType === 'direct'/.test(app) &&
+  /engine\.getItem\(\)\.hinekoraLocked && FORESEEABLE\.has\(currency\)[\s\S]*?commitForesight\(currency\)/.test(executeCraftSource));
 check('foresight commit preserves undo and consumes Hinekora lock',
   /const before = snapshotState\(engine\.getItem\(\)\);[\s\S]*?pushUndo\(before\);[\s\S]*?engine\.loadItem\(seal\.afterItem\);[\s\S]*?engine\.recordCurrencyUse\(currency\);[\s\S]*?engine\.clearHinekoraLock\(\)/.test(commitForesightSource));
 check('foresight rollback preserves pending Desecration state',
   /function computeForesight\(currency\)[\s\S]*?const snapshotPending = engine\.getPendingDesecration\(\)[\s\S]*?engine\.loadItem\(snapshot, snapshotPending\)/.test(app) &&
   /function computeDesecrationForesight\(bone\)[\s\S]*?const snapshotPending = engine\.getPendingDesecration\(\)[\s\S]*?engine\.loadItem\(snapshot, snapshotPending\)/.test(app));
-check('currency supports click/tap activation',
-  /elements\.currencyBtns\.forEach\(btn => \{[\s\S]*?btn\.addEventListener\('click',[\s\S]*?toggleCurrency/.test(app));
-check('disabled crafting cards receive a user-facing reason',
-  /function setCraftButtonState\([\s\S]*?button\.title = disabled \? disabledReason/.test(app));
-check('stable crafting ID resolves through the central registry',
-  /const CRAFTING_ITEM_REGISTRY = Object\.freeze/.test(app) &&
-  /function definitionForElement\(element\)[\s\S]*?element\.dataset\.craftId/.test(app) &&
-  /function actionForElement\(element\)[\s\S]*?definitionForElement/.test(app));
-check('runtime craft definitions receive inventory classifications from local data',
+const inventoryEventsMatch = app.match(/function ((?:setup|bind)Craft(?:ing)?InventoryEvents)\s*\(/);
+const inventoryEventsStart = inventoryEventsMatch ? app.indexOf(`function ${inventoryEventsMatch[1]}(`) : -1;
+const inventoryEventsEnd = inventoryEventsStart >= 0 ? app.indexOf('\nfunction ', inventoryEventsStart + 10) : -1;
+const inventoryEventsSource = inventoryEventsStart >= 0
+  ? app.slice(inventoryEventsStart, inventoryEventsEnd >= 0 ? inventoryEventsEnd : app.length)
+  : '';
+check('pointer, contextmenu, and drag interactions use delegated craft-card events',
+  inventoryEventsSource.length > 0 &&
+  ['click', 'contextmenu', 'dragstart', 'dragend'].every(type =>
+    inventoryEventsSource.includes(`addEventListener('${type}'`) ||
+    inventoryEventsSource.includes(`addEventListener("${type}"`)) &&
+  /closest\(['"]\[data-craft-id\]['"]\)/.test(inventoryEventsSource));
+check('keyboard activation reaches the same craft dispatcher as pointer activation',
+  /function dispatchCraft(?:ing)?Control\s*\(/.test(app) &&
+  /createElement\(['"]button['"]\)/.test(createCraftCardSource) && /button\.type\s*=\s*['"]button['"]/.test(createCraftCardSource) &&
+  /addEventListener\(['"]keydown['"][\s\S]*?ArrowRight[\s\S]*?\.focus\(\)/.test(inventoryEventsSource) &&
+  /addEventListener\(['"]click['"][\s\S]*?dispatchCraft(?:ing)?Control/.test(inventoryEventsSource));
+const setCraftButtonStateStart = app.indexOf('function setCraftButtonState(');
+const setCraftButtonStateEnd = setCraftButtonStateStart >= 0
+  ? app.indexOf('\nfunction ', setCraftButtonStateStart + 10)
+  : -1;
+const setCraftButtonStateSource = setCraftButtonStateStart >= 0
+  ? app.slice(setCraftButtonStateStart, setCraftButtonStateEnd >= 0 ? setCraftButtonStateEnd : app.length)
+  : '';
+check('aria-disabled crafting controls remain focusable and expose their exact reason',
+  /setAttribute\(['"]aria-disabled['"]/.test(renderInventorySource + setCraftButtonStateSource) &&
+  !/button\.disabled\s*=/.test(setCraftButtonStateSource) &&
+  /craft-item-card\[aria-disabled="true"\]:focus-visible|\[data-craft-id\]\[aria-disabled="true"\]:focus-visible/.test(css));
+check('stable crafting IDs resolve directly through the generated registry',
   /const CRAFTING_CURRENCY_INDEX = window\.CRAFTING_CURRENCY_INDEX/.test(app) &&
-  /inventoryClassification: indexed\?\.classification \|\| 'unclassified'/.test(app) &&
-  /Crafting inventory classification is missing/.test(app));
+  /craftRegistry/.test(app) &&
+  /function definitionForElement\(element\)[\s\S]*?element\.dataset\.craftId/.test(app) &&
+  !/function directCraft\(|function omenCraft\(/.test(app));
 check('legacy labels and data attributes do not select crafting behaviour',
   !/dataset\.(?:currency|bone|omen|craftOmen)\b/.test(app) &&
   !/getAttribute\(['"]data-(?:currency|bone|omen|craft-omen)/.test(app));
 check('enabled registry entries require real validators and handlers',
-  /function validateCraftRegistry\(\)[\s\S]*?Supported crafting card lacks validator\/handler/.test(app) &&
-  /Engine handler is missing/.test(app) && /Eligibility validator is missing/.test(app));
+  visibleCraftDefinitions.filter(definition => definition.supported).every(definition =>
+    definition.disabledReasonHandler && definition.handler) &&
+  /function validateCraftRegistry\(\)[\s\S]*?disabledReasonHandler[\s\S]*?handler/.test(app));
 check('unsupported registry entries cannot dispatch mutations',
-  /id: 'essence-breach'[\s\S]*?supported: false[\s\S]*?unsupportedReason: UNSUPPORTED_REASON/.test(app) &&
-  /if \(!definition \|\| !definition\.supported \|\| !definition\.handler\)/.test(app));
+  visibleCraftDefinitions.filter(definition => !definition.supported).every(definition =>
+    !definition.handler && (definition.disabledReason || definition.blocker)) &&
+  /if\s*\([^)]*!(?:definition\.supported|definition\.handler)[^)]*\)[\s\S]*?return/.test(executeCraftSource));
 check('generic icon loading covers every crafting tab without fetch',
   /document\.querySelectorAll\('\[data-craft-id\]'\)/.test(app) &&
   /assets\/icons\/\$\{iconId\}\.png/.test(app) && !/fetch\s*\(/.test(app));
-check('missing icons retain placeholders and icon loading is idempotent',
+check('missing icons retain generated placeholders and icon loading is idempotent',
+  visibleCraftDefinitions.every(definition => definition.iconFallback) &&
+  /currency-abbr/.test(renderInventorySource) &&
   /img\.hidden = true/.test(app) &&
   /addEventListener\('load'[\s\S]*?has-real-icon/.test(app) &&
   /addEventListener\('error'[\s\S]*?img\.remove\(\)/.test(app) &&
-  /if \(existing\) return existing/.test(app) &&
-  (html.match(/class="currency-abbr"/g) || []).length >= 20);
+  /if \(existing\) return existing/.test(app));
+check('custom cursor icon resolution is registry-driven',
+  /function iconIdForAction\([\s\S]*?CRAFT_DEFINITION_BY_ACTION/.test(app) &&
+  /function setOrbIcon\([\s\S]*?iconIdForAction/.test(app));
 check('normalized browser data loads before the crafting engine',
   html.indexOf('data/normalized.data.js') > html.indexOf('data/desecrated-mods.data.js') &&
   html.indexOf('data/normalized.data.js') < html.indexOf('crafting.js'));
@@ -190,7 +295,7 @@ const loadFromStashStart = app.indexOf('function loadFromStash(index)');
 const loadFromStashEnd = app.indexOf('\nfunction removeFromStash', loadFromStashStart);
 const loadFromStashSource = app.slice(loadFromStashStart, loadFromStashEnd);
 check('stash reload rebuilds the normalized modifier overlay for the saved simulator pool',
-  /new CraftingEngine\(\s*modData,\s*savedPoolId,\s*desecData,\s*buildSourceModifierOverlay\(savedPoolId\),\s*null,\s*savedConcreteBase,?\s*\)/.test(loadFromStashSource));
+  /new CraftingEngine\(\s*modData,\s*savedPoolId,\s*desecData,\s*buildSourceModifierOverlay\(savedPoolId\),\s*null,\s*savedConcreteBase,\s*craftingRandomSource,?\s*\)/.test(loadFromStashSource));
 check('incompatible stash migration is transactional and preserves the live engine',
   /let candidateEngine;[\s\S]*?try \{[\s\S]*?candidateEngine\.loadItem\(item, pending\);[\s\S]*?catch \(error\)[\s\S]*?showError\(`[\s\S]*?return;[\s\S]*?engine = candidateEngine;/.test(loadFromStashSource));
 check('requested performance paths are instrumented',
@@ -315,9 +420,9 @@ check('tooltip separates concrete details and implicits from explicit modifiers'
 check('Jewel-only flavor text is conditional on Jewel mode',
   /flavorEl\.hidden = !isJewelMode/.test(app) &&
   /Place into an allocated Jewel Socket on the Passive Skill Tree/.test(html));
-check('runtime selector stylesheet is versioned and available offline',
+check('runtime selector stylesheet is versioned in the Task 03 offline shell',
   /header-fix\.css\?v=16/.test(select) &&
-  /CACHE_NAME = 'poe2-craft-task02-v1'/.test(serviceWorker) &&
+  /CACHE_NAME = 'poe2-craft-task03-v1'/.test(serviceWorker) &&
   serviceWorker.includes("'./header-fix.css?v=16'"));
 
 console.log(`\nRESULT: ${passed}/${passed + failed} checks passed`);

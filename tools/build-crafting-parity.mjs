@@ -14,108 +14,106 @@ function readJson(filePath) {
   return JSON.parse(readFileSync(filePath, 'utf8'));
 }
 
-function unique(values) {
-  return [...new Set(values.filter(value => value != null && value !== ''))];
+function countByStatus(entries, statuses) {
+  return Object.fromEntries(statuses.map(status => [
+    status,
+    entries.filter(entry => entry.implementationStatus === status).length,
+  ]));
 }
 
-function buildEntry(entry, targetGameVersion) {
-  const constraints = unique((entry.methods || []).flatMap(method => method.constraints || []));
-  const handlers = unique((entry.methods || []).map(method => method.handler));
-  const runtimeCraftIds = unique(entry.runtimeCraftIds || []);
-  const implemented = entry.classification === 'implemented';
+function countByField(entries, field) {
+  const counts = new Map();
+  for (const entry of entries) {
+    const value = entry[field];
+    if (value == null || value === '') continue;
+    counts.set(value, (counts.get(value) || 0) + 1);
+  }
+  return Object.fromEntries([...counts.entries()].sort(([a], [b]) => String(a).localeCompare(String(b))));
+}
+
+// The parity report deliberately copies its behavioral claims from the
+// authoritative generated registry. It must not reconstruct applicability,
+// handlers, evidence, or verification from normalized source hints.
+function buildEntry(definition) {
   return {
-    stableId: entry.id,
-    craftId: runtimeCraftIds.length === 1 ? runtimeCraftIds[0] : null,
-    runtimeCraftIds,
-    sourceItemId: entry.sourceItemId,
-    metadataKey: entry.metadataKey,
-    exactName: entry.displayName,
-    targetGameVersion,
-    equipmentRelevance: 'pending_audit',
-    category: (entry.sourceClassifications || []).length
-      ? entry.sourceClassifications.join(' + ')
-      : 'pending_audit',
-    implementationStatus: entry.classification,
-    verificationStatus: implemented
-      ? 'runtime_present_not_parity_verified'
-      : 'not_verified',
+    stableId: definition.id,
+    craftId: definition.craftId,
+    sourceItemId: definition.sourceItemId,
+    metadataKey: definition.metadataKey,
+    sourceIdentityStatus: definition.sourceIdentityStatus,
+    exactName: definition.displayName,
+    targetGameVersion: definition.targetGameVersion,
+    equipmentRelevance: definition.equipmentRelevance,
+    category: definition.category,
+    tab: definition.tab,
+    implementationStatus: definition.implementationStatus,
+    verificationStatus: definition.verificationStatus,
     applicability: {
-      status: constraints.length || (entry.sourceTags || []).length
-        ? 'source_constraints_only'
-        : 'not_audited',
-      constraints,
-      sourceTags: unique(entry.sourceTags || []),
+      predicate: definition.applicabilityPredicate,
+      validItemClasses: definition.validItemClasses,
+      validItemTags: definition.validItemTags,
+      corruptionRestriction: definition.corruptionRestriction,
+      qualityRestriction: definition.qualityRestriction,
+      socketRestriction: definition.socketRestriction,
     },
-    handlers,
-    sourceEvidence: [
-      {
-        path: 'data/crafting/currency-index.json',
-        stableId: entry.id,
-      },
-      {
-        path: 'data/normalized/crafting-items.json',
-        sourceItemId: entry.sourceItemId,
-      },
-    ],
-    testReferences: [],
-    blocker: implemented
-      ? 'Per-item target-version evidence and deterministic fixture audit remain pending in Tasks 03-07.'
-      : entry.reason || 'Exact target-version equipment behavior has not been verified.',
+    handler: definition.handler,
+    disabledReasonHandler: definition.disabledReasonHandler,
+    disabledReason: definition.disabledReason,
+    triggeringAction: definition.triggeringAction,
+    omenInteraction: definition.omenInteraction,
+    sourceEvidence: definition.sourceEvidence,
+    testReferences: definition.testFixtureIds,
+    blocker: definition.blocker,
+    supported: definition.supported,
+    visible: definition.visible,
   };
 }
 
-function buildReport(index) {
-  const entries = index.entries.map(entry => buildEntry(entry, index.targetGameVersion));
-  const unmatchedRuntimeEntries = Object.values(index.runtimeRegistry || {})
-    .filter(entry => entry.sourceItemId == null)
-    .map(entry => ({
-      stableId: `runtime:${entry.id}`,
-      craftId: entry.id,
-      runtimeCraftIds: [entry.id],
-      sourceItemId: null,
-      metadataKey: null,
-      exactName: entry.displayName,
-      targetGameVersion: index.targetGameVersion,
-      equipmentRelevance: 'equipment_runtime',
-      category: 'runtime_registry',
-      implementationStatus: entry.classification,
-      verificationStatus: 'runtime_present_source_identity_unresolved',
-      applicability: { status: 'runtime_validator_only', constraints: [], sourceTags: [] },
-      handlers: unique(entry.sourceHandlers || []),
-      sourceEvidence: [{ path: 'data/crafting/currency-index.json', runtimeCraftId: entry.id }],
-      testReferences: [],
-      blocker: 'Normalized source item identity is unresolved; per-item target-version evidence remains pending.',
-    }));
+export function buildReport(index) {
+  if (!Array.isArray(index.craftRegistry)) {
+    throw new Error('data/crafting/currency-index.json has no authoritative craftRegistry array.');
+  }
+  const definitions = index.craftRegistry;
+  const entries = definitions.map(buildEntry);
+  const statuses = index.allowedClassifications || [];
+  const visibleDefinitions = definitions.filter(definition => definition.visible);
+  const unresolvedSourceIdentities = definitions.filter(definition => definition.sourceItemId == null);
 
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     targetGameVersion: index.targetGameVersion,
     fullParityClaim: false,
     inventorySource: 'data/crafting/currency-index.json',
-    entryDetailStatus: 'conservative_baseline_pending_task03_registry_expansion',
+    registrySource: 'data/crafting/currency-index.json#craftRegistry',
+    entryDetailStatus: 'authoritative_registry_task03',
     counts: {
       sourceEntries: index.counts.entries,
-      runtimeDefinitions: index.counts.runtimeDefinitions,
-      unmatchedRuntimeEntries: unmatchedRuntimeEntries.length,
-      unclassified: index.counts.unclassified,
+      registryDefinitions: definitions.length,
+      visibleDefinitions: visibleDefinitions.length,
+      unresolvedSourceIdentities: unresolvedSourceIdentities.length,
+      unclassified: definitions.filter(definition => !statuses.includes(definition.implementationStatus)).length,
       sourceByClassification: index.counts.byClassification,
-      runtimeByClassification: index.counts.runtimeByClassification,
+      registryByClassification: countByStatus(definitions, statuses),
+      visibleByClassification: countByStatus(visibleDefinitions, statuses),
+      registryByCategory: countByField(definitions, 'category'),
+      visibleByTab: countByField(visibleDefinitions, 'tab'),
     },
     entries,
-    unmatchedRuntimeEntries,
-    task01Change: {
+    task03Change: {
       craftingItemStatusesChanged: 0,
-      note: 'Task 01 changes concrete Amulet selection and item identity only; it does not claim or change crafting-item mechanics.',
+      note: 'Task 03 centralizes registry metadata, UI generation, and dispatch without claiming new crafting mechanics.',
     },
     blockers: [
-      'Task 03 must replace source-constraint-only applicability with the authoritative registry, equipment relevance, handlers, evidence, and deterministic fixtures.',
-      'Later mechanic tasks must resolve retained blocked_missing_data and probability_unverified entries before full parity can be claimed.',
+      'Full parity remains blocked while retained registry definitions still have implementation or verification blockers.',
+      'Hinekora\'s Lock remains implemented for compatibility but has no normalized source-item identity in the checked-in export.',
+      'Tasks 04-07 must resolve mechanic-specific blocked_missing_data and probability_unverified records from verified target-version evidence.',
     ],
   };
 }
 
 const index = readJson(INDEX_PATH);
-const output = `${JSON.stringify(buildReport(index), null, 2)}\n`;
+const report = buildReport(index);
+const output = `${JSON.stringify(report, null, 2)}\n`;
 
 if (CHECK) {
   const current = readFileSync(OUTPUT_PATH, 'utf8');
@@ -123,8 +121,8 @@ if (CHECK) {
     console.error('reports/crafting-parity.json is stale.');
     process.exit(1);
   }
-  console.log(`Crafting parity report is current (${index.counts.entries} retained entries).`);
+  console.log(`Crafting parity report is current (${report.counts.registryDefinitions} registry definitions).`);
 } else {
   writeFileSync(OUTPUT_PATH, output, 'utf8');
-  console.log(`Wrote ${path.relative(ROOT, OUTPUT_PATH)} (${index.counts.entries} retained entries).`);
+  console.log(`Wrote ${path.relative(ROOT, OUTPUT_PATH)} (${report.counts.registryDefinitions} registry definitions).`);
 }
