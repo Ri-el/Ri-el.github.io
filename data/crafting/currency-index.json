@@ -6,7 +6,7 @@
     "normalizedSourceSha256": "30a09add1e2e626a74c697da3aa78c2400c4122c21353bd0ed824bd4aa58b4ee",
     "normalizedSourceVersionStatus": "Source export does not encode a game version; 0.5.4 compatibility must be verified per mechanic.",
     "runtimeRegistrySource": "data/crafting/runtime-registry.json",
-    "runtimeRegistrySha256": "ecf167cc085959c24a98fc0d569f6bb9b528da212571b9e92ad75d064e51b921"
+    "runtimeRegistrySha256": "6657a529f76128042ccce0fb3e55ca0f8dcc5ae788cea33c0fc393764b2a8646"
   },
   "allowedClassifications": [
     "implemented",
@@ -20082,7 +20082,9 @@
         "triggerCraftId": "preserved-cranium"
       },
       "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
-      "validItemClasses": [],
+      "validItemClasses": [
+        "Jewel"
+      ],
       "validItemTags": [],
       "qualityRestriction": "none",
       "socketRestriction": "none",
@@ -20146,7 +20148,9 @@
         "triggerCraftId": "preserved-cranium"
       },
       "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
-      "validItemClasses": [],
+      "validItemClasses": [
+        "Jewel"
+      ],
       "validItemTags": [],
       "qualityRestriction": "none",
       "socketRestriction": "none",
@@ -20210,7 +20214,9 @@
         "triggerCraftId": "preserved-cranium"
       },
       "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
-      "validItemClasses": [],
+      "validItemClasses": [
+        "Jewel"
+      ],
       "validItemTags": [],
       "qualityRestriction": "none",
       "socketRestriction": "none",
@@ -20274,7 +20280,9 @@
         "triggerCraftId": "annulment"
       },
       "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
-      "validItemClasses": [],
+      "validItemClasses": [
+        "Jewel"
+      ],
       "validItemTags": [],
       "qualityRestriction": "none",
       "socketRestriction": "none",
@@ -27269,7 +27277,9 @@
         "triggerCraftId": null
       },
       "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
-      "validItemClasses": [],
+      "validItemClasses": [
+        "Jewel"
+      ],
       "validItemTags": [],
       "qualityRestriction": "none",
       "socketRestriction": "none",
@@ -27336,7 +27346,35 @@
         "triggerCraftId": null
       },
       "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
-      "validItemClasses": [],
+      "validItemClasses": [
+        "Amulet",
+        "Ring",
+        "Dagger",
+        "Wand",
+        "One Hand Sword",
+        "One Hand Axe",
+        "One Hand Mace",
+        "Bow",
+        "Staff",
+        "Two Hand Sword",
+        "Two Hand Axe",
+        "Two Hand Mace",
+        "Quiver",
+        "Belt",
+        "Gloves",
+        "Boots",
+        "Body Armour",
+        "Helmet",
+        "Shield",
+        "Sceptre",
+        "Warstaff",
+        "Spear",
+        "Crossbow",
+        "Focus",
+        "Flail",
+        "Buckler",
+        "Talisman"
+      ],
       "validItemTags": [],
       "qualityRestriction": "none",
       "socketRestriction": "none",
@@ -34172,7 +34210,9 @@
         "triggerCraftId": "preserved-cranium"
       },
       "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
-      "validItemClasses": [],
+      "validItemClasses": [
+        "Jewel"
+      ],
       "validItemTags": [],
       "qualityRestriction": "none",
       "socketRestriction": "none",
@@ -34240,7 +34280,9 @@
         "triggerCraftId": "preserved-cranium"
       },
       "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
-      "validItemClasses": [],
+      "validItemClasses": [
+        "Jewel"
+      ],
       "validItemTags": [],
       "qualityRestriction": "none",
       "socketRestriction": "none",
@@ -34308,7 +34350,9 @@
         "triggerCraftId": "preserved-cranium"
       },
       "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
-      "validItemClasses": [],
+      "validItemClasses": [
+        "Jewel"
+      ],
       "validItemTags": [],
       "qualityRestriction": "none",
       "socketRestriction": "none",
@@ -34376,7 +34420,9 @@
         "triggerCraftId": "annulment"
       },
       "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
-      "validItemClasses": [],
+      "validItemClasses": [
+        "Jewel"
+      ],
       "validItemTags": [],
       "qualityRestriction": "none",
       "socketRestriction": "none",
@@ -35056,7 +35102,9 @@
         "triggerCraftId": null
       },
       "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
-      "validItemClasses": [],
+      "validItemClasses": [
+        "Jewel"
+      ],
       "validItemTags": [],
       "qualityRestriction": "none",
       "socketRestriction": "none",
@@ -35129,7 +35177,35 @@
         "triggerCraftId": null
       },
       "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
-      "validItemClasses": [],
+      "validItemClasses": [
+        "Amulet",
+        "Ring",
+        "Dagger",
+        "Wand",
+        "One Hand Sword",
+        "One Hand Axe",
+        "One Hand Mace",
+        "Bow",
+        "Staff",
+        "Two Hand Sword",
+        "Two Hand Axe",
+        "Two Hand Mace",
+        "Quiver",
+        "Belt",
+        "Gloves",
+        "Boots",
+        "Body Armour",
+        "Helmet",
+        "Shield",
+        "Sceptre",
+        "Warstaff",
+        "Spear",
+        "Crossbow",
+        "Focus",
+        "Flail",
+        "Buckler",
+        "Talisman"
+      ],
       "validItemTags": [],
       "qualityRestriction": "none",
       "socketRestriction": "none",

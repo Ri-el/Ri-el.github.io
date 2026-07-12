@@ -85,7 +85,7 @@ export function buildReport(index) {
     fullParityClaim: false,
     inventorySource: 'data/crafting/currency-index.json',
     registrySource: 'data/crafting/currency-index.json#craftRegistry',
-    entryDetailStatus: 'authoritative_registry_task04',
+    entryDetailStatus: 'authoritative_registry_task05',
     counts: {
       sourceEntries: index.counts.entries,
       registryDefinitions: definitions.length,
@@ -105,10 +105,18 @@ export function buildReport(index) {
       vaalBlocked: definitions.some(definition => definition.craftId === 'vaal' && !definition.supported),
       note: 'Task 04 adds structured quality caps and blocked quality audit cards, corrects source-backed core restrictions, and blocks unverified Vaal outcomes.',
     },
+    task05Change: {
+      jewelOnlyAbyssControls: ['preserved-cranium', 'omen-sinistral-necromancy', 'omen-dextral-necromancy', 'omen-abyssal-echoes', 'omen-light'],
+      essenceOfAbyssEquipmentClasses: 27,
+      atomicDesecrationValidation: ['unknown_bone', 'conflicting_directional_omens'],
+      lightOmenConsumption: 'successful_annulment_once_including_hinekora_commit',
+      rerollCountSource: 'engine_result',
+      note: 'Task 05 gates supported Abyss controls to source-backed targets and keeps unresolved Bones, Essences, Catalysts, and target-version Desecrated weighting as explicit blockers.',
+    },
     blockers: [
       'Full parity remains blocked while retained registry definitions still have implementation or verification blockers.',
       'Hinekora\'s Lock remains implemented for compatibility but has no normalized source-item identity in the checked-in export.',
-      'Tasks 05-07 must resolve remaining mechanic-specific blocked_missing_data and probability_unverified records from verified target-version evidence.',
+      'Tasks 06-07 must resolve remaining mechanic-specific blocked_missing_data and probability_unverified records from verified target-version evidence.',
     ],
   };
 }

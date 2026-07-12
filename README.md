@@ -77,6 +77,12 @@ No quality currency button is enabled merely from a known description.
 - Vaal Orb is still visible in the Corruption tab for parity, but is disabled and atomically rejected because the retained 0.5.4 evidence does not encode its outcome probabilities/transitions. The former uniform outcome path is no longer reachable through the workbench or engine.
 - Eight retained quality records are visible as disabled audit cards with specific blockers: four ordinary currencies lack the exact 0.5.4 item-level increment formula, and four Vaal Infusers remain reserved for the specialized Task 07 audit. Gemcutter's Prism has a verified generic +5/cap-20 engine rule but no normalized Skill Gem workbench target.
 
+### Task 05 Abyss, Breach, Essences, and Omens checkpoint
+
+- The existing Preserved Cranium and Well of Souls flow remains inside the workbench. Preserved Cranium plus Sinistral Necromancy, Dextral Necromancy, Abyssal Echoes, and Omen of Light are declared Jewel-only; Essence of the Abyss carries the 27 normalized equipment classes and rejects Jewels, Flasks, and Charms in both UI and engine validation.
+- Unknown Abyssal Bones and conflicting directional Necromancy Omens fail atomically. Omen of Light requires a revealed Desecrated modifier and is consumed once on the successful guarded Annulment path, including Hinekora foresight. The UI uses the engine-returned Echoes reroll count.
+- Other Bones, regular/Breach Essences, Catalysts, and target-version Lich guarantees remain blocked with explicit reasons. The retained Desecrated pool is identified as PoE2 0.3 and lacks complete 0.5.4 Well-of-Souls weighting/localization data; option selection and Echoes consumption timing therefore remain limited compatibility behavior rather than a full parity claim.
+
 ---
 
 ## 🛠️ Build & tooling files
@@ -101,9 +107,9 @@ No quality currency button is enabled merely from a known description.
 | File | What it does |
 |---|---|
 | `_scaffold_data.mjs` | One-off Node generator that split the jewel data into per-base files and created the empty scaffolds. Already done its job; kept for reference. Git-ignored. |
-| `fuzz.mjs` | **Node fuzz / regression harness for the crafting engine.** It treats malformed data, engine exceptions, malformed item state, zero meaningful mutations, invariant violations, and fixed-seed digest drift as fatal. The reviewed Task 02 checkpoint is `node fuzz.mjs 30000 542026`: 30,016 operations, 2,573 meaningful mutations, 206 Hinekora consumptions, digest `46984d739488e00aea6bfd0664a34741306ec273e68542df96d574695f1f5104`. The intentional digest change comes from attaching deterministic schema-v3 concrete-base state to every populated pool. |
-| `validation.mjs` | Deterministic 0.5.4-oriented engine/data regression suite, including injectable crafting RNG, generic concrete identity/state migration, source overlays, base-specific tags/affix limits, structured quality/socket preservation, and all 56 populated pools. Current checkpoint: **39/39**. |
-| `ui-validation.mjs` | Dependency-free DOM/CSS contract checks for generated registry tabs/cards, shared dispatch, startup isolation, eligibility scope, filters, accessibility, the workbench grid, concrete-base flow, and stash markup. Current checkpoint: **117/117**. |
+| `fuzz.mjs` | **Node fuzz / regression harness for the crafting engine.** It treats malformed data, engine exceptions, malformed item state, zero meaningful mutations, invariant violations, and fixed-seed digest drift as fatal. The current Task 05 boundary is `node fuzz.mjs 30000 542026`; the reviewed digest is recorded in `VALIDATION_REPORT.md` after the full runtime check. |
+| `validation.mjs` | Deterministic 0.5.4-oriented engine/data regression suite, including injectable crafting RNG, generic concrete identity/state migration, source overlays, base-specific tags/affix limits, structured quality/socket preservation, Abyss/Essence applicability, and all 56 populated pools. Current checkpoint: **46/46**. |
+| `ui-validation.mjs` | Dependency-free DOM/CSS contract checks for generated registry tabs/cards, shared dispatch, startup isolation, eligibility scope, filters, accessibility, the workbench grid, concrete-base flow, stash markup, and Task 05 Omen gating/consumption. Current checkpoint: **122/122**. |
 | `data-validation.mjs` | Validates normalized schemas, all 1,760 concrete records, the complete crafting registry/parity projection, 31-class base parity, provenance, hashes, browser bundles, and explicit blockers using only repository-owned files. Current checkpoint: **67/67**. |
 
 ### Validation commands
@@ -119,7 +125,7 @@ node tools/sync-poe2-data.mjs verify
 node fuzz.mjs 30000 542026
 ```
 
-The Task 03 regression-fix checkpoint passes **39/39 engine**, **117/117 UI**, and **67/67 data** checks. The fixed-seed fuzz run remains unchanged and passes with zero exceptions, harness errors, or invariant violations. `tools/browser-smoke.mjs` performs real-script click-through checks against explicit `file://` or local-HTTP targets when Playwright is already available.
+The Task 05 boundary passes **46/46 engine**, **122/122 UI**, and **67/67 data** checks. The fixed-seed fuzz run passes with zero exceptions, harness errors, or invariant violations; its digest is recorded in `VALIDATION_REPORT.md`. `tools/browser-smoke.mjs` performs real-script click-through checks against explicit `file://` or local-HTTP targets when Playwright is already available.
 
 ---
 

@@ -159,8 +159,19 @@ class CraftingEngine {
   static BONES = {
     // Cranium is the jewel bone. In-game only the Preserved quality exists for
     // Craniums (Gnawed/Ancient apply to Jawbone/Rib/Collarbone, not jewels).
-    preserved_cranium: { name: 'Preserved Cranium', reveal: 3, desecratedOnly: false },
+    preserved_cranium: {
+      name: 'Preserved Cranium', reveal: 3, desecratedOnly: false,
+      validItemClasses: ['Jewel'],
+    },
   };
+
+  static ABYSS_ESSENCE_ITEM_CLASSES = new Set([
+    'Amulet', 'Ring', 'Dagger', 'Wand', 'One Hand Sword', 'One Hand Axe',
+    'One Hand Mace', 'Bow', 'Staff', 'Two Hand Sword', 'Two Hand Axe',
+    'Two Hand Mace', 'Quiver', 'Belt', 'Gloves', 'Boots', 'Body Armour',
+    'Helmet', 'Shield', 'Sceptre', 'Warstaff', 'Spear', 'Crossbow', 'Focus',
+    'Flail', 'Buckler', 'Talisman',
+  ]);
 
   // `desecratedData` is the parsed contents of data/desecrated-mods.json (or null).
   constructor(modData, baseType = 'ruby', desecratedData = null, sourceModifierOverlay = null, qualityRules = null, concreteBase = null, rng = null) {
@@ -1083,6 +1094,9 @@ class CraftingEngine {
   applyEssenceOfAbyss() {
     const err = this._checkCorrupted(); if (err) return err;
     if (this._item.rarity !== 'rare') return this._fail('Essence of the Abyss can only be used on a Rare item.');
+    if (this._item.itemClass && !CraftingEngine.ABYSS_ESSENCE_ITEM_CLASSES.has(this._item.itemClass)) {
+      return this._fail('Essence of the Abyss is not applicable to this item class.');
+    }
     if (this._allModEntries().some(({ mod }) => mod.crafted)) {
       return this._fail('Item already has its maximum of one crafted modifier.');
     }
@@ -1122,6 +1136,9 @@ class CraftingEngine {
 
   startDesecration({ bone = 'preserved_cranium', omen = null, omens = null } = {}) {
     const err = this._checkCorrupted(); if (err) return err;
+    if (!Object.prototype.hasOwnProperty.call(CraftingEngine.BONES, bone)) {
+      return this._fail(`Unsupported Abyssal Bone: ${String(bone)}.`);
+    }
     if (this._item.rarity !== 'rare') {
       return this._fail('Desecration can only be used on a Rare item (use Alchemy or Regal first).');
     }
@@ -1160,7 +1177,16 @@ class CraftingEngine {
 
     // Accept either a single `omen` (legacy) or an `omens` array, so a
     // directional Necromancy omen can be combined with Abyssal Echoes.
-    const omenList = Array.isArray(omens) ? omens.slice() : (omen ? [omen] : []);
+    const omenList = [...new Set(Array.isArray(omens) ? omens : (omen ? [omen] : []))];
+    const uniqueOmens = omenList;
+    const hasSinistral = uniqueOmens.includes('sinistral_necromancy');
+    const hasDextral = uniqueOmens.includes('dextral_necromancy');
+    if (hasSinistral && hasDextral) {
+      return _failDesecration('Omen of Sinistral Necromancy and Omen of Dextral Necromancy cannot be combined.');
+    }
+    if (uniqueOmens.some(value => !['sinistral_necromancy', 'dextral_necromancy', 'abyssal_echoes'].includes(value))) {
+      return _failDesecration('Unsupported Desecration Omen combination.');
+    }
 
     let targetSide = null;
     if (omenList.includes('sinistral_necromancy')) targetSide = 'prefix';
@@ -1181,7 +1207,11 @@ class CraftingEngine {
 
     // Bone sets the base number of revealed options. Omen of Light is NOT a
     // reveal omen — it modifies the next Orb of Annulment instead.
-    const boneCfg = CraftingEngine.BONES[bone] || CraftingEngine.BONES.preserved_cranium;
+    const boneCfg = CraftingEngine.BONES[bone];
+    if (boneCfg.validItemClasses && this._item.itemClass &&
+        !boneCfg.validItemClasses.includes(this._item.itemClass)) {
+      return _failDesecration(`${boneCfg.name} is only applicable to a Jewel base.`);
+    }
     const desecratedOnly = !!boneCfg.desecratedOnly || markConsumed;
     const revealCount = boneCfg.reveal || 3;
 

@@ -656,7 +656,7 @@ function countCraftDefinitionsBy(definitions, field, orderedValues = null) {
   return Object.fromEntries(pairs);
 }
 
-check('Task 04 authoritative crafting registry has complete stable coverage',
+check('Task 05 authoritative crafting registry has complete stable coverage',
   currencyIndex.schemaVersion >= 2 &&
   craftRegistry.length === 531 &&
   sourceBackedCraftDefinitions.length === currencyIndex.entries.length &&
@@ -665,7 +665,7 @@ check('Task 04 authoritative crafting registry has complete stable coverage',
   visibleCraftDefinitions.length === currencyIndex.counts.visibleCraftDefinitions &&
   registryCraftIds.size === craftRegistry.length &&
   new Set(craftRegistry.map(definition => definition.id)).size === craftRegistry.length);
-check('every crafting definition exposes the complete Task 04 data contract',
+check('every crafting definition exposes the complete Task 05 data contract',
   craftRegistry.every(definition =>
     requiredCraftDefinitionFields.every(field => Object.prototype.hasOwnProperty.call(definition, field)) &&
     typeof definition.craftId === 'string' && definition.craftId.length > 0 &&
@@ -696,7 +696,7 @@ check('registry tabs preserve runtime controls and surface quality audit cards',
   stable([...visibleCraftDefinitions.filter(definition => definition.category !== 'quality').map(definition => definition.craftId)].sort()) ===
     stable(Object.keys(currencyIndex.runtimeRegistry).sort()) &&
   visibleCraftDefinitions.filter(definition => definition.category === 'quality').length === 8);
-check('registry implementation classifications are exclusive after Task 04 audit surfacing',
+check('registry implementation classifications are exclusive after Task 05 audit surfacing',
   craftRegistry.every(definition => currencyIndex.allowedClassifications.includes(definition.implementationStatus)) &&
   stable(countCraftDefinitionsBy(craftRegistry, 'implementationStatus', currencyIndex.allowedClassifications)) ===
     stable(expectedRegistryClassificationCounts) &&
@@ -723,11 +723,11 @@ check('all Omen trigger craft references resolve inside the authoritative regist
     const triggerCraftId = definition.omenInteraction?.triggerCraftId;
     return triggerCraftId == null || registryCraftIds.has(triggerCraftId);
   }));
-check('Task 04 crafting parity is a direct complete projection of the registry',
+check('Task 05 crafting parity is a direct complete projection of the registry',
   craftingParity.schemaVersion === 2 &&
   craftingParity.targetGameVersion === currencyIndex.targetGameVersion &&
   craftingParity.fullParityClaim === false &&
-  craftingParity.entryDetailStatus === 'authoritative_registry_task04' &&
+  craftingParity.entryDetailStatus === 'authoritative_registry_task05' &&
   craftingParity.entries.length === craftRegistry.length &&
   parityByCraftId.size === craftRegistry.length &&
   craftRegistry.every(definition => {

@@ -3,6 +3,14 @@
 Target game version: **0.5.4**  
 Full parity claimed: **No**
 
+## Task 05 Abyss, Breach, Essences, and Omens checkpoint
+
+The registry remains **531 definitions** for target **0.5.4** and the visible surface is intentionally unchanged at **45 cards**. Task 05 adds no speculative controls: the existing Preserved Cranium/Well of Souls and Essence of the Abyss controls remain the only supported Abyss operations, while the other retained Bones, regular/Breach Essences, Catalysts, and unverified Lich guarantees remain blocked with their source-specific reasons.
+
+The supported Abyss metadata now declares Preserved Cranium and the four Desecration-direction/selection Omens as **Jewel-only**. Essence of the Abyss declares the 27 normalized equipment classes and rejects Jewel, Flask, and Charm targets. The engine rejects unknown Bones and simultaneous Sinistral/Dextral Necromancy Omens atomically, and Omen of Light requires a revealed Desecrated modifier and is consumed exactly once on a successful guarded Annulment (including Hinekora foresight). The UI uses the engine-returned reroll count for Abyssal Echoes.
+
+The checked-in Desecrated pool is explicitly a PoE2 **0.3** jewel pool and lacks a complete target **0.5.4** Well-of-Souls weighting/localization procedure. Its option selection therefore remains a limited compatibility path, not a full parity claim. Echoes consumption timing is likewise retained as an explicit verification blocker because the source identifies the reroll action but not the exact consumption event.
+
 ## Task 04 core and quality checkpoint
 
 The generated registry remains **531 definitions** for target version **0.5.4**. It now renders **45 visible cards**: the original 37 authored runtime controls plus eight disabled quality audit cards from retained normalized records. The eight cards are disabled with specific blockers and expose no handlers; their presence does not claim quality-mechanic parity.

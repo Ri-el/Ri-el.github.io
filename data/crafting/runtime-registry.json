@@ -1080,7 +1080,7 @@
         "triggerCraftId": "preserved-cranium"
       },
       "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
-      "validItemClasses": [],
+      "validItemClasses": ["Jewel"],
       "validItemTags": [],
       "qualityRestriction": "none",
       "socketRestriction": "none",
@@ -1132,7 +1132,7 @@
         "triggerCraftId": "preserved-cranium"
       },
       "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
-      "validItemClasses": [],
+      "validItemClasses": ["Jewel"],
       "validItemTags": [],
       "qualityRestriction": "none",
       "socketRestriction": "none",
@@ -1184,7 +1184,7 @@
         "triggerCraftId": "preserved-cranium"
       },
       "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
-      "validItemClasses": [],
+      "validItemClasses": ["Jewel"],
       "validItemTags": [],
       "qualityRestriction": "none",
       "socketRestriction": "none",
@@ -1236,7 +1236,7 @@
         "triggerCraftId": "annulment"
       },
       "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
-      "validItemClasses": [],
+      "validItemClasses": ["Jewel"],
       "validItemTags": [],
       "qualityRestriction": "none",
       "socketRestriction": "none",
@@ -1756,7 +1756,7 @@
         "triggerCraftId": null
       },
       "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
-      "validItemClasses": [],
+      "validItemClasses": ["Jewel"],
       "validItemTags": [],
       "qualityRestriction": "none",
       "socketRestriction": "none",
@@ -1809,7 +1809,13 @@
         "triggerCraftId": null
       },
       "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
-      "validItemClasses": [],
+      "validItemClasses": [
+        "Amulet", "Ring", "Dagger", "Wand", "One Hand Sword", "One Hand Axe",
+        "One Hand Mace", "Bow", "Staff", "Two Hand Sword", "Two Hand Axe",
+        "Two Hand Mace", "Quiver", "Belt", "Gloves", "Boots", "Body Armour",
+        "Helmet", "Shield", "Sceptre", "Warstaff", "Spear", "Crossbow", "Focus",
+        "Flail", "Buckler", "Talisman"
+      ],
       "validItemTags": [],
       "qualityRestriction": "none",
       "socketRestriction": "none",

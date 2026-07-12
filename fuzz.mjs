@@ -495,10 +495,10 @@ const ACTIONS = [
 const FIXED_SNAPSHOT = {
 	iterations: 30000,
 	seed: 542026,
- // Task 04 checkpoint: Vaal no longer consumes RNG while its unverified
- // outcome model is blocked; structured quality state and strict core rarity
- // guards also change the deterministic event stream.
- digest: '85d16590e2ed6e7a8fb4dd55d5a53ab4af980a40a360fd4633e469c3b59c37fe',
+ // Task 05 checkpoint: Preserved Cranium is now Jewel-only, unknown/dual
+ // Desecration Omens are rejected atomically, and Essence of the Abyss has
+ // source-backed equipment-class gates.
+ digest: '68cf3661d60c39b202799fff940bab1070d3c24ebb396c55a6d7d9809c0b0b55',
 }
 const runHash = createHash('sha256')
 function hashEvent(event) {

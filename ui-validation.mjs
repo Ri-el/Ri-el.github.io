@@ -251,6 +251,10 @@ check('foresight commit preserves undo and consumes Hinekora lock',
 check('foresight rollback preserves pending Desecration state',
   /function computeForesight\(currency\)[\s\S]*?const snapshotPending = engine\.getPendingDesecration\(\)[\s\S]*?engine\.loadItem\(snapshot, snapshotPending\)/.test(app) &&
   /function computeDesecrationForesight\(bone\)[\s\S]*?const snapshotPending = engine\.getPendingDesecration\(\)[\s\S]*?engine\.loadItem\(snapshot, snapshotPending\)/.test(app));
+check('Omen of Light requires a revealed Desecrated modifier and is consumed exactly once',
+  /omen === 'omen_of_light'[\s\S]*?revealed Desecrated modifier/.test(app) &&
+  /currency === 'annulment' && omenOfLightActive[\s\S]*?engine\.recordCurrencyUse\('omen_of_light'\)/.test(app) &&
+  /engine\.clearHinekoraLock\(\)[\s\S]*?currency === 'annulment' && omenOfLightActive[\s\S]*?engine\.recordCurrencyUse\('omen_of_light'\)/.test(app));
 const inventoryEventsMatch = app.match(/function ((?:setup|bind)Craft(?:ing)?InventoryEvents)\s*\(/);
 const inventoryEventsStart = inventoryEventsMatch ? app.indexOf(`function ${inventoryEventsMatch[1]}(`) : -1;
 const inventoryEventsEnd = inventoryEventsStart >= 0 ? app.indexOf('\nfunction ', inventoryEventsStart + 10) : -1;
@@ -461,9 +465,9 @@ check('tooltip renders structured quality without mixing it into explicit modifi
 check('Jewel-only flavor text is conditional on Jewel mode',
   /flavorEl\.hidden = !isJewelMode/.test(app) &&
   /Place into an allocated Jewel Socket on the Passive Skill Tree/.test(html));
-check('runtime selector and quality stylesheet is versioned in the Task 04 offline shell',
+check('runtime selector and quality stylesheet is versioned in the Task 05 offline shell',
   /header-fix\.css\?v=17/.test(select) &&
-  /CACHE_NAME = 'poe2-craft-task04-quality-core-v1'/.test(serviceWorker) &&
+  /CACHE_NAME = 'poe2-craft-task05-abyss-omens-v1'/.test(serviceWorker) &&
   serviceWorker.includes("'./header-fix.css?v=17'"));
 
 console.log(`\nRESULT: ${passed}/${passed + failed} checks passed`);

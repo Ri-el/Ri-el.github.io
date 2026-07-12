@@ -718,6 +718,36 @@ test('Omen of Whittling uses modifier level and randomises equal-lowest ties', (
   assert.equal(second, 'P1');
 });
 
+test('Desecration rejects unknown Bones and incompatible directional Omen combinations atomically', () => {
+  const fixture = desecrationTransactionFixture();
+  const engine = new Engine(fixture.data, fixture.baseType, fixture.desecrated);
+  engine.loadItem(rareItem(fixture.baseType, [record('P0', 1)], [record('S0', 1)]));
+  const before = engine.getItem();
+  const unknownBone = engine.startDesecration({ bone: 'gnawed_jawbone' });
+  assert.equal(unknownBone.success, false);
+  assert.match(unknownBone.error, /Unsupported Abyssal Bone/i);
+  assert.deepEqual(engine.getItem(), before);
+
+  const incompatible = engine.startDesecration({
+    bone: 'preserved_cranium',
+    omens: ['sinistral_necromancy', 'dextral_necromancy'],
+  });
+  assert.equal(incompatible.success, false);
+  assert.match(incompatible.error, /cannot be combined/i);
+  assert.deepEqual(engine.getItem(), before);
+  assert.equal(engine.getPendingDesecration(), null);
+
+  const nonJewel = new Engine(fixture.data, fixture.baseType, fixture.desecrated);
+  const amulet = rareItem(fixture.baseType, [record('P0', 1)], [record('S0', 1)]);
+  amulet.itemClass = 'Amulet';
+  nonJewel.loadItem(amulet);
+  const nonJewelBefore = nonJewel.getItem();
+  const nonJewelResult = nonJewel.startDesecration({ bone: 'preserved_cranium' });
+  assert.equal(nonJewelResult.success, false);
+  assert.match(nonJewelResult.error, /only applicable to a Jewel/i);
+  assert.deepEqual(nonJewel.getItem(), nonJewelBefore);
+});
+
 test('modifier groups are mutually exclusive across both affix sides', () => {
   const shared = group('SharedFamily', [tier(60, 100), tier(1, 100)]);
   const data = { bases: { group_test: { name: 'Group Test', prefixes: [shared], suffixes: [shared, group('Other', [tier(1, 100)])] } } };
@@ -962,6 +992,23 @@ test('Essence of the Abyss creates one crafted Mark and respects the crafted-mod
   assert.equal(result.success, false);
   assert.match(result.error, /maximum of one crafted modifier/);
   assert.deepEqual(blocked.getItem(), withCrafted);
+});
+
+test('Essence of the Abyss rejects Jewel, Flask, and Charm targets when class metadata is present', () => {
+  const data = { bases: { test_equipment: syntheticBase() } };
+  for (const itemClass of ['Jewel', 'Flask', 'Charm']) {
+    const engine = new Engine(data, 'test_equipment');
+    const item = engine.getItem();
+    item.rarity = 'rare';
+    item.itemClass = itemClass;
+    item.prefixes = [record('P0', 1)];
+    engine.loadItem(item);
+    const before = engine.getItem();
+    const result = engine.applyEssenceOfAbyss();
+    assert.equal(result.success, false);
+    assert.match(result.error, /not applicable/i);
+    assert.deepEqual(engine.getItem(), before);
+  }
 });
 
 test('Greater/Perfect modifier-level options filter tiers', () => {

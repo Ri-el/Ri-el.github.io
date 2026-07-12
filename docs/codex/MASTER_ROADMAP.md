@@ -231,6 +231,8 @@ Current local checkpoint: numbered Tasks 01–03 are implemented and tested. Tas
 
 Task 04 is implemented and tested. The registry still has 531 definitions and now surfaces 45 visible cards (37 runtime controls plus eight disabled quality audit cards). Core rarity/mirror restrictions are corrected, structured quality includes a cap, and Vaal remains blocked pending verified target-version outcomes. The next numbered task is Task 05, Abyss, Breach, Essences, and Omens.
 
+Task 05 is implemented and tested at a verified boundary. The runtime keeps the existing Preserved Cranium/Well of Souls flow, adds source-backed Jewel and Essence of the Abyss applicability gates, rejects unknown Bones and conflicting directional Omens atomically, fixes Omen of Light consumption on successful Annulment (including Hinekora foresight), and uses the engine's verified reroll count in the UI. The other Abyssal Bones, regular and Breach Essences, Catalysts, and target-version Desecrated pool/Well weighting remain explicitly blocked where the checked-in 0.5.4 evidence is incomplete. The next numbered task is Task 06, Sockets, Runes, and Soul Cores.
+
 Each task must end with:
 
 - relevant tests passing

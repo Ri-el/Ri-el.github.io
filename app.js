@@ -1302,6 +1302,7 @@ function executeCraftOperation(definition, { shiftKey = false } = {}) {
   engine.recordCurrencyUse(currency);
   pushUndo(before);
   if (currency === 'annulment' && omenOfLightActive) {
+    engine.recordCurrencyUse('omen_of_light');
     omenOfLightActive = false;
     const lightButton = Array.from(elements.omenBtns).find(button => omenForElement(button) === 'omen_of_light');
     if (lightButton) {
@@ -1884,7 +1885,7 @@ function startDesecrationFlow(bone = 'preserved_cranium') {
   });
   pushUndo(before);
 
-  desecState = { side: res.side, mode: res.mode, rerollsLeft: 1, options: res.options, abyssalUsed: false };
+  desecState = { side: res.side, mode: res.mode, rerollsLeft: res.rerollsLeft, options: res.options, abyssalUsed: false };
   playSound('desecration');
   triggerCraftAnimation('preserved_cranium');
   renderItem(res);
@@ -2317,6 +2318,7 @@ function commitForesight(currency) {
   engine.recordCurrencyUse(currency);
   engine.clearHinekoraLock();        // "The Lock is removed when this item is modified."
   if (currency === 'annulment' && omenOfLightActive) {
+    engine.recordCurrencyUse('omen_of_light');
     omenOfLightActive = false;
     const lb = Array.from(elements.omenBtns).find(b => omenForElement(b) === 'omen_of_light');
     if (lb) {
@@ -2664,6 +2666,11 @@ function boneDisabledReason(item) {
   if (item.corrupted) return 'Item is corrupted and cannot be modified.';
   if (item.sanctified) return 'Item is sanctified and cannot be modified further.';
   if (item.mirrored || item.isMirrored) return 'Item is mirrored and cannot be modified.';
+  if (item.itemClass && item.itemClass !== 'Jewel') return 'Preserved Cranium requires a Jewel base.';
+  const pool = desecData?.bases?.[engine.baseType] || desecData?.jewelTypes?.[engine.baseType];
+  if (desecData && (!pool || (!(pool.prefixes || []).length && !(pool.suffixes || []).length))) {
+    return 'No Desecrated modifiers are available for this base.';
+  }
   if (!desecData) return 'Unsupported — verification required: Desecrated modifier data is unavailable.';
   if (item.rarity !== 'rare') return 'Requires a Rare item.';
   if (alreadyDesecrated) return 'Item already has a Desecrated modifier.';
@@ -2675,6 +2682,9 @@ function essenceDisabledReason(action, item) {
   if (item.corrupted) return 'Item is corrupted and cannot be modified.';
   if (item.sanctified) return 'Item is sanctified and cannot be modified further.';
   if (item.mirrored || item.isMirrored) return 'Item is mirrored and cannot be modified.';
+  if (item.itemClass && !CraftingEngine.ABYSS_ESSENCE_ITEM_CLASSES.has(item.itemClass)) {
+    return 'Essence of the Abyss is not applicable to this item class.';
+  }
   if (item.rarity !== 'rare') return 'Requires a Rare item.';
   if (!removableItemMods(item).length) return 'Requires at least one removable modifier.';
   if (allItemMods(item).some(mod => mod.mark)) return 'Item already carries the Mark of the Abyssal Lord.';
@@ -2693,7 +2703,11 @@ function omenDisabledReason(definition, item) {
   if (definition.handler === 'toggleOmen') {
     const alreadyDesecrated = allItemMods(item).some(mod => mod.desecrated && !mod.mark);
     const hasRevealedDesecrated = allItemMods(item).some(mod => mod.desecrated && !mod.mark && !mod.unrevealed);
-    if (omen === 'omen_of_light') return '';
+    if (omen === 'omen_of_light') {
+      return allItemMods(item).some(mod => mod.desecrated && !mod.mark && !mod.unrevealed)
+        ? ''
+        : 'Omen of Light requires a revealed Desecrated modifier.';
+    }
     if (item.rarity !== 'rare') return 'Requires a Rare item.';
     if (omen === 'abyssal_echoes') {
       return hasRevealedDesecrated ? 'The Desecrated modifier has already been revealed.' : '';
