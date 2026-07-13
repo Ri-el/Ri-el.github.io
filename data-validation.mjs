@@ -6,10 +6,16 @@ import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { normalizeCoeData, parseCoeExport } from './tools/convert-coe-data.mjs';
-import { buildNormalizedBrowserSource } from './tools/build-normalized-data.mjs';
+import {
+  buildNormalizedBrowserSource,
+  buildRuntimeBrowserSource,
+  buildRuntimeData,
+} from './tools/build-normalized-data.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const NORMALIZED_DIR = path.join(HERE, 'data', 'normalized');
+const BASE_DIR = path.join(HERE, 'data', 'bases');
+const SHARED_DIR = path.join(HERE, 'data', 'shared');
 const PROVENANCE_PATH = path.join(HERE, 'data', 'source-cache', 'provenance.json');
 const COVERAGE_PATH = path.join(HERE, 'reports', 'data-coverage.json');
 const BASE_PARITY_PATH = path.join(HERE, 'reports', 'base-item-parity.json');
@@ -1064,6 +1070,145 @@ const context = { window: {} };
 vm.runInNewContext(actualBundle, context, { filename: bundlePath });
 check('browser bundle matches normalized source data',
   stable(context.window.COE_NORMALIZED_DATA) === stable(actual));
+
+const expectedRuntimeBundle = buildRuntimeBrowserSource(NORMALIZED_DIR, BASE_DIR, SHARED_DIR);
+const runtimeBundlePath = path.join(HERE, 'data', 'runtime.data.js');
+const actualRuntimeBundle = readFileSync(runtimeBundlePath, 'utf8');
+check('generated runtime browser bundle is current',
+  actualRuntimeBundle.replace(/\r\n?/g, '\n') === expectedRuntimeBundle.replace(/\r\n?/g, '\n'));
+
+const runtimeContext = { window: {} };
+vm.runInNewContext(actualRuntimeBundle, runtimeContext, { filename: runtimeBundlePath });
+const runtime = runtimeContext.window.COE_RUNTIME_DATA;
+const expectedRuntime = buildRuntimeData(NORMALIZED_DIR, BASE_DIR, SHARED_DIR);
+check('runtime browser bundle matches the generated source projection',
+  stable(runtime) === stable(expectedRuntime));
+check('runtime projection retains source counts and provenance without audit-only payloads',
+  runtime.counts.bases === actual.baseItems.bases.length &&
+  runtime.counts.modifiers === actual.modifiers.modifiers.length &&
+  runtime.counts.craftingItems === actual.craftingItems.items.length &&
+  runtime.targetGameVersion === actual.manifest.targetGameVersion &&
+  runtime.source.sha256 === actual.manifest.source.sha256 &&
+  runtime.modifiers == null && runtime.craftingItems == null && runtime.essences == null);
+check('runtime projection preserves every simulator mapping and concrete base identity',
+  stable(runtime.baseItems.simulatorBaseMap) === stable(actual.baseItems.simulatorBaseMap) &&
+  stable(runtime.baseItems.bases.map(base => base.id)) === stable(actual.baseItems.bases.map(base => base.id)) &&
+  stable(runtime.baseItems.classes.map(sourceClass => sourceClass.id)) === stable(actual.baseItems.classes.map(sourceClass => sourceClass.id)));
+const expectedImplicitIds = [...new Set(actual.baseItems.bases.flatMap(base => base.implicitModifierIds || []))]
+  .map(String).sort((left, right) => Number(left) - Number(right));
+const runtimeOverlayModifierIds = [...new Set(Object.values(runtime.overlayByPool)
+  .flatMap(rows => rows.map(([, modifierId]) => String(modifierId))))]
+  .sort((left, right) => Number(left) - Number(right));
+check('runtime projection retains exactly the implicit and source modifiers it references',
+  stable(Object.keys(runtime.implicits)) === stable(expectedImplicitIds) &&
+  stable(Object.keys(runtime.sourceModifiers)) === stable(runtimeOverlayModifierIds) &&
+  Object.values(runtime.overlayByPool).every(rows => rows.every(row =>
+    Array.isArray(row) && row.length === 3 && runtime.sourceModifiers[row[1]])));
+
+const runtimeBaseFields = [
+  'id', 'metadataKey', 'displayName', 'itemClass', 'equipmentSlot',
+  'classId', 'modifierPoolClassId', 'requiredLevel', 'dropLevel', 'tags',
+  'requirements', 'baseProperties', 'implicitModifierIds', 'socketCount',
+  'icon', 'unmodifiable',
+];
+const projectFields = (source, fields) => Object.fromEntries(fields
+  .filter(field => Object.prototype.hasOwnProperty.call(source, field))
+  .map(field => [field, source[field]]));
+check('runtime concrete-base records preserve every field consumed by the browser',
+  stable(runtime.baseItems.bases) === stable(actual.baseItems.bases.map(base => projectFields(base, runtimeBaseFields))) &&
+  stable(runtime.baseItems.classes) === stable(actual.baseItems.classes.map(sourceClass =>
+    projectFields(sourceClass, ['id', 'iconKey']))));
+
+const fullModifiersById = new Map(actual.modifiers.modifiers.map(modifier => [modifier.id, modifier]));
+check('runtime implicit tuples preserve exact source identity, group, and stats',
+  expectedImplicitIds.every(id => {
+    const modifier = fullModifiersById.get(Number(id));
+    return stable(runtime.implicits[id]) === stable([
+      modifier?.key ?? null,
+      modifier?.modifierGroupId ?? null,
+      modifier?.modifierGroup ?? null,
+      modifier?.stats || [],
+    ]);
+  }));
+check('runtime source-modifier tuples preserve exact identity and tag conditions',
+  runtimeOverlayModifierIds.every(id => {
+    const modifier = fullModifiersById.get(Number(id));
+    return stable(runtime.sourceModifiers[id]) === stable([
+      modifier?.key ?? null,
+      modifier?.modifierGroupId ?? null,
+      modifier?.modifierTags || [],
+      modifier?.requiredTags || [],
+      modifier?.forbiddenTags || [],
+      modifier?.weightConditions || [],
+    ]);
+  }));
+
+const fullModifiersByClassGroupLevel = new Map();
+for (const modifier of actual.modifiers.modifiers) {
+  for (const [classId] of modifier.spawnWeights || []) {
+    const key = `${classId}|${modifier.affix}|${modifier.modifierGroup}|${modifier.requiredItemLevel}`;
+    if (!fullModifiersByClassGroupLevel.has(key)) fullModifiersByClassGroupLevel.set(key, []);
+    fullModifiersByClassGroupLevel.get(key).push(modifier);
+  }
+}
+const sharedPools = {};
+if (existsSync(SHARED_DIR)) {
+  for (const file of readdirSync(SHARED_DIR).filter(file => file.endsWith('.json')).sort()) {
+    sharedPools[file.replace(/\.json$/, '')] = readJson(path.join(SHARED_DIR, file));
+  }
+}
+const resolvedBasePools = {};
+for (const file of readdirSync(BASE_DIR).filter(file => file.endsWith('.json')).sort()) {
+  const id = file.replace(/\.json$/, '');
+  const source = readJson(path.join(BASE_DIR, file));
+  if (!Array.isArray(source.inherits) || source.inherits.length === 0) {
+    resolvedBasePools[id] = source;
+    continue;
+  }
+  const prefixes = source.inherits.flatMap(key => sharedPools[key]?.prefixes || []);
+  const suffixes = source.inherits.flatMap(key => sharedPools[key]?.suffixes || []);
+  resolvedBasePools[id] = {
+    ...source,
+    prefixes: [...prefixes, ...(source.prefixes || [])],
+    suffixes: [...suffixes, ...(source.suffixes || [])],
+  };
+}
+let overlayParity = true;
+for (const [poolId, mapping] of Object.entries(actual.baseItems.simulatorBaseMap)) {
+  const expectedRows = [];
+  const typeData = resolvedBasePools[poolId];
+  if (typeData) {
+    for (const [affix, groups] of [['prefix', typeData.prefixes || []], ['suffix', typeData.suffixes || []]]) {
+      for (const group of groups) {
+        for (const tier of group.tiers || []) {
+          const matches = [];
+          for (const classId of mapping.classIds || []) {
+            const key = `${classId}|${affix}|${group.modGroup}|${Number(tier.ilvlReq) || 0}`;
+            for (const modifier of fullModifiersByClassGroupLevel.get(key) || []) {
+              if (!modifier.desecrated && !modifier.essence && !modifier.corrupted && !modifier.enchantment) {
+                matches.push(modifier);
+              }
+            }
+          }
+          const ids = [...new Set(matches.map(modifier => modifier.id))];
+          if (ids.length !== 1) continue;
+          const modifier = fullModifiersById.get(ids[0]);
+          const weights = (modifier.spawnWeights || [])
+            .filter(([classId]) => mapping.classIds.includes(classId))
+            .map(([, weight]) => Number(weight));
+          const uniqueWeights = [...new Set(weights)];
+          expectedRows.push([
+            `${affix}|${group.modGroup}|${Number(tier.ilvlReq) || 0}`,
+            modifier.id,
+            uniqueWeights.length === 1 ? uniqueWeights[0] : null,
+          ]);
+        }
+      }
+    }
+  }
+  if (stable(runtime.overlayByPool[poolId]) !== stable(expectedRows)) overlayParity = false;
+}
+check('runtime modifier overlays exactly preserve legacy identity and effective weights', overlayParity);
 
 if (existsSync(COVERAGE_PATH)) {
   const report = readJson(COVERAGE_PATH);

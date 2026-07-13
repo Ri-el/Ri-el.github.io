@@ -7,6 +7,8 @@ const app = fs.readFileSync(new URL('./app.js', import.meta.url), 'utf8');
 const select = fs.readFileSync(new URL('./select.js', import.meta.url), 'utf8');
 const serviceWorker = fs.readFileSync(new URL('./sw.js', import.meta.url), 'utf8');
 const browserSmoke = fs.readFileSync(new URL('./tools/browser-smoke.mjs', import.meta.url), 'utf8');
+const runtimeData = fs.readFileSync(new URL('./data/runtime.data.js', import.meta.url), 'utf8');
+const modDataBuilder = fs.readFileSync(new URL('./tools/build-mod-data.mjs', import.meta.url), 'utf8');
 const currencyIndex = JSON.parse(fs.readFileSync(new URL('./data/crafting/currency-index.json', import.meta.url), 'utf8'));
 const currencyBrowserSource = fs.readFileSync(new URL('./data/crafting/currency-index.data.js', import.meta.url), 'utf8').trim();
 const currencyBrowserPrefix = 'window.CRAFTING_CURRENCY_INDEX=';
@@ -320,14 +322,23 @@ check('missing icons retain generated placeholders and icon loading is idempoten
 check('custom cursor icon resolution is registry-driven',
   /function iconIdForAction\([\s\S]*?CRAFT_DEFINITION_BY_ACTION/.test(app) &&
   /function setOrbIcon\([\s\S]*?iconIdForAction/.test(app));
-check('normalized browser data loads before the crafting engine',
-  html.indexOf('data/normalized.data.js') > html.indexOf('data/desecrated-mods.data.js') &&
-  html.indexOf('data/normalized.data.js') < html.indexOf('crafting.js'));
+check('compiled runtime data loads before the crafting engine',
+  html.indexOf('data/runtime.data.js') > html.indexOf('data/desecrated-mods.data.js') &&
+  html.indexOf('data/runtime.data.js') < html.indexOf('crafting.js') &&
+  !html.includes('data/normalized.data.js'));
 check('currency index loads locally before the runtime registry',
-  html.indexOf('data/crafting/currency-index.data.js') > html.indexOf('data/normalized.data.js') &&
+  html.indexOf('data/crafting/currency-index.data.js') > html.indexOf('data/runtime.data.js') &&
   html.indexOf('data/crafting/currency-index.data.js') < html.indexOf('app.js'));
-check('normalized browser data is included in the offline application shell',
-  serviceWorker.includes("'./data/normalized.data.js'"));
+check('compiled runtime data replaces the audit bundle in the offline application shell',
+  serviceWorker.includes("'./data/runtime.data.js'") &&
+  !serviceWorker.includes("'./data/normalized.data.js'"));
+check('runtime data is a local classic-script projection with complete base and overlay indexes',
+  /^window\.COE_RUNTIME_DATA=/.test(runtimeData) &&
+  /"baseItems":/.test(runtimeData) && /"overlayByPool":/.test(runtimeData) &&
+  /"sourceModifiers":/.test(runtimeData) && /"implicits":/.test(runtimeData));
+check('browser mod data is generated through the minifying JSON builder',
+  /JSON\.stringify\(readJson/.test(modDataBuilder) &&
+  /data\/mods\.data\.js is stale/.test(modDataBuilder));
 check('currency index is included in the offline application shell',
   serviceWorker.includes("'./data/crafting/currency-index.data.js'"));
 const loadFromStashStart = app.indexOf('function loadFromStash(index)');
@@ -478,9 +489,9 @@ check('tooltip renders socket state in a dedicated section',
 check('Jewel-only flavor text is conditional on Jewel mode',
   /flavorEl\.hidden = !isJewelMode/.test(app) &&
   /Place into an allocated Jewel Socket on the Passive Skill Tree/.test(html));
-check('runtime selector, socket stylesheet, and performance bundle are versioned in the offline shell',
+check('runtime selector, socket stylesheet, and performance data are versioned in the offline shell',
   /header-fix\.css\?v=18/.test(select) &&
-  /CACHE_NAME = 'poe2-craft-perf-runtime-index-v1'/.test(serviceWorker) &&
+  /CACHE_NAME = 'poe2-craft-perf-runtime-data-v2'/.test(serviceWorker) &&
   serviceWorker.includes("'./header-fix.css?v=18'"));
 
 console.log(`\nRESULT: ${passed}/${passed + failed} checks passed`);

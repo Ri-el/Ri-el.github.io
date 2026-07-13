@@ -9,7 +9,7 @@
 //  - On activate we delete every older cache automatically.
 //  - skipWaiting + clients.claim means a new worker takes over instantly.
 
-const CACHE_NAME = 'poe2-craft-perf-runtime-index-v1';
+const CACHE_NAME = 'poe2-craft-perf-runtime-data-v2';
 
 const APP_SHELL = [
   './',
@@ -27,7 +27,7 @@ const APP_SHELL = [
   //  app no longer loads, and omitted these compiled files — breaking offline.)
   './data/mods.data.js',
   './data/desecrated-mods.data.js',
-  './data/normalized.data.js',
+  './data/runtime.data.js',
   './data/crafting/currency-index.data.js',
   './manifest.json',
 ];

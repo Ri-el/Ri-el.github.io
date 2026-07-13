@@ -18,7 +18,7 @@ The runtime identities remain separate:
 | Concrete base ID | `2546` |
 | Concrete display name | `Crimson Amulet` |
 
-`data/bases/amulets.json` remains the class-level explicit-modifier pool. Concrete records come from `data/normalized/base-items.json`, are bundled into `window.COE_NORMALIZED_DATA`, and are resolved only through `simulatorBaseMap.amulets.concreteBaseIds` plus the runtime `basesById` index.
+`data/bases/amulets.json` remains the class-level explicit-modifier pool. Concrete records come from `data/normalized/base-items.json`. The complete normalized audit bundle remains checked in, while the browser loads the generated `window.COE_RUNTIME_DATA` projection and resolves Amulets only through `simulatorBaseMap.amulets.concreteBaseIds` plus the runtime `basesById` index.
 
 ## Task 02 generic coverage
 

@@ -55,7 +55,7 @@ The root keys are `categories`, `classes`, `items`, `mods`, `modgroups`, `classm
 - `essences.json`: normalized essence definitions and guaranteed modifier mappings.
 - `version-manifest.json`: source hash, observed schema, output counts, and explicit data limitations. The source does not embed a game version, so the manifest does not pretend that it does.
 
-`tools/build-normalized-data.mjs` compiles those JSON files into `data/normalized.data.js` as `window.COE_NORMALIZED_DATA`, preserving direct `file://` use without `fetch()`.
+`tools/build-normalized-data.mjs` keeps a complete `data/normalized.data.js` audit wrapper and also compiles `data/runtime.data.js` as `window.COE_RUNTIME_DATA`. The runtime projection contains every concrete base and simulator mapping, the exact implicit records those bases reference, and the exact source modifier identities, weights, and tag conditions used by compiled modifier-pool overlays. Full modifiers, crafting inventories, Essences, and provenance remain in repository-owned normalized JSON and the audit wrapper; they are not deleted merely to reduce browser startup. Both outputs remain classic scripts, preserving direct `file://` use without `fetch()`.
 
 Repository-owned provenance is recorded in `data/source-cache/provenance.json`. The legacy raw upload is not present, so default validation verifies the normalized payload hashes, references, manifest, coverage, and browser bundle without pretending to re-run the missing conversion. `data-validation.mjs --source <path>` enables an explicit raw-to-normalized comparison when the exact export is available. Refresh candidates and the non-promoting staging workflow are documented in `docs/data-pipeline.md`.
 

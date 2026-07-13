@@ -44,7 +44,7 @@ if (targets.length === 0) {
 
       const startup = await page.evaluate(() => ({
         modBaseCount: window.MOD_BASES ? Object.keys(window.MOD_BASES).length : 0,
-        normalizedPresent: !!window.COE_NORMALIZED_DATA,
+        runtimeDataPresent: !!window.COE_RUNTIME_DATA,
         currencyIndexPresent: !!window.CRAFTING_CURRENCY_INDEX,
         craftRegistryLength: window.CRAFTING_CURRENCY_INDEX?.craftRegistry?.length ?? null,
         craftTabsLength: window.CRAFTING_CURRENCY_INDEX?.craftTabs?.length ?? null,
@@ -53,7 +53,7 @@ if (targets.length === 0) {
         toast: document.getElementById('error-toast')?.textContent || '',
       }));
       assert(startup.modBaseCount > 0, `${target}: MOD_BASES did not initialize`);
-      assert(startup.normalizedPresent, `${target}: normalized data did not initialize`);
+      assert(startup.runtimeDataPresent, `${target}: runtime data did not initialize`);
       assert(startup.currencyIndexPresent, `${target}: currency index did not initialize`);
       assert.equal(startup.craftRegistryLength, 45, `${target}: visible runtime registry length`);
       assert.equal(startup.craftTabsLength, 10, `${target}: tab length`);

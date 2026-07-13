@@ -194,25 +194,16 @@ function Write-DataModule {
 
 Write-DataModule "data\desecrated-mods.json" "DESECRATED_MODS_RAW" "data\desecrated-mods.data.js"
 
-# Compile every per-base file in data\bases (and optional data\shared) into ONE
-# file:// loader: data\mods.data.js  (so index.html only needs one script tag).
-$loader = "window.MOD_BASES = window.MOD_BASES || {};`r`nwindow.MOD_SHARED = window.MOD_SHARED || {};`r`n"
-Get-ChildItem -Path "data\bases" -Filter *.json | Sort-Object Name | ForEach-Object {
-    $id  = $_.BaseName
-    $raw = (Get-Content $_.FullName -Raw).TrimStart([char]0xFEFF).Trim()
-    $null = ConvertFrom-Json $raw   # validate JSON; stops the build on a typo
-    $loader += 'window.MOD_BASES[' + (ConvertTo-Json $id) + '] = ' + $raw + ";`r`n"
-}
-if (Test-Path "data\shared") {
-    Get-ChildItem -Path "data\shared" -Filter *.json | Sort-Object Name | ForEach-Object {
-        $key = $_.BaseName
-        $raw = (Get-Content $_.FullName -Raw).TrimStart([char]0xFEFF).Trim()
-        $null = ConvertFrom-Json $raw
-        $loader += 'window.MOD_SHARED[' + (ConvertTo-Json $key) + '] = ' + $raw + ";`r`n"
+# Compile every per-base file in data\bases (and optional data\shared) into one
+# minified file:// loader. JSON parsing/stringifying preserves the exact data
+# values while avoiding megabytes of source-only indentation in the browser.
+$modBuilder = Join-Path (Get-Location) "tools\build-mod-data.mjs"
+if (Test-Path $modBuilder) {
+    & node $modBuilder
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to generate data\mods.data.js"
     }
 }
-[System.IO.File]::WriteAllText((Join-Path (Get-Location) "data\mods.data.js"), $loader, (New-Object System.Text.UTF8Encoding($false)))
-Write-Host "Generated data\mods.data.js"
 
 # Compile the repository-owned normalized Craft of Exile extract with Node.
 # Keeping this in the existing build means the source JSON remains reviewable,

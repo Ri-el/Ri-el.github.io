@@ -373,59 +373,27 @@ function mergeModSources() {
 }
 
 function buildNormalizedDataIndexes(data) {
-  if (!data?.baseItems || !data?.modifiers || !data?.craftingItems) return null;
+  if (!data?.baseItems || !data?.implicits || !data?.sourceModifiers || !data?.overlayByPool) return null;
   return measureOperation('normalized-index-build', () => {
     const indexes = {
       basesById: new Map(),
-      basesByItemClass: new Map(),
       simulatorPoolByBaseId: new Map(),
       classesById: new Map(),
-      modifiersById: new Map(),
-      modifiersByBase: new Map(),
-      modifiersByItemClass: new Map(),
-      prefixes: [],
-      suffixes: [],
-      modifierGroups: new Map(),
-      tags: new Map(),
-      itemLevelThresholds: new Map(),
-      desecratedPools: new Map(),
-      craftingDefinitions: new Map(),
-      craftingMethodsByHandler: new Map(),
-      modifiersByClassGroupLevel: new Map(),
-    };
-
-    const addToMapArray = (map, key, value) => {
-      if (key == null) return;
-      if (!map.has(key)) map.set(key, []);
-      map.get(key).push(value);
+      implicitModifiersById: new Map(),
+      sourceModifiersById: new Map(),
+      craftingMethodsByHandler: new Set(data.craftingHandlers || []),
     };
 
     for (const sourceClass of data.baseItems.classes || []) indexes.classesById.set(sourceClass.id, sourceClass);
-    for (const base of data.baseItems.bases || []) {
-      indexes.basesById.set(base.id, base);
-      addToMapArray(indexes.basesByItemClass, base.itemClass, base);
-      for (const tag of base.tags || []) addToMapArray(indexes.tags, tag, { kind: 'base', id: base.id });
+    for (const base of data.baseItems.bases || []) indexes.basesById.set(base.id, base);
+    for (const [id, modifier] of Object.entries(data.implicits || {})) {
+      indexes.implicitModifiersById.set(Number(id), modifier);
     }
-
-    for (const modifier of data.modifiers.modifiers || []) {
-      indexes.modifiersById.set(modifier.id, modifier);
-      if (modifier.affix === 'prefix') indexes.prefixes.push(modifier);
-      if (modifier.affix === 'suffix') indexes.suffixes.push(modifier);
-      addToMapArray(indexes.modifierGroups, modifier.modifierGroupId, modifier);
-      addToMapArray(indexes.itemLevelThresholds, modifier.requiredItemLevel, modifier);
-      for (const tag of modifier.modifierTags || []) addToMapArray(indexes.tags, tag, { kind: 'modifier', id: modifier.id });
-      for (const [classId] of modifier.spawnWeights || []) {
-        const sourceClass = indexes.classesById.get(classId);
-        addToMapArray(indexes.modifiersByItemClass, sourceClass?.itemClass, modifier);
-        if (modifier.desecrated) addToMapArray(indexes.desecratedPools, classId, modifier);
-        const key = `${classId}|${modifier.affix}|${modifier.modifierGroup}|${modifier.requiredItemLevel}`;
-        addToMapArray(indexes.modifiersByClassGroupLevel, key, modifier);
-      }
+    for (const [id, modifier] of Object.entries(data.sourceModifiers || {})) {
+      indexes.sourceModifiersById.set(Number(id), modifier);
     }
 
     for (const [simulatorPoolId, mapping] of Object.entries(data.baseItems.simulatorBaseMap || {})) {
-      const seen = new Set();
-      const pool = [];
       for (const concreteBaseId of mapping.concreteBaseIds || []) {
         const concreteBase = indexes.basesById.get(concreteBaseId);
         if (!concreteBase) {
@@ -441,23 +409,7 @@ function buildNormalizedDataIndexes(data) {
         }
         indexes.simulatorPoolByBaseId.set(concreteBaseId, simulatorPoolId);
       }
-      for (const classId of mapping.classIds || []) {
-        const sourceClass = indexes.classesById.get(classId);
-        for (const [modifierId] of sourceClass?.modifierWeights || []) {
-          if (seen.has(modifierId)) continue;
-          const modifier = indexes.modifiersById.get(modifierId);
-          if (modifier) { seen.add(modifierId); pool.push(modifier); }
-        }
-      }
-      indexes.modifiersByBase.set(simulatorPoolId, pool);
     }
-
-    for (const item of data.craftingItems.items || []) indexes.craftingDefinitions.set(item.id, item);
-    const visitMethod = method => {
-      if (method.handler) addToMapArray(indexes.craftingMethodsByHandler, method.handler, method);
-      for (const child of method.elements || []) visitMethod(child);
-    };
-    for (const method of data.craftingItems.methods || []) visitMethod(method);
     return indexes;
   });
 }
@@ -489,19 +441,20 @@ function normalizedStatText(stat) {
 }
 
 function normalizedImplicitSnapshot(modifierId) {
-  const modifier = normalizedIndexes?.modifiersById.get(modifierId);
+  const modifier = normalizedIndexes?.implicitModifiersById.get(Number(modifierId));
   if (!modifier) return { id: modifierId, key: null, stats: [], displayText: `Modifier ${modifierId}` };
-  const stats = Array.isArray(modifier.stats) ? structuredClone(modifier.stats) : [];
+  const [key, modifierGroupId, modifierGroup, sourceStats] = modifier;
+  const stats = Array.isArray(sourceStats) ? structuredClone(sourceStats) : [];
   const statText = stats.map(normalizedStatText).filter(Boolean);
   return {
-    id: modifier.id,
-    key: modifier.key || null,
-    modifierGroupId: modifier.modifierGroupId ?? null,
-    modifierGroup: modifier.modifierGroup || null,
+    id: modifierId,
+    key: key || null,
+    modifierGroupId: modifierGroupId ?? null,
+    modifierGroup: modifierGroup || null,
     stats,
     // The source export has no localization templates. This deliberately uses
     // sourced stat identifiers/ranges instead of inventing in-game wording.
-    displayText: statText.join('; ') || modifier.key || `Modifier ${modifier.id}`,
+    displayText: statText.join('; ') || key || `Modifier ${modifierId}`,
   };
 }
 
@@ -546,12 +499,12 @@ function concreteBaseDefinition(base, simulatorPoolId) {
     icon: base.icon || sourceClass?.iconKey || null,
     selectable: !base.unmodifiable,
     disabledReason: base.unmodifiable ? 'This normalized base is marked unmodifiable.' : '',
-    targetGameVersion: normalizedData?.manifest?.targetGameVersion || null,
-    sourceVersion: normalizedData?.manifest?.source?.embeddedGameVersion || null,
-    verificationState: normalizedData?.manifest?.source?.versionStatus || null,
+    targetGameVersion: normalizedData?.targetGameVersion || null,
+    sourceVersion: normalizedData?.source?.embeddedGameVersion || null,
+    verificationState: normalizedData?.source?.versionStatus || null,
     provenance: {
       normalizedPath: 'data/normalized/base-items.json',
-      sourceSha256: normalizedData?.manifest?.source?.sha256 || null,
+      sourceSha256: normalizedData?.source?.sha256 || null,
     },
   };
 }
@@ -650,42 +603,26 @@ function requestConcreteBaseConfirmation(result) {
 
 function buildSourceModifierOverlay(baseType) {
   if (!normalizedIndexes || !normalizedData) return null;
-  const mapping = normalizedData.baseItems.simulatorBaseMap?.[baseType];
+  const rows = normalizedData.overlayByPool?.[baseType];
   const typeData = modData?.bases?.[baseType];
-  if (!mapping || !typeData) return null;
+  if (!Array.isArray(rows) || !typeData) return null;
 
   return measureOperation('base-modifier-overlay', () => {
     const overlay = new Map();
-    for (const [affix, groups] of [['prefix', typeData.prefixes || []], ['suffix', typeData.suffixes || []]]) {
-      for (const group of groups) {
-        for (const tier of group.tiers || []) {
-          const matches = [];
-          for (const classId of mapping.classIds || []) {
-            const key = `${classId}|${affix}|${group.modGroup}|${Number(tier.ilvlReq) || 0}`;
-            for (const modifier of normalizedIndexes.modifiersByClassGroupLevel.get(key) || []) {
-              if (modifier.desecrated || modifier.essence || modifier.corrupted || modifier.enchantment) continue;
-              matches.push(modifier);
-            }
-          }
-          const ids = [...new Set(matches.map(modifier => modifier.id))];
-          if (ids.length !== 1) continue;
-          const modifier = normalizedIndexes.modifiersById.get(ids[0]);
-          const applicableWeights = (modifier.spawnWeights || [])
-            .filter(([classId]) => mapping.classIds.includes(classId))
-            .map(([, weight]) => Number(weight));
-          const uniqueWeights = [...new Set(applicableWeights)];
-          overlay.set(`${affix}|${group.modGroup}|${Number(tier.ilvlReq) || 0}`, {
-            stableModifierId: modifier.id,
-            sourceModifierKey: modifier.key,
-            sourceModifierGroupId: modifier.modifierGroupId,
-            spawnWeight: uniqueWeights.length === 1 ? uniqueWeights[0] : null,
-            modifierTags: modifier.modifierTags || [],
-            requiredTags: modifier.requiredTags || [],
-            forbiddenTags: modifier.forbiddenTags || [],
-            weightConditions: modifier.weightConditions || [],
-          });
-        }
-      }
+    for (const [key, modifierId, spawnWeight] of rows) {
+      const source = normalizedIndexes.sourceModifiersById.get(Number(modifierId));
+      if (!source) throw new Error(`Runtime modifier overlay references unknown source modifier ${modifierId}.`);
+      const [sourceModifierKey, sourceModifierGroupId, modifierTags, requiredTags, forbiddenTags, weightConditions] = source;
+      overlay.set(key, {
+        stableModifierId: Number(modifierId),
+        sourceModifierKey,
+        sourceModifierGroupId,
+        spawnWeight,
+        modifierTags: modifierTags || [],
+        requiredTags: requiredTags || [],
+        forbiddenTags: forbiddenTags || [],
+        weightConditions: weightConditions || [],
+      });
     }
     return overlay;
   });
@@ -774,10 +711,10 @@ async function init() {
   try {
     measureOperation('initial-data-load', () => {
       if (!window.MOD_BASES) throw new Error('Mod data not found — run build (build.cmd) to generate data/mods.data.js.');
-      if (!window.COE_NORMALIZED_DATA) throw new Error('Normalized crafting data not found — run build (build.cmd).');
+      if (!window.COE_RUNTIME_DATA) throw new Error('Compiled runtime crafting data not found — run build (build.cmd).');
       if (!window.CRAFTING_CURRENCY_INDEX) throw new Error('Crafting currency index not found — run build (build.cmd).');
       modData = mergeModSources();
-      normalizedData = window.COE_NORMALIZED_DATA;
+      normalizedData = window.COE_RUNTIME_DATA;
       normalizedIndexes = buildNormalizedDataIndexes(normalizedData);
 
       // Desecrated (Abyssal) mod pools — optional. Desecration is disabled if absent.
@@ -1018,15 +955,9 @@ window.CraftForge.getPerformanceMetrics = () => performanceMetrics.map(metric =>
 window.CraftForge.reloadCraftIcons = () => setupCurrencyIcons();
 window.CraftForge.getConcreteBaseContext = concreteBaseContext;
 window.CraftForge.selectConcreteBase = selectConcreteBase;
-window.CraftForge.getNormalizedIndexCounts = () => normalizedIndexes ? ({
-  bases: normalizedIndexes.basesById.size,
-  itemClasses: normalizedIndexes.basesByItemClass.size,
-  modifiers: normalizedIndexes.modifiersById.size,
-  modifierGroups: normalizedIndexes.modifierGroups.size,
-  tags: normalizedIndexes.tags.size,
-  desecratedPools: normalizedIndexes.desecratedPools.size,
-  craftingItems: normalizedIndexes.craftingDefinitions.size,
-}) : null;
+window.CraftForge.getNormalizedIndexCounts = () => normalizedIndexes
+  ? { ...(normalizedData?.counts || {}) }
+  : null;
 
 function setupCurrencyIcons() {
   document.querySelectorAll('[data-craft-id]').forEach(card => {
@@ -3107,7 +3038,7 @@ function loadFromStash(index) {
   if (!saved) return;
 
   const savedPoolId = saved.simulatorPoolId || saved.jewelType || saved.baseType;
-  const targetGameVersion = normalizedData?.manifest?.targetGameVersion || null;
+  const targetGameVersion = normalizedData?.targetGameVersion || null;
   if (saved.targetGameVersion && targetGameVersion && saved.targetGameVersion !== targetGameVersion) {
     showError(`This saved item targets ${saved.targetGameVersion}; this workbench targets ${targetGameVersion}.`);
     return;

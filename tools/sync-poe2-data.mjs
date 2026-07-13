@@ -19,7 +19,7 @@ import {
   parseCoeExport,
   writeNormalizedFiles,
 } from './convert-coe-data.mjs';
-import { buildNormalizedBrowserSource } from './build-normalized-data.mjs';
+import { buildNormalizedBrowserSource, buildRuntimeBrowserSource } from './build-normalized-data.mjs';
 
 const TOOL_DIR = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(TOOL_DIR, '..');
@@ -322,6 +322,11 @@ function verifyCurrentRepository() {
   const actualBundle = readFileSync(path.join(PROJECT_ROOT, 'data', 'normalized.data.js'), 'utf8');
   if (normalizeText(actualBundle) !== normalizeText(expectedBundle)) {
     throw new Error('data/normalized.data.js is stale');
+  }
+  const expectedRuntimeBundle = buildRuntimeBrowserSource(NORMALIZED_DIR);
+  const actualRuntimeBundle = readFileSync(path.join(PROJECT_ROOT, 'data', 'runtime.data.js'), 'utf8');
+  if (normalizeText(actualRuntimeBundle) !== normalizeText(expectedRuntimeBundle)) {
+    throw new Error('data/runtime.data.js is stale');
   }
   return { normalized, provenance, active };
 }
