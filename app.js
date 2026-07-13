@@ -113,7 +113,9 @@ let modData = null;
 let desecData = null;
 let normalizedData = null;
 let normalizedIndexes = null;
+const concreteBasePoolCache = new Map();
 let armedCurrency = null;
+let stickyCurrency = null;
 let showDetails = false;
 let stash = [];
 let dragIndex = null;
@@ -510,12 +512,15 @@ function concreteBaseDefinition(base, simulatorPoolId) {
 }
 
 function concreteBasesForPool(simulatorPoolId) {
+  if (concreteBasePoolCache.has(simulatorPoolId)) return concreteBasePoolCache.get(simulatorPoolId);
   const mapping = normalizedData?.baseItems?.simulatorBaseMap?.[simulatorPoolId];
   if (!mapping || !normalizedIndexes) return [];
-  return (mapping.concreteBaseIds || [])
+  const bases = (mapping.concreteBaseIds || [])
     .map(id => normalizedIndexes.basesById.get(id))
     .filter(Boolean)
     .map(base => concreteBaseDefinition(base, simulatorPoolId));
+  concreteBasePoolCache.set(simulatorPoolId, bases);
+  return bases;
 }
 
 function concreteBasesForPools(simulatorPoolIds) {
@@ -1195,7 +1200,9 @@ function filterCraftInventory() {
 }
 
 function rejectCraftOperation(reason, shiftKey = false) {
-  if (!shiftKey) disarmCurrency();
+  // Sticky mode never survives an invalid operation. Physical Shift retains
+  // its historical behaviour for non-sticky currency use.
+  if (stickyCurrency || !shiftKey) disarmCurrency();
   playSound('error');
   triggerErrorAnimation();
   showError(reason);
@@ -1245,7 +1252,8 @@ function executeCraftOperation(definition, { shiftKey = false } = {}) {
   playSound(currency);
   triggerCraftAnimation(currency);
   renderItem(result);
-  if (!shiftKey || result.item.corrupted || result.item.sanctified) disarmCurrency();
+  const keepArmed = shiftKey || stickyCurrency === currency;
+  if (!keepArmed || result.item.corrupted || result.item.sanctified) disarmCurrency();
   return result;
 }
 
@@ -1277,7 +1285,11 @@ function dispatchCraftControl(definition, event, intent = 'activate', control = 
     else return false;
     return true;
   }
-  toggleCurrency(definition.engineAction);
+  if (intent === 'sticky' && isStickyCurrencyDefinition(definition)) {
+    toggleStickyCurrency(definition.engineAction);
+  } else {
+    toggleCurrency(definition.engineAction);
+  }
   return true;
 }
 
@@ -1292,7 +1304,7 @@ function setupCraftInventoryEvents() {
     const button = event.target.closest('[data-craft-id]');
     if (!button || !elements.currencyPanel.contains(button)) return;
     event.preventDefault();
-    dispatchCraftControl(definitionForElement(button), event, 'activate');
+    dispatchCraftControl(definitionForElement(button), event, 'sticky');
   });
   elements.currencyPanel.addEventListener('focusin', event => {
     const button = event.target.closest('[data-craft-id]');
@@ -1493,6 +1505,22 @@ function applyCurrencyToEngine(currency, eng = engine) {
   });
 }
 
+function isStickyCurrencyDefinition(definition) {
+  return Boolean(definition?.supported && definition.actionType === 'direct' &&
+    definition.engineAction && definition.handler &&
+    definition.handler !== 'applyHinekoraLock' && definition.handler !== 'startDesecrationFlow');
+}
+
+function toggleStickyCurrency(currency) {
+  if (!currency) return;
+  if (stickyCurrency === currency && armedCurrency === currency) {
+    disarmCurrency();
+    return;
+  }
+  stickyCurrency = currency;
+  armCurrency(currency);
+}
+
 function toggleCurrency(currency) {
   if (!currency) return;
   const item = engine.getItem();
@@ -1506,7 +1534,10 @@ function toggleCurrency(currency) {
     return;
   }
   if (armedCurrency === currency) disarmCurrency();
-  else armCurrency(currency);
+  else {
+    stickyCurrency = null;
+    armCurrency(currency);
+  }
 }
 
 // Show the picked-up currency's real icon riding along with the cursor orb,
@@ -1559,17 +1590,23 @@ function armCurrency(currency) {
   elements.currencyBtns.forEach(b => {
     const isArmed = actionForElement(b) === currency;
     b.classList.toggle('armed', isArmed);
+    b.classList.toggle('sticky', isArmed && stickyCurrency === currency);
     b.setAttribute('aria-pressed', String(isArmed));
+    b.dataset.repeatMode = String(isArmed && stickyCurrency === currency);
   });
   elements.boneBtns.forEach(b => {
     const isArmed = actionForElement(b) === currency;
     b.classList.toggle('armed', isArmed);
+    b.classList.toggle('sticky', isArmed && stickyCurrency === currency);
     b.setAttribute('aria-pressed', String(isArmed));
+    b.dataset.repeatMode = String(isArmed && stickyCurrency === currency);
   });
   if (elements.essenceBtns) elements.essenceBtns.forEach(b => {
     const isArmed = actionForElement(b) === currency;
     b.classList.toggle('armed', isArmed);
+    b.classList.toggle('sticky', isArmed && stickyCurrency === currency);
     b.setAttribute('aria-pressed', String(isArmed));
+    b.dataset.repeatMode = String(isArmed && stickyCurrency === currency);
   });
 
   const color = (CURRENCIES[currency] && CURRENCIES[currency].color) || DEFAULT_ORB_COLOR;
@@ -1587,17 +1624,21 @@ function armCurrency(currency) {
 
 function disarmCurrency() {
   armedCurrency = null;
+  stickyCurrency = null;
   elements.currencyBtns.forEach(b => {
-    b.classList.remove('armed');
+    b.classList.remove('armed', 'sticky');
     b.setAttribute('aria-pressed', 'false');
+    b.dataset.repeatMode = 'false';
   });
   elements.boneBtns.forEach(b => {
-    b.classList.remove('armed');
+    b.classList.remove('armed', 'sticky');
     b.setAttribute('aria-pressed', 'false');
+    b.dataset.repeatMode = 'false';
   });
   if (elements.essenceBtns) elements.essenceBtns.forEach(b => {
-    b.classList.remove('armed');
+    b.classList.remove('armed', 'sticky');
     b.setAttribute('aria-pressed', 'false');
+    b.dataset.repeatMode = 'false';
   });
   clearOrbIcon();
   elements.cursorOrb.style.opacity = '0';
@@ -2674,18 +2715,13 @@ function baseDetailRow(label, value, unavailable = false) {
 function renderConcreteBaseDetails(item) {
   const hasConcreteBase = item?.baseItemId != null;
   if (elements.baseDetailList) {
-    elements.baseDetailList.hidden = !hasConcreteBase;
+    const properties = hasConcreteBase ? Object.entries(item.baseProperties || {}) : [];
+    elements.baseDetailList.hidden = properties.length === 0;
     if (hasConcreteBase) {
       const fragment = document.createDocumentFragment();
-      if (item.requiredLevel != null && Number.isFinite(Number(item.requiredLevel))) {
-        fragment.appendChild(baseDetailRow('Required Level', String(item.requiredLevel)));
-      } else {
-        fragment.appendChild(baseDetailRow('Required Level', 'Unavailable in normalized source', true));
-      }
-      if (item.dropLevel != null && Number.isFinite(Number(item.dropLevel))) {
-        fragment.appendChild(baseDetailRow('Drop Level', String(item.dropLevel)));
-      }
-      for (const [key, value] of Object.entries(item.baseProperties || {})) {
+      // Audit levels stay on the model, but only player-relevant base
+      // properties belong in the in-game-style item tooltip.
+      for (const [key, value] of properties) {
         const label = capitalize(String(key).replaceAll('_', ' ').replace(/\s+/g, ' '));
         fragment.appendChild(baseDetailRow(label, String(value)));
       }
@@ -2702,7 +2738,7 @@ function renderConcreteBaseDetails(item) {
     for (const implicit of implicits) {
       const line = document.createElement('div');
       line.className = 'implicit-line';
-      line.textContent = implicit.displayText || implicit.key || `Modifier ${implicit.id}`;
+      line.textContent = implicit.displayText || implicit.key || 'Implicit modifier';
       line.dataset.implicitId = implicit.id;
       fragment.appendChild(line);
     }
@@ -2740,13 +2776,13 @@ function renderQualityDetails(item) {
 function renderSocketDetails(item) {
   if (!elements.socketList) return;
   const hasConcreteBase = item?.baseItemId != null;
-  elements.socketList.hidden = !hasConcreteBase;
-  if (!hasConcreteBase) {
+  const state = item?.socketState && typeof item.socketState === 'object' ? item.socketState : null;
+  const slots = Array.isArray(state?.slots) ? state.slots : [];
+  elements.socketList.hidden = !hasConcreteBase || slots.length === 0;
+  if (!hasConcreteBase || !slots.length) {
     elements.socketList.replaceChildren();
     return;
   }
-  const state = item?.socketState && typeof item.socketState === 'object' ? item.socketState : null;
-  const slots = Array.isArray(state?.slots) ? state.slots : [];
   const fragment = document.createDocumentFragment();
   if (!slots.length) {
     const line = document.createElement('div');
