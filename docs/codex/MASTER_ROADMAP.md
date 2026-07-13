@@ -235,6 +235,8 @@ Task 05 is implemented and tested at a verified boundary. The runtime keeps the 
 
 Task 06 is implemented and tested as an evidence-boundary slice. The item now carries deterministic empty/preserved-unverified socket state with typed contiguous slots, atomic malformed-state rejection, save/load and base-reset preservation, and a dedicated tooltip section. No Artificer's Orb, socket insertion, Rune, Soul Core, replacement, or extraction mutation is enabled: the checked-in source has no verified default/maximum socket semantics, target-version effects/localization, class limits, corruption behavior, or extraction procedure. The next numbered task is Task 07, Expedition and Temple/Atziri/Vaal systems.
 
+Task 07 is implemented and tested as the final evidence-boundary slice. Expedition Runeforging/Flux/Alloy records, Delirium/Instilling records, Temple/Atziri/sacrifice records, specialized Infusers/extraction records, and Vaal outcomes remain explicitly blocked where target-version transitions or weights are absent. The existing visible Vaal card remains atomic and probability-blocked; no specialized operation falls through to ordinary Vaal behavior. The numbered implementation sequence is complete; remaining work is the final parity review and any newly verified source data.
+
 Each task must end with:
 
 - relevant tests passing

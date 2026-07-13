@@ -136,6 +136,18 @@ Task 06 deterministic boundary: **47/47 engine**, **124/124 UI**, **69/69 data**
 
 The next numbered task is **Task 07 — Expedition and Temple/Atziri/Vaal systems**.
 
+## Task 07 Expedition, Temple/Atziri, Vaal, and specialized crafting checkpoint
+
+Task 07 completes the numbered audit without enabling unsupported outcomes. The authoritative registry retains **19 Runeforging/Expedition category definitions**, **26 Delirium/Instilling definitions**, and **four corruption category definitions**; all 49 are unsupported and hidden except the existing visible Vaal Orb parity card. The true Expedition equipment candidates are 17 (13 Alloys plus four Fluxes); Alloy Crossbow and Elemental Conflux are converter false positives and are excluded from equipment-operation parity. The true corruption candidates are Vaal Orb, Architect's Orb, and Ancient Infuser; the Sacrifice skill gem is likewise excluded. Vaal remains probability-unverified and atomically blocked, so no ordinary Vaal result is reused for Architect's Orb, Ancient Infuser, Infusers, extraction, or other specialized records.
+
+The normalized source identifies four Flux records (Blazing, Chilling, Crackling, and Void), thirteen Alloy records, Architect's Orb, and Ancient Infuser. It does not verify resistance conversion/replacement, property or quality interactions, corruption/sacrifice requirements, destruction/failure outcomes, specialized weights, or extraction transitions. Several task-listed names (including Crystallised Corruption, Core Destabiliser, Vaal Cultivation Orb, the named sacrifice Orbs, Orb of Extraction, and Vaal Siphoner) have no matching normalized source identity and remain explicit blockers. Vaal Infusers remain disabled quality audit records; the four Thesis Soul Cores remain blocked under the Task 06 socket audit.
+
+Delirium/Instilling and Runeforging state categories are likewise not inferred from labels: no equipment mutation, enchantment, implicit, socket effect, base-property, or probability rule is enabled without verified target-version evidence. Hinekora cannot preview unsupported specialized operations, and all blocked dispatches remain non-mutating.
+
+Task 07 deterministic boundary: **47/47 engine**, **124/124 UI**, **71/71 data**, normalized/currency/parity generators current, sync verification passing, and fixed-seed fuzz **30,016 operations / 3,984 meaningful mutations / 402 Hinekora consumptions / 0 exceptions / 0 invariant violations**, reviewed digest `68cf3661d60c39b202799fff940bab1070d3c24ebb396c55a6d7d9809c0b0b55`. No shipped runtime asset changed after the Task 06 cache boundary; interactive direct-file browser verification remains blocked by the Codex browser's local-file URL policy.
+
+The numbered roadmap is complete. The remaining roadmap item is final parity review and any future source-backed corrections; no push was performed.
+
 - Baseline deterministic suite against the original engine: **11/17 passed**. Failures covered the stale browser bundle, equipment limits, Magic-only classes, Alchemy count, Whittling ties, and Greater/Perfect semantics.
 - Current deterministic suite: **39/39 passed** with `node validation.mjs`.
 - Current UI DOM/CSS contract suite: **117/117 passed** with `node ui-validation.mjs`.

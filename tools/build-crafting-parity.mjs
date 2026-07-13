@@ -85,7 +85,7 @@ export function buildReport(index) {
     fullParityClaim: false,
     inventorySource: 'data/crafting/currency-index.json',
     registrySource: 'data/crafting/currency-index.json#craftRegistry',
-    entryDetailStatus: 'authoritative_registry_task06',
+    entryDetailStatus: 'authoritative_registry_task07',
     counts: {
       sourceEntries: index.counts.entries,
       registryDefinitions: definitions.length,
@@ -128,6 +128,21 @@ export function buildReport(index) {
       retainedRunes: 226,
       retainedSoulCores: 34,
       note: 'Task 06 formalizes deterministic empty/preserved socket state and a dedicated tooltip section. It does not enable Artificer, Rune, Soul Core, or extraction mutations because target-version limits, effects, and transitions are incomplete.',
+    },
+    task07Change: {
+      expeditionRuneforgingDefinitions: definitions.filter(definition => definition.category === 'runeforging').length,
+      expeditionEquipmentCandidates: 17,
+      excludedRuneforgingFalsePositiveSourceIds: [2191, 4402],
+      deliriumDefinitions: definitions.filter(definition => definition.category === 'delirium').length,
+      corruptionDefinitions: definitions.filter(definition => definition.category === 'corruption').length,
+      corruptionEquipmentCandidates: 3,
+      excludedCorruptionFalsePositiveSourceIds: [4479],
+      supportedSpecializedOperations: definitions.filter(definition =>
+        ['runeforging', 'delirium', 'corruption'].includes(definition.category) && definition.supported).length,
+      vaalVisibleBlocked: definitions.some(definition => definition.craftId === 'vaal' && definition.visible && !definition.supported),
+      vaalInfuserSourceIds: [65, 66, 67, 68],
+      thesisSoulCoreSourceIds: [770, 771, 772, 773],
+      note: 'Task 07 keeps Expedition, Delirium/Instilling, Temple/Atziri, sacrifice, extraction, and specialized Vaal operations blocked where exact target-version transitions or outcome weights are absent. Ordinary Vaal behavior is not reused.',
     },
     blockers: [
       'Full parity remains blocked while retained registry definitions still have implementation or verification blockers.',

@@ -3,6 +3,12 @@
 Target game version: **0.5.4**  
 Full parity claimed: **No**
 
+## Task 07 Expedition, Temple/Atziri, Vaal, and specialized crafting checkpoint
+
+Task 07 leaves the shipped visible surface unchanged and keeps unsupported specialized systems out of mutation dispatch. The registry retains **19 Runeforging/Expedition category**, **26 Delirium/Instilling**, and **four corruption category** definitions; all 49 are hidden and unsupported except the visible, probability-unverified Vaal Orb card. The true equipment candidates are 17 Expedition records and three corruption records; Alloy Crossbow, Elemental Conflux, and the Sacrifice skill gem are converter false positives excluded from equipment-operation parity. No specialized operation reuses ordinary Vaal outcomes.
+
+The four Fluxes, thirteen named Alloys, Architect's Orb, Ancient Infuser, Vaal Infusers, extraction candidates, and task-listed Temple/Atziri names remain source-audited blockers: exact target classes/tags, conversion/property/quality rules, corruption or sacrifice requirements, outcome weights, destruction/failure, extraction, and interactions are not verified. Missing normalized identities are recorded rather than fabricated. Delirium/Instilling and Runeforging results are not classified as enchantments, implicits, socket effects, or base properties without source-backed state definitions.
+
 ## Task 06 Sockets, Runes, and Soul Cores checkpoint
 
 The registry remains **531 definitions** for target **0.5.4**. Socketing retains **296 definitions** (Artificer's Orb plus 295 socketables), all hidden and unsupported: **288 blocked_missing_data** and **eight deprecated_for_target_version** records. No socketing mutation is claimed or enabled.

@@ -656,7 +656,7 @@ function countCraftDefinitionsBy(definitions, field, orderedValues = null) {
   return Object.fromEntries(pairs);
 }
 
-check('Task 06 authoritative crafting registry has complete stable coverage',
+check('Task 07 authoritative crafting registry has complete stable coverage',
   currencyIndex.schemaVersion >= 2 &&
   craftRegistry.length === 531 &&
   sourceBackedCraftDefinitions.length === currencyIndex.entries.length &&
@@ -665,7 +665,7 @@ check('Task 06 authoritative crafting registry has complete stable coverage',
   visibleCraftDefinitions.length === currencyIndex.counts.visibleCraftDefinitions &&
   registryCraftIds.size === craftRegistry.length &&
   new Set(craftRegistry.map(definition => definition.id)).size === craftRegistry.length);
-check('every crafting definition exposes the complete Task 06 data contract',
+check('every crafting definition exposes the complete Task 07 data contract',
   craftRegistry.every(definition =>
     requiredCraftDefinitionFields.every(field => Object.prototype.hasOwnProperty.call(definition, field)) &&
     typeof definition.craftId === 'string' && definition.craftId.length > 0 &&
@@ -696,7 +696,7 @@ check('registry tabs preserve runtime controls and surface quality audit cards',
   stable([...visibleCraftDefinitions.filter(definition => definition.category !== 'quality').map(definition => definition.craftId)].sort()) ===
     stable(Object.keys(currencyIndex.runtimeRegistry).sort()) &&
   visibleCraftDefinitions.filter(definition => definition.category === 'quality').length === 8);
-check('registry implementation classifications are exclusive after Task 06 audit surfacing',
+check('registry implementation classifications are exclusive after Task 07 audit surfacing',
   craftRegistry.every(definition => currencyIndex.allowedClassifications.includes(definition.implementationStatus)) &&
   stable(countCraftDefinitionsBy(craftRegistry, 'implementationStatus', currencyIndex.allowedClassifications)) ===
     stable(expectedRegistryClassificationCounts) &&
@@ -723,11 +723,11 @@ check('all Omen trigger craft references resolve inside the authoritative regist
     const triggerCraftId = definition.omenInteraction?.triggerCraftId;
     return triggerCraftId == null || registryCraftIds.has(triggerCraftId);
   }));
-check('Task 06 crafting parity is a direct complete projection of the registry',
+check('Task 07 crafting parity is a direct complete projection of the registry',
   craftingParity.schemaVersion === 2 &&
   craftingParity.targetGameVersion === currencyIndex.targetGameVersion &&
   craftingParity.fullParityClaim === false &&
-  craftingParity.entryDetailStatus === 'authoritative_registry_task06' &&
+  craftingParity.entryDetailStatus === 'authoritative_registry_task07' &&
   craftingParity.entries.length === craftRegistry.length &&
   parityByCraftId.size === craftRegistry.length &&
   craftRegistry.every(definition => {
@@ -759,6 +759,31 @@ check('Task 06 retained socketable cohorts match normalized source',
   actual.craftingItems.socketables.length === 295 &&
   stable(task06SocketTypeCounts) === stable({ '0': 221, '1': 34, '2': 35, '3': 4, '4': 1 }) &&
   !actual.craftingItems.methods.some(method => /extract|remove.*socket|socket.*remove/i.test(String(method.handler || ''))));
+const task07Definitions = craftRegistry.filter(definition =>
+  ['runeforging', 'delirium', 'corruption'].includes(definition.category));
+const task07ExpeditionSourceIds = [...Array.from({ length: 13 }, (_, index) => 5049 + index), 5067, 5068, 5069, 5070];
+const task07SpecializedSourceIds = [52, 54, 57, 65, 66, 67, 68];
+const task07ThesisSourceIds = [770, 771, 772, 773];
+const task07ExcludedSourceIds = [2191, 4402, 4479];
+const task07SpecializedEntries = currencyIndex.entries.filter(entry => task07ExpeditionSourceIds.concat(task07SpecializedSourceIds, task07ThesisSourceIds).includes(Number(entry.sourceItemId)));
+const task07InfuserDefinitions = craftRegistry.filter(definition => [65, 66, 67, 68].includes(Number(definition.sourceItemId)));
+const task07ThesisDefinitions = craftRegistry.filter(definition => task07ThesisSourceIds.includes(Number(definition.sourceItemId)));
+check('Task 07 Expedition, Delirium, and specialized corruption definitions remain blocked',
+  task07Definitions.length === 49 &&
+  task07Definitions.filter(definition => definition.category === 'runeforging').length === 19 &&
+  task07Definitions.filter(definition => definition.category === 'delirium').length === 26 &&
+  task07Definitions.filter(definition => definition.category === 'corruption').length === 4 &&
+  task07Definitions.filter(definition => definition.supported).length === 0 &&
+  task07Definitions.filter(definition => definition.craftId !== 'vaal').every(definition => definition.handler == null && definition.engineAction == null) &&
+  task07Definitions.filter(definition => definition.visible).map(definition => definition.craftId).join(',') === 'vaal' &&
+  task07Definitions.find(definition => definition.craftId === 'vaal')?.implementationStatus === 'probability_unverified');
+check('Task 07 source identities retain explicit blockers without invented outcomes',
+  task07SpecializedEntries.length === task07ExpeditionSourceIds.length + task07SpecializedSourceIds.length + task07ThesisSourceIds.length &&
+  task07SpecializedEntries.every(entry => typeof entry.reason === 'string' && entry.reason.length > 0) &&
+  task07InfuserDefinitions.length === 4 && task07InfuserDefinitions.every(definition => definition.category === 'quality' && definition.visible && !definition.supported) &&
+  task07ThesisDefinitions.length === 4 && task07ThesisDefinitions.every(definition => definition.category === 'socketing' && !definition.visible && !definition.supported) &&
+  currencyIndex.entries.filter(entry => task07ExcludedSourceIds.includes(Number(entry.sourceItemId))).length === task07ExcludedSourceIds.length &&
+  actual.craftingItems.methods.every(method => !/extract|sacrifice.*outcome|vaal.*outcome/i.test(String(method.handler || ''))));
 check('Task 03 parity counts derive exactly from source, registry, and visible definitions',
   craftingParity.counts.sourceEntries === currencyIndex.counts.entries &&
   craftingParity.counts.registryDefinitions === craftRegistry.length &&

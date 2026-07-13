@@ -89,6 +89,12 @@ No quality currency button is enabled merely from a known description.
 - The normalized source retains 295 socketables: 221 Rune records, 34 Soul Cores, 35 Idols, four Abyssal Eyes, and one Congealed Mist (the source classification cohort contains 226 Rune-tagged records). The registry retains 296 socketing definitions, all hidden and blocked/deprecated.
 - Artificer's Orb, socket insertion, Rune/Soul Core effects, replacement, and extraction remain disabled because target-version limits, class/effect semantics, localization/scaling, corruption behavior, and removal procedures are not verified. Implemented socket, Rune, Soul Core, and extraction counts remain zero.
 
+### Task 07 Expedition, Temple/Atziri, Vaal, and specialized crafting checkpoint
+
+- The final numbered audit keeps the existing visible Vaal card atomic and probability-blocked. The registry retains 19 Runeforging/Expedition category records, 26 Delirium/Instilling records, and four corruption category records, but the true equipment candidates are 17 Expedition records and three corruption records. Alloy Crossbow, Elemental Conflux, and the Sacrifice skill gem are converter false positives excluded from equipment-operation parity; no specialized operation falls through to ordinary Vaal behavior.
+- Fluxes, Alloys, Architect's Orb, Ancient Infuser, Vaal Infusers, extraction candidates, and the named Temple/Atziri records lack verified target-version transitions, limits, outcome weights, destruction/failure, or extraction rules. Missing source identities stay explicit blockers. Delirium/Instilling and Runeforging state categories are not guessed.
+- The numbered roadmap is complete. The remaining work is final parity review and future source-backed corrections; no push is performed.
+
 ---
 
 ## 🛠️ Build & tooling files
@@ -116,7 +122,7 @@ No quality currency button is enabled merely from a known description.
 | `fuzz.mjs` | **Node fuzz / regression harness for the crafting engine.** It treats malformed data, engine exceptions, malformed item state, zero meaningful mutations, invariant violations, and fixed-seed digest drift as fatal. The current Task 05 boundary is `node fuzz.mjs 30000 542026`; the reviewed digest is recorded in `VALIDATION_REPORT.md` after the full runtime check. |
 | `validation.mjs` | Deterministic 0.5.4-oriented engine/data regression suite, including injectable crafting RNG, generic concrete identity/state migration, source overlays, base-specific tags/affix limits, structured quality/socket preservation, Abyss/Essence applicability, explicit socket state, and all 56 populated pools. Current checkpoint: **47/47**. |
 | `ui-validation.mjs` | Dependency-free DOM/CSS contract checks for generated registry tabs/cards, shared dispatch, startup isolation, eligibility scope, filters, accessibility, the workbench grid, concrete-base flow, stash markup, Task 05 Omen gating/consumption, and Task 06 socket rendering. Current checkpoint: **124/124**. |
-| `data-validation.mjs` | Validates normalized schemas, all 1,760 concrete records, the complete crafting registry/parity projection, 31-class base parity, provenance, hashes, browser bundles, socketable cohorts, and explicit blockers using only repository-owned files. Current checkpoint: **69/69**. |
+| `data-validation.mjs` | Validates normalized schemas, all 1,760 concrete records, the complete crafting registry/parity projection, 31-class base parity, provenance, hashes, browser bundles, socketable cohorts, specialized-crafting cohorts, and explicit blockers using only repository-owned files. Current checkpoint: **71/71**. |
 
 ### Validation commands
 
@@ -131,7 +137,7 @@ node tools/sync-poe2-data.mjs verify
 node fuzz.mjs 30000 542026
 ```
 
-The Task 06 boundary passes **47/47 engine**, **124/124 UI**, and **69/69 data** checks. The fixed-seed fuzz run passes with zero exceptions, harness errors, or invariant violations; its digest is recorded in `VALIDATION_REPORT.md`. `tools/browser-smoke.mjs` performs real-script click-through checks against explicit `file://` or local-HTTP targets when Playwright is already available.
+The Task 07 boundary passes **47/47 engine**, **124/124 UI**, and **71/71 data** checks. The fixed-seed fuzz run passes with zero exceptions, harness errors, or invariant violations; its digest is recorded in `VALIDATION_REPORT.md`. `tools/browser-smoke.mjs` performs real-script click-through checks against explicit `file://` or local-HTTP targets when Playwright is already available.
 
 ---
 
