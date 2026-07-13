@@ -1057,7 +1057,8 @@ if (activeSnapshot) {
 const expectedBundle = buildNormalizedBrowserSource(NORMALIZED_DIR);
 const bundlePath = path.join(HERE, 'data', 'normalized.data.js');
 const actualBundle = readFileSync(bundlePath, 'utf8');
-check('generated normalized browser bundle is current', actualBundle === expectedBundle);
+check('generated normalized browser bundle is current',
+  actualBundle.replace(/\r\n?/g, '\n') === expectedBundle.replace(/\r\n?/g, '\n'));
 
 const context = { window: {} };
 vm.runInNewContext(actualBundle, context, { filename: bundlePath });

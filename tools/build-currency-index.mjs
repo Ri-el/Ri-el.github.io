@@ -96,6 +96,10 @@ function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
 }
 
+function normalizeText(value) {
+  return String(value).replace(/\r\n?/g, '\n');
+}
+
 function addToMapArray(map, key, value) {
   if (key == null) return;
   const normalized = String(key);
@@ -548,11 +552,11 @@ export function buildCurrencyIndex() {
     schemaVersion: INDEX_SCHEMA_VERSION,
     targetGameVersion: TARGET_VERSION,
     generatedFrom: {
-      normalizedManifestSha256: sha256(manifestRaw.trim()),
+      normalizedManifestSha256: sha256(normalizeText(manifestRaw).trim()),
       normalizedSourceSha256: manifest.source?.sha256 || null,
       normalizedSourceVersionStatus: manifest.source?.versionStatus || null,
       runtimeRegistrySource: 'data/crafting/runtime-registry.json',
-      runtimeRegistrySha256: sha256(registryRaw.trim()),
+      runtimeRegistrySha256: sha256(normalizeText(registryRaw).trim()),
     },
     allowedClassifications: CLASSIFICATIONS,
     sources: OFFICIAL_SOURCES,
@@ -575,6 +579,19 @@ export function buildCurrencyIndex() {
     runtimeRegistry,
     entries,
   };
+}
+
+// The complete index remains checked in as JSON for provenance and audit
+// validation. The browser only needs the tabs and definitions it can render,
+// so avoid parsing hundreds of hidden audit-only records on every startup.
+export function buildCurrencyBrowserSource(index = buildCurrencyIndex()) {
+  const runtimeIndex = {
+    schemaVersion: index.schemaVersion,
+    targetGameVersion: index.targetGameVersion,
+    craftTabs: index.craftTabs,
+    craftRegistry: index.craftRegistry.filter(definition => definition.visible),
+  };
+  return `window.CRAFTING_CURRENCY_INDEX=${JSON.stringify(runtimeIndex)};\n`;
 }
 
 function coverageMarkdown(index) {
@@ -608,7 +625,7 @@ export function writeCurrencyIndex(index = buildCurrencyIndex()) {
   mkdirSync(path.dirname(REPORT_OUTPUT), { recursive: true });
   const json = `${JSON.stringify(index, null, 2)}\n`;
   writeFileSync(JSON_OUTPUT, json, 'utf8');
-  writeFileSync(BROWSER_OUTPUT, `window.CRAFTING_CURRENCY_INDEX=${JSON.stringify(index)};\n`, 'utf8');
+  writeFileSync(BROWSER_OUTPUT, buildCurrencyBrowserSource(index), 'utf8');
   writeFileSync(REPORT_OUTPUT, coverageMarkdown(index), 'utf8');
   return index;
 }
@@ -617,7 +634,7 @@ function runCli() {
   const checkOnly = process.argv.includes('--check');
   const index = buildCurrencyIndex();
   const expectedJson = `${JSON.stringify(index, null, 2)}\n`;
-  const expectedBrowser = `window.CRAFTING_CURRENCY_INDEX=${JSON.stringify(index)};\n`;
+  const expectedBrowser = buildCurrencyBrowserSource(index);
   const expectedReport = coverageMarkdown(index);
   if (checkOnly) {
     const checks = [
@@ -626,7 +643,9 @@ function runCli() {
       [REPORT_OUTPUT, expectedReport],
     ];
     for (const [file, expected] of checks) {
-      if (readFileSync(file, 'utf8') !== expected) throw new Error(`${path.relative(ROOT, file)} is stale.`);
+      if (normalizeText(readFileSync(file, 'utf8')) !== normalizeText(expected)) {
+        throw new Error(`${path.relative(ROOT, file)} is stale.`);
+      }
     }
     console.log(`Currency index is current (${index.counts.entries} entries, ${index.counts.unclassified} unclassified).`);
     return;

@@ -8,6 +8,9 @@ const select = fs.readFileSync(new URL('./select.js', import.meta.url), 'utf8');
 const serviceWorker = fs.readFileSync(new URL('./sw.js', import.meta.url), 'utf8');
 const browserSmoke = fs.readFileSync(new URL('./tools/browser-smoke.mjs', import.meta.url), 'utf8');
 const currencyIndex = JSON.parse(fs.readFileSync(new URL('./data/crafting/currency-index.json', import.meta.url), 'utf8'));
+const currencyBrowserSource = fs.readFileSync(new URL('./data/crafting/currency-index.data.js', import.meta.url), 'utf8').trim();
+const currencyBrowserPrefix = 'window.CRAFTING_CURRENCY_INDEX=';
+const currencyBrowserIndex = JSON.parse(currencyBrowserSource.slice(currencyBrowserPrefix.length, -1));
 const craftTabs = Array.isArray(currencyIndex.craftTabs) ? currencyIndex.craftTabs : [];
 const craftRegistry = Array.isArray(currencyIndex.craftRegistry) ? currencyIndex.craftRegistry : [];
 
@@ -96,6 +99,11 @@ check('authoritative registry audits 531 definitions and exposes runtime control
   craftIds.length === new Set(craftIds).size &&
   craftIds.every(id => currencyIndex.runtimeRegistry[id] ||
     craftRegistry.find(definition => definition.craftId === id)?.sourceItemId != null));
+check('browser registry contains only the 45 visible runtime definitions',
+  currencyBrowserSource.startsWith(currencyBrowserPrefix) &&
+  currencyBrowserIndex.craftRegistry.length === visibleCraftDefinitions.length &&
+  JSON.stringify(currencyBrowserIndex.craftRegistry.map(definition => definition.craftId)) === JSON.stringify(craftIds) &&
+  currencyBrowserIndex.craftRegistry.every(definition => definition.visible === true));
 check('every visible definition has generated-UI metadata and a valid tab',
   visibleCraftDefinitions.every(definition =>
     definition.craftId && definition.displayName && definition.description && definition.iconId &&
@@ -470,9 +478,9 @@ check('tooltip renders socket state in a dedicated section',
 check('Jewel-only flavor text is conditional on Jewel mode',
   /flavorEl\.hidden = !isJewelMode/.test(app) &&
   /Place into an allocated Jewel Socket on the Passive Skill Tree/.test(html));
-check('runtime selector and socket stylesheet is versioned in the Task 06 offline shell',
+check('runtime selector, socket stylesheet, and performance bundle are versioned in the offline shell',
   /header-fix\.css\?v=18/.test(select) &&
-  /CACHE_NAME = 'poe2-craft-task06-sockets-runes-v1'/.test(serviceWorker) &&
+  /CACHE_NAME = 'poe2-craft-perf-runtime-index-v1'/.test(serviceWorker) &&
   serviceWorker.includes("'./header-fix.css?v=18'"));
 
 console.log(`\nRESULT: ${passed}/${passed + failed} checks passed`);

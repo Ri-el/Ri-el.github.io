@@ -55,7 +55,7 @@ if (targets.length === 0) {
       assert(startup.modBaseCount > 0, `${target}: MOD_BASES did not initialize`);
       assert(startup.normalizedPresent, `${target}: normalized data did not initialize`);
       assert(startup.currencyIndexPresent, `${target}: currency index did not initialize`);
-      assert.equal(startup.craftRegistryLength, 531, `${target}: registry length`);
+      assert.equal(startup.craftRegistryLength, 45, `${target}: visible runtime registry length`);
       assert.equal(startup.craftTabsLength, 10, `${target}: tab length`);
       assert(startup.craftForgePresent && startup.normalizedCounts, `${target}: CraftForge bridge/indexes unavailable`);
       assert.equal(startup.toast, '', `${target}: startup toast`);

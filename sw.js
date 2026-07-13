@@ -9,7 +9,7 @@
 //  - On activate we delete every older cache automatically.
 //  - skipWaiting + clients.claim means a new worker takes over instantly.
 
-const CACHE_NAME = 'poe2-craft-task06-sockets-runes-v1';
+const CACHE_NAME = 'poe2-craft-perf-runtime-index-v1';
 
 const APP_SHELL = [
   './',

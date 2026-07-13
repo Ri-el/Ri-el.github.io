@@ -27,12 +27,18 @@ export function buildNormalizedBrowserSource(directory = NORMALIZED_DIR) {
   return `window.COE_NORMALIZED_DATA={${parts.join(',')}};\n`;
 }
 
+function normalizeText(value) {
+  return String(value).replace(/\r\n?/g, '\n');
+}
+
 function runCli() {
   const checkOnly = process.argv.includes('--check');
   const source = buildNormalizedBrowserSource();
   if (checkOnly) {
     const actual = readFileSync(OUTPUT_FILE, 'utf8');
-    if (actual !== source) throw new Error('data/normalized.data.js is stale; rebuild browser data.');
+    if (normalizeText(actual) !== normalizeText(source)) {
+      throw new Error('data/normalized.data.js is stale; rebuild browser data.');
+    }
     console.log('data/normalized.data.js matches normalized source JSON.');
     return;
   }

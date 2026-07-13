@@ -43,6 +43,10 @@ function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
 }
 
+function normalizeText(value) {
+  return String(value).replace(/\r\n?/g, '\n');
+}
+
 function atomicWrite(filePath, contents) {
   mkdirSync(path.dirname(filePath), { recursive: true });
   const temporary = `${filePath}.${process.pid}.tmp`;
@@ -316,7 +320,9 @@ function verifyCurrentRepository() {
   }
   const expectedBundle = buildNormalizedBrowserSource(NORMALIZED_DIR);
   const actualBundle = readFileSync(path.join(PROJECT_ROOT, 'data', 'normalized.data.js'), 'utf8');
-  if (actualBundle !== expectedBundle) throw new Error('data/normalized.data.js is stale');
+  if (normalizeText(actualBundle) !== normalizeText(expectedBundle)) {
+    throw new Error('data/normalized.data.js is stale');
+  }
   return { normalized, provenance, active };
 }
 
