@@ -184,9 +184,18 @@
               <option value="">All categories</option>
             </select>
           </label>
+          <fieldset class="craft-inventory-mode" aria-label="Crafting inventory mode">
+            <legend>Inventory</legend>
+            <label><input type="radio" name="craft-inventory-mode" value="available" checked> Available</label>
+            <label><input type="radio" name="craft-inventory-mode" value="known"> All known items</label>
+          </fieldset>
           <label class="craft-applicable-filter" for="craft-applicable-only">
             <input id="craft-applicable-only" type="checkbox">
             <span>Applicable only</span>
+          </label>
+          <label id="craft-deprecated-filter-label" class="craft-applicable-filter craft-deprecated-filter" for="craft-show-deprecated" hidden>
+            <input id="craft-show-deprecated" type="checkbox">
+            <span>Show deprecated audit items</span>
           </label>
           <p id="craft-result-count" class="craft-result-count" aria-live="polite">Loading crafting registry...</p>
         </div>

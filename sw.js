@@ -9,7 +9,7 @@
 //  - On activate we delete every older cache automatically.
 //  - skipWaiting + clients.claim means a new worker takes over instantly.
 
-const CACHE_NAME = 'poe2-craft-zero-affix-v1';
+const CACHE_NAME = 'poe2-craft-registry-v2';
 
 const APP_SHELL = [
   './',
@@ -29,6 +29,7 @@ const APP_SHELL = [
   './data/desecrated-mods.data.js',
   './data/runtime.data.js',
   './data/crafting/currency-index.data.js',
+  './data/crafting/known-items.data.js',
   './manifest.json',
 ];
 

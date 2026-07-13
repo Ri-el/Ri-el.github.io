@@ -707,9 +707,9 @@ const expectedRegistryClassificationCounts = {
   implemented: currencyIndex.counts.byClassification.implemented + 1,
 };
 const expectedVisibleClassificationCounts = {
-  ...currencyIndex.counts.runtimeByClassification,
-  blocked_missing_data: (currencyIndex.counts.runtimeByClassification.blocked_missing_data || 0) +
-    visibleCraftDefinitions.filter(definition => definition.category === 'quality').length,
+  ...currencyIndex.counts.byClassification,
+  implemented: currencyIndex.counts.byClassification.implemented + 1,
+  deprecated_for_target_version: 0,
 };
 
 function countCraftDefinitionsBy(definitions, field, orderedValues = null) {
@@ -762,8 +762,8 @@ check('registry tabs preserve runtime controls and surface quality audit cards',
   craftTabs.length === 10 &&
   registryTabIds.size === craftTabs.length &&
   craftRegistry.every(definition => registryTabIds.has(definition.tab)) &&
-  stable([...visibleCraftDefinitions.filter(definition => definition.category !== 'quality').map(definition => definition.craftId)].sort()) ===
-    stable(Object.keys(currencyIndex.runtimeRegistry).sort()) &&
+  craftRegistry.filter(definition => definition.supported).length === 46 &&
+  craftRegistry.filter(definition => definition.supported).every(definition => definition.visible) &&
   visibleCraftDefinitions.filter(definition => definition.category === 'quality').length === 8);
 check('registry implementation classifications are exclusive after Task 07 audit surfacing',
   craftRegistry.every(definition => currencyIndex.allowedClassifications.includes(definition.implementationStatus)) &&
@@ -786,7 +786,7 @@ check('registry evidence and fixtures never replace unresolved blockers with inv
     definition.testFixtureIds.length > 0 ||
     (typeof definition.blocker === 'string' && definition.blocker.length > 0)) &&
   visibleCraftDefinitions.every(definition => definition.testFixtureIds.length > 0 ||
-    (definition.category === 'quality' && !definition.supported)));
+    (!definition.supported && typeof definition.blocker === 'string' && definition.blocker.length > 0)));
 check('all Omen trigger craft references resolve inside the authoritative registry',
   craftRegistry.every(definition => {
     const triggerCraftId = definition.omenInteraction?.triggerCraftId;
@@ -821,7 +821,8 @@ const task06SocketTypeCounts = Object.fromEntries([...new Set(actual.craftingIte
   .map(type => [String(type), actual.craftingItems.socketables.filter(record => record.type === type).length]));
 check('Task 06 socket inventory remains explicit and blocked',
   task06SocketDefinitions.length === 296 &&
-  task06SocketDefinitions.every(definition => !definition.supported && !definition.visible) &&
+  task06SocketDefinitions.every(definition => !definition.supported) &&
+  task06SocketDefinitions.filter(definition => definition.visible).length === 288 &&
   task06SocketDefinitions.filter(definition => definition.implementationStatus === 'blocked_missing_data').length === 288 &&
   task06SocketDefinitions.filter(definition => definition.implementationStatus === 'deprecated_for_target_version').length === 8);
 check('Task 06 retained socketable cohorts match normalized source',
@@ -844,13 +845,13 @@ check('Task 07 Expedition, Delirium, and specialized corruption definitions rema
   task07Definitions.filter(definition => definition.category === 'corruption').length === 4 &&
   task07Definitions.filter(definition => definition.supported).length === 0 &&
   task07Definitions.filter(definition => definition.craftId !== 'vaal').every(definition => definition.handler == null && definition.engineAction == null) &&
-  task07Definitions.filter(definition => definition.visible).map(definition => definition.craftId).join(',') === 'vaal' &&
+  task07Definitions.every(definition => definition.visible) &&
   task07Definitions.find(definition => definition.craftId === 'vaal')?.implementationStatus === 'probability_unverified');
 check('Task 07 source identities retain explicit blockers without invented outcomes',
   task07SpecializedEntries.length === task07ExpeditionSourceIds.length + task07SpecializedSourceIds.length + task07ThesisSourceIds.length &&
   task07SpecializedEntries.every(entry => typeof entry.reason === 'string' && entry.reason.length > 0) &&
   task07InfuserDefinitions.length === 4 && task07InfuserDefinitions.every(definition => definition.category === 'quality' && definition.visible && !definition.supported) &&
-  task07ThesisDefinitions.length === 4 && task07ThesisDefinitions.every(definition => definition.category === 'socketing' && !definition.visible && !definition.supported) &&
+  task07ThesisDefinitions.length === 4 && task07ThesisDefinitions.every(definition => definition.category === 'socketing' && definition.visible && !definition.supported) &&
   currencyIndex.entries.filter(entry => task07ExcludedSourceIds.includes(Number(entry.sourceItemId))).length === task07ExcludedSourceIds.length &&
   actual.craftingItems.methods.every(method => !/extract|sacrifice.*outcome|vaal.*outcome/i.test(String(method.handler || ''))));
 check('Task 03 parity counts derive exactly from source, registry, and visible definitions',

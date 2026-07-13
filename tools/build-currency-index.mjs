@@ -11,7 +11,9 @@ const NORMALIZED_DIR = path.join(ROOT, 'data', 'normalized');
 const OUTPUT_DIR = path.join(ROOT, 'data', 'crafting');
 const JSON_OUTPUT = path.join(OUTPUT_DIR, 'currency-index.json');
 const BROWSER_OUTPUT = path.join(OUTPUT_DIR, 'currency-index.data.js');
+const KNOWN_BROWSER_OUTPUT = path.join(OUTPUT_DIR, 'known-items.data.js');
 const REGISTRY_SOURCE = path.join(OUTPUT_DIR, 'runtime-registry.json');
+const EXPANSION_SOURCE = path.join(OUTPUT_DIR, 'registry-expansion.json');
 const REPORT_OUTPUT = path.join(ROOT, 'reports', 'currency-coverage.md');
 const TARGET_VERSION = '0.5.4';
 const INDEX_SCHEMA_VERSION = 2;
@@ -92,6 +94,10 @@ function readRegistrySource() {
   return JSON.parse(readFileSync(REGISTRY_SOURCE, 'utf8'));
 }
 
+function readExpansionSource() {
+  return JSON.parse(readFileSync(EXPANSION_SOURCE, 'utf8'));
+}
+
 function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
 }
@@ -150,6 +156,7 @@ function isDeprecated(item) {
 
 function fallbackClassification(item) {
   if (isDeprecated(item)) return 'deprecated_for_target_version';
+  if ([2191, 4402, 4479].includes(Number(item.id))) return 'non_item_currency';
   // Every retained normalized item is an item-affecting method, Omen, Essence,
   // Catalyst, socketable, emotion, or explicitly retained data-only crafting
   // resource. Until an exact state transition is implemented, it stays blocked.
@@ -164,6 +171,8 @@ function explanationFor(classification, runtimeCraft = null) {
       return 'Mutation is implemented, but target-version outcome probabilities are not encoded by the retained public data.';
     case 'deprecated_for_target_version':
       return 'Source record is retained for audit, but is unused/deprecated for the 0.5.4 target.';
+    case 'non_item_currency':
+      return 'Retained source-extraction record is not an item-affecting crafting operation.';
     case 'blocked_missing_data':
       return runtimeCraft
         ? runtimeCraft.disabledReason || runtimeCraft.blocker
@@ -287,6 +296,55 @@ function fallbackBlocker(entry, category) {
   if (entry.classification === 'probability_unverified') {
     return `Mechanic blocked because exact target-version outcome probabilities for ${entry.displayName} are not verified.`;
   }
+  if (entry.classification === 'non_item_currency') {
+    const detail = Number(entry.sourceItemId) === 2191
+      ? 'a Crossbow base item whose name contains “Alloy”'
+      : Number(entry.sourceItemId) === 4402
+        ? 'an Elemental Conflux skill gem'
+        : 'the Sacrifice skill gem';
+    return `${entry.displayName} is retained for source-audit completeness but is ${detail}, not a crafting currency or workbench operation.`;
+  }
+  const identity = `${entry.displayName || ''} ${entry.metadataKey || ''}`;
+  const classifications = new Set(entry.sourceClassifications || []);
+  if (/^Ancient (?:Jawbone|Rib|Collarbone)$/i.test(entry.displayName)) {
+    return `Mechanic blocked because ${entry.displayName} requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete.`;
+  }
+  if (/Vertebra/i.test(identity)) {
+    return `Mechanic blocked because ${entry.displayName} targets Waystones and the simulator has no verified Waystone item-state or modifier-pool model.`;
+  }
+  if (/Altered (?:Jawbone|Rib|Collarbone|Cranium|Vertebra)/i.test(identity)) {
+    return `Mechanic blocked because the retained text for ${entry.displayName} describes a chance for an otherworldly outcome without encoding its probability or complete outcome pool.`;
+  }
+  if (category === 'essences') {
+    const transition = /^Perfect Essence/i.test(entry.displayName)
+      ? 'remove-one/add-one transition'
+      : 'Magic-to-Rare transition';
+    return `Mechanic blocked because the ${transition} is known, but the guaranteed modifier IDs retained for ${entry.displayName} have no canonical display templates, runtime modifier-group identities, or complete item-class eligibility in the browser data; applying them would lose modifier identity and provenance.`;
+  }
+  if (/Alloy/i.test(identity)) {
+    return `Mechanic blocked because ${entry.displayName} has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts.`;
+  }
+  if (/Resistance Flux/i.test(identity)) {
+    return `Mechanic blocked because ${entry.displayName} is known to transform resistance modifiers, but the retained data does not map every source modifier tier to an equivalent target resistance modifier while preserving tier, range, group, and weight identity.`;
+  }
+  if (classifications.has('catalyst')) {
+    return `Mechanic blocked because ${entry.displayName}'s jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version ${TARGET_VERSION}.`;
+  }
+  if (classifications.has('distilled-emotion')) {
+    return `Mechanic blocked because ${entry.displayName}'s Jewel replacement target is retained only as source modifier IDs; canonical display templates, group-conflict identity, and exact class labels are incomplete in the browser runtime.`;
+  }
+  if (/Artificer/i.test(identity)) {
+    return `Mechanic blocked because ${entry.displayName} adds a Rune Socket, but the retained per-base socket count is explicitly unverified as a default or maximum, so the simulator cannot enforce a safe socket-cap transition.`;
+  }
+  if (classifications.has('socketable') || /(?:Rune|Soul Core)/i.test(identity)) {
+    return `Mechanic blocked because ${entry.displayName}'s effect text is retained, but verified socket capacity, insertion binding, replacement, removal, and corruption restrictions are incomplete; no socket mutation is exposed.`;
+  }
+  if (/Sacrifice/i.test(identity)) {
+    return `Mechanic blocked because the retained generic ${entry.displayName} identity does not distinguish the target-version Orb of Sacrifice variants or encode their corrupted-enchantment upgrade mapping and random explicit-removal constraints.`;
+  }
+  if (/Infuser|Architect|Atziri/i.test(identity)) {
+    return `Mechanic blocked because ${entry.displayName}'s exact quality mutation or other target model, outcome table, cap interaction, and target-version probabilities are not present in the retained data.`;
+  }
   if (category === 'quality') {
     const sourceId = Number(entry.sourceItemId);
     if ([0, 1, 6, 28].includes(sourceId)) {
@@ -336,6 +394,7 @@ function completeAuthoredDefinition(definition, sourceEntry, tabById) {
     accentColor: definition.accentColor,
     cssClasses: definition.cssClasses,
     description: definition.description,
+    assumption: definition.assumption || null,
     actionType: definition.actionType,
     activation: definition.activation,
     engineAction: definition.engineAction,
@@ -358,6 +417,9 @@ function completeAuthoredDefinition(definition, sourceEntry, tabById) {
     ]),
     implementationStatus: definition.implementationStatus,
     verificationStatus: definition.verificationStatus,
+    confidence: definition.confidence || (definition.supported ? 'verified' : 'blocked'),
+    historyTier: definition.operationOptions?.variantTier ||
+      (definition.actionType === 'direct' ? 1 : null),
     blocker: definition.blocker,
     testFixtureIds: definition.testFixtureIds,
     supported: definition.supported,
@@ -387,7 +449,9 @@ function fallbackDefinition(entry, tabById) {
     tab: category,
     tabOrder: tab.order,
     displayOrder: 1000 + Number(entry.sourceItemId),
-    equipmentRelevance: 'equipment_crafting_candidate_unverified',
+    equipmentRelevance: entry.classification === 'non_item_currency'
+      ? 'source_extraction_non_crafting'
+      : 'equipment_crafting_candidate_unverified',
     iconId: `source-item-${entry.sourceItemId}`,
     iconFallback: fallbackIconText(entry.displayName),
     accentColor: TAB_ACCENTS[category],
@@ -416,14 +480,17 @@ function fallbackDefinition(entry, tabById) {
     implementationStatus: entry.classification,
     verificationStatus: entry.classification === 'deprecated_for_target_version'
       ? 'deprecated_for_target_version'
-      : 'not_verified',
+      : entry.classification === 'non_item_currency' ? 'verified_non_crafting' : 'not_verified',
+    confidence: entry.classification === 'deprecated_for_target_version'
+      ? 'deprecated'
+      : entry.classification === 'non_item_currency' ? 'non_item' : 'blocked',
+    historyTier: null,
     blocker,
     testFixtureIds: [],
     supported: false,
-    // Quality records are surfaced as disabled audit cards so the workbench
-    // can explain their verified target taxonomy and the exact missing rule;
-    // they never acquire an operation handler from source descriptions alone.
-    visible: category === 'quality',
+    // Every retained record is discoverable in All known items. Deprecated
+    // records remain behind the explicit audit/deprecated control.
+    visible: entry.classification !== 'deprecated_for_target_version',
     targetGameVersion: TARGET_VERSION,
     sourceClassifications: entry.sourceClassifications,
     sourceTags: entry.sourceTags,
@@ -435,8 +502,8 @@ function validateGeneratedRegistry(craftRegistry, sourceEntries, craftTabs) {
   assert(craftRegistry.length === 531, `Generated crafting registry has ${craftRegistry.length} definitions; expected 531.`);
   assert(new Set(craftRegistry.map(definition => definition.craftId)).size === craftRegistry.length,
     'Generated crafting registry contains duplicate craft IDs.');
-  assert(craftRegistry.filter(definition => definition.visible).length === 45,
-    'Generated crafting registry must contain 37 runtime controls plus 8 visible quality audit cards.');
+  assert(craftRegistry.filter(definition => definition.visible).length === 522,
+    'Generated crafting registry must expose all 522 non-deprecated definitions in All known items.');
   const sourceIds = craftRegistry.filter(definition => definition.sourceItemId != null).map(definition => String(definition.sourceItemId));
   const metadataKeys = craftRegistry.filter(definition => definition.metadataKey != null).map(definition => definition.metadataKey);
   assert(sourceIds.length === sourceEntries.length && new Set(sourceIds).size === sourceEntries.length,
@@ -471,14 +538,26 @@ export function buildCurrencyIndex() {
   const manifest = JSON.parse(manifestRaw);
   const registryRaw = readFileSync(REGISTRY_SOURCE, 'utf8');
   const registrySource = JSON.parse(registryRaw);
+  const expansionRaw = readFileSync(EXPANSION_SOURCE, 'utf8');
+  const expansionSource = JSON.parse(expansionRaw);
   validateRuntimeRegistrySource(registrySource, crafting.items || []);
 
   const methodByItemId = buildMethodIndex(crafting.methods);
+  const expandedDefinitions = expandRegistryDefinitions(
+    expansionSource,
+    crafting.items || [],
+    methodByItemId
+  );
+  const authoredDefinitions = [...registrySource.definitions, ...expandedDefinitions];
+  assert(new Set(authoredDefinitions.map(definition => definition.craftId)).size === authoredDefinitions.length,
+    'Combined runtime and expansion registry contains duplicate craft IDs.');
   const omenByItemId = new Map((crafting.omens || []).map(omen => [String(omen.itemId), omen]));
   const essenceByItemId = new Map((essences.essences || []).map(essence => [String(essence.itemId), essence]));
-  const authoredBySourceId = new Map(registrySource.definitions
+  const authoredBySourceId = new Map(authoredDefinitions
     .filter(definition => definition.sourceItemId != null)
     .map(definition => [String(definition.sourceItemId), definition]));
+  assert(authoredBySourceId.size === authoredDefinitions.filter(definition => definition.sourceItemId != null).length,
+    'Combined registry claims a normalized source item more than once.');
 
   const entries = (crafting.items || []).map(item => {
     const runtimeCraft = authoredBySourceId.get(String(item.id)) || null;
@@ -515,7 +594,7 @@ export function buildCurrencyIndex() {
       ? completeAuthoredDefinition(authored, entry, tabById)
       : fallbackDefinition(entry, tabById);
   });
-  for (const authored of registrySource.definitions.filter(definition => definition.sourceItemId == null)) {
+  for (const authored of authoredDefinitions.filter(definition => definition.sourceItemId == null)) {
     craftRegistry.push(completeAuthoredDefinition(authored, null, tabById));
   }
   craftRegistry.sort((a, b) => a.tabOrder - b.tabOrder || a.displayOrder - b.displayOrder ||
@@ -523,7 +602,7 @@ export function buildCurrencyIndex() {
   validateGeneratedRegistry(craftRegistry, entries, craftTabs);
 
   const generatedById = new Map(craftRegistry.map(definition => [definition.craftId, definition]));
-  const runtimeRegistry = Object.fromEntries(registrySource.definitions.map(authored => {
+  const runtimeRegistry = Object.fromEntries(authoredDefinitions.map(authored => {
     const definition = generatedById.get(authored.craftId);
     const source = authored.sourceItemId == null ? null : entryBySourceId.get(String(authored.sourceItemId));
     const classification = runtimeClassification(authored);
@@ -557,18 +636,22 @@ export function buildCurrencyIndex() {
       normalizedSourceVersionStatus: manifest.source?.versionStatus || null,
       runtimeRegistrySource: 'data/crafting/runtime-registry.json',
       runtimeRegistrySha256: sha256(normalizeText(registryRaw).trim()),
+      registryExpansionSource: 'data/crafting/registry-expansion.json',
+      registryExpansionSha256: sha256(normalizeText(expansionRaw).trim()),
     },
     allowedClassifications: CLASSIFICATIONS,
-    sources: OFFICIAL_SOURCES,
+    sources: [...OFFICIAL_SOURCES, ...(expansionSource.sources || [])],
     migration: {
       mode: 'authoritative-generated-registry',
       behaviorOwner: 'Registry records reference stable JavaScript validator and handler names; executable functions remain in classic browser scripts.',
-      runtimeDefinitions: registrySource.definitions.length,
+      runtimeDefinitions: authoredDefinitions.length,
+      retainedStartupDefinitions: registrySource.definitions.length,
+      expandedDefinitions: expandedDefinitions.length,
     },
     counts: {
       entries: entries.length,
       byClassification: counts,
-      runtimeDefinitions: registrySource.definitions.length,
+      runtimeDefinitions: authoredDefinitions.length,
       runtimeByClassification: runtimeCounts,
       craftRegistryDefinitions: craftRegistry.length,
       visibleCraftDefinitions: craftRegistry.filter(definition => definition.visible).length,
@@ -581,17 +664,157 @@ export function buildCurrencyIndex() {
   };
 }
 
+const BONE_ITEM_CLASSES = Object.freeze({
+  jawbone: [
+    'Claw', 'Dagger', 'Wand', 'One Hand Sword', 'One Hand Axe', 'One Hand Mace',
+    'Spear', 'Flail', 'Bow', 'Staff', 'Two Hand Sword', 'Two Hand Axe',
+    'Two Hand Mace', 'Quiver', 'Sceptre', 'Warstaff', 'Crossbow', 'Talisman',
+  ],
+  rib: ['Gloves', 'Boots', 'Body Armour', 'Helmet', 'Shield', 'Buckler', 'Focus'],
+  collarbone: ['Amulet', 'Ring', 'Belt'],
+});
+
+function expandRegistryDefinitions(expansion, craftingItems, methodByItemId) {
+  assert(expansion?.schemaVersion === 1, 'Unsupported registry expansion schema.');
+  assert(expansion.targetGameVersion === TARGET_VERSION,
+    `Registry expansion target ${expansion.targetGameVersion} does not match ${TARGET_VERSION}.`);
+  assert(Array.isArray(expansion.definitions), 'Registry expansion definitions are missing.');
+  const itemById = new Map(craftingItems.map(item => [String(item.id), item]));
+  const craftIds = new Set();
+  return expansion.definitions.map(compact => {
+    assert(!craftIds.has(compact.craftId), `Duplicate expansion craft ID ${compact.craftId}.`);
+    craftIds.add(compact.craftId);
+    assert(compact.confidence === 'verified' || compact.confidence === 'inferred',
+      `Expansion ${compact.craftId} must be verified or inferred.`);
+    const item = itemById.get(String(compact.sourceItemId));
+    assert(item, `Expansion ${compact.craftId} references unknown item ${compact.sourceItemId}.`);
+    const sourceMethods = methodByItemId.get(String(compact.sourceItemId)) || [];
+    const isOmen = compact.kind === 'crafting_omen';
+    const isBone = compact.kind === 'abyss_bone';
+    assert(isOmen || isBone, `Expansion ${compact.craftId} has unknown kind ${compact.kind}.`);
+    const method = sourceMethods[0] || null;
+    if (isBone) assert(method, `Abyss Bone ${compact.craftId} has no retained method record.`);
+    const maxItemLevel = method?.properties?.find(property => property.key === 'max_item_level')?.value ?? null;
+    const minModifierLevel = method?.properties?.find(property => property.key === 'min_mod_level')?.value ?? null;
+    const verificationStatus = compact.confidence === 'verified'
+      ? 'verified_exact_item_text'
+      : 'inferred_shared_desecration_transition';
+    return {
+      craftId: compact.craftId,
+      sourceItemId: compact.sourceItemId,
+      metadataKey: item.metadataKey,
+      displayName: item.displayName,
+      category: isOmen ? 'ritual' : 'abyss',
+      equipmentRelevance: 'equipment_runtime',
+      displayOrder: compact.displayOrder,
+      iconId: compact.craftId,
+      iconFallback: compact.iconFallback,
+      accentColor: isOmen ? '#d4af5a' : '#5fd38a',
+      cssClasses: isOmen ? ['abyss-btn', 'craft-omen-btn'] : ['abyss-btn', 'bone-btn'],
+      description: isBone
+        ? `${compact.description} Inferred assumption: Gnawed and Preserved family variants use the same three-option Well of Souls reveal flow as Preserved Cranium.`
+        : compact.description,
+      assumption: isBone
+        ? 'Gnawed and Preserved family variants share Preserved Cranium\'s three-option Well of Souls reveal flow.'
+        : null,
+      actionType: isOmen ? 'omen' : 'specialized',
+      activation: isOmen ? 'toggle_omen' : 'arm',
+      engineAction: isBone ? compact.boneId : null,
+      applicabilityPredicate: isOmen ? 'omenDisabledReason' : 'boneDisabledReason',
+      disabledReasonHandler: isOmen ? 'omenDisabledReason' : 'boneDisabledReason',
+      disabledReason: '',
+      handler: isOmen ? 'toggleCraftOmen' : 'startDesecrationFlow',
+      sourceHandler: method?.handler || null,
+      triggeringAction: isOmen ? compact.triggerCraftId : null,
+      omenInteraction: {
+        omenId: isOmen ? compact.omenId : null,
+        exclusiveGroup: isOmen ? 'crafting_omen' : null,
+        consumeOn: isOmen ? 'successful_triggering_operation' : 'successful_operation',
+        triggerCraftId: isOmen ? compact.triggerCraftId : null,
+      },
+      corruptionRestriction: 'blocked_if_corrupted_or_sanctified',
+      validItemClasses: isBone ? BONE_ITEM_CLASSES[compact.boneFamily] : [],
+      validItemTags: [],
+      qualityRestriction: 'none',
+      socketRestriction: 'none',
+      operationOptions: isOmen
+        ? { omenId: compact.omenId }
+        : {
+            boneId: compact.boneId,
+            boneFamily: compact.boneFamily,
+            revealCount: 3,
+            maxItemLevel,
+            minModifierLevel,
+          },
+      sourceEvidence: unique([
+        `data/normalized/crafting-items.json#item:${compact.sourceItemId}`,
+        method ? `data/normalized/crafting-items.json#method:${method.methodId}` : null,
+        isOmen ? 'https://poe2db.tw/us/Omen' : 'https://poe2db.tw/us/Abyss',
+        'data/crafting/registry-expansion.json',
+      ]),
+      implementationStatus: 'implemented',
+      verificationStatus,
+      confidence: compact.confidence,
+      blocker: null,
+      testFixtureIds: isOmen
+        ? ['validation:expanded-crafting-omens']
+        : ['validation:expanded-abyss-bones'],
+      supported: true,
+      visible: true,
+    };
+  });
+}
+
 // The complete index remains checked in as JSON for provenance and audit
 // validation. The browser only needs the tabs and definitions it can render,
 // so avoid parsing hundreds of hidden audit-only records on every startup.
 export function buildCurrencyBrowserSource(index = buildCurrencyIndex()) {
+  const categoryCounts = Object.fromEntries(index.craftTabs.map(tab => {
+    const definitions = index.craftRegistry.filter(definition => definition.tab === tab.id);
+    return [tab.id, {
+      available: definitions.filter(definition => definition.supported).length,
+      known: definitions.filter(definition => definition.implementationStatus !== 'deprecated_for_target_version').length,
+      deprecated: definitions.filter(definition => definition.implementationStatus === 'deprecated_for_target_version').length,
+    }];
+  }));
   const runtimeIndex = {
     schemaVersion: index.schemaVersion,
     targetGameVersion: index.targetGameVersion,
     craftTabs: index.craftTabs,
-    craftRegistry: index.craftRegistry.filter(definition => definition.visible),
+    categoryCounts,
+    totalKnownDefinitions: index.craftRegistry.length,
+    craftRegistry: projectBrowserDefinitions(
+      index.craftRegistry.filter(definition => definition.supported)
+    ),
   };
   return `window.CRAFTING_CURRENCY_INDEX=${JSON.stringify(runtimeIndex)};\n`;
+}
+
+// Keep complete provenance, validation evidence, and importer audit fields in
+// currency-index.json. These are the fields the classic browser runtime reads;
+// projecting them here avoids parsing a second audit representation at startup
+// while retaining stable craft and source-handler identities.
+const BROWSER_DEFINITION_FIELDS = Object.freeze([
+  'craftId', 'metadataKey', 'displayName', 'category', 'tab',
+  'tabOrder', 'displayOrder', 'iconId', 'iconFallback', 'accentColor', 'cssClasses',
+  'description', 'assumption', 'actionType', 'activation', 'engineAction', 'disabledReasonHandler',
+  'disabledReason', 'handler', 'sourceHandler', 'triggeringAction', 'omenInteraction',
+  'operationOptions', 'implementationStatus', 'confidence', 'historyTier', 'blocker', 'supported',
+]);
+
+function projectBrowserDefinitions(definitions) {
+  return definitions.map(definition => Object.fromEntries(
+    BROWSER_DEFINITION_FIELDS.map(field => [field, definition[field] ?? null])
+  ));
+}
+
+export function buildKnownItemsBrowserSource(index = buildCurrencyIndex()) {
+  const definitions = projectBrowserDefinitions(index.craftRegistry);
+  return `window.CRAFTING_KNOWN_ITEMS=${JSON.stringify({
+    schemaVersion: index.schemaVersion,
+    targetGameVersion: index.targetGameVersion,
+    craftRegistry: definitions,
+  })};\n`;
 }
 
 function coverageMarkdown(index) {
@@ -626,6 +849,7 @@ export function writeCurrencyIndex(index = buildCurrencyIndex()) {
   const json = `${JSON.stringify(index, null, 2)}\n`;
   writeFileSync(JSON_OUTPUT, json, 'utf8');
   writeFileSync(BROWSER_OUTPUT, buildCurrencyBrowserSource(index), 'utf8');
+  writeFileSync(KNOWN_BROWSER_OUTPUT, buildKnownItemsBrowserSource(index), 'utf8');
   writeFileSync(REPORT_OUTPUT, coverageMarkdown(index), 'utf8');
   return index;
 }
@@ -635,11 +859,13 @@ function runCli() {
   const index = buildCurrencyIndex();
   const expectedJson = `${JSON.stringify(index, null, 2)}\n`;
   const expectedBrowser = buildCurrencyBrowserSource(index);
+  const expectedKnownBrowser = buildKnownItemsBrowserSource(index);
   const expectedReport = coverageMarkdown(index);
   if (checkOnly) {
     const checks = [
       [JSON_OUTPUT, expectedJson],
       [BROWSER_OUTPUT, expectedBrowser],
+      [KNOWN_BROWSER_OUTPUT, expectedKnownBrowser],
       [REPORT_OUTPUT, expectedReport],
     ];
     for (const [file, expected] of checks) {

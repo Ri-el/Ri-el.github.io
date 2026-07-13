@@ -12,24 +12,32 @@ const USE_SOUND_FILES = false;
 
 const DEFAULT_ORB_COLOR = 'rgba(255,255,255,0.6)';
 
-const CRAFTING_ITEM_REGISTRY = Object.freeze(Object.fromEntries([
-  ...(Array.isArray(CRAFTING_CURRENCY_INDEX?.craftRegistry)
-    ? CRAFTING_CURRENCY_INDEX.craftRegistry
-    : [])
-    .map(definition => [definition.craftId, Object.freeze({
-      ...definition,
-      id: definition.craftId,
-      tab: definition.tab || definition.category,
-      validator: definition.disabledReasonHandler,
-      omenId: definition.omenInteraction?.omenId || null,
-      unsupportedReason: definition.disabledReason || definition.blocker?.reason || definition.blocker || UNSUPPORTED_REASON,
-      minModifierLevel: definition.operationOptions?.minModifierLevel ?? null,
-    })]),
-]));
+const CRAFTING_ITEM_REGISTRY = {};
+function normalizeCraftDefinition(definition) {
+  return Object.freeze({
+    ...definition,
+    id: definition.craftId,
+    tab: definition.tab || definition.category,
+    validator: definition.disabledReasonHandler,
+    omenId: definition.omenInteraction?.omenId || null,
+    unsupportedReason: definition.disabledReason || definition.blocker?.reason || definition.blocker || UNSUPPORTED_REASON,
+    minModifierLevel: definition.operationOptions?.minModifierLevel ?? null,
+  });
+}
+function registerCraftDefinitions(definitions) {
+  for (const rawDefinition of definitions || []) {
+    if (!rawDefinition?.craftId) continue;
+    const definition = Object.isFrozen(rawDefinition)
+      ? rawDefinition
+      : normalizeCraftDefinition(rawDefinition);
+    CRAFTING_ITEM_REGISTRY[definition.craftId] = definition;
+  }
+}
+registerCraftDefinitions(CRAFTING_CURRENCY_INDEX?.craftRegistry);
 const CRAFTING_TABS = Object.freeze([...(CRAFTING_CURRENCY_INDEX?.craftTabs || [])]
   .sort((left, right) => left.order - right.order));
 const VISIBLE_CRAFT_DEFINITIONS = Object.freeze(Object.values(CRAFTING_ITEM_REGISTRY)
-  .filter(definition => definition.visible)
+  .filter(definition => definition.supported)
   .sort((left, right) => (left.tabOrder || 0) - (right.tabOrder || 0) || left.displayOrder - right.displayOrder || left.displayName.localeCompare(right.displayName)));
 const CRAFT_DEFINITION_BY_ACTION = new Map();
 for (const definition of VISIBLE_CRAFT_DEFINITIONS) {
@@ -74,8 +82,16 @@ const CRAFT_OMENS = Object.freeze(Object.fromEntries(VISIBLE_CRAFT_DEFINITIONS
   }])));
 const CRAFT_DEFINITION_BY_COUNTER_KEY = new Map();
 for (const definition of VISIBLE_CRAFT_DEFINITIONS) {
-  if (definition.engineAction) CRAFT_DEFINITION_BY_COUNTER_KEY.set(definition.engineAction, definition);
-  if (definition.omenId) CRAFT_DEFINITION_BY_COUNTER_KEY.set(definition.omenId, definition);
+  CRAFT_DEFINITION_BY_COUNTER_KEY.set(definition.craftId, definition);
+}
+
+function craftIdForAction(action) {
+  return CRAFT_DEFINITION_BY_ACTION.get(action)?.craftId || action;
+}
+
+function craftIdForOmen(omen) {
+  return CRAFT_OMENS[omen]?.craftId ||
+    VISIBLE_CRAFT_DEFINITIONS.find(definition => definition.omenId === omen)?.craftId || omen;
 }
 
 const performanceMetrics = [];
@@ -129,6 +145,10 @@ let undoStack = [];
 let redoStack = [];
 let eventsBound = false;
 let activeCraftTab = 'currency';
+let craftInventoryMode = 'available';
+let showDeprecatedCrafts = false;
+let knownCraftDefinitions = null;
+let knownItemsLoadPromise = null;
 
 // Desecration (Abyssal) UI state.
 // A directional Necromancy omen (sinistral/dextral) may be combined with
@@ -168,6 +188,15 @@ function createCraftCard(definition) {
   button.dataset.iconId = definition.iconId;
   button.dataset.craftCategory = definition.category;
   button.dataset.searchText = `${definition.displayName} ${definition.description} ${definition.category}`.toLocaleLowerCase();
+  const status = definition.implementationStatus === 'deprecated_for_target_version'
+    ? 'Deprecated'
+    : definition.implementationStatus === 'non_item_currency'
+      ? 'Audit only'
+    : definition.confidence === 'inferred'
+      ? 'Inferred'
+      : definition.supported ? 'Verified' : 'Blocked';
+  const statusSlug = status.toLocaleLowerCase().replace(/\s+/g, '-');
+  button.dataset.craftStatus = statusSlug;
   button.setAttribute('aria-disabled', String(!definition.supported));
   button.setAttribute('aria-pressed', 'false');
   button.draggable = Boolean(definition.supported && definition.actionType !== 'omen');
@@ -185,20 +214,136 @@ function createCraftCard(definition) {
   label.textContent = definition.displayName;
   if (definition.operationOptions?.baseAction) {
     label.hidden = true;
-    button.setAttribute('aria-label', definition.displayName);
+    button.setAttribute('aria-label', `${definition.displayName}, tier ${definition.historyTier || definition.operationOptions.variantTier || 1}, ${status}`);
     const tier = document.createElement('span');
     tier.className = 'tier-num';
     tier.textContent = definition.iconFallback;
     button.append(icon, label, tier);
   } else {
     button.append(icon, label);
+    button.setAttribute('aria-label', `${definition.displayName}, ${status}`);
   }
+  const statusLabel = document.createElement('span');
+  statusLabel.className = `craft-status craft-status-${statusSlug}`;
+  statusLabel.textContent = status;
+  button.appendChild(statusLabel);
   return button;
 }
 
-// The checked-in browser bundle is the single source for tabs and cards. This
-// runs before element collections are captured so file:// and deferred classic
-// scripts behave exactly like the installed/offline build.
+function loadKnownCraftDefinitions() {
+  if (knownCraftDefinitions) return Promise.resolve(knownCraftDefinitions);
+  if (knownItemsLoadPromise) return knownItemsLoadPromise;
+  knownItemsLoadPromise = new Promise((resolve, reject) => {
+    const acceptLoadedData = () => {
+      const payload = window.CRAFTING_KNOWN_ITEMS;
+      if (!payload || payload.targetGameVersion !== CRAFTING_CURRENCY_INDEX?.targetGameVersion ||
+          !Array.isArray(payload.craftRegistry)) {
+        reject(new Error('The complete crafting catalog is missing or targets a different game version.'));
+        return;
+      }
+      knownCraftDefinitions = Object.freeze(payload.craftRegistry
+        .map(normalizeCraftDefinition)
+        .sort((left, right) => (left.tabOrder || 0) - (right.tabOrder || 0) ||
+          left.displayOrder - right.displayOrder || left.displayName.localeCompare(right.displayName)));
+      registerCraftDefinitions(knownCraftDefinitions);
+      window.CRAFTING_KNOWN_ITEMS = null;
+      resolve(knownCraftDefinitions);
+    };
+    if (window.CRAFTING_KNOWN_ITEMS) {
+      acceptLoadedData();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'data/crafting/known-items.data.js';
+    script.async = true;
+    script.dataset.craftingKnownItems = 'true';
+    script.addEventListener('load', acceptLoadedData, { once: true });
+    script.addEventListener('error', () => reject(new Error('Unable to load the complete crafting catalog.')), { once: true });
+    document.head.appendChild(script);
+  }).catch(error => {
+    knownItemsLoadPromise = null;
+    throw error;
+  });
+  return knownItemsLoadPromise;
+}
+
+function inventoryDefinitionsForTab(tabId) {
+  const source = craftInventoryMode === 'known'
+    ? (knownCraftDefinitions || [])
+    : VISIBLE_CRAFT_DEFINITIONS;
+  return source.filter(definition => definition.tab === tabId &&
+    (showDeprecatedCrafts || definition.implementationStatus !== 'deprecated_for_target_version'));
+}
+
+function appendCraftCards(grid, definitions) {
+  const rendered = new Set();
+  for (const definition of definitions) {
+    if (rendered.has(definition.craftId)) continue;
+    const variants = definitions.filter(record => record.operationOptions?.baseAction === definition.engineAction);
+    if (variants.length) {
+      const cluster = document.createElement('div');
+      cluster.className = 'cur-cluster';
+      cluster.appendChild(createCraftCard(definition));
+      const tiers = document.createElement('div');
+      tiers.className = 'cur-tiers';
+      for (const variant of variants) {
+        tiers.appendChild(createCraftCard(variant));
+        rendered.add(variant.craftId);
+      }
+      cluster.appendChild(tiers);
+      grid.appendChild(cluster);
+    } else if (!definition.operationOptions?.baseAction) {
+      grid.appendChild(createCraftCard(definition));
+    }
+    rendered.add(definition.craftId);
+  }
+}
+
+function renderActiveCraftPanel() {
+  const panel = document.querySelector(`[data-craft-panel="${activeCraftTab}"]`);
+  const tab = CRAFTING_TABS.find(record => record.id === activeCraftTab);
+  if (!panel || !tab) return 0;
+  return measureOperation('active-tab-render', () => {
+    document.querySelectorAll('[data-craft-panel]').forEach(otherPanel => {
+      if (otherPanel !== panel) otherPanel.replaceChildren();
+    });
+    panel.replaceChildren();
+    if (tab.description) {
+      const help = document.createElement('p');
+      help.className = 'tab-help';
+      help.textContent = tab.description;
+      panel.appendChild(help);
+    }
+    const grid = document.createElement('div');
+    grid.className = `crafting-card-grid ${tab.id}-card-grid`;
+    if (tab.id === 'currency') {
+      grid.id = 'currency-grid';
+      grid.classList.add('currency-grid');
+    }
+    const definitions = inventoryDefinitionsForTab(tab.id);
+    appendCraftCards(grid, definitions);
+    panel.appendChild(grid);
+    if (!definitions.length) {
+      const counts = CRAFTING_CURRENCY_INDEX?.categoryCounts?.[tab.id] || { available: 0, known: 0 };
+      const empty = document.createElement('div');
+      empty.className = 'craft-inventory-empty';
+      empty.setAttribute('role', 'status');
+      empty.innerHTML = craftInventoryMode === 'available'
+        ? `<strong>No implemented ${escapeHtml(tab.label)} operations yet.</strong><span>${counts.known} known item${counts.known === 1 ? '' : 's'} available in All known items.</span>`
+        : `<strong>No items match the current filters.</strong><span>Clear search or applicability filters to see this category.</span>`;
+      panel.appendChild(empty);
+    }
+    refreshCraftInventoryElements();
+    syncRenderedCraftControlState();
+    setupCurrencyIcons();
+    filterCraftInventory();
+    return definitions.length;
+  });
+}
+
+// Startup creates only tab shells and renders the active category. The complete
+// retained inventory is loaded only when All known items is selected, which
+// preserves file:// support without parsing hundreds of blocked audit records.
 function renderCraftingInventory() {
   const tabList = document.getElementById('craft-tab-list');
   const panelHost = document.getElementById('craft-tab-panels');
@@ -206,10 +351,15 @@ function renderCraftingInventory() {
   if (!tabList || !panelHost || !categoryFilter) return;
   tabList.replaceChildren();
   panelHost.replaceChildren();
-  categoryFilter.replaceChildren(new Option('All categories', ''));
+  categoryFilter.replaceChildren();
+
+  try {
+    const savedTab = localStorage.getItem(CRAFT_TAB_STORAGE_KEY);
+    if (savedTab && CRAFTING_TABS.some(tab => tab.id === savedTab)) activeCraftTab = savedTab;
+  } catch (_) {}
 
   for (const tab of CRAFTING_TABS) {
-    const active = tab.id === 'currency';
+    const active = tab.id === activeCraftTab;
     const tabButton = document.createElement('button');
     tabButton.id = `craft-tab-${tab.id}`;
     tabButton.type = 'button';
@@ -231,43 +381,10 @@ function renderCraftingInventory() {
     panel.setAttribute('aria-labelledby', tabButton.id);
     panel.hidden = !active;
 
-    if (tab.description) {
-      const help = document.createElement('p');
-      help.className = 'tab-help';
-      help.textContent = tab.description;
-      panel.appendChild(help);
-    }
-    const grid = document.createElement('div');
-    grid.className = `crafting-card-grid ${tab.id}-card-grid`;
-    if (tab.id === 'currency') {
-      grid.id = 'currency-grid';
-      grid.classList.add('currency-grid');
-    }
-    const tabDefinitions = VISIBLE_CRAFT_DEFINITIONS.filter(record => record.tab === tab.id);
-    const rendered = new Set();
-    for (const definition of tabDefinitions) {
-      if (rendered.has(definition.craftId)) continue;
-      const variants = tabDefinitions.filter(record => record.operationOptions?.baseAction === definition.engineAction);
-      if (variants.length) {
-        const cluster = document.createElement('div');
-        cluster.className = 'cur-cluster';
-        cluster.appendChild(createCraftCard(definition));
-        const tiers = document.createElement('div');
-        tiers.className = 'cur-tiers';
-        for (const variant of variants) {
-          tiers.appendChild(createCraftCard(variant));
-          rendered.add(variant.craftId);
-        }
-        cluster.appendChild(tiers);
-        grid.appendChild(cluster);
-      } else if (!definition.operationOptions?.baseAction) {
-        grid.appendChild(createCraftCard(definition));
-      }
-      rendered.add(definition.craftId);
-    }
-    panel.appendChild(grid);
     panelHost.appendChild(panel);
   }
+  categoryFilter.value = activeCraftTab;
+  renderActiveCraftPanel();
 }
 
 const elements = {
@@ -311,8 +428,12 @@ const elements = {
   craftTabPanels: document.querySelectorAll('[data-craft-panel]'),
   craftItemSearch: document.getElementById('craft-item-search'),
   craftCategoryFilter: document.getElementById('craft-category-filter'),
+  craftInventoryModes: document.querySelectorAll('input[name="craft-inventory-mode"]'),
   craftApplicableOnly: document.getElementById('craft-applicable-only'),
+  craftShowDeprecated: document.getElementById('craft-show-deprecated'),
+  craftDeprecatedLabel: document.getElementById('craft-deprecated-filter-label'),
   craftResultCount: document.getElementById('craft-result-count'),
+  craftTabList: document.getElementById('craft-tab-list'),
   craftDescriptionTitle: document.getElementById('craft-item-description-title'),
   craftDescriptionText: document.getElementById('craft-item-description-text'),
   sanctifiedLabel: document.getElementById('sanctified-label'),
@@ -338,6 +459,25 @@ function refreshCraftInventoryElements() {
   elements.essenceBtns = document.querySelectorAll('.essence-btn');
   elements.craftTabs = document.querySelectorAll('[data-craft-tab]');
   elements.craftTabPanels = document.querySelectorAll('[data-craft-panel]');
+}
+
+function syncRenderedCraftControlState() {
+  const item = engine?.getItem();
+  elements.craftButtons.forEach(button => {
+    const definition = definitionForElement(button);
+    setCraftButtonState(button, item ? disabledReasonForDefinition(definition, item) : '');
+    const action = definition?.engineAction;
+    const isArmed = Boolean(action && action === armedCurrency);
+    button.classList.toggle('armed', isArmed);
+    button.classList.toggle('sticky', isArmed && stickyCurrency === action);
+    button.dataset.repeatMode = String(isArmed && stickyCurrency === action);
+    const omen = definition?.omenId;
+    const omenActive = definition?.handler === 'toggleCraftOmen'
+      ? omen === selectedCraftOmen
+      : omen === 'omen_of_light' ? omenOfLightActive : selectedOmens.has(omen);
+    button.classList.toggle('active', Boolean(omen && omenActive));
+    button.setAttribute('aria-pressed', String(isArmed || Boolean(omen && omenActive)));
+  });
 }
 
 function escapeHtml(s) {
@@ -635,7 +775,7 @@ function buildSourceModifierOverlay(baseType) {
 
 const CRAFT_VALIDATORS = Object.freeze({
   currencyDisabledReason: (definition, item) => currencyDisabledReason(definition.engineAction, item),
-  boneDisabledReason: (_definition, item) => boneDisabledReason(item),
+  boneDisabledReason: (definition, item) => boneDisabledReason(definition, item),
   essenceDisabledReason: (definition, item) => essenceDisabledReason(definition.engineAction, item),
   omenDisabledReason: (definition, item) => omenDisabledReason(definition, item),
   unsupportedReason: definition => definition.unsupportedReason,
@@ -652,7 +792,7 @@ function disabledReasonForDefinition(definition, item = engine?.getItem()) {
 
 function validateCraftRegistry() {
   const specializedHandlers = { applyHinekoraLock, startDesecrationFlow, toggleOmen, toggleCraftOmen };
-  const indexedRegistry = CRAFTING_CURRENCY_INDEX?.craftRegistry || [];
+  const indexedRegistry = knownCraftDefinitions || CRAFTING_CURRENCY_INDEX?.craftRegistry || [];
   if (!indexedRegistry.length || indexedRegistry.length !== Object.keys(CRAFTING_ITEM_REGISTRY).length) {
     throw new Error('Authoritative crafting registry is missing or incomplete.');
   }
@@ -702,13 +842,17 @@ function validateCraftRegistry() {
     seen.add(id);
     const definition = CRAFTING_ITEM_REGISTRY[id];
     if (!definition) throw new Error(`Crafting registry entry not found: ${id}`);
-    if (!definition.visible) throw new Error(`Hidden crafting definition was rendered: ${id}`);
+    if (definition.implementationStatus === 'deprecated_for_target_version' && !showDeprecatedCrafts) {
+      throw new Error(`Deprecated crafting definition was rendered without audit mode: ${id}`);
+    }
     const panel = card.closest('[data-craft-panel]');
     if (panel && panel.dataset.craftPanel !== definition.tab) {
       throw new Error(`Crafting card ${id} is in ${panel.dataset.craftPanel}, expected ${definition.tab}.`);
     }
   }
-  if (seen.size !== VISIBLE_CRAFT_DEFINITIONS.length) throw new Error('Rendered crafting inventory does not match visible registry definitions.');
+  if (seen.size !== inventoryDefinitionsForTab(activeCraftTab).length) {
+    throw new Error('Rendered crafting inventory does not match the active category model.');
+  }
   return true;
 }
 
@@ -968,12 +1112,26 @@ window.CraftForge.getNormalizedIndexCounts = () => normalizedIndexes
   ? { ...(normalizedData?.counts || {}) }
   : null;
 
+let craftIconObserver = null;
 function setupCurrencyIcons() {
+  if (!craftIconObserver && typeof IntersectionObserver === 'function') {
+    craftIconObserver = new IntersectionObserver(entries => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const iconEl = entry.target;
+        loadIconInto(iconEl, iconEl.dataset.lazyIconId);
+        craftIconObserver.unobserve(iconEl);
+      }
+    }, { root: elements.currencyPanel, rootMargin: '160px' });
+  }
   document.querySelectorAll('[data-craft-id]').forEach(card => {
     const definition = definitionForElement(card);
     const iconEl = card.querySelector('.currency-icon');
     const iconId = card.dataset.iconId || definition?.iconId || card.dataset.craftId;
-    if (iconEl && iconId) loadIconInto(iconEl, iconId);
+    if (!iconEl || !iconId) return;
+    iconEl.dataset.lazyIconId = iconId;
+    if (craftIconObserver) craftIconObserver.observe(iconEl);
+    else loadIconInto(iconEl, iconId);
   });
   loadIconInto(elements.hinekoraMark, 'hinekora-mark');
 }
@@ -1107,6 +1265,8 @@ function setActiveCraftTab(tabId, { focus = false, persist = true } = {}) {
   return measureOperation('tab-switch', () => {
     const target = Array.from(elements.craftTabs).find(tab => tab.dataset.craftTab === tabId);
     if (!target) return false;
+    const targetPanel = Array.from(elements.craftTabPanels).find(panel => panel.dataset.craftPanel === tabId);
+    const shouldRender = activeCraftTab !== tabId || !targetPanel?.childElementCount;
 
     activeCraftTab = tabId;
     elements.craftTabs.forEach(tab => {
@@ -1118,6 +1278,8 @@ function setActiveCraftTab(tabId, { focus = false, persist = true } = {}) {
     elements.craftTabPanels.forEach(panel => {
       panel.hidden = panel.dataset.craftPanel !== tabId;
     });
+    if (elements.craftCategoryFilter) elements.craftCategoryFilter.value = tabId;
+    if (shouldRender) renderActiveCraftPanel();
 
     if (persist) {
       try { localStorage.setItem(CRAFT_TAB_STORAGE_KEY, tabId); } catch (_) {}
@@ -1136,25 +1298,37 @@ function setupCraftTabs() {
     setActiveCraftTab('currency', { persist: false });
   }
 
-  elements.craftTabs.forEach((tab, index) => {
-    const activateInventoryTab = (tabId, options = {}) => {
-      if (elements.craftCategoryFilter) elements.craftCategoryFilter.value = tabId;
-      setActiveCraftTab(tabId, options);
-      filterCraftInventory();
-    };
-    tab.addEventListener('click', () => activateInventoryTab(tab.dataset.craftTab));
-    tab.addEventListener('keydown', (event) => {
-      const tabs = Array.from(elements.craftTabs);
-      let next = index;
-      if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = (index + 1) % tabs.length;
-      else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next = (index - 1 + tabs.length) % tabs.length;
-      else if (event.key === 'Home') next = 0;
-      else if (event.key === 'End') next = tabs.length - 1;
-      else return;
-      event.preventDefault();
-      activateInventoryTab(tabs[next].dataset.craftTab, { focus: true });
-    });
+  const activateInventoryTab = (tabId, options = {}) => setActiveCraftTab(tabId, options);
+  elements.craftTabList?.addEventListener('click', event => {
+    const tab = event.target.closest('[data-craft-tab]');
+    if (tab && elements.craftTabList.contains(tab)) activateInventoryTab(tab.dataset.craftTab);
   });
+  elements.craftTabList?.addEventListener('keydown', event => {
+    const tab = event.target.closest('[data-craft-tab]');
+    if (!tab) return;
+    const tabs = Array.from(elements.craftTabs);
+    const index = tabs.indexOf(tab);
+    let next = index;
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = (index + 1) % tabs.length;
+    else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next = (index - 1 + tabs.length) % tabs.length;
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = tabs.length - 1;
+    else if (event.key === 'Enter' || event.key === ' ') next = index;
+    else return;
+    event.preventDefault();
+    activateInventoryTab(tabs[next].dataset.craftTab, { focus: true });
+  });
+  elements.craftTabList?.addEventListener('wheel', event => {
+    const strip = elements.craftTabList;
+    if (!strip || strip.scrollWidth <= strip.clientWidth) return;
+    const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+    if (!delta) return;
+    const before = strip.scrollLeft;
+    const maximum = Math.max(0, strip.scrollWidth - strip.clientWidth);
+    if ((delta < 0 && before <= 0) || (delta > 0 && before >= maximum)) return;
+    strip.scrollLeft = Math.max(0, Math.min(maximum, before + delta));
+    if (strip.scrollLeft !== before) event.preventDefault();
+  }, { passive: false });
 }
 
 function renderCraftingDescription(definition, reason = '') {
@@ -1173,32 +1347,39 @@ function renderCraftingDescription(definition, reason = '') {
 
 function filterCraftInventory() {
   const query = (elements.craftItemSearch?.value || '').trim().toLocaleLowerCase();
-  const category = elements.craftCategoryFilter?.value || '';
   const applicableOnly = Boolean(elements.craftApplicableOnly?.checked);
   let visibleCount = 0;
-  let firstMatchingTab = null;
-  let activeTabMatches = 0;
   elements.craftButtons.forEach(button => {
     const definition = definitionForElement(button);
     const reason = disabledReasonForDefinition(definition);
     const matchesSearch = !query || button.dataset.searchText.includes(query);
-    const matchesCategory = !category || definition?.category === category;
     const matchesApplicable = !applicableOnly || !reason;
-    button.hidden = !(matchesSearch && matchesCategory && matchesApplicable);
+    button.hidden = !(matchesSearch && matchesApplicable);
     if (!button.hidden) {
       visibleCount++;
-      firstMatchingTab ||= definition?.tab || null;
-      if (definition?.tab === activeCraftTab) activeTabMatches++;
     }
   });
   document.querySelectorAll('.cur-cluster').forEach(cluster => {
     cluster.hidden = !Array.from(cluster.querySelectorAll('[data-craft-id]')).some(button => !button.hidden);
   });
-  if (elements.craftResultCount) {
-    elements.craftResultCount.textContent = `${visibleCount} of ${VISIBLE_CRAFT_DEFINITIONS.length} crafting items`;
+  const activePanel = document.querySelector(`[data-craft-panel="${activeCraftTab}"]`);
+  const existingFilterEmpty = activePanel?.querySelector('.craft-filter-empty');
+  if (visibleCount === 0 && elements.craftButtons.length > 0) {
+    if (!existingFilterEmpty && activePanel) {
+      const empty = document.createElement('div');
+      empty.className = 'craft-inventory-empty craft-filter-empty';
+      empty.setAttribute('role', 'status');
+      empty.innerHTML = '<strong>No items match the current filters.</strong><span>Clear search or applicability filters to see this category.</span>';
+      activePanel.appendChild(empty);
+    }
+  } else if (existingFilterEmpty) {
+    existingFilterEmpty.remove();
   }
-  if (query && !category && visibleCount > 0 && activeTabMatches === 0 && firstMatchingTab) {
-    setActiveCraftTab(firstMatchingTab);
+  if (elements.craftResultCount) {
+    const counts = CRAFTING_CURRENCY_INDEX?.categoryCounts?.[activeCraftTab] || { available: 0, known: 0, deprecated: 0 };
+    const known = counts.known + (showDeprecatedCrafts ? counts.deprecated : 0);
+    const filtered = Boolean(query || applicableOnly);
+    elements.craftResultCount.textContent = `${filtered ? `${visibleCount} shown · ` : ''}${counts.available} available · ${known} known`;
   }
   return visibleCount;
 }
@@ -1242,10 +1423,10 @@ function executeCraftOperation(definition, { shiftKey = false } = {}) {
   if (!result.success) return rejectCraftOperation(result.error, shiftKey);
 
   consumeCraftOmen(currency);
-  engine.recordCurrencyUse(currency);
+  engine.recordCurrencyUse(definition.craftId);
   pushUndo(before);
   if (currency === 'annulment' && omenOfLightActive) {
-    engine.recordCurrencyUse('omen_of_light');
+    engine.recordCurrencyUse(craftIdForOmen('omen_of_light'));
     omenOfLightActive = false;
     const lightButton = Array.from(elements.omenBtns).find(button => omenForElement(button) === 'omen_of_light');
     if (lightButton) {
@@ -1342,9 +1523,35 @@ function setupCraftInventoryEvents() {
   elements.craftItemSearch?.addEventListener('input', filterCraftInventory);
   elements.craftCategoryFilter?.addEventListener('change', () => {
     if (elements.craftCategoryFilter.value) setActiveCraftTab(elements.craftCategoryFilter.value);
-    filterCraftInventory();
   });
   elements.craftApplicableOnly?.addEventListener('change', filterCraftInventory);
+  elements.craftInventoryModes?.forEach(control => control.addEventListener('change', async () => {
+    if (!control.checked) return;
+    if (control.value === 'known') {
+      craftInventoryMode = 'known';
+      if (elements.craftResultCount) elements.craftResultCount.textContent = 'Loading complete crafting catalog…';
+      try {
+        await loadKnownCraftDefinitions();
+      } catch (error) {
+        craftInventoryMode = 'available';
+        const availableControl = Array.from(elements.craftInventoryModes).find(input => input.value === 'available');
+        if (availableControl) availableControl.checked = true;
+        showError(error.message);
+      }
+    } else {
+      craftInventoryMode = 'available';
+      showDeprecatedCrafts = false;
+      if (elements.craftShowDeprecated) elements.craftShowDeprecated.checked = false;
+    }
+    if (elements.craftDeprecatedLabel) elements.craftDeprecatedLabel.hidden = craftInventoryMode !== 'known';
+    renderActiveCraftPanel();
+    validateCraftRegistry();
+    renderItem();
+  }));
+  elements.craftShowDeprecated?.addEventListener('change', () => {
+    showDeprecatedCrafts = Boolean(elements.craftShowDeprecated.checked);
+    renderActiveCraftPanel();
+  });
   filterCraftInventory();
 }
 
@@ -1486,6 +1693,7 @@ function applyCurrencyToEngine(currency, eng = engine) {
   // A crafting omen only applies to its matching (base) currency.
   const omen = (selectedCraftOmen && CRAFT_OMENS[selectedCraftOmen]
     && CRAFT_OMENS[selectedCraftOmen].currency === baseCurrency) ? selectedCraftOmen : null;
+  if (omen) craftOptions.omen = omen;
   const metric = baseCurrency === 'chaos' && omen === 'whittling'
     ? 'chaos-with-whittling'
     : `craft-${baseCurrency}`;
@@ -1498,7 +1706,7 @@ function applyCurrencyToEngine(currency, eng = engine) {
       case 'applyAugmentation':
       case 'applyRegal':
       case 'applyExalted': return eng[definition.handler](craftOptions);
-      case 'applyAlchemy':
+      case 'applyAlchemy': return eng[definition.handler](craftOptions);
       case 'applyFracturing':
       case 'applyEssenceOfAbyss':
       case 'applyEssenceOfBreach': return eng[definition.handler]();
@@ -1807,7 +2015,7 @@ function consumeCraftOmen(currency) {
   const base = ORB_VARIANTS[currency] ? ORB_VARIANTS[currency].base : currency;
   if (selectedCraftOmen && CRAFT_OMENS[selectedCraftOmen]
       && CRAFT_OMENS[selectedCraftOmen].currency === base) {
-    engine.recordCurrencyUse(selectedCraftOmen);
+    engine.recordCurrencyUse(craftIdForOmen(selectedCraftOmen));
     clearCraftOmen();
   }
 }
@@ -1842,9 +2050,9 @@ function startDesecrationFlow(bone = 'preserved_cranium') {
   // The bone (and any omens) are consumed now: the desecration is applied and an
   // unrevealed green modifier is placed on the item. The actual modifier is
   // revealed later via the Reveal panel below the item.
-  engine.recordCurrencyUse(bone || 'preserved_cranium');
+  engine.recordCurrencyUse(craftIdForAction(bone || 'preserved_cranium'));
   // Abyssal Echoes is activated at reveal time (not now), so don't count it here.
-  selectedOmens.forEach((o) => { if (o !== 'abyssal_echoes') engine.recordCurrencyUse(o); });
+  selectedOmens.forEach((o) => { if (o !== 'abyssal_echoes') engine.recordCurrencyUse(craftIdForOmen(o)); });
   engine.clearHinekoraLock();
   // Keep Abyssal Echoes armed through the reveal: it is consumed at the Well of
   // Souls (the reroll), NOT when the bone is used. Clearing every omen here is
@@ -1875,7 +2083,7 @@ function openWell() {
   // is actually used. If it was never activated, it is never counted. Guarded
   // by echoCounted so re-opening the Well (after a Cancel) cannot double-count.
   if (selectedOmens.has('abyssal_echoes') && !desecState.echoCounted) {
-    engine.recordCurrencyUse('abyssal_echoes');
+    engine.recordCurrencyUse(craftIdForOmen('abyssal_echoes'));
     desecState.echoCounted = true;
   }
   renderWell();
@@ -2094,7 +2302,7 @@ function applyHinekoraLock(shiftKey = false) {
   }
   const before = snapshotState(engine.getItem());
   engine.setHinekoraLock();
-  engine.recordCurrencyUse('hinekora');
+  engine.recordCurrencyUse(craftIdForAction('hinekora'));
   pushUndo(before);
   foreseenSeals = {};
   foreseenHover = null;
@@ -2290,10 +2498,10 @@ function commitForesight(currency) {
   const before = snapshotState(engine.getItem());
   engine.loadItem(seal.afterItem);   // commit the exact sealed outcome
   consumeCraftOmen(currency);
-  engine.recordCurrencyUse(currency);
+  engine.recordCurrencyUse(craftIdForAction(currency));
   engine.clearHinekoraLock();        // "The Lock is removed when this item is modified."
   if (currency === 'annulment' && omenOfLightActive) {
-    engine.recordCurrencyUse('omen_of_light');
+    engine.recordCurrencyUse(craftIdForOmen('omen_of_light'));
     omenOfLightActive = false;
     const lb = Array.from(elements.omenBtns).find(b => omenForElement(b) === 'omen_of_light');
     if (lb) {
@@ -2333,10 +2541,10 @@ function commitDesecrationForesight(bone) {
   // Restore the sealed item (with its unrevealed placeholder) AND the sealed
   // pending desecration (same side/mode + the same revealed options).
   engine.loadItem(seal.afterItem, seal.pending);
-  engine.recordCurrencyUse(bone);
+  engine.recordCurrencyUse(craftIdForAction(bone));
   // Consume any directional / one-shot omens now (Abyssal Echoes is counted
   // later, on commit at the Well), mirroring startDesecrationFlow.
-  selectedOmens.forEach((o) => { if (o !== 'abyssal_echoes') engine.recordCurrencyUse(o); });
+  selectedOmens.forEach((o) => { if (o !== 'abyssal_echoes') engine.recordCurrencyUse(craftIdForOmen(o)); });
   engine.clearHinekoraLock();
   const res = seal.result;
   desecState = { side: res.side, mode: res.mode, rerollsLeft: res.rerollsLeft, options: res.options, abyssalUsed: false };
@@ -2405,24 +2613,43 @@ function renderCraftCounter(item) {
     elements.craftCounter.innerHTML = '';
     return;
   }
-  const chips = entries
-    .map(([k, n]) => {
-      const definition = CRAFT_DEFINITION_BY_COUNTER_KEY.get(k);
-      return `<div class="cc-chip" title="${escapeHtml(definition?.displayName || capitalize(k))}: ${n} used">` +
-        `<span class="currency-icon ${k}-icon cc-icon">` +
-          `<span class="currency-abbr">${escapeHtml(definition?.iconFallback || capitalize(k))}</span>` +
+  const chipModels = entries.map(([key, count], index) => {
+    const legacy = key.startsWith('legacy:');
+    const legacyAction = legacy ? key.slice('legacy:'.length) : null;
+    const definition = legacy
+      ? CRAFT_DEFINITION_BY_ACTION.get(legacyAction)
+      : CRAFT_DEFINITION_BY_COUNTER_KEY.get(key) || CRAFTING_ITEM_REGISTRY[key];
+    const displayName = legacy
+      ? `Legacy ${definition?.displayName || capitalize(legacyAction)} history`
+      : definition?.displayName || capitalize(key.replace(/[-_]/g, ' '));
+    const tier = definition?.historyTier || definition?.operationOptions?.variantTier ||
+      (definition?.actionType === 'direct' || legacy ? 1 : null);
+    const romanTier = tier === 3 ? 'III' : tier === 2 ? 'II' : tier === 1 ? 'I' : null;
+    return {
+      key, count, index, definition, displayName, romanTier, legacy,
+      iconId: definition?.iconId || legacyAction || key,
+    };
+  });
+  const chips = chipModels
+    .map(model => {
+      const accessible = `${model.displayName}${model.romanTier ? `, tier ${model.romanTier}` : ''}, ${model.count} currency use${model.count === 1 ? '' : 's'}`;
+      return `<div class="cc-chip${model.legacy ? ' cc-chip-legacy' : ''}" title="${escapeHtml(accessible)}" aria-label="${escapeHtml(accessible)}">` +
+        `<span id="cc-icon-${model.index}" class="currency-icon cc-icon">` +
+          `<span class="currency-abbr">${escapeHtml(model.definition?.iconFallback || capitalize(model.key))}</span>` +
         `</span>` +
-        `<span class="cc-count">${n}\u00d7</span>` +
+        `<span class="cc-name">${escapeHtml(model.displayName)}</span>` +
+        (model.romanTier ? `<span class="cc-tier" aria-hidden="true">${model.romanTier}</span>` : '') +
+        `<span class="cc-count">\u00d7${model.count}</span>` +
       `</div>`;
     })
     .join('');
   elements.craftCounter.style.display = 'block';
   elements.craftCounter.innerHTML =
-    `<span class="cc-total">${total} currenc${total === 1 ? 'y' : 'ies'} used</span>` +
+    `<span class="cc-total">${total} currency use${total === 1 ? '' : 's'}</span>` +
     `<div class="cc-chips">${chips}</div>`;
-  entries.forEach(([k]) => {
-    const iconEl = elements.craftCounter.querySelector(`.cc-icon.${k}-icon`);
-    if (iconEl) loadIconInto(iconEl, iconIdForAction(k));
+  chipModels.forEach(model => {
+    const iconEl = elements.craftCounter.querySelector(`#cc-icon-${model.index}`);
+    if (iconEl) loadIconInto(iconEl, model.iconId);
   });
 }
 
@@ -2640,12 +2867,20 @@ function unsupportedReason() {
   return UNSUPPORTED_REASON;
 }
 
-function boneDisabledReason(item) {
+function boneDisabledReason(definition, item) {
+  const boneId = definition?.operationOptions?.boneId || definition?.engineAction || 'preserved_cranium';
+  const bone = CraftingEngine.BONES[boneId];
+  if (!bone) return `Unsupported Abyssal Bone: ${String(boneId)}.`;
   const alreadyDesecrated = allItemMods(item).some(mod => mod.desecrated && !mod.mark);
   if (item.corrupted) return 'Item is corrupted and cannot be modified.';
   if (item.sanctified) return 'Item is sanctified and cannot be modified further.';
   if (item.mirrored || item.isMirrored) return 'Item is mirrored and cannot be modified.';
-  if (item.itemClass && item.itemClass !== 'Jewel') return 'Preserved Cranium requires a Jewel base.';
+  if (item.itemClass && bone.validItemClasses && !bone.validItemClasses.includes(item.itemClass)) {
+    return `${bone.name} requires ${bone.targetDescription || 'a compatible base'}.`;
+  }
+  if (bone.maxItemLevel != null && Number(item.ilvl || item.itemLevel || 0) > bone.maxItemLevel) {
+    return `${bone.name} can only desecrate items of Item Level ${bone.maxItemLevel} or lower.`;
+  }
   const pool = desecData?.bases?.[engine.baseType] || desecData?.jewelTypes?.[engine.baseType];
   if (desecData && (!pool || (!(pool.prefixes || []).length && !(pool.suffixes || []).length))) {
     return 'No Desecrated modifiers are available for this base.';
@@ -2678,6 +2913,7 @@ function omenDisabledReason(definition, item) {
   if (item.mirrored || item.isMirrored) return 'Item is mirrored and cannot be modified.';
   const omen = definition.omenId;
   const removable = removableItemMods(item);
+  const rareLimits = engine.getLimits('rare');
 
   if (definition.handler === 'toggleOmen') {
     const alreadyDesecrated = allItemMods(item).some(mod => mod.desecrated && !mod.mark);
@@ -2692,6 +2928,51 @@ function omenDisabledReason(definition, item) {
       return hasRevealedDesecrated ? 'The Desecrated modifier has already been revealed.' : '';
     }
     return alreadyDesecrated ? 'Item already has a Desecrated modifier.' : '';
+  }
+
+  if (omen === 'sinistral_alchemy' || omen === 'dextral_alchemy') {
+    if (item.rarity !== 'normal') return 'Requires a Normal item for the next Orb of Alchemy.';
+    if (!rareLimits) return `${item.baseName} cannot be upgraded to Rare.`;
+    const side = omen === 'sinistral_alchemy' ? 'prefix' : 'suffix';
+    const cap = side === 'prefix' ? rareLimits.prefixes : rareLimits.suffixes;
+    if (cap === 0) return `This base has 0 available Rare ${side === 'prefix' ? 'Prefix' : 'Suffix'} slots.`;
+    return engine.getEligibleModifierGroupCountForSide('rare', side, {}, { clearExisting: true }) >= cap
+      ? ''
+      : `No eligible Rare ${side === 'prefix' ? 'Prefix' : 'Suffix'} modifier is available.`;
+  }
+  if (omen === 'sinistral_coronation' || omen === 'dextral_coronation') {
+    if (item.rarity !== 'magic') return 'Requires a Magic item for the next Regal Orb.';
+    if (!rareLimits) return `${item.baseName} cannot be upgraded to Rare.`;
+    const side = omen === 'sinistral_coronation' ? 'prefix' : 'suffix';
+    const cap = side === 'prefix' ? rareLimits.prefixes : rareLimits.suffixes;
+    const current = side === 'prefix' ? item.prefixes.length : item.suffixes.length;
+    if (current >= cap) return `No open Rare ${side === 'prefix' ? 'Prefix' : 'Suffix'} slot is available.`;
+    return engine.getEligibleModifierCountForSide('rare', side)
+      ? ''
+      : `No eligible Rare ${side === 'prefix' ? 'Prefix' : 'Suffix'} modifier is available.`;
+  }
+  if (omen === 'greater_exaltation' || omen === 'sinistral_exaltation' || omen === 'dextral_exaltation') {
+    if (item.rarity !== 'rare') return 'Requires a Rare item for the next Exalted Orb.';
+    if (!rareLimits) return `${item.baseName} cannot have Rare modifiers.`;
+    if (omen === 'greater_exaltation') {
+      const openSlots = Math.max(0, rareLimits.prefixes - item.prefixes.length) +
+        Math.max(0, rareLimits.suffixes - item.suffixes.length);
+      if (openSlots < 2) return 'Omen of Greater Exaltation requires two open Rare affix slots.';
+      return engine.getEligibleModifierGroupCount('rare') >= 2
+        ? ''
+        : 'Omen of Greater Exaltation requires two eligible Rare modifiers.';
+    }
+    const side = omen === 'sinistral_exaltation' ? 'prefix' : 'suffix';
+    const cap = side === 'prefix' ? rareLimits.prefixes : rareLimits.suffixes;
+    const current = side === 'prefix' ? item.prefixes.length : item.suffixes.length;
+    if (current >= cap) return `No open Rare ${side === 'prefix' ? 'Prefix' : 'Suffix'} slot is available.`;
+    return engine.getEligibleModifierCountForSide('rare', side)
+      ? ''
+      : `No eligible Rare ${side === 'prefix' ? 'Prefix' : 'Suffix'} modifier is available.`;
+  }
+  if (omen === 'greater_annulment') {
+    if (item.rarity === 'normal') return 'Requires a Magic or Rare item for the next Orb of Annulment.';
+    return removable.length >= 2 ? '' : 'Omen of Greater Annulment requires two removable modifiers.';
   }
 
   if (item.rarity !== 'rare') return 'Requires a Rare item.';
@@ -2980,14 +3261,20 @@ function renderItem(actionResult = null, overrideItem = null) {
     }
   }
 
-  let heldCurrencyBecameUnavailable = false;
-  let selectedCraftOmenBecameUnavailable = false;
+  const heldDefinition = armedCurrency ? CRAFT_DEFINITION_BY_ACTION.get(armedCurrency) : null;
+  const heldCurrencyBecameUnavailable = Boolean(
+    heldDefinition && disabledReasonForDefinition(heldDefinition, liveItem)
+  );
+  const selectedOmenDefinition = selectedCraftOmen
+    ? CRAFTING_ITEM_REGISTRY[CRAFT_OMENS[selectedCraftOmen]?.craftId]
+    : null;
+  const selectedCraftOmenBecameUnavailable = Boolean(
+    selectedOmenDefinition && disabledReasonForDefinition(selectedOmenDefinition, liveItem)
+  );
   elements.craftButtons.forEach(button => {
     const definition = definitionForElement(button);
     const reason = disabledReasonForDefinition(definition, liveItem);
     setCraftButtonState(button, reason);
-    if (reason && armedCurrency === definition?.engineAction) heldCurrencyBecameUnavailable = true;
-    if (reason && selectedCraftOmen === definition?.omenId) selectedCraftOmenBecameUnavailable = true;
   });
   if (heldCurrencyBecameUnavailable) disarmCurrency();
   if (selectedCraftOmenBecameUnavailable) clearCraftOmen();

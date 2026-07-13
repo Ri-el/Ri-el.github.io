@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "targetGameVersion": "0.5.4",
+  "sources": [
+    {
+      "id": "poe2db-crafting-0.5.4",
+      "type": "reliable_public_item_text",
+      "url": "https://poe2db.tw/us/Crafting"
+    },
+    {
+      "id": "poe2db-omen-0.5.4",
+      "type": "reliable_public_item_text",
+      "url": "https://poe2db.tw/us/Omen"
+    },
+    {
+      "id": "poe2db-abyss-0.5.4",
+      "type": "reliable_public_item_text",
+      "url": "https://poe2db.tw/us/Abyss"
+    }
+  ],
+  "definitions": [
+    {
+      "craftId": "omen-sinistral-alchemy",
+      "sourceItemId": 4418,
+      "kind": "crafting_omen",
+      "omenId": "sinistral_alchemy",
+      "triggerCraftId": "alchemy",
+      "displayOrder": 140,
+      "iconFallback": "SinA",
+      "description": "Makes the next qualifying Orb of Alchemy produce the maximum number of Prefix modifiers.",
+      "confidence": "verified"
+    },
+    {
+      "craftId": "omen-dextral-alchemy",
+      "sourceItemId": 4419,
+      "kind": "crafting_omen",
+      "omenId": "dextral_alchemy",
+      "triggerCraftId": "alchemy",
+      "displayOrder": 150,
+      "iconFallback": "DexA",
+      "description": "Makes the next qualifying Orb of Alchemy produce the maximum number of Suffix modifiers.",
+      "confidence": "verified"
+    },
+    {
+      "craftId": "omen-sinistral-coronation",
+      "sourceItemId": 4420,
+      "kind": "crafting_omen",
+      "omenId": "sinistral_coronation",
+      "triggerCraftId": "regal",
+      "displayOrder": 160,
+      "iconFallback": "SinC",
+      "description": "Makes the next qualifying Regal Orb add only a Prefix modifier.",
+      "confidence": "verified"
+    },
+    {
+      "craftId": "omen-dextral-coronation",
+      "sourceItemId": 4421,
+      "kind": "crafting_omen",
+      "omenId": "dextral_coronation",
+      "triggerCraftId": "regal",
+      "displayOrder": 170,
+      "iconFallback": "DexC",
+      "description": "Makes the next qualifying Regal Orb add only a Suffix modifier.",
+      "confidence": "verified"
+    },
+    {
+      "craftId": "omen-greater-exaltation",
+      "sourceItemId": 4423,
+      "kind": "crafting_omen",
+      "omenId": "greater_exaltation",
+      "triggerCraftId": "exalted",
+      "displayOrder": 180,
+      "iconFallback": "GrEx",
+      "description": "Makes the next qualifying Exalted Orb add two random modifiers.",
+      "confidence": "verified"
+    },
+    {
+      "craftId": "omen-sinistral-exaltation",
+      "sourceItemId": 4424,
+      "kind": "crafting_omen",
+      "omenId": "sinistral_exaltation",
+      "triggerCraftId": "exalted",
+      "displayOrder": 190,
+      "iconFallback": "SinE",
+      "description": "Makes the next qualifying Exalted Orb add only a Prefix modifier.",
+      "confidence": "verified"
+    },
+    {
+      "craftId": "omen-dextral-exaltation",
+      "sourceItemId": 4425,
+      "kind": "crafting_omen",
+      "omenId": "dextral_exaltation",
+      "triggerCraftId": "exalted",
+      "displayOrder": 200,
+      "iconFallback": "DexE",
+      "description": "Makes the next qualifying Exalted Orb add only a Suffix modifier.",
+      "confidence": "verified"
+    },
+    {
+      "craftId": "omen-greater-annulment",
+      "sourceItemId": 4426,
+      "kind": "crafting_omen",
+      "omenId": "greater_annulment",
+      "triggerCraftId": "annulment",
+      "displayOrder": 210,
+      "iconFallback": "GrAn",
+      "description": "Makes the next qualifying Orb of Annulment remove two random modifiers.",
+      "confidence": "verified"
+    },
+    {
+      "craftId": "gnawed-jawbone",
+      "sourceItemId": 4855,
+      "kind": "abyss_bone",
+      "boneId": "gnawed_jawbone",
+      "boneFamily": "jawbone",
+      "displayOrder": 20,
+      "iconFallback": "GJ",
+      "description": "Starts Desecration for a weapon or quiver of item level 64 or lower and reveals three Well of Souls options.",
+      "confidence": "inferred"
+    },
+    {
+      "craftId": "preserved-jawbone",
+      "sourceItemId": 4856,
+      "kind": "abyss_bone",
+      "boneId": "preserved_jawbone",
+      "boneFamily": "jawbone",
+      "displayOrder": 30,
+      "iconFallback": "PJ",
+      "description": "Starts Desecration for a weapon or quiver and reveals three Well of Souls options.",
+      "confidence": "inferred"
+    },
+    {
+      "craftId": "gnawed-rib",
+      "sourceItemId": 4858,
+      "kind": "abyss_bone",
+      "boneId": "gnawed_rib",
+      "boneFamily": "rib",
+      "displayOrder": 50,
+      "iconFallback": "GR",
+      "description": "Starts Desecration for an armour item of item level 64 or lower and reveals three Well of Souls options.",
+      "confidence": "inferred"
+    },
+    {
+      "craftId": "preserved-rib",
+      "sourceItemId": 4859,
+      "kind": "abyss_bone",
+      "boneId": "preserved_rib",
+      "boneFamily": "rib",
+      "displayOrder": 60,
+      "iconFallback": "PR",
+      "description": "Starts Desecration for an armour item and reveals three Well of Souls options.",
+      "confidence": "inferred"
+    },
+    {
+      "craftId": "gnawed-collarbone",
+      "sourceItemId": 4861,
+      "kind": "abyss_bone",
+      "boneId": "gnawed_collarbone",
+      "boneFamily": "collarbone",
+      "displayOrder": 80,
+      "iconFallback": "GC",
+      "description": "Starts Desecration for jewellery of item level 64 or lower and reveals three Well of Souls options.",
+      "confidence": "inferred"
+    },
+    {
+      "craftId": "preserved-collarbone",
+      "sourceItemId": 4862,
+      "kind": "abyss_bone",
+      "boneId": "preserved_collarbone",
+      "boneFamily": "collarbone",
+      "displayOrder": 90,
+      "iconFallback": "PC",
+      "description": "Starts Desecration for jewellery and reveals three Well of Souls options.",
+      "confidence": "inferred"
+    }
+  ]
+}

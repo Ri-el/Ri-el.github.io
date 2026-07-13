@@ -76,7 +76,7 @@
       "iconFallback": "Trans",
       "accentColor": "#6888c8",
       "cssClasses": ["currency-btn"],
-      "description": "Upgrades a Normal item to Magic and adds a modifier.",
+      "description": "Upgrades a Normal item to Magic and adds one modifier when its effective Magic capacity and eligible pool allow one; zero-capacity bases transition with no explicit modifier.",
       "actionType": "direct",
       "activation": "arm",
       "engineAction": "transmutation",
@@ -113,7 +113,7 @@
       "iconFallback": "II",
       "accentColor": "#6888c8",
       "cssClasses": ["currency-btn", "tier-badge"],
-      "description": "Upgrades a Normal item to Magic and adds a modifier with Minimum Modifier Level 44.",
+      "description": "Upgrades a Normal item to Magic and adds one modifier of Minimum Modifier Level 44 when an effective Magic slot exists; zero-capacity bases transition with no explicit modifier.",
       "actionType": "direct",
       "activation": "arm",
       "engineAction": "greater_transmutation",
@@ -150,7 +150,7 @@
       "iconFallback": "III",
       "accentColor": "#6888c8",
       "cssClasses": ["currency-btn", "tier-badge"],
-      "description": "Upgrades a Normal item to Magic and adds a modifier with Minimum Modifier Level 70.",
+      "description": "Upgrades a Normal item to Magic and adds one modifier of Minimum Modifier Level 70 when an effective Magic slot exists; zero-capacity bases transition with no explicit modifier.",
       "actionType": "direct",
       "activation": "arm",
       "engineAction": "perfect_transmutation",
@@ -346,7 +346,7 @@
       "cssClasses": [
         "currency-btn"
       ],
-      "description": "Upgrades a Normal or Magic item to Rare and rolls four fresh modifiers.",
+      "description": "Upgrades a Normal item to Rare and rolls up to four fresh modifiers within its effective Rare capacity.",
       "actionType": "direct",
       "activation": "arm",
       "engineAction": "alchemy",
@@ -1847,13 +1847,13 @@
       "cssClasses": [
         "unsupported-item-card"
       ],
-      "description": "The retained Breach Essence identity is visible, but its target-version equipment mutation is not enabled.",
+      "description": "The retained Breach Essence identity is visible, but its target-version Rare-item replacement and Maximum Quality modifier mutation are not enabled.",
       "actionType": "unsupported",
       "activation": "none",
       "engineAction": "essence_breach",
       "applicabilityPredicate": "unsupportedReason",
       "disabledReasonHandler": "staticDisabledReason",
-      "disabledReason": "Mechanic blocked because the exact target-version Essence of the Breach Caster/Minion modifier mapping, applicable item classes, and replacement behavior are not verified.",
+      "disabledReason": "Mechanic blocked because a Ring or Amulet receives a +20% Maximum Quality Prefix, but full-Prefix-side removal behavior and runtime quality-cap derivation from that explicit modifier are not encoded.",
       "handler": null,
       "sourceHandler": null,
       "triggeringAction": null,
@@ -1874,7 +1874,7 @@
       ],
       "implementationStatus": "blocked_missing_data",
       "verificationStatus": "blocked_missing_target_version_data",
-      "blocker": "Mechanic blocked because the exact target-version Essence of the Breach Caster/Minion modifier mapping, applicable item classes, and replacement behavior are not verified.",
+      "blocker": "Mechanic blocked because a Ring or Amulet receives a +20% Maximum Quality Prefix, but full-Prefix-side removal behavior and runtime quality-cap derivation from that explicit modifier are not encoded.",
       "testFixtureIds": [
         "ui:unsupported-registry-entry-cannot-dispatch"
       ],

@@ -497,9 +497,10 @@ const FIXED_SNAPSHOT = {
 	seed: 542026,
 	// Zero-affix checkpoint: Augmentation failures now report effective Magic
 	// capacity instead of assuming the default 1/1 limit. Mutation totals and
-	// invariants remain unchanged; the reviewed digest changes because failure
-	// messages are part of the deterministic event stream.
-	digest: '2ff53c3e4b62f384c588003d91bccd3285b9cbc1eae4db14a7f6b06e277aab66',
+	// invariants remain unchanged. Task 07 adds the schema-v5 history identity
+	// snapshot; its schema number is part of the reviewed deterministic event
+	// stream. Expanded Omen paths are covered by focused engine/browser tests.
+	digest: '53312453235d67aa3e14245351df58ada174125c9700051daa641ca2948cef39',
 }
 const runHash = createHash('sha256')
 function hashEvent(event) {

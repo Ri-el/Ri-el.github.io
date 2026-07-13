@@ -64,7 +64,7 @@ function record(modGroup, ilvlReq, extra = {}) {
 
 function rareItem(baseType, prefixes = [], suffixes = []) {
   return {
-    schemaVersion: 4,
+    schemaVersion: 5,
     rarity: 'rare', baseName: baseType, name: 'Test Item', baseType, jewelType: baseType,
     generatedName: 'Test Item',
     prefixes, suffixes, enchantments: [], corrupted: false, sanctified: false,
@@ -297,7 +297,7 @@ test('verified fixed quality operation enforces target, cap, type, save/load, an
   assert.deepEqual(invalidTarget.getItem(), invalidBefore);
 });
 
-test('schema v4 keeps generic concrete-base metadata and item-level aliases distinct', () => {
+test('schema v5 keeps generic concrete-base metadata and item-level aliases distinct', () => {
   const data = { bases: { amulets: syntheticBase() } };
   const crimson = {
     ...concreteAmulet(2546, 'Crimson Amulet', 1, 1564),
@@ -319,7 +319,7 @@ test('schema v4 keeps generic concrete-base metadata and item-level aliases dist
   const engine = new Engine(data, 'amulets', null, null, null, crimson);
   const item = engine.getItem();
 
-  assert.equal(item.schemaVersion, 4);
+  assert.equal(item.schemaVersion, 5);
   assert.equal(item.baseItemId, 2546);
   assert.equal(item.baseSourceId, 'source-2546');
   assert.equal(item.sourceItemClass, 'Amulet');
@@ -358,7 +358,7 @@ test('schema v4 keeps generic concrete-base metadata and item-level aliases dist
   assert.notEqual(rare.generatedName, rare.baseName);
 });
 
-test('schema v4 migration preserves legacy socket payloads without inventing mechanics', () => {
+test('schema v5 migration preserves legacy socket payloads without inventing mechanics', () => {
   const data = { bases: { amulets: syntheticBase() } };
   const crimson = concreteAmulet(2546, 'Crimson Amulet', 1, 1564);
   const engine = new Engine(data, 'amulets', null, null, null, crimson);
@@ -377,7 +377,7 @@ test('schema v4 migration preserves legacy socket payloads without inventing mec
   delete numericLegacy.flags;
   engine.loadItem(numericLegacy);
   const migrated = engine.getItem();
-  assert.equal(migrated.schemaVersion, 4);
+  assert.equal(migrated.schemaVersion, 5);
   assert.equal(migrated.ilvl, 67);
   assert.equal(migrated.itemLevel, 67);
   assert.deepEqual(migrated.quality, { amount: 7, type: 'normal', source: null, cap: 20 });
@@ -452,7 +452,7 @@ test('schema migration rejects incompatible state without mutating the live item
   const engine = new Engine(data, 'amulets', null, null, null, crimson);
   const before = engine.getItem();
 
-  assert.throws(() => engine.loadItem({ ...before, schemaVersion: 5 }), /newer than supported/);
+  assert.throws(() => engine.loadItem({ ...before, schemaVersion: 6 }), /newer than supported/);
   assert.throws(() => engine.loadItem({ ...before, simulatorPoolId: 'rings' }), /does not match/);
   assert.throws(() => engine.loadItem({ ...before, baseItemId: 999999 }), /does not match resolved base/);
   assert.throws(() => engine.loadItem({ ...before, targetGameVersion: '0.4.0' }), /targets game version/);
@@ -626,7 +626,7 @@ test('concrete Amulet identity remains separate from the simulator pool', () => 
   const engine = new Engine(data, 'amulets', null, null, null, crimson);
   const initial = engine.getItem();
 
-  assert.equal(initial.schemaVersion, 4);
+  assert.equal(initial.schemaVersion, 5);
   assert.equal(initial.baseType, 'amulets');
   assert.equal(initial.jewelType, 'amulets');
   assert.equal(initial.simulatorPoolId, 'amulets');
@@ -899,7 +899,7 @@ test('Desecration rejects unknown Bones and incompatible directional Omen combin
   const engine = new Engine(fixture.data, fixture.baseType, fixture.desecrated);
   engine.loadItem(rareItem(fixture.baseType, [record('P0', 1)], [record('S0', 1)]));
   const before = engine.getItem();
-  const unknownBone = engine.startDesecration({ bone: 'gnawed_jawbone' });
+  const unknownBone = engine.startDesecration({ bone: 'unretained_bone' });
   assert.equal(unknownBone.success, false);
   assert.match(unknownBone.error, /Unsupported Abyssal Bone/i);
   assert.deepEqual(engine.getItem(), before);
@@ -920,7 +920,7 @@ test('Desecration rejects unknown Bones and incompatible directional Omen combin
   const nonJewelBefore = nonJewel.getItem();
   const nonJewelResult = nonJewel.startDesecration({ bone: 'preserved_cranium' });
   assert.equal(nonJewelResult.success, false);
-  assert.match(nonJewelResult.error, /only applicable to a Jewel/i);
+  assert.match(nonJewelResult.error, /requires a Jewel/i);
   assert.deepEqual(nonJewel.getItem(), nonJewelBefore);
 });
 
@@ -1067,6 +1067,165 @@ test('crafting RNG is injectable without changing the default Math.random contra
   switched.setRandomSource(() => 0.999999);
   assert.equal(switched._weightedIndex(weighted), 1);
   assert.throws(() => switched.setRandomSource('not-a-function'), /RNG must be a function or null/);
+});
+
+test('validation:expanded-crafting-omens', () => {
+  const data = { bases: { omen_test: syntheticBase() } };
+  const alchemy = omen => withRandom(() => 0, () => {
+    const engine = new Engine(data, 'omen_test');
+    const result = engine.applyAlchemy({ omen });
+    assert.equal(result.success, true);
+    return engine.getItem();
+  });
+  const sinistralAlchemy = alchemy('sinistral_alchemy');
+  assert.equal(sinistralAlchemy.prefixes.length, 3);
+  assert.equal(sinistralAlchemy.suffixes.length, 1);
+  const dextralAlchemy = alchemy('dextral_alchemy');
+  assert.equal(dextralAlchemy.prefixes.length, 1);
+  assert.equal(dextralAlchemy.suffixes.length, 3);
+
+  const magicItem = (side) => {
+    const item = rareItem('omen_test', side === 'prefix' ? [record('P0', 1)] : [], side === 'suffix' ? [record('S0', 1)] : []);
+    item.rarity = 'magic';
+    item.name = item.baseName;
+    item.generatedName = null;
+    return item;
+  };
+  for (const [omen, expectedSide] of [
+    ['sinistral_coronation', 'prefix'],
+    ['dextral_coronation', 'suffix'],
+  ]) {
+    const engine = new Engine(data, 'omen_test');
+    engine.loadItem(magicItem(expectedSide === 'prefix' ? 'suffix' : 'prefix'));
+    const result = withRandom(() => 0, () => engine.applyRegal({ omen }));
+    assert.equal(result.success, true);
+    assert.equal(result.addedMods.length, 1);
+    assert.equal(result.addedMods[0].type, expectedSide);
+  }
+
+  const greaterExalt = new Engine(data, 'omen_test');
+  greaterExalt.loadItem(rareItem('omen_test', [record('P0', 1)], [record('S0', 1)]));
+  const greaterExaltResult = withRandom(() => 0, () => greaterExalt.applyExalted({ omen: 'greater_exaltation' }));
+  assert.equal(greaterExaltResult.success, true);
+  assert.equal(greaterExaltResult.addedMods.length, 2);
+
+  for (const [omen, expectedSide] of [
+    ['sinistral_exaltation', 'prefix'],
+    ['dextral_exaltation', 'suffix'],
+  ]) {
+    const engine = new Engine(data, 'omen_test');
+    engine.loadItem(rareItem('omen_test', [record('P0', 1)], [record('S0', 1)]));
+    const result = withRandom(() => 0, () => engine.applyExalted({ omen }));
+    assert.equal(result.success, true);
+    assert.equal(result.addedMods.length, 1);
+    assert.equal(result.addedMods[0].type, expectedSide);
+  }
+
+  const greaterAnnul = new Engine(data, 'omen_test');
+  greaterAnnul.loadItem(rareItem('omen_test', [record('P0', 1), record('P1', 1)], [record('S0', 1)]));
+  const greaterAnnulResult = withRandom(() => 0, () => greaterAnnul.applyAnnulment({ omen: 'greater_annulment' }));
+  assert.equal(greaterAnnulResult.success, true);
+  assert.equal(greaterAnnulResult.removedMods.length, 2);
+  assert.equal(greaterAnnul.getItem().prefixes.length + greaterAnnul.getItem().suffixes.length, 1);
+
+  const oneMod = new Engine(data, 'omen_test');
+  oneMod.loadItem(rareItem('omen_test', [record('P0', 1)], []));
+  const beforeAnnul = oneMod.getItem();
+  const failedAnnul = oneMod.applyAnnulment({ omen: 'greater_annulment' });
+  assert.equal(failedAnnul.success, false);
+  assert.deepEqual(oneMod.getItem(), beforeAnnul);
+
+  const limitedData = { bases: { limited_omen_test: {
+    ...syntheticBase(),
+    limits: { magic: { prefixes: 1, suffixes: 1 }, rare: { prefixes: 1, suffixes: 1 } },
+  } } };
+  const limited = new Engine(limitedData, 'limited_omen_test');
+  limited.loadItem(rareItem('limited_omen_test', [record('P0', 1)], []));
+  const beforeExalt = limited.getItem();
+  const failedExalt = withRandom(() => 0, () => limited.applyExalted({ omen: 'greater_exaltation' }));
+  assert.equal(failedExalt.success, false);
+  assert.deepEqual(limited.getItem(), beforeExalt);
+});
+
+test('validation:expanded-abyss-bones', () => {
+  const fixture = desecrationTransactionFixture();
+  const cases = [
+    ['gnawed_jawbone', 'Bow', 64],
+    ['preserved_jawbone', 'Bow', 83],
+    ['gnawed_rib', 'Helmet', 64],
+    ['preserved_rib', 'Helmet', 83],
+    ['gnawed_collarbone', 'Amulet', 64],
+    ['preserved_collarbone', 'Amulet', 83],
+  ];
+  for (const [bone, itemClass, ilvl] of cases) {
+    const engine = new Engine(fixture.data, fixture.baseType, fixture.desecrated);
+    const item = rareItem(fixture.baseType, [record('P0', 1)], [record('S0', 1)]);
+    item.itemClass = itemClass;
+    item.ilvl = ilvl;
+    item.itemLevel = ilvl;
+    engine.loadItem(item);
+    const result = withRandom(() => 0, () => engine.startDesecration({ bone }));
+    assert.equal(result.success, true, bone);
+    assert.equal(result.options.length, 3, bone);
+    assert.equal(engine.getPendingDesecration().bone, bone);
+    assert.equal(engine.cancelDesecration().success, true);
+  }
+
+  const tooHigh = new Engine(fixture.data, fixture.baseType, fixture.desecrated);
+  const highItem = rareItem(fixture.baseType, [record('P0', 1)], [record('S0', 1)]);
+  highItem.itemClass = 'Bow';
+  highItem.ilvl = 65;
+  highItem.itemLevel = 65;
+  tooHigh.loadItem(highItem);
+  const beforeHigh = tooHigh.getItem();
+  const highResult = tooHigh.startDesecration({ bone: 'gnawed_jawbone' });
+  assert.equal(highResult.success, false);
+  assert.match(highResult.error, /Item Level 64 or lower/i);
+  assert.deepEqual(tooHigh.getItem(), beforeHigh);
+
+  const wrongFamily = new Engine(fixture.data, fixture.baseType, fixture.desecrated);
+  const amulet = rareItem(fixture.baseType, [record('P0', 1)], [record('S0', 1)]);
+  amulet.itemClass = 'Amulet';
+  wrongFamily.loadItem(amulet);
+  const beforeWrong = wrongFamily.getItem();
+  const wrongResult = wrongFamily.startDesecration({ bone: 'preserved_rib' });
+  assert.equal(wrongResult.success, false);
+  assert.match(wrongResult.error, /requires an Armour base/i);
+  assert.deepEqual(wrongFamily.getItem(), beforeWrong);
+
+  assert.equal(wrongFamily.startDesecration({ bone: 'ancient_collarbone' }).success, false);
+});
+
+test('schema v5 history migration preserves exact variants and isolates ambiguous base counts', () => {
+  const data = { bases: { history_test: syntheticBase() } };
+  const engine = new Engine(data, 'history_test');
+  const legacy = rareItem('history_test');
+  legacy.schemaVersion = 4;
+  legacy.currencyUsed = {
+    transmutation: 1,
+    regal: 1,
+    chaos: 34,
+    perfect_chaos: 26,
+    greater_exalted: 2,
+    whittling: 3,
+  };
+  engine.loadItem(legacy);
+  assert.deepEqual(engine.getItem().currencyUsed, {
+    'legacy:transmutation': 1,
+    'legacy:regal': 1,
+    'legacy:chaos': 34,
+    'perfect-chaos': 26,
+    'greater-exalted': 2,
+    'omen-whittling': 3,
+  });
+  engine.recordCurrencyUse('chaos');
+  assert.equal(engine.getItem().currencyUsed.chaos, 1);
+  assert.equal(engine.getItem().currencyUsed['legacy:chaos'], 34);
+
+  const saved = engine.getItem();
+  const restored = new Engine(data, 'history_test');
+  restored.loadItem(saved);
+  assert.deepEqual(restored.getItem().currencyUsed, saved.currencyUsed);
 });
 
 test('repeated currency applications have deterministic parity with manual reselection', () => {

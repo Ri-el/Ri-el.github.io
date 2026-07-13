@@ -6,7 +6,7 @@
 // key) and per-base affix limits. Jewels remain the default base.
 
 class CraftingEngine {
-  static ITEM_SCHEMA_VERSION = 4;
+  static ITEM_SCHEMA_VERSION = 5;
 
   // Ordinary equipment can hold three prefixes and three suffixes. Jewels are
   // the exception at two of each; flasks and charms are Magic-only.
@@ -161,7 +161,40 @@ class CraftingEngine {
     // Craniums (Gnawed/Ancient apply to Jawbone/Rib/Collarbone, not jewels).
     preserved_cranium: {
       name: 'Preserved Cranium', reveal: 3, desecratedOnly: false,
-      validItemClasses: ['Jewel'],
+      validItemClasses: ['Jewel'], targetDescription: 'a Jewel base',
+    },
+    gnawed_jawbone: {
+      name: 'Gnawed Jawbone', reveal: 3, maxItemLevel: 64,
+      targetDescription: 'a weapon or Quiver base',
+      validItemClasses: [
+        'Claw', 'Dagger', 'Wand', 'One Hand Sword', 'One Hand Axe', 'One Hand Mace',
+        'Spear', 'Flail', 'Bow', 'Staff', 'Two Hand Sword', 'Two Hand Axe',
+        'Two Hand Mace', 'Quiver', 'Sceptre', 'Warstaff', 'Crossbow', 'Talisman',
+      ],
+    },
+    preserved_jawbone: {
+      name: 'Preserved Jawbone', reveal: 3, targetDescription: 'a weapon or Quiver base',
+      validItemClasses: [
+        'Claw', 'Dagger', 'Wand', 'One Hand Sword', 'One Hand Axe', 'One Hand Mace',
+        'Spear', 'Flail', 'Bow', 'Staff', 'Two Hand Sword', 'Two Hand Axe',
+        'Two Hand Mace', 'Quiver', 'Sceptre', 'Warstaff', 'Crossbow', 'Talisman',
+      ],
+    },
+    gnawed_rib: {
+      name: 'Gnawed Rib', reveal: 3, maxItemLevel: 64, targetDescription: 'an Armour base',
+      validItemClasses: ['Gloves', 'Boots', 'Body Armour', 'Helmet', 'Shield', 'Buckler', 'Focus'],
+    },
+    preserved_rib: {
+      name: 'Preserved Rib', reveal: 3, targetDescription: 'an Armour base',
+      validItemClasses: ['Gloves', 'Boots', 'Body Armour', 'Helmet', 'Shield', 'Buckler', 'Focus'],
+    },
+    gnawed_collarbone: {
+      name: 'Gnawed Collarbone', reveal: 3, maxItemLevel: 64, targetDescription: 'an Amulet, Ring, or Belt base',
+      validItemClasses: ['Amulet', 'Ring', 'Belt'],
+    },
+    preserved_collarbone: {
+      name: 'Preserved Collarbone', reveal: 3, targetDescription: 'an Amulet, Ring, or Belt base',
+      validItemClasses: ['Amulet', 'Ring', 'Belt'],
     },
   };
 
@@ -817,6 +850,49 @@ class CraftingEngine {
     if (!item.currencyUsed || typeof item.currencyUsed !== 'object' || Array.isArray(item.currencyUsed)) {
       item.currencyUsed = {};
     }
+    if (parsedVersion < 5) {
+      const exactLegacyKeys = {
+        greater_transmutation: 'greater-transmutation',
+        perfect_transmutation: 'perfect-transmutation',
+        greater_augmentation: 'greater-augmentation',
+        perfect_augmentation: 'perfect-augmentation',
+        greater_regal: 'greater-regal',
+        perfect_regal: 'perfect-regal',
+        greater_exalted: 'greater-exalted',
+        perfect_exalted: 'perfect-exalted',
+        greater_chaos: 'greater-chaos',
+        perfect_chaos: 'perfect-chaos',
+        sinistral_necromancy: 'omen-sinistral-necromancy',
+        dextral_necromancy: 'omen-dextral-necromancy',
+        abyssal_echoes: 'omen-abyssal-echoes',
+        omen_of_light: 'omen-light',
+        whittling: 'omen-whittling',
+        sinistral_erasure: 'omen-sinistral-erasure',
+        dextral_erasure: 'omen-dextral-erasure',
+        sinistral_annulment: 'omen-sinistral-annulment',
+        dextral_annulment: 'omen-dextral-annulment',
+        sanctification: 'omen-sanctification',
+        preserved_cranium: 'preserved-cranium',
+        essence_abyss: 'essence-abyss',
+        hinekora: 'hinekora',
+        alchemy: 'alchemy',
+        annulment: 'annulment',
+        divine: 'divine',
+        fracturing: 'fracturing',
+      };
+      const ambiguousBaseActions = new Set([
+        'transmutation', 'augmentation', 'regal', 'exalted', 'chaos',
+      ]);
+      const migratedUses = {};
+      for (const [oldKey, rawCount] of Object.entries(item.currencyUsed)) {
+        const count = Number(rawCount);
+        if (!Number.isFinite(count) || count <= 0) continue;
+        const nextKey = exactLegacyKeys[oldKey] ||
+          (ambiguousBaseActions.has(oldKey) ? `legacy:${oldKey}` : oldKey);
+        migratedUses[nextKey] = (migratedUses[nextKey] || 0) + Math.floor(count);
+      }
+      item.currencyUsed = migratedUses;
+    }
     if (item.mirrored == null) item.mirrored = !!item.isMirrored;
     for (const key of ['corrupted', 'sanctified', 'mirrored', 'hinekoraLocked']) {
       item[key] = !!item[key];
@@ -915,6 +991,48 @@ class CraftingEngine {
     return this._success({ action: 'transform', addedMods: [added], previousRarity });
   }
 
+  getEligibleModifierCountForSide(rarity, side, options = {}, { clearExisting = false } = {}) {
+    if (side !== 'prefix' && side !== 'suffix') return 0;
+    const limits = this._limits[rarity];
+    if (!limits) return 0;
+    const currentCount = clearExisting
+      ? 0
+      : (side === 'prefix' ? this._item.prefixes.length : this._item.suffixes.length);
+    const cap = side === 'prefix' ? limits.prefixes : limits.suffixes;
+    if (currentCount >= cap) return 0;
+    const existingGroups = clearExisting ? new Set() : this._existingGroups();
+    const candidates = this._eligibleCandidates(side, existingGroups);
+    return this._filterByMinModifierLevel(candidates, this._craftOptions(options).minModLevel).length;
+  }
+
+  getEligibleModifierGroupCount(rarity, options = {}, { clearExisting = false } = {}) {
+    const limits = this._limits[rarity];
+    if (!limits) return 0;
+    const existingGroups = clearExisting ? new Set() : this._existingGroups();
+    const candidates = [];
+    if ((clearExisting ? 0 : this._item.prefixes.length) < limits.prefixes) {
+      candidates.push(...this._eligibleCandidates('prefix', existingGroups));
+    }
+    if ((clearExisting ? 0 : this._item.suffixes.length) < limits.suffixes) {
+      candidates.push(...this._eligibleCandidates('suffix', existingGroups));
+    }
+    const filtered = this._filterByMinModifierLevel(candidates, this._craftOptions(options).minModLevel);
+    return new Set(filtered.map(candidate => `${candidate.type}:${candidate.groupIdentity}`)).size;
+  }
+
+  getEligibleModifierGroupCountForSide(rarity, side, options = {}, { clearExisting = false } = {}) {
+    if (side !== 'prefix' && side !== 'suffix') return 0;
+    const limits = this._limits[rarity];
+    if (!limits) return 0;
+    const current = clearExisting ? 0 : (side === 'prefix' ? this._item.prefixes.length : this._item.suffixes.length);
+    const cap = side === 'prefix' ? limits.prefixes : limits.suffixes;
+    if (current >= cap) return 0;
+    const existingGroups = clearExisting ? new Set() : this._existingGroups();
+    const candidates = this._eligibleCandidates(side, existingGroups);
+    const filtered = this._filterByMinModifierLevel(candidates, this._craftOptions(options).minModLevel);
+    return new Set(filtered.map(candidate => candidate.groupIdentity)).size;
+  }
+
   applyAugmentation(options = {}) {
     const err = this._checkCorrupted(); if (err) return err;
     if (this._item.rarity !== 'magic') return this._fail('Orb of Augmentation can only be used on Magic items.');
@@ -942,14 +1060,23 @@ class CraftingEngine {
     this._item.rarity = 'rare';
     this._item.generatedName = this._generateRareName();
     this._item.name = this._item.generatedName;
-    const added = this._addRandomMod('rare', options);
+    const omen = options.omen || null;
+    const forcedSide = omen === 'sinistral_coronation'
+      ? 'prefix'
+      : omen === 'dextral_coronation' ? 'suffix' : null;
+    const added = forcedSide
+      ? this._addRandomModOfType(forcedSide, 'rare', options)
+      : this._addRandomMod('rare', options);
     if (!added) {
       this._item.rarity = previousRarity;
       this._item.name = previousName;
       this._item.generatedName = previousGeneratedName;
       return this._fail('No eligible mods available.');
     }
-    return this._success({ action: 'transform', addedMods: [added], previousRarity });
+    return this._success({
+      action: 'transform', addedMods: [added], previousRarity,
+      ...(omen ? { omen } : {}),
+    });
   }
 
   applyExalted(options = {}) {
@@ -960,9 +1087,32 @@ class CraftingEngine {
     if (this._isAtModLimit('rare')) {
       return this._fail(`Item already has max mods (${rareLimits.prefixes} prefixes + ${rareLimits.suffixes} suffixes).`);
     }
-    const added = this._addRandomMod('rare', options);
-    if (!added) return this._fail('No eligible open affix available.');
-    return this._success({ action: 'add', addedMods: [added], previousRarity: 'rare' });
+    const omen = options.omen || null;
+    const forcedSide = omen === 'sinistral_exaltation'
+      ? 'prefix'
+      : omen === 'dextral_exaltation' ? 'suffix' : null;
+    const addCount = omen === 'greater_exaltation' ? 2 : 1;
+    const snapshot = structuredClone(this._item);
+    const addedMods = [];
+    for (let index = 0; index < addCount; index++) {
+      const added = forcedSide
+        ? this._addRandomModOfType(forcedSide, 'rare', options)
+        : this._addRandomMod('rare', options);
+      if (!added) {
+        this._item = snapshot;
+        const detail = addCount === 2
+          ? 'Omen of Greater Exaltation requires two eligible open affix slots.'
+          : forcedSide
+            ? `No eligible open ${forcedSide === 'prefix' ? 'Prefix' : 'Suffix'} slot is available.`
+            : 'No eligible open affix available.';
+        return this._fail(detail);
+      }
+      addedMods.push(added);
+    }
+    return this._success({
+      action: 'add', addedMods, previousRarity: 'rare',
+      ...(omen ? { omen } : {}),
+    });
   }
 
   // `omen` may be one of: 'whittling' (remove the lowest modifier level),
@@ -1011,7 +1161,7 @@ class CraftingEngine {
     return this._success({ action: 'reroll', addedMods: [added], removedMods: [removed], previousRarity: 'rare', omen });
   }
 
-  applyAlchemy() {
+  applyAlchemy(options = {}) {
     const err = this._checkCorrupted(); if (err) return err;
     if (this._item.rarity !== 'normal') return this._fail('Orb of Alchemy can only be used on Normal items.');
     if (!this.supportsRarity('rare')) return this._fail(`${this._item.baseName} cannot be upgraded to Rare.`);
@@ -1023,8 +1173,39 @@ class CraftingEngine {
     this._item.generatedName = this._generateRareName();
     this._item.name = this._item.generatedName;
 
-    const totalMods = 4;
+    const rareLimits = this._limits.rare;
+    const totalMods = Math.min(4, (rareLimits?.prefixes || 0) + (rareLimits?.suffixes || 0));
     const addedMods = [];
+
+    const omen = options.omen || null;
+    const forcedSide = omen === 'sinistral_alchemy'
+      ? 'prefix'
+      : omen === 'dextral_alchemy' ? 'suffix' : null;
+    if (forcedSide) {
+      const sideLimit = forcedSide === 'prefix' ? rareLimits.prefixes : rareLimits.suffixes;
+      const forcedCount = Math.min(sideLimit, totalMods);
+      for (let index = 0; index < forcedCount; index++) {
+        const forced = this._addRandomModOfType(forcedSide, 'rare');
+        if (!forced) {
+          this._item = snapshot;
+          return this._fail(
+            `${omen === 'sinistral_alchemy' ? 'Omen of Sinistral Alchemy' : 'Omen of Dextral Alchemy'} ` +
+            `cannot fill the maximum ${forcedSide === 'prefix' ? 'Prefix' : 'Suffix'} capacity on this item.`
+          );
+        }
+        addedMods.push(forced);
+      }
+      while (addedMods.length < totalMods) {
+        const mod = this._addRandomMod('rare');
+        if (!mod) break;
+        addedMods.push(mod);
+      }
+      if (addedMods.length === 0) {
+        this._item = snapshot;
+        return this._fail('No eligible mods available.');
+      }
+      return this._success({ action: 'transform', addedMods, removedMods: [], previousRarity, omen });
+    }
 
     const forcedPrefix = this._addRandomModOfType('prefix', 'rare');
     if (forcedPrefix) addedMods.push(forcedPrefix);
@@ -1076,6 +1257,20 @@ class CraftingEngine {
       const removed = this._removeMod({ side: 'suffix' });
       if (!removed) return this._fail('Omen of Dextral Annulment: no removable suffix to remove.');
       return this._success({ action: 'remove', removedMods: [removed], previousRarity, omen: opts.omen });
+    }
+
+    if (opts.omen === 'greater_annulment') {
+      const snapshot = structuredClone(this._item);
+      const removedMods = [];
+      for (let index = 0; index < 2; index++) {
+        const removed = this._removeRandomMod();
+        if (!removed) {
+          this._item = snapshot;
+          return this._fail('Omen of Greater Annulment requires two removable modifiers.');
+        }
+        removedMods.push(removed);
+      }
+      return this._success({ action: 'remove', removedMods, previousRarity, omen: opts.omen });
     }
 
     const removed = this._removeRandomMod();
@@ -1318,7 +1513,7 @@ class CraftingEngine {
     const boneCfg = CraftingEngine.BONES[bone];
     if (boneCfg.validItemClasses && this._item.itemClass &&
         !boneCfg.validItemClasses.includes(this._item.itemClass)) {
-      return _failDesecration(`${boneCfg.name} is only applicable to a Jewel base.`);
+      return _failDesecration(`${boneCfg.name} requires ${boneCfg.targetDescription || 'a compatible base'}.`);
     }
     const desecratedOnly = !!boneCfg.desecratedOnly || markConsumed;
     const revealCount = boneCfg.reveal || 3;

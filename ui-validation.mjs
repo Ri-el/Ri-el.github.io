@@ -13,6 +13,9 @@ const currencyIndex = JSON.parse(fs.readFileSync(new URL('./data/crafting/curren
 const currencyBrowserSource = fs.readFileSync(new URL('./data/crafting/currency-index.data.js', import.meta.url), 'utf8').trim();
 const currencyBrowserPrefix = 'window.CRAFTING_CURRENCY_INDEX=';
 const currencyBrowserIndex = JSON.parse(currencyBrowserSource.slice(currencyBrowserPrefix.length, -1));
+const knownBrowserSource = fs.readFileSync(new URL('./data/crafting/known-items.data.js', import.meta.url), 'utf8').trim();
+const knownBrowserPrefix = 'window.CRAFTING_KNOWN_ITEMS=';
+const knownBrowserIndex = JSON.parse(knownBrowserSource.slice(knownBrowserPrefix.length, -1));
 const craftTabs = Array.isArray(currencyIndex.craftTabs) ? currencyIndex.craftTabs : [];
 const craftRegistry = Array.isArray(currencyIndex.craftRegistry) ? currencyIndex.craftRegistry : [];
 
@@ -39,7 +42,7 @@ check('all HTML ids are unique', ids.length === new Set(ids).size);
 for (const id of [
   'main-content', 'currency-panel', 'jewel-panel', 'stash-panel',
   'craft-inventory-controls', 'craft-item-search', 'craft-category-filter',
-  'craft-applicable-only', 'craft-result-count', 'craft-item-description',
+  'craft-applicable-only', 'craft-show-deprecated', 'craft-result-count', 'craft-item-description',
   'craft-item-description-title', 'craft-item-description-text',
   'craft-tab-list', 'craft-tab-panels', 'well-modal', 'stash-grid', 'jewel-tooltip',
   'undo-btn', 'redo-btn', 'reset-btn',
@@ -73,6 +76,8 @@ check('crafting inventory controls are accessible structural markup',
   /id="craft-item-search"[^>]*type="search"/.test(html) &&
   /id="craft-category-filter"/.test(html) &&
   /id="craft-applicable-only"[^>]*type="checkbox"/.test(html) &&
+  /name="craft-inventory-mode"[^>]*value="available"[^>]*checked/.test(html) &&
+  /name="craft-inventory-mode"[^>]*value="known"/.test(html) &&
   /id="craft-result-count"[^>]*aria-live="polite"/.test(html) &&
   /id="craft-item-description"[^>]*role="status"[^>]*aria-live="polite"/.test(html));
 
@@ -93,18 +98,21 @@ check('crafting inventory classifies every retained source item exactly once',
   currencyIndex.entries.every(entry => currencyIndex.allowedClassifications.includes(entry.classification)));
 const visibleCraftDefinitions = craftRegistry.filter(definition => definition.visible === true);
 const craftIds = visibleCraftDefinitions.map(definition => definition.craftId);
-check('authoritative registry audits 531 definitions and exposes runtime controls plus quality audit cards',
-  currencyIndex.counts.runtimeDefinitions === 37 &&
-  Object.keys(currencyIndex.runtimeRegistry).length === 37 &&
-  craftRegistry.length === 531 && visibleCraftDefinitions.length === 45 &&
+check('authoritative registry audits 531 definitions and exposes all non-deprecated known items',
+  currencyIndex.counts.runtimeDefinitions === 51 &&
+  Object.keys(currencyIndex.runtimeRegistry).length === 51 &&
+  craftRegistry.length === 531 && visibleCraftDefinitions.length === 522 &&
   craftIds.length === new Set(craftIds).size &&
   craftIds.every(id => currencyIndex.runtimeRegistry[id] ||
     craftRegistry.find(definition => definition.craftId === id)?.sourceItemId != null));
-check('browser registry contains only the 45 visible runtime definitions',
+check('startup browser registry contains only the 46 available definitions',
   currencyBrowserSource.startsWith(currencyBrowserPrefix) &&
-  currencyBrowserIndex.craftRegistry.length === visibleCraftDefinitions.length &&
-  JSON.stringify(currencyBrowserIndex.craftRegistry.map(definition => definition.craftId)) === JSON.stringify(craftIds) &&
-  currencyBrowserIndex.craftRegistry.every(definition => definition.visible === true));
+  currencyBrowserIndex.craftRegistry.length === 46 &&
+  currencyBrowserIndex.craftRegistry.every(definition => definition.supported === true));
+check('lazy browser registry contains every retained definition',
+  knownBrowserSource.startsWith(knownBrowserPrefix) &&
+  knownBrowserIndex.craftRegistry.length === craftRegistry.length &&
+  new Set(knownBrowserIndex.craftRegistry.map(definition => definition.craftId)).size === 531);
 check('every visible definition has generated-UI metadata and a valid tab',
   visibleCraftDefinitions.every(definition =>
     definition.craftId && definition.displayName && definition.description && definition.iconId &&
@@ -210,7 +218,21 @@ check('hover and keyboard focus update the persistent registry description',
 check('tab switching only updates tab presentation and persistence',
   /function setActiveCraftTab\([\s\S]*?panel\.hidden\s*=\s*panel\.dataset\.craftPanel\s*!==\s*tabId;[\s\S]*?localStorage\.setItem\(CRAFT_TAB_STORAGE_KEY/.test(app));
 check('tab controls support keyboard navigation',
-  /event\.key === 'ArrowRight'[\s\S]*?event\.key === 'Home'[\s\S]*?event\.key === 'End'/.test(app));
+  /event\.key === 'ArrowRight'[\s\S]*?event\.key === 'Home'[\s\S]*?event\.key === 'End'[\s\S]*?event\.key === 'Enter'/.test(app));
+check('tab strip consumes wheel input only while horizontal movement is possible',
+  /craftTabList\?\.addEventListener\('wheel'[\s\S]*?scrollWidth <= strip\.clientWidth[\s\S]*?before <= 0[\s\S]*?before >= maximum[\s\S]*?scrollLeft !== before\) event\.preventDefault\(\)[\s\S]*?passive: false/.test(app) &&
+  !/document\.addEventListener\('wheel'/.test(app) &&
+  !/craftCategoryFilter[^\n]*addEventListener\('wheel'/.test(app));
+check('only the active category is rendered and card icons are lazy',
+  /function renderActiveCraftPanel\(\)[\s\S]*?panel\.replaceChildren\(\)[\s\S]*?inventoryDefinitionsForTab\(tab\.id\)[\s\S]*?appendCraftCards/.test(app) &&
+  /IntersectionObserver[\s\S]*?lazyIconId/.test(app));
+check('All known items loads the separate local catalog on demand',
+  /function loadKnownCraftDefinitions\(\)[\s\S]*?data\/crafting\/known-items\.data\.js/.test(app) &&
+  /control\.value === 'known'[\s\S]*?await loadKnownCraftDefinitions\(\)/.test(app));
+check('inventory counts are active-category scoped and statuses are textual',
+  /categoryCounts\?\.\[activeCraftTab\][\s\S]*?available[\s\S]*?known/.test(app) &&
+  /craft-status-[\s\S]*?textContent = status/.test(app) &&
+  /No implemented [\s\S]*?All known items/.test(app));
 check('event listener setup is guarded against duplicate binding',
   /if \(eventsBound\) return;[\s\S]*?eventsBound = true;[\s\S]*?setupCraftTabs\(\);/.test(app) &&
   renderInventoryStart >= 0);
@@ -232,6 +254,12 @@ check('real-browser entry smoke covers representative released item classes',
 check('history snapshots preserve armed and consumed Omen state',
   /omens:\s*Array\.from\(selectedOmens\)[\s\S]*?omenOfLight:\s*omenOfLightActive[\s\S]*?craftOmen:\s*selectedCraftOmen/.test(app) &&
   /selectedOmens\s*=\s*new Set\([\s\S]*?selectedCraftOmen\s*=\s*snap\.craftOmen/.test(app));
+check('history uses exact craft IDs, visible tiers, quantities, and currency-use wording',
+  /engine\.recordCurrencyUse\(definition\.craftId\)/.test(app) &&
+  /CRAFT_DEFINITION_BY_COUNTER_KEY\.set\(definition\.craftId/.test(app) &&
+  /tier === 3 \? 'III'[\s\S]*?tier === 2 \? 'II'[\s\S]*?tier === 1 \? 'I'/.test(app) &&
+  /currency use\$\{total === 1 \? '' : 's'\}/.test(app) &&
+  /aria-label=/.test(app) && /\\u00d7\$\{model\.count\}/.test(app));
 const executeCraftStart = app.indexOf('function executeCraftOperation(');
 const executeCraftEnd = executeCraftStart >= 0 ? app.indexOf('\nfunction ', executeCraftStart + 10) : -1;
 const executeCraftSource = executeCraftStart >= 0
@@ -260,14 +288,14 @@ check('Essence of the Abyss uses the Hinekora foresight commit path',
   /const FORESEEABLE = new Set\(VISIBLE_CRAFT_DEFINITIONS[\s\S]*?definition\.actionType === 'direct'/.test(app) &&
   /engine\.getItem\(\)\.hinekoraLocked && FORESEEABLE\.has\(currency\)[\s\S]*?commitForesight\(currency\)/.test(executeCraftSource));
 check('foresight commit preserves undo and consumes Hinekora lock',
-  /const before = snapshotState\(engine\.getItem\(\)\);[\s\S]*?engine\.loadItem\(seal\.afterItem\);[\s\S]*?engine\.recordCurrencyUse\(currency\);[\s\S]*?engine\.clearHinekoraLock\(\);[\s\S]*?pushUndo\(before\)/.test(commitForesightSource));
+  /const before = snapshotState\(engine\.getItem\(\)\);[\s\S]*?engine\.loadItem\(seal\.afterItem\);[\s\S]*?engine\.recordCurrencyUse\(craftIdForAction\(currency\)\);[\s\S]*?engine\.clearHinekoraLock\(\);[\s\S]*?pushUndo\(before\)/.test(commitForesightSource));
 check('foresight rollback preserves pending Desecration state',
   /function computeForesight\(currency\)[\s\S]*?const snapshotPending = engine\.getPendingDesecration\(\)[\s\S]*?engine\.loadItem\(snapshot, snapshotPending\)/.test(app) &&
   /function computeDesecrationForesight\(bone\)[\s\S]*?const snapshotPending = engine\.getPendingDesecration\(\)[\s\S]*?engine\.loadItem\(snapshot, snapshotPending\)/.test(app));
 check('Omen of Light requires a revealed Desecrated modifier and is consumed exactly once',
   /omen === 'omen_of_light'[\s\S]*?revealed Desecrated modifier/.test(app) &&
-  /currency === 'annulment' && omenOfLightActive[\s\S]*?engine\.recordCurrencyUse\('omen_of_light'\)/.test(app) &&
-  /engine\.clearHinekoraLock\(\)[\s\S]*?currency === 'annulment' && omenOfLightActive[\s\S]*?engine\.recordCurrencyUse\('omen_of_light'\)/.test(app));
+  /currency === 'annulment' && omenOfLightActive[\s\S]*?engine\.recordCurrencyUse\(craftIdForOmen\('omen_of_light'\)\)/.test(app) &&
+  /engine\.clearHinekoraLock\(\)[\s\S]*?currency === 'annulment' && omenOfLightActive[\s\S]*?engine\.recordCurrencyUse\(craftIdForOmen\('omen_of_light'\)\)/.test(app));
 const inventoryEventsMatch = app.match(/function ((?:setup|bind)Craft(?:ing)?InventoryEvents)\s*\(/);
 const inventoryEventsStart = inventoryEventsMatch ? app.indexOf(`function ${inventoryEventsMatch[1]}(`) : -1;
 const inventoryEventsEnd = inventoryEventsStart >= 0 ? app.indexOf('\nfunction ', inventoryEventsStart + 10) : -1;
@@ -502,8 +530,9 @@ check('Jewel-only flavor text is conditional on Jewel mode',
   /Place into an allocated Jewel Socket on the Passive Skill Tree/.test(html));
 check('runtime selector, socket stylesheet, and performance data are versioned in the offline shell',
   /header-fix\.css\?v=19/.test(select) &&
-  /CACHE_NAME = 'poe2-craft-zero-affix-v1'/.test(serviceWorker) &&
-  serviceWorker.includes("'./header-fix.css?v=19'"));
+  /CACHE_NAME = 'poe2-craft-registry-v2'/.test(serviceWorker) &&
+  serviceWorker.includes("'./header-fix.css?v=19'") &&
+  serviceWorker.includes("'./data/crafting/known-items.data.js'"));
 check('right-click sticky currency mode is explicit, repeatable, and Escape-safe',
   /intent === 'sticky' && isStickyCurrencyDefinition\(definition\)/.test(app) &&
   /const keepArmed = shiftKey \|\| stickyCurrency === currency/.test(app) &&

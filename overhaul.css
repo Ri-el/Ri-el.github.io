@@ -764,6 +764,29 @@ body::before {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.craft-inventory-mode {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 5px 7px;
+  border: 1px solid rgba(155,133,94,0.2);
+  color: #8b8273;
+  font: 600 0.56rem/1.2 'Inter', sans-serif;
+}
+.craft-inventory-mode legend {
+  padding: 0 4px;
+  color: #746c60;
+  font-size: 0.5rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.craft-inventory-mode label { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+.craft-inventory-mode input { margin: 0; accent-color: #b9823f; }
+.craft-deprecated-filter { grid-column: 1 / -1; }
 .craft-item-description span { display: none; }
 
 .craft-item-description strong {
@@ -902,6 +925,7 @@ body::before {
 
 #currency-panel .currency-btn,
 #currency-panel .abyss-btn {
+  position: relative;
   display: flex;
   width: 100%;
   align-items: center;
@@ -925,6 +949,24 @@ body::before {
   background: #211b13;
   box-shadow: inset 0 0 14px rgba(185,130,63,0.1), 0 0 10px rgba(185,130,63,0.12);
 }
+
+.craft-status {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  padding: 2px 3px;
+  border: 1px solid currentColor;
+  background: rgba(8,10,11,0.9);
+  font: 700 0.38rem/1 'Inter', sans-serif;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+.craft-status-verified { color: #77aa82; }
+.craft-status-inferred { color: #d0a15f; }
+.craft-status-blocked { color: #c28c78; }
+.craft-status-deprecated { color: #898989; }
+.craft-status-audit-only { color: #8fa1ad; }
+#currency-panel .cur-tiers .craft-status { display: none; }
 
 #currency-panel .currency-btn.sticky,
 #currency-panel .abyss-btn.sticky {
@@ -1085,6 +1127,54 @@ body::before {
   padding: 0;
   border: 0;
   background: transparent;
+}
+
+.craft-inventory-empty {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 24px 14px;
+  border: 1px dashed rgba(155,133,94,0.28);
+  color: #746d62;
+  font: 0.64rem/1.45 'Inter', sans-serif;
+  text-align: center;
+}
+.craft-inventory-empty strong { color: #b9a37d; font-family: 'Cinzel', serif; }
+
+.craft-counter .cc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 7px;
+}
+.craft-counter .cc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 3px 6px 3px 3px;
+  border: 1px solid rgba(200,170,110,0.22);
+  background: rgba(8,10,11,0.72);
+  color: #b9aa8c;
+  font: 600 0.58rem/1.15 'Inter', sans-serif;
+}
+.craft-counter .cc-icon { width: 24px; height: 24px; }
+.craft-counter .cc-name { max-width: 115px; text-align: left; }
+.craft-counter .cc-tier {
+  min-width: 18px;
+  padding: 2px 3px;
+  border: 1px solid rgba(208,161,95,0.5);
+  color: #e0c58f;
+  font-weight: 800;
+}
+.craft-counter .cc-count { color: #eee1bd; font-variant-numeric: tabular-nums; }
+.craft-counter .cc-chip-legacy { border-style: dashed; }
+
+@media (min-width: 1101px) {
+  .craft-inventory-filter { display: none; }
+  .craft-inventory-controls { grid-template-columns: minmax(0, 1fr) auto; }
+  .craft-inventory-mode { grid-column: auto; padding-block: 3px; }
 }
 .stash-empty {
   display: grid;
