@@ -408,7 +408,7 @@ body::before {
   padding-top: 4px;
 }
 /* The item-level slider IS the single divider line under the title (matching
-   the in-game tooltip): one thin separator line with a draggable gilded knob. */
+   the in-game tooltip): one thin separator line with a draggable diamond marker. */
 .ilvl-slider {
   position: relative;
   padding: 4px 0 2px;
@@ -423,26 +423,65 @@ body::before {
 }
 .ilvl-fill { display: none; }
 .ilvl-knob {
+  --ilvl-marker-scale: 1;
+  --ilvl-marker-border: var(--accent-separator);
+  --ilvl-marker-glow: 0 1px 2px rgba(0, 0, 0, 0.72), 0 0 2px rgba(107, 74, 42, 0.18);
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 10px;
-  height: 10px;
-  margin-left: -5px;
-  margin-top: -5px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #e7cf9b, #b8965c 70%);
-  border: 1px solid rgba(20, 16, 10, 0.7);
-  box-shadow: 0 0 4px rgba(200, 170, 110, 0.4);
-  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+  width: 22px;
+  height: 22px;
+  margin-left: 0;
+  margin-top: 0;
+  transform: translate(-50%, -50%);
+  background: transparent;
 }
-.ilvl-slider:hover .ilvl-knob {
-  transform: scale(1.2);
-  box-shadow: 0 0 7px rgba(200, 170, 110, 0.7);
+.ilvl-knob::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  box-sizing: border-box;
+  background: rgba(5, 8, 14, 0.94);
+  border: 1px solid var(--ilvl-marker-border);
+  box-shadow: inset 1px 1px 0 rgba(236, 210, 151, 0.08), var(--ilvl-marker-glow);
+  transform: translate(-50%, -50%) rotate(45deg) scale(var(--ilvl-marker-scale));
+  transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+  pointer-events: none;
+}
+.ilvl-slider:hover .ilvl-knob,
+.ilvl-slider:focus-visible .ilvl-knob,
+.ilvl-slider:active .ilvl-knob {
+  --ilvl-marker-scale: 1.12;
+  --ilvl-marker-border: var(--accent-gold-light);
+  --ilvl-marker-glow: 0 0 5px rgba(212, 160, 74, 0.34);
+}
+.ilvl-slider:focus-visible {
+  outline: none;
+}
+.ilvl-slider:focus-visible .ilvl-knob {
+  --ilvl-marker-glow: 0 0 0 1px rgba(212, 160, 74, 0.42), 0 0 6px rgba(212, 160, 74, 0.3);
 }
 .ilvl-knob.locked {
-  background: radial-gradient(circle at 35% 35%, #e88a8a, #b03636 70%);
-  box-shadow: 0 0 7px rgba(210, 70, 70, 0.7);
+  --ilvl-marker-border: #8d4f43;
+  --ilvl-marker-glow: 0 0 4px rgba(145, 56, 50, 0.32);
+}
+.ilvl-slider:hover .ilvl-knob.locked,
+.ilvl-slider:focus-visible .ilvl-knob.locked,
+.ilvl-slider:active .ilvl-knob.locked {
+  --ilvl-marker-border: #a86150;
+  --ilvl-marker-glow: 0 0 0 1px rgba(168, 72, 61, 0.22), 0 0 5px rgba(145, 56, 50, 0.38);
+}
+.ilvl-slider:focus-visible .ilvl-knob.locked {
+  --ilvl-marker-border: #b36a58;
+  --ilvl-marker-glow: 0 0 0 2px rgba(179, 93, 74, 0.38), 0 0 6px rgba(145, 56, 50, 0.42);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ilvl-knob::before {
+    transition: none;
+  }
 }
 .ilvl-label {
   margin-bottom: 3px;

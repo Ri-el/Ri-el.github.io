@@ -1874,7 +1874,10 @@ function updateIlvlUI(ilvl) {
     elements.ilvlKnob.classList.toggle('locked', ilvlLocked);
   }
   if (elements.ilvlValue) elements.ilvlValue.textContent = ilvl;
-  if (elements.ilvlSlider) elements.ilvlSlider.setAttribute('aria-valuenow', String(ilvl));
+  if (elements.ilvlSlider) {
+    elements.ilvlSlider.setAttribute('aria-valuenow', String(ilvl));
+    elements.ilvlSlider.setAttribute('aria-valuetext', ilvlLocked ? `${ilvl}, locked` : `${ilvl}, unlocked`);
+  }
 }
 
 function setupIlvlSlider() {
@@ -1906,6 +1909,7 @@ function setupIlvlSlider() {
     // Keep the press off the tooltip so it can't apply an armed currency.
     e.stopPropagation();
     e.preventDefault();
+    slider.focus({ preventScroll: true });
     startedOnKnob = !!(e.target.closest && e.target.closest('.ilvl-knob'));
     startX = e.clientX;
     moved = false;
@@ -1938,6 +1942,26 @@ function setupIlvlSlider() {
   slider.addEventListener('pointerup', endDrag);
   slider.addEventListener('pointercancel', endDrag);
   slider.addEventListener('click', (e) => e.stopPropagation());
+
+  slider.addEventListener('keydown', (event) => {
+    const current = engine.getItem().ilvl;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      ilvlLocked = !ilvlLocked;
+      updateIlvlUI(current);
+      return;
+    }
+
+    let next;
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') next = current - 1;
+    else if (event.key === 'ArrowRight' || event.key === 'ArrowUp') next = current + 1;
+    else if (event.key === 'Home') next = 1;
+    else if (event.key === 'End') next = 100;
+    else return;
+
+    event.preventDefault();
+    if (!ilvlLocked) applyValue(next);
+  });
 
   if (engine) updateIlvlUI(engine.getItem().ilvl);
 }

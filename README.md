@@ -1,6 +1,6 @@
-# PoE2 Crafting Simulator
+# Oishy Crafting Forge
 
-A click-and-play **Path of Exile 2 crafting *emulator*** (not a probability calculator). Double-click `index.html` to play — no server, no install, no terminal needed. Works offline and on a locked-down office laptop.
+A click-and-play **Path of Exile 2 0.5.4-targeted crafting *emulator*** (not a probability calculator). Double-click `index.html` to play — no server, no install, no terminal needed. Works offline and on a locked-down office laptop.
 
 This README explains **what every file does** and **where to look when something breaks** — written so a human *or* an AI assistant can pick it up cold.
 
@@ -18,7 +18,12 @@ This README explains **what every file does** and **where to look when something
 
 ## 🗺️ Architecture in one paragraph
 
-You edit **one small JSON file per base item** in `data/bases/` (e.g. `ruby.json`, `helmets_str.json`). `build.cmd` runs `build_data.ps1`, which validates those files and compiles local browser-loadable `.data.js` bundles. `app.js` reads those globals and hands the selected pool to `crafting.js`; no external site is contacted at runtime, so direct `file://` use still works. The workbench's ten tabs and 45 visible cards (37 runtime controls plus eight disabled quality audit cards) are generated from the browser form of one 531-definition registry. Repository-owned normalized source data, provenance, and the classified crafting inventory are kept separately so development-time validation does not depend on `../upload/data.json`.
+You edit **one small JSON file per base item** in `data/bases/` (e.g. `ruby.json`, `helmets_str.json`). `build.cmd` runs `build_data.ps1`, which validates those files and compiles local browser-loadable `.data.js` bundles. `app.js` reads those globals and hands the selected pool to `crafting.js`; no external site is contacted at runtime, so direct `file://` use still works. The workbench's ten tabs load 46 supported crafting definitions at startup from one 531-definition registry. That registry contains 51 runtime definitions and 522 visible catalog definitions; unsupported entries remain explicit blockers. Repository-owned normalized source data, provenance, and the classified crafting inventory are kept separately so development-time validation does not depend on `../upload/data.json`.
+
+### Current workbench interaction
+
+- The outer screen selects an item class and opens the workbench immediately. Concrete bases are selected inside the workbench and can be switched without returning to the outer screen; Ruby/Sapphire/Emerald Jewel switching remains available.
+- The item-level divider uses a dark diamond marker with a 22px interaction target. Pointer dragging and track clicks adjust the level; clicking the marker locks or unlocks it. The same slider supports Tab focus, Arrow/Home/End adjustment, Enter/Space lock toggling, and reduced-motion styling.
 
 ---
 
@@ -27,10 +32,10 @@ You edit **one small JSON file per base item** in `data/bases/` (e.g. `ruby.json
 | File | What it does | Look here when… |
 |---|---|---|
 | `index.html` | The page itself. Loads every script/style in order. The `<script>` tags at the bottom decide what code runs. | A file you added isn't loading, or you need to add a new script/style tag. |
-| `app.js` | **Boot + UI glue.** Wraps everything in an IIFE (`window.CraftingEngine`), reads the compiled data, generates crafting tabs/cards from the authoritative registry, and routes pointer, keyboard, context-menu, and drag interactions through shared validation/dispatch. It also owns the cursor orb, animations, stash, and ALT tier tooltips. | Buttons/clicks/tooltips/animations misbehave, or data isn't loading into the UI. |
-| `crafting.js` | **The crafting engine (the rules).** Currency behavior lives here — Transmute, Augment, Regal, Exalt, Chaos, Annul, Alchemy, Divine, blocked Vaal, Essence of the Abyss, Desecrate, plus prefix/suffix caps and tier rolling. Item-state schema v4 keeps concrete identity, structured quality `{ amount, type, source, cap }`, and versioned legacy migration without enabling unverified mechanics. | An orb does the wrong thing, mods roll incorrectly, or affix caps are off. **Engine bugs live here, NOT in the data files.** |
+| `app.js` | **Boot + UI glue.** Runs as a classic deferred script, reads the compiled data, generates crafting tabs/cards from the authoritative registry, and routes pointer, keyboard, context-menu, drag, and item-level slider interactions through shared validation/dispatch. It also owns the cursor orb, animations, stash, and ALT tier tooltips. | Buttons/clicks/tooltips/animations misbehave, or data isn't loading into the UI. |
+| `crafting.js` | **The crafting engine (the rules).** Currency behavior lives here — Transmute, Augment, Regal, Exalt, Chaos, Annul, Alchemy, Divine, blocked Vaal, Essence of the Abyss, Desecrate, plus prefix/suffix caps and tier rolling. Item-state schema v5 keeps generic concrete-base metadata distinct from simulator pool identity, keeps `ilvl` and `itemLevel` synchronized, preserves structured quality `{ amount, type, source, cap }`, and performs versioned legacy migration without enabling unverified mechanics. | An orb does the wrong thing, mods roll incorrectly, or affix caps are off. **Engine bugs live here, NOT in the data files.** |
 | `select.js` | **Item-class menu and workbench base selector.** Defines the outer category tree without inserting a concrete-base screen. Inside the workbench one generic normalized picker serves every non-Jewel class; Jewels retain Ruby/Sapphire/Emerald controls. It owns search, filters, keyboard behavior, and reset confirmation. | A class/category is missing, or the in-workbench base picker misbehaves. |
-| `style.css` | Main look — item tooltip, stash panel, dark PoE2 theme, layout. | General visual styling. |
+| `style.css` | Main look — item tooltip, stash panel, dark PoE2 theme, layout, and the item-level diamond marker with its hit target, focus, hover, active, locked, and reduced-motion states. | General visual styling or slider-marker behavior. |
 | `overhaul.css` | Final in-game-inspired layout layer: three-column workbench, currency stash tab, item stash, Omens row, and responsive selection screen. | Current UI layout and visual polish. |
 | `header-fix.css` | Versioned workbench-header, concrete-base dialog, confirmation, and concrete tooltip-detail styles loaded locally by `select.js`. | The workbench selector, its mobile drawer, or concrete details look wrong. |
 | `desecrate.css` | Styling specific to the Desecrate / abyssal-bones overlay feature. | The desecrate panel looks wrong. |
@@ -52,8 +57,8 @@ You edit **one small JSON file per base item** in `data/bases/` (e.g. `ruby.json
 | `data/normalized.data.js` | **Auto-generated complete audit wrapper** for every normalized record. It remains available to validation and source tooling but is not loaded by the application. | Never edit by hand; run the build. |
 | `data/runtime.data.js` | **Auto-generated `file://` runtime projection.** Retains every concrete base and simulator mapping plus the exact referenced implicits, source modifier identities, weights, tag rules, provenance, and crafting handlers. | This is the smaller normalized representation loaded by the browser; rebuild it from the complete normalized JSON. |
 | `data/source-cache/` | Source policy and provenance for the normalized data. The manifest explicitly records that the legacy raw export is unavailable rather than fabricating a fixture. | Auditing source identity, target version, parser version, or hashes. |
-| `data/crafting/runtime-registry.json` | Hand-authored tab metadata and the 37 runtime definitions. The generated inventory also surfaces eight disabled quality audit cards from retained source records. It references normalized records by exact source ID and metadata key, never by display-name matching. | Changing a verified visible craft's presentation or declarative runtime binding. |
-| `data/crafting/currency-index.json` | **Generated authoritative registry.** It audits all 530 retained source records plus runtime-only Hinekora's Lock: 531 unique definitions, ten tabs, 37 runtime controls and 45 visible cards including eight disabled quality audit cards, exact blockers, evidence, fixtures, applicability, and handlers. | Adding or auditing a crafting item. Generate it with `tools/build-currency-index.mjs`. |
+| `data/crafting/runtime-registry.json` | Hand-authored tab metadata and 51 runtime definitions: 46 supported, four blocked for missing data, and one probability-unverified. It references normalized records by exact source ID and metadata key, never by display-name matching. | Changing a verified visible craft's presentation or declarative runtime binding. |
+| `data/crafting/currency-index.json` | **Generated authoritative registry.** It audits all 530 retained source records plus runtime-only Hinekora's Lock: 531 unique definitions, ten tabs, 51 runtime definitions, 46 supported startup controls, and 522 visible catalog definitions, with exact blockers, evidence, fixtures, applicability, and handlers. | Adding or auditing a crafting item. Generate it with `tools/build-currency-index.mjs`. |
 | `data/crafting/quality-rules.json` | Attributed 0.5.4 quality target/cap data and explicit blocked reasons for rules whose exact formula is unavailable. | Reviewing quality support; this file is not permission to enable a button without an engine operation and tests. |
 
 ### The 61 base files at a glance
@@ -73,7 +78,7 @@ No quality currency button is enabled merely from a known description.
 
 ### Task 04 core and quality checkpoint
 
-- Item-state schema is now version 4. Every quality record carries `amount`, `type`, `source`, and `cap`; normal legacy quality at or below the verified 20% cap migrates to `cap: 20`, while alternate or above-cap quality preserves an unknown cap instead of inheriting an unverified rule.
+- The current item-state schema is version 5. It preserves generic concrete-base metadata separately from simulator pool identity and keeps `ilvl`/`itemLevel` as synchronized aliases. Every quality record carries `amount`, `type`, `source`, and `cap`; normal legacy quality at or below the verified 20% cap migrates to `cap: 20`, while alternate or above-cap quality preserves an unknown cap instead of inheriting an unverified rule.
 - Source-backed core corrections are enforced in both engine and UI: Alchemy is Normal-only; Annulment and Divine reject Normal items; mirrored items cannot be modified or have their item level changed. Greater/Perfect minimum modifier-level floors and their documented below-floor group fallback remain unchanged.
 - Vaal Orb is still visible in the Corruption tab for parity, but is disabled and atomically rejected because the retained 0.5.4 evidence does not encode its outcome probabilities/transitions. The former uniform outcome path is no longer reachable through the workbench or engine.
 - Eight retained quality records are visible as disabled audit cards with specific blockers: four ordinary currencies lack the exact 0.5.4 item-level increment formula, and four Vaal Infusers remain reserved for the specialized Task 07 audit. Gemcutter's Prism has a verified generic +5/cap-20 engine rule but no normalized Skill Gem workbench target.
@@ -121,10 +126,10 @@ No quality currency button is enabled merely from a known description.
 | File | What it does |
 |---|---|
 | `_scaffold_data.mjs` | One-off Node generator that split the jewel data into per-base files and created the empty scaffolds. Already done its job; kept for reference. Git-ignored. |
-| `fuzz.mjs` | **Node fuzz / regression harness for the crafting engine.** It treats malformed data, engine exceptions, malformed item state, zero meaningful mutations, invariant violations, and fixed-seed digest drift as fatal. The current Task 05 boundary is `node fuzz.mjs 30000 542026`; the reviewed digest is recorded in `VALIDATION_REPORT.md` after the full runtime check. |
-| `validation.mjs` | Deterministic 0.5.4-oriented engine/data regression suite, including injectable crafting RNG, generic concrete identity/state migration, source overlays, base-specific tags/affix limits, structured quality/socket preservation, Abyss/Essence applicability, explicit socket state, and all 56 populated pools. Current checkpoint: **47/47**. |
-| `ui-validation.mjs` | Dependency-free DOM/CSS contract checks for generated registry tabs/cards, shared dispatch, startup isolation, eligibility scope, filters, accessibility, the workbench grid, concrete-base flow, stash markup, Task 05 Omen gating/consumption, and Task 06 socket rendering. Current checkpoint: **124/124**. |
-| `data-validation.mjs` | Validates normalized schemas, all 1,760 concrete records, the complete crafting registry/parity projection, 31-class base parity, provenance, hashes, browser bundles, socketable cohorts, specialized-crafting cohorts, and explicit blockers using only repository-owned files. Current checkpoint: **71/71**. |
+| `fuzz.mjs` | **Node fuzz / regression harness for the crafting engine.** It treats malformed data, engine exceptions, malformed item state, zero meaningful mutations, invariant violations, and fixed-seed digest drift as fatal. The current final boundary is `node fuzz.mjs 30000 542026`; the reviewed digest is recorded in `VALIDATION_REPORT.md` after the full runtime check. |
+| `validation.mjs` | Deterministic 0.5.4-oriented engine/data regression suite, including injectable crafting RNG, schema-v5 concrete identity/state migration, source overlays, base-specific tags/affix limits, structured quality/socket preservation, Abyss/Essence applicability, explicit socket state, and all 56 populated pools. Current checkpoint: **55/55**. |
+| `ui-validation.mjs` | Dependency-free DOM/CSS contract checks for generated registry tabs/cards, shared dispatch, startup isolation, eligibility scope, filters, accessibility, the workbench grid, concrete-base flow, stash markup, item-level slider keyboard/ARIA behavior, marker states, and reduced motion. Current checkpoint: **143/143**. |
+| `data-validation.mjs` | Validates normalized schemas, all 1,760 concrete records, the complete crafting registry/parity projection, 31-class base parity, provenance, hashes, browser bundles, socketable cohorts, specialized-crafting cohorts, and explicit blockers using only repository-owned files. Current checkpoint: **82/82**. |
 
 ### Validation commands
 
@@ -139,7 +144,7 @@ node tools/sync-poe2-data.mjs verify
 node fuzz.mjs 30000 542026
 ```
 
-The Task 07 boundary passes **47/47 engine**, **124/124 UI**, and **71/71 data** checks. The fixed-seed fuzz run passes with zero exceptions, harness errors, or invariant violations; its digest is recorded in `VALIDATION_REPORT.md`. `tools/browser-smoke.mjs` performs real-script click-through checks against explicit `file://` or local-HTTP targets when Playwright is already available.
+The current final boundary passes **55/55 engine**, **143/143 UI**, and **82/82 data** checks. The fixed-seed fuzz run passes with zero exceptions, harness errors, or invariant violations; its digest is recorded in `VALIDATION_REPORT.md`. `tools/browser-smoke.mjs` performs real-script click-through checks against explicit `file://` or local-HTTP targets when Playwright is already available.
 
 ---
 

@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 
 const html = fs.readFileSync(new URL('./index.html', import.meta.url), 'utf8');
+const baseCss = fs.readFileSync(new URL('./style.css', import.meta.url), 'utf8');
 const css = fs.readFileSync(new URL('./overhaul.css', import.meta.url), 'utf8');
 const headerCss = fs.readFileSync(new URL('./header-fix.css', import.meta.url), 'utf8');
 const app = fs.readFileSync(new URL('./app.js', import.meta.url), 'utf8');
@@ -91,6 +92,51 @@ check('Active Item is absent and Crafting Workbench remains',
   !/Active item/i.test(html) && /<h2>Crafting workbench<\/h2>/i.test(html));
 check('workbench heading divider is removed',
   /\.workbench-heading\s*\{[\s\S]*?border-bottom:\s*0;/.test(css));
+
+const ilvlSliderMarkup = html.match(/<div id="ilvl-slider"[^>]*>/)?.[0] || '';
+const setupIlvlSliderStart = app.indexOf('function setupIlvlSlider()');
+const setupIlvlSliderEnd = setupIlvlSliderStart >= 0
+  ? app.indexOf('\n// ============================================================', setupIlvlSliderStart)
+  : -1;
+const setupIlvlSliderSource = setupIlvlSliderStart >= 0
+  ? app.slice(setupIlvlSliderStart, setupIlvlSliderEnd >= 0 ? setupIlvlSliderEnd : app.length)
+  : '';
+const updateIlvlUIStart = app.indexOf('function updateIlvlUI(ilvl)');
+const updateIlvlUISource = updateIlvlUIStart >= 0
+  ? app.slice(updateIlvlUIStart, setupIlvlSliderStart >= 0 ? setupIlvlSliderStart : app.length)
+  : '';
+const ilvlMarkerStart = baseCss.indexOf('.ilvl-knob {');
+const ilvlMarkerEnd = baseCss.indexOf('.ilvl-label {', ilvlMarkerStart);
+const ilvlMarkerCss = ilvlMarkerStart >= 0
+  ? baseCss.slice(ilvlMarkerStart, ilvlMarkerEnd >= 0 ? ilvlMarkerEnd : baseCss.length)
+  : '';
+check('item-level slider is focusable and exposes complete keyboard operation',
+  /role="slider"/.test(ilvlSliderMarkup) && /tabindex="0"/.test(ilvlSliderMarkup) &&
+  /slider\.addEventListener\(['"]keydown['"]/.test(setupIlvlSliderSource) &&
+  ['ArrowLeft', 'ArrowDown', 'ArrowRight', 'ArrowUp', 'Home', 'End', 'Enter', ' ']
+    .every(key => setupIlvlSliderSource.includes(`'${key}'`)) &&
+  /event\.preventDefault\(\)/.test(setupIlvlSliderSource) &&
+  /applyValue\(/.test(setupIlvlSliderSource));
+check('item-level slider names itself and exposes locked state accessibly',
+  /aria-label="Item level"/.test(ilvlSliderMarkup) &&
+  /aria-valuetext="83, unlocked"/.test(ilvlSliderMarkup) &&
+  /setAttribute\(['"]aria-valuetext['"]/.test(updateIlvlUISource) &&
+  /ilvlLocked\s*\?\s*`\$\{ilvl\}, locked`\s*:\s*`\$\{ilvl\}, unlocked`/.test(updateIlvlUISource));
+check('pointer activation focuses the item-level slider without scrolling',
+  /slider\.focus\(\{\s*preventScroll:\s*true\s*\}\)/.test(setupIlvlSliderSource));
+check('item-level marker separates a 22px hit target from an 8px diamond',
+  /\.ilvl-knob\s*\{[^}]*width:\s*22px;[^}]*height:\s*22px;[^}]*margin-left:\s*0;[^}]*margin-top:\s*0;[^}]*transform:\s*translate\(-50%,\s*-50%\);/s.test(ilvlMarkerCss) &&
+  /\.ilvl-knob::before\s*\{[^}]*content:\s*['"]{2};[^}]*width:\s*8px;[^}]*height:\s*8px;[^}]*box-sizing:\s*border-box;[^}]*transform:\s*translate\(-50%,\s*-50%\) rotate\(45deg\) scale\(var\(--ilvl-marker-scale\)\);/s.test(ilvlMarkerCss) &&
+  !/radial-gradient|border-radius:\s*50%/.test(ilvlMarkerCss));
+check('item-level diamond has stable hover, focus, active, and locked state styling',
+  /\.ilvl-slider:hover \.ilvl-knob,[\s\S]*?\.ilvl-slider:focus-visible \.ilvl-knob,[\s\S]*?\.ilvl-slider:active \.ilvl-knob\s*\{[^}]*--ilvl-marker-scale:\s*1\.1[0-5];/s.test(ilvlMarkerCss) &&
+  /\.ilvl-slider:focus-visible\s*\{[^}]*outline:\s*none;/s.test(ilvlMarkerCss) &&
+  /\.ilvl-knob\.locked\s*\{[^}]*--ilvl-marker-border:[^;}]+;[^}]*--ilvl-marker-glow:[^;}]+;/s.test(ilvlMarkerCss) &&
+  !/\.ilvl-(?:slider:hover|knob\.locked)[^{]*\{[^}]*transform\s*:/s.test(ilvlMarkerCss));
+check('locked item-level diamond retains a distinct keyboard focus ring',
+  /\.ilvl-slider:focus-visible \.ilvl-knob\.locked\s*\{[^}]*--ilvl-marker-border:[^;}]+;[^}]*--ilvl-marker-glow:\s*0 0 0 2px[^;}]+;/s.test(ilvlMarkerCss));
+check('reduced motion disables item-level marker transitions',
+  /@media \(prefers-reduced-motion:\s*reduce\)\s*\{[\s\S]*?\.ilvl-knob::before\s*\{[^}]*transition:\s*none;/s.test(baseCss));
 
 check('crafting inventory classifies every retained source item exactly once',
   currencyIndex.counts.entries === currencyIndex.entries.length &&
@@ -530,7 +576,7 @@ check('Jewel-only flavor text is conditional on Jewel mode',
   /Place into an allocated Jewel Socket on the Passive Skill Tree/.test(html));
 check('runtime selector, socket stylesheet, and performance data are versioned in the offline shell',
   /header-fix\.css\?v=19/.test(select) &&
-  /CACHE_NAME = 'poe2-craft-registry-v2'/.test(serviceWorker) &&
+  /CACHE_NAME = 'poe2-craft-registry-v3'/.test(serviceWorker) &&
   serviceWorker.includes("'./header-fix.css?v=19'") &&
   serviceWorker.includes("'./data/crafting/known-items.data.js'"));
 check('right-click sticky currency mode is explicit, repeatable, and Escape-safe',
