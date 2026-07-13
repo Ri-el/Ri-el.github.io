@@ -24,6 +24,9 @@ function loadBases() {
 const bases = loadBases();
 const modData = { bases };
 const desecratedData = JSON.parse(readFileSync(path.join(HERE, 'data', 'desecrated-mods.json'), 'utf8'));
+const normalizedBaseItems = JSON.parse(readFileSync(path.join(HERE, 'data', 'normalized', 'base-items.json'), 'utf8'));
+const normalizedModifiers = JSON.parse(readFileSync(path.join(HERE, 'data', 'normalized', 'modifiers.json'), 'utf8'));
+const normalizedModifiersById = new Map(normalizedModifiers.modifiers.map(modifier => [modifier.id, modifier]));
 
 function mulberry32(seed) {
   return () => {
@@ -115,6 +118,42 @@ function concreteLimitBase({ id, simulatorPoolId, itemClass, prefixRange, suffix
     sourceSocketCount: 1,
     targetGameVersion: '0.5.4',
     verificationState: 'fixture',
+  };
+}
+
+function normalizedConcreteBase(baseItemId, simulatorPoolId) {
+  const base = normalizedBaseItems.bases.find(candidate => candidate.id === baseItemId);
+  assert(base, `Missing normalized concrete base ${baseItemId}`);
+  return {
+    id: base.id,
+    sourceId: base.id,
+    metadataKey: base.metadataKey,
+    displayName: base.displayName,
+    itemClass: base.itemClass,
+    sourceItemClass: base.itemClass,
+    equipmentSlot: base.equipmentSlot,
+    classId: base.classId,
+    modifierPoolClassId: base.modifierPoolClassId,
+    simulatorPoolId,
+    dropLevel: base.dropLevel,
+    tags: base.tags || [],
+    requirements: base.requirements || {},
+    baseProperties: base.baseProperties || {},
+    implicits: (base.implicitModifierIds || []).map(id => {
+      const modifier = normalizedModifiersById.get(id);
+      assert(modifier, `Missing normalized implicit ${id}`);
+      return {
+        id,
+        key: modifier.key,
+        modifierGroupId: modifier.modifierGroupId,
+        modifierGroup: modifier.modifierGroup,
+        stats: modifier.stats || [],
+      };
+    }),
+    sourceSocketCount: base.socketCount ?? null,
+    selectable: !base.unmodifiable,
+    targetGameVersion: normalizedBaseItems.targetGameVersion || '0.5.4',
+    verificationState: 'normalized-test-fixture',
   };
 }
 
@@ -478,6 +517,106 @@ test('fixed concrete implicit stats adjust Amulet and Ring affix capacity only',
     magic: { prefixes: 1, suffixes: 1 },
     rare: { prefixes: 3, suffixes: 3 },
   });
+});
+
+test('Absent Amulet Transmutation is a successful zero-affix transition and Regal adds exactly one modifier', () => {
+  const absent = normalizedConcreteBase(2563, 'amulets');
+  assert.equal(absent.displayName, 'Absent Amulet');
+  let randomCalls = 0;
+  const engine = new Engine(modData, 'amulets', null, null, null, absent, () => {
+    randomCalls++;
+    return 0;
+  });
+  assert.deepEqual(engine.getLimits('magic'), { prefixes: 0, suffixes: 0 });
+  assert.deepEqual(engine.getLimits('rare'), { prefixes: 2, suffixes: 2 });
+
+  const transmutation = engine.applyTransmutation();
+  assert.equal(transmutation.success, true);
+  assert.equal(transmutation.action, 'transform');
+  assert.deepEqual(transmutation.addedMods, []);
+  assert.equal(transmutation.previousRarity, 'normal');
+  assert.equal(transmutation.item.rarity, 'magic');
+  assert.equal(transmutation.item.prefixes.length, 0);
+  assert.equal(transmutation.item.suffixes.length, 0);
+  assert.equal(randomCalls, 0, 'a zero-capacity transition must not consume crafting RNG');
+
+  engine.recordCurrencyUse('transmutation');
+  const zeroModifierMagic = engine.getItem();
+  assert.equal(zeroModifierMagic.currencyUsed.transmutation, 1);
+
+  const restored = new Engine(modData, 'amulets', null, null, null, absent, () => 0);
+  restored.loadItem(JSON.parse(JSON.stringify(zeroModifierMagic)));
+  assert.deepEqual(restored.getItem(), zeroModifierMagic, 'stash-style serialization must preserve zero-modifier Magic state');
+
+  const beforeAugmentation = restored.getItem();
+  const augmentation = restored.applyAugmentation();
+  assert.equal(augmentation.success, false);
+  assert.equal(augmentation.error, 'This base has 0 available Magic affix slots.');
+  assert.deepEqual(restored.getItem(), beforeAugmentation, 'blocked Augmentation must be atomic');
+
+  const regal = restored.applyRegal();
+  assert.equal(regal.success, true);
+  assert.equal(regal.item.rarity, 'rare');
+  assert.equal(regal.addedMods.length, 1);
+  assert.equal(regal.item.prefixes.length + regal.item.suffixes.length, 1);
+  assert.deepEqual(restored.getLimits('rare'), { prefixes: 2, suffixes: 2 });
+});
+
+test('zero-affix Transmutation remains deterministic through Hinekora-style preview and commit', () => {
+  const absent = normalizedConcreteBase(2563, 'amulets');
+  let randomCalls = 0;
+  const engine = new Engine(modData, 'amulets', null, null, null, absent, () => {
+    randomCalls++;
+    return 0.75;
+  });
+  engine.setHinekoraLock();
+  const locked = engine.getItem();
+  const preview = engine.applyTransmutation();
+  const previewItem = engine.getItem();
+  engine.loadItem(locked);
+  const commit = engine.applyTransmutation();
+  assert.equal(preview.success, true);
+  assert.equal(commit.success, true);
+  assert.deepEqual(commit.item, previewItem);
+  assert.equal(randomCalls, 0);
+});
+
+test('one-sided Magic capacity still forces Transmutation onto its available affix side', () => {
+  const data = { bases: { amulets: syntheticBase() } };
+  const cases = [
+    { prefixRange: [-1, -1], suffixRange: null, expectedType: 'suffix' },
+    { prefixRange: null, suffixRange: [-1, -1], expectedType: 'prefix' },
+  ];
+  for (const [index, fixture] of cases.entries()) {
+    const base = concreteLimitBase({
+      id: 7100 + index,
+      simulatorPoolId: 'amulets',
+      itemClass: 'Amulet',
+      prefixRange: fixture.prefixRange,
+      suffixRange: fixture.suffixRange,
+    });
+    const engine = new Engine(data, 'amulets', null, null, null, base, () => 0);
+    const result = engine.applyTransmutation();
+    assert.equal(result.success, true);
+    assert.equal(result.addedMods.length, 1);
+    assert.equal(result.addedMods[0].type, fixture.expectedType);
+  }
+});
+
+test('positive Magic capacity with no eligible modifier still fails Transmutation atomically', () => {
+  const data = { bases: { gated: {
+    name: 'Gated Base',
+    prefixes: [group('HighLevelOnly', [tier(80, 100)])],
+    suffixes: [],
+  } } };
+  const engine = new Engine(data, 'gated', null, null, null, null, () => 0);
+  engine.setItemLevel(1);
+  assert.deepEqual(engine.getLimits('magic'), { prefixes: 1, suffixes: 1 });
+  const before = engine.getItem();
+  const result = engine.applyTransmutation();
+  assert.equal(result.success, false);
+  assert.match(result.error, /No eligible mods available/);
+  assert.deepEqual(engine.getItem(), before);
 });
 
 test('concrete Amulet identity remains separate from the simulator pool', () => {

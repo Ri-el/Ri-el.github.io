@@ -7,11 +7,17 @@ if (targets.length === 0) {
   console.error('Usage: node tools/browser-smoke.mjs <file:///.../index.html|http://localhost:8080/> [...]');
   process.exitCode = 2;
 } else {
-  const { chromium } = await import('playwright').catch(error => {
+  const playwrightModule = process.env.PLAYWRIGHT_MODULE || 'playwright';
+  const { chromium } = await import(playwrightModule).catch(error => {
     throw new Error(`Browser smoke test requires an existing Playwright installation: ${error.message}`);
   });
 
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({
+    headless: true,
+    ...(process.env.BROWSER_EXECUTABLE_PATH
+      ? { executablePath: process.env.BROWSER_EXECUTABLE_PATH }
+      : {}),
+  });
   const cases = [
     ['Jewels', 'Ruby'],
     ['Amulets', 'Crimson Amulet'],
@@ -28,9 +34,24 @@ if (targets.length === 0) {
       const context = await browser.newContext();
       const page = await context.newPage();
       const runtimeErrors = [];
+      const isOptionalFallbackAsset = url => {
+        try { return new URL(url).pathname.replaceAll('\\', '/').includes('/assets/'); }
+        catch (_) { return false; }
+      };
       page.on('pageerror', error => runtimeErrors.push(error.message));
       page.on('console', message => {
-        if (message.type() === 'error') runtimeErrors.push(message.text());
+        if (message.type() !== 'error') return;
+        const text = message.text();
+        if (/^Failed to load resource: (?:net::ERR_FILE_NOT_FOUND|the server responded with a status of 404)/.test(text)) return;
+        runtimeErrors.push(text);
+      });
+      page.on('response', response => {
+        if (response.status() < 400 || isOptionalFallbackAsset(response.url())) return;
+        runtimeErrors.push(`${response.status()} ${response.url()}`);
+      });
+      page.on('requestfailed', request => {
+        if (isOptionalFallbackAsset(request.url())) return;
+        runtimeErrors.push(`${request.failure()?.errorText || 'request failed'} ${request.url()}`);
       });
 
       await page.goto(target, { waitUntil: 'load' });
@@ -62,7 +83,9 @@ if (targets.length === 0) {
 
       const results = [];
       for (const [classLabel, expectedBase] of cases) {
-        const card = page.locator('.cat-card', { hasText: classLabel });
+        const card = page.locator('.cat-card').filter({
+          has: page.getByText(classLabel, { exact: true }),
+        });
         assert.equal(await card.count(), 1, `${target}: ${classLabel} card count`);
         await card.click();
         const entered = await page.evaluate(() => {
@@ -112,12 +135,15 @@ if (targets.length === 0) {
           });
           assert(!contextMenus.outsidePrevented && contextMenus.controlPrevented,
             `${target}: context-menu prevention is not scoped to crafting controls`);
+          await page.keyboard.press('Escape');
 
-          await page.getByRole('button', { name: 'Orb of Transmutation', exact: true }).click();
+          await page.locator('[data-craft-id="transmutation"]').click();
           await page.locator('#jewel-tooltip').click();
-          await page.getByRole('button', { name: 'Regal Orb', exact: true }).click();
+          assert.equal(await page.locator('#mod-list .mod-line:not(.mod-empty)').count(), 1,
+            `${target}: ordinary Amulet Transmutation did not add exactly one modifier`);
+          await page.locator('[data-craft-id="regal"]').click();
           await page.locator('#jewel-tooltip').click();
-          await page.getByRole('button', { name: 'Chaos Orb', exact: true }).click({ button: 'right' });
+          await page.locator('[data-craft-id="chaos"]').click({ button: 'right' });
           await page.locator('#jewel-tooltip').click();
           await page.locator('#jewel-tooltip').click();
           const sticky = await page.locator('[data-craft-id="chaos"]').evaluate(button => ({
@@ -161,6 +187,121 @@ if (targets.length === 0) {
         assert(!(await page.locator('#craft-view').isVisible()), `${target}: back button did not hide workbench`);
         results.push({ classLabel, defaultBase: entered.tooltipName });
       }
+
+      // Absent Amulet is the current normalized base whose implicit deltas make
+      // its effective Magic capacity 0/0 while leaving Rare capacity at 2/2.
+      // Exercise the real controller so history, stash, Hinekora, sticky mode,
+      // currency counters, and disabled reasons are covered on both HTTP and
+      // direct file:// targets.
+      await page.locator('.cat-card', { hasText: 'Amulets' }).click();
+      await page.locator('.concrete-base-trigger').click();
+      await page.locator('#base-picker-search').fill('Absent Amulet');
+      await page.locator('.concrete-base-option', { hasText: 'Absent Amulet' }).click();
+      await page.evaluate(() => window.CraftForge.setCraftingRandomSource(() => 0));
+
+      const absentState = () => page.evaluate(() => {
+        const tooltip = document.getElementById('jewel-tooltip');
+        const rarityClass = [...tooltip.classList].find(value => value.startsWith('rarity-')) || '';
+        return {
+          rarity: rarityClass.replace('rarity-', ''),
+          name: document.getElementById('item-name')?.textContent?.trim() || '',
+          mods: document.querySelectorAll('#mod-list .mod-line:not(.mod-empty)').length,
+          empty: !!document.querySelector('#mod-list .mod-empty'),
+          counter: document.getElementById('craft-counter')?.textContent || '',
+          hinekoraVisible: getComputedStyle(document.getElementById('hinekora-mark')).display !== 'none',
+          foresightVisible: !!document.getElementById('foreseen-banner'),
+        };
+      });
+      const applyCraft = async craftId => {
+        await page.locator(`[data-craft-id="${craftId}"]`).click();
+        await page.locator('#jewel-tooltip').click();
+      };
+
+      const initialAbsent = await absentState();
+      assert.equal(initialAbsent.rarity, 'normal', `${target}: Absent Amulet did not start Normal`);
+      assert.equal(initialAbsent.mods, 0, `${target}: fresh Absent Amulet has explicit modifiers`);
+      assert.equal(await page.locator('[data-craft-id="transmutation"]').getAttribute('aria-disabled'), 'false',
+        `${target}: Transmutation is disabled on Normal Absent Amulet`);
+
+      await applyCraft('transmutation');
+      const magicAbsent = await absentState();
+      assert.equal(magicAbsent.rarity, 'magic', `${target}: zero-affix Transmutation did not produce Magic rarity`);
+      assert(magicAbsent.empty && magicAbsent.mods === 0, `${target}: zero-affix Transmutation added a modifier`);
+      assert.equal(await page.locator('[data-craft-id="augmentation"]').getAttribute('data-disabled-reason'),
+        'This base has 0 available Magic affix slots.', `${target}: Augmentation capacity reason`);
+      assert.equal(await page.locator('[data-craft-id="regal"]').getAttribute('aria-disabled'), 'false',
+        `${target}: Regal is disabled on zero-modifier Magic Absent Amulet`);
+      assert.match(magicAbsent.counter, /1 currency used/i, `${target}: successful zero-affix craft was not counted`);
+
+      await page.locator('[data-craft-id="augmentation"]').dispatchEvent('click');
+      assert.equal(await page.locator('#error-toast').textContent(), 'This base has 0 available Magic affix slots.',
+        `${target}: blocked Augmentation toast`);
+      assert.deepEqual(await absentState(), magicAbsent, `${target}: blocked Augmentation mutated the item`);
+
+      await page.locator('#save-btn').click();
+      assert.equal(await page.locator('.stash-slot.filled.rarity-magic').count(), 1,
+        `${target}: zero-modifier Magic item was not saved to stash`);
+      await applyCraft('regal');
+      const rareAbsent = await absentState();
+      assert.equal(rareAbsent.rarity, 'rare', `${target}: Regal did not produce Rare rarity`);
+      assert.equal(rareAbsent.mods, 1, `${target}: Regal did not add exactly one Rare modifier`);
+
+      await page.locator('#undo-btn').click();
+      assert.deepEqual(await absentState(), magicAbsent, `${target}: first undo did not restore zero-modifier Magic state`);
+      await page.locator('#undo-btn').click();
+      const undoneNormal = await absentState();
+      assert.equal(undoneNormal.rarity, 'normal', `${target}: second undo did not restore Normal rarity`);
+      assert(undoneNormal.empty && undoneNormal.mods === 0, `${target}: second undo restored unexpected modifiers`);
+      await page.locator('#redo-btn').click();
+      assert.deepEqual(await absentState(), magicAbsent, `${target}: first redo did not restore zero-modifier Magic state`);
+      await page.locator('#redo-btn').click();
+      assert.deepEqual(await absentState(), rareAbsent, `${target}: second redo did not restore exact Rare state`);
+
+      await page.locator('.stash-slot.filled').click();
+      const loadedMagic = await absentState();
+      assert.equal(loadedMagic.rarity, 'magic', `${target}: stash load did not restore Magic rarity`);
+      assert(loadedMagic.empty && loadedMagic.mods === 0, `${target}: stash load did not preserve zero modifiers`);
+      assert.equal(loadedMagic.name, 'Absent Amulet', `${target}: stash load lost concrete base identity`);
+
+      await page.locator('#reset-btn').click();
+      const hinekoraDefinition = await page.evaluate(() => window.CraftForge.getCraftRegistry().hinekora);
+      await page.evaluate(tab => window.CraftForge.setCraftTab(tab), hinekoraDefinition.tab);
+      await applyCraft('hinekora');
+      assert((await absentState()).hinekoraVisible, `${target}: Hinekora lock was not applied`);
+      const transmutationDefinition = await page.evaluate(() => window.CraftForge.getCraftRegistry().transmutation);
+      await page.evaluate(tab => window.CraftForge.setCraftTab(tab), transmutationDefinition.tab);
+      await page.locator('[data-craft-id="transmutation"]').click();
+      await page.locator('#jewel-tooltip').hover();
+      const previewAbsent = await absentState();
+      assert(previewAbsent.foresightVisible, `${target}: zero-affix Hinekora preview was not shown`);
+      assert.equal(previewAbsent.rarity, 'magic', `${target}: Hinekora preview rarity`);
+      assert(previewAbsent.empty && previewAbsent.mods === 0, `${target}: Hinekora preview added a modifier`);
+      await page.locator('#jewel-tooltip').click();
+      const committedAbsent = await absentState();
+      assert.deepEqual(
+        { rarity: committedAbsent.rarity, name: committedAbsent.name, mods: committedAbsent.mods, empty: committedAbsent.empty },
+        { rarity: previewAbsent.rarity, name: previewAbsent.name, mods: previewAbsent.mods, empty: previewAbsent.empty },
+        `${target}: Hinekora commit differed from its zero-affix preview`,
+      );
+      assert(!committedAbsent.hinekoraVisible, `${target}: Hinekora lock survived committed Transmutation`);
+
+      await page.locator('#reset-btn').click();
+      await page.locator('[data-craft-id="transmutation"]').click({ button: 'right' });
+      await page.locator('#jewel-tooltip').click();
+      assert(!(await page.locator('[data-craft-id="transmutation"]').evaluate(button => button.classList.contains('sticky'))),
+        `${target}: sticky Transmutation remained armed after becoming unavailable`);
+      const stickyMagic = await absentState();
+      assert.equal(stickyMagic.rarity, 'magic', `${target}: sticky zero-affix Transmutation rarity`);
+      await page.locator('#jewel-tooltip').click();
+      assert.deepEqual(await absentState(), stickyMagic, `${target}: cleared sticky mode allowed a second mutation`);
+
+      await page.locator('#back-to-select').click();
+      results.push({
+        classLabel: 'Absent Amulet regression',
+        defaultBase: initialAbsent.name,
+        magicCapacity: '0/0',
+        rareCapacity: '2/2',
+      });
 
       assert.deepEqual(runtimeErrors, [], `${target}: browser errors`);
       console.log(JSON.stringify({ target, startup, results }, null, 2));

@@ -9,7 +9,7 @@
 //  - On activate we delete every older cache automatically.
 //  - skipWaiting + clients.claim means a new worker takes over instantly.
 
-const CACHE_NAME = 'poe2-craft-ui-redesign-v3';
+const CACHE_NAME = 'poe2-craft-zero-affix-v1';
 
 const APP_SHELL = [
   './',

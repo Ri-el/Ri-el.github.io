@@ -364,6 +364,10 @@ check('item-level eligibility helper is scoped to currency validation',
   /const noEligibleModifier\s*=/.test(currencyReasonSource) &&
   /return noEligibleModifier\(['"]magic['"]\)/.test(currencyReasonSource) &&
   !/noEligibleModifier/.test(consumeOmenSource));
+check('zero-capacity Magic transitions bypass modifier eligibility while Augmentation reports effective capacity',
+  /case 'transmutation':[\s\S]*?magicLimits\.prefixes === 0 && magicLimits\.suffixes === 0\) return '';[\s\S]*?return noEligibleModifier\('magic'\)/.test(currencyReasonSource) &&
+  /This base has 0 available Magic affix slots\./.test(currencyReasonSource) &&
+  /effective limit: \$\{magicLimits\.prefixes\} Prefix \/ \$\{magicLimits\.suffixes\} Suffix/.test(currencyReasonSource));
 check('Whittling blocks unknown modifier levels in the UI',
   /Unsupported — verification required: a removable modifier has no numeric modifier level/.test(app));
 check('base search still filters rendered cards',
@@ -498,7 +502,7 @@ check('Jewel-only flavor text is conditional on Jewel mode',
   /Place into an allocated Jewel Socket on the Passive Skill Tree/.test(html));
 check('runtime selector, socket stylesheet, and performance data are versioned in the offline shell',
   /header-fix\.css\?v=19/.test(select) &&
-  /CACHE_NAME = 'poe2-craft-ui-redesign-v3'/.test(serviceWorker) &&
+  /CACHE_NAME = 'poe2-craft-zero-affix-v1'/.test(serviceWorker) &&
   serviceWorker.includes("'./header-fix.css?v=19'"));
 check('right-click sticky currency mode is explicit, repeatable, and Escape-safe',
   /intent === 'sticky' && isStickyCurrencyDefinition\(definition\)/.test(app) &&

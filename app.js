@@ -2568,11 +2568,15 @@ function currencyDisabledReason(currency, item) {
   switch (base) {
     case 'transmutation':
       if (item.rarity !== 'normal') return 'Requires a Normal item.';
+      if (magicLimits && magicLimits.prefixes === 0 && magicLimits.suffixes === 0) return '';
       return noEligibleModifier('magic');
     case 'augmentation':
       if (item.rarity !== 'magic') return 'Requires a Magic item.';
       if (magicLimits && item.prefixes.length >= magicLimits.prefixes && item.suffixes.length >= magicLimits.suffixes) {
-        return 'Magic item already has its maximum Prefix and Suffix.';
+        if (magicLimits.prefixes === 0 && magicLimits.suffixes === 0) {
+          return 'This base has 0 available Magic affix slots.';
+        }
+        return `Magic item has no available affix slots (effective limit: ${magicLimits.prefixes} Prefix / ${magicLimits.suffixes} Suffix).`;
       }
       return noEligibleModifier('magic');
     case 'alchemy':

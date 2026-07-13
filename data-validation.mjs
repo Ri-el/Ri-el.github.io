@@ -86,6 +86,55 @@ function isValidBasePropertyValue(value) {
   return Object.entries(value).every(([key, child]) => key.trim().length > 0 && isValidBasePropertyValue(child));
 }
 
+export function auditZeroMagicCapacityBases(baseItems, modifiers, basePools = {}) {
+  const basesById = new Map((baseItems?.bases || []).map(base => [String(base.id), base]));
+  const modifiersById = new Map((modifiers?.modifiers || []).map(modifier => [String(modifier.id), modifier]));
+  const poolByBaseId = new Map();
+  for (const [poolId, mapping] of Object.entries(baseItems?.simulatorBaseMap || {})) {
+    for (const baseId of mapping?.concreteBaseIds || []) poolByBaseId.set(String(baseId), poolId);
+  }
+
+  const statToSide = new Map([
+    ['local_maximum_prefixes_allowed_+', 'prefixes'],
+    ['local_maximum_suffixes_allowed_+', 'suffixes'],
+  ]);
+  const zeroCapacity = [];
+  for (const [baseId, poolId] of poolByBaseId) {
+    const base = basesById.get(baseId);
+    if (!base || base.unmodifiable) continue;
+    const configured = basePools?.[poolId]?.limits?.magic;
+    const limits = {
+      prefixes: Number.isFinite(Number(configured?.prefixes)) ? Number(configured.prefixes) : 1,
+      suffixes: Number.isFinite(Number(configured?.suffixes)) ? Number(configured.suffixes) : 1,
+    };
+    const deltas = { prefixes: 0, suffixes: 0 };
+    for (const implicitId of base.implicitModifierIds || []) {
+      const implicit = modifiersById.get(String(implicitId));
+      for (const stat of implicit?.stats || []) {
+        const side = statToSide.get(stat?.id);
+        const range = Array.isArray(stat?.range) ? stat.range : [];
+        if (!side || range.length === 0) continue;
+        const first = Number(range[0]);
+        if (!Number.isInteger(first) || range.some(value => Number(value) !== first)) continue;
+        deltas[side] += first;
+      }
+    }
+    const effective = {
+      prefixes: Math.max(0, limits.prefixes + deltas.prefixes),
+      suffixes: Math.max(0, limits.suffixes + deltas.suffixes),
+    };
+    if (effective.prefixes === 0 && effective.suffixes === 0) {
+      zeroCapacity.push({
+        baseItemId: base.id,
+        displayName: base.displayName,
+        simulatorPoolId: poolId,
+        magic: effective,
+      });
+    }
+  }
+  return zeroCapacity.sort((left, right) => Number(left.baseItemId) - Number(right.baseItemId));
+}
+
 // Validate the normalized concrete-base contract independently from the UI.
 // Known source limitations are accepted only through explicit ID allowlists;
 // malformed fixtures without those allowlists must still fail deterministically.
@@ -584,6 +633,20 @@ check('base validator rejects malformed base-property values',
   fixtureHasError('malformed_base_properties', fixture => { fixture.baseItems.bases[0].baseProperties.armour = Infinity; }));
 check('base validator rejects unsupported version mixing',
   fixtureHasError('unsupported_version_mixing', fixture => { fixture.baseItems.bases[0].targetGameVersion = '0.5.3'; }));
+check('zero-Magic-capacity audit is driven by fixed implicit deltas rather than a base name', (() => {
+  const fixture = makeBaseValidationFixture();
+  fixture.baseItems.bases[0].displayName = 'Future Capacity Fixture';
+  fixture.modifiers.modifiers[0].stats = [
+    { id: 'local_maximum_prefixes_allowed_+', range: [-1, -1] },
+    { id: 'local_maximum_suffixes_allowed_+', range: [-1, -1] },
+  ];
+  return stable(auditZeroMagicCapacityBases(fixture.baseItems, fixture.modifiers, { rings: {} })) === stable([{
+    baseItemId: 1,
+    displayName: 'Future Capacity Fixture',
+    simulatorPoolId: 'rings',
+    magic: { prefixes: 0, suffixes: 0 },
+  }]);
+})());
 
 const mappingsValid = Object.values(actual.baseItems.simulatorBaseMap).every(mapping =>
   mapping.classIds.length > 0 && mapping.classIds.every(id => classIds.has(id)) &&
@@ -1173,6 +1236,22 @@ for (const file of readdirSync(BASE_DIR).filter(file => file.endsWith('.json')).
     suffixes: [...suffixes, ...(source.suffixes || [])],
   };
 }
+const zeroMagicCapacityBases = auditZeroMagicCapacityBases(
+  actual.baseItems,
+  actual.modifiers,
+  resolvedBasePools,
+);
+check('selectable zero-Magic-capacity concrete-base audit matches the reviewed dataset',
+  stable(zeroMagicCapacityBases) === stable([{
+    baseItemId: 2563,
+    displayName: 'Absent Amulet',
+    simulatorPoolId: 'amulets',
+    magic: { prefixes: 0, suffixes: 0 },
+  }]),
+  `found ${stable(zeroMagicCapacityBases)}`);
+console.log(`  INFO  zero-Magic-capacity selectable bases: ${zeroMagicCapacityBases
+  .map(base => `${base.displayName} (${base.baseItemId}, ${base.simulatorPoolId}, ${base.magic.prefixes}/${base.magic.suffixes})`)
+  .join(', ') || 'none'}`);
 let overlayParity = true;
 for (const [poolId, mapping] of Object.entries(actual.baseItems.simulatorBaseMap)) {
   const expectedRows = [];

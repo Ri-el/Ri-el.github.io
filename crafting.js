@@ -906,6 +906,10 @@ class CraftingEngine {
     if (this._item.rarity !== 'normal') return this._fail('Orb of Transmutation can only be used on Normal items.');
     const previousRarity = this._item.rarity;
     this._item.rarity = 'magic';
+    const magicLimits = this._limits.magic;
+    if (magicLimits && magicLimits.prefixes === 0 && magicLimits.suffixes === 0) {
+      return this._success({ action: 'transform', addedMods: [], previousRarity });
+    }
     const added = this._addRandomMod('magic', options);
     if (!added) { this._item.rarity = previousRarity; return this._fail('No eligible mods available.'); }
     return this._success({ action: 'transform', addedMods: [added], previousRarity });
@@ -914,7 +918,15 @@ class CraftingEngine {
   applyAugmentation(options = {}) {
     const err = this._checkCorrupted(); if (err) return err;
     if (this._item.rarity !== 'magic') return this._fail('Orb of Augmentation can only be used on Magic items.');
-    if (this._isAtModLimit('magic')) return this._fail('Item already has max mods for a Magic item (1 prefix + 1 suffix).');
+    if (this._isAtModLimit('magic')) {
+      const limits = this._limits.magic;
+      if (limits && limits.prefixes === 0 && limits.suffixes === 0) {
+        return this._fail('This base has 0 available Magic affix slots.');
+      }
+      return this._fail(
+        `Magic item has no available affix slots (effective limit: ${limits.prefixes} Prefix / ${limits.suffixes} Suffix).`
+      );
+    }
     const added = this._addRandomMod('magic', options);
     if (!added) return this._fail('No eligible open affix available.');
     return this._success({ action: 'add', addedMods: [added], previousRarity: 'magic' });

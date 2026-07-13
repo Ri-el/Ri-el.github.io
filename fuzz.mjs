@@ -495,10 +495,11 @@ const ACTIONS = [
 const FIXED_SNAPSHOT = {
 	iterations: 30000,
 	seed: 542026,
- // Task 05 checkpoint: Preserved Cranium is now Jewel-only, unknown/dual
- // Desecration Omens are rejected atomically, and Essence of the Abyss has
- // source-backed equipment-class gates.
- digest: '68cf3661d60c39b202799fff940bab1070d3c24ebb396c55a6d7d9809c0b0b55',
+	// Zero-affix checkpoint: Augmentation failures now report effective Magic
+	// capacity instead of assuming the default 1/1 limit. Mutation totals and
+	// invariants remain unchanged; the reviewed digest changes because failure
+	// messages are part of the deterministic event stream.
+	digest: '2ff53c3e4b62f384c588003d91bccd3285b9cbc1eae4db14a7f6b06e277aab66',
 }
 const runHash = createHash('sha256')
 function hashEvent(event) {
