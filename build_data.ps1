@@ -234,3 +234,13 @@ if (Test-Path $craftingParityBuilder) {
         throw "Failed to generate crafting parity reports"
     }
 }
+
+# Refresh the exact concrete-base and crafting-icon asset checklist after both
+# normalized bases and the crafting registry have reached their stable output.
+$assetRequirementsBuilder = Join-Path (Get-Location) "tools\build-asset-requirements.mjs"
+if (Test-Path $assetRequirementsBuilder) {
+    & node $assetRequirementsBuilder
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to generate asset requirement reports"
+    }
+}

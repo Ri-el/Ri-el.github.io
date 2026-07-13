@@ -47,6 +47,7 @@ for (const id of [
   'craft-item-description-title', 'craft-item-description-text',
   'craft-tab-list', 'craft-tab-panels', 'well-modal', 'stash-grid', 'jewel-tooltip',
   'undo-btn', 'redo-btn', 'reset-btn',
+  'item-art-stage', 'item-art', 'item-art-aura',
   'base-detail-list', 'quality-list', 'socket-list', 'implicit-list', 'concrete-base-picker',
   'base-picker-search', 'base-picker-reset', 'base-picker-list',
   'base-picker-attribute-field', 'base-picker-attribute-filter',
@@ -574,11 +575,72 @@ check('tooltip renders socket state in a dedicated section',
 check('Jewel-only flavor text is conditional on Jewel mode',
   /flavorEl\.hidden = !isJewelMode/.test(app) &&
   /Place into an allocated Jewel Socket on the Passive Skill Tree/.test(html));
+const itemArtMarkupStart = html.indexOf('id="item-art-stage"');
+const itemArtMarkupEnd = itemArtMarkupStart >= 0 ? html.indexOf('</div>', itemArtMarkupStart) : -1;
+const itemArtMarkup = itemArtMarkupStart >= 0
+  ? html.slice(itemArtMarkupStart, itemArtMarkupEnd >= 0 ? itemArtMarkupEnd : itemArtMarkupStart + 1000)
+  : '';
+check('item art stage has separate persistent and animated image layers',
+  itemArtMarkup.includes('id="item-art"') &&
+  itemArtMarkup.includes('id="item-art-aura"'));
+
+const baseArtPathMatch = app.match(
+  /function\s+\w*[Aa]rt\w*[Pp]ath\w*\s*\(\s*baseItemId\s*\)\s*\{[\s\S]{0,800}?\n\}/,
+);
+const baseArtPathSource = baseArtPathMatch?.[0] || '';
+check('base artwork resolves from a normalized numeric base ID',
+  /Number\(baseItemId\)/.test(baseArtPathSource) &&
+  /assets\/item-bases\/\$\{[A-Za-z_$][\w$]*\}\.png/.test(baseArtPathSource) &&
+  !/displayName|itemName|replace\(/.test(baseArtPathSource));
+
+const renderItemStart = app.indexOf('function renderItem(');
+const renderItemEnd = renderItemStart >= 0 ? app.indexOf('\nfunction triggerCraftAnimation', renderItemStart) : -1;
+const renderItemSource = renderItemStart >= 0
+  ? app.slice(renderItemStart, renderItemEnd >= 0 ? renderItemEnd : app.length)
+  : '';
+const itemArtRendererMatch = app.match(/function\s+(render\w*Item\w*Art\w*)\s*\(/i);
+const itemArtRendererName = itemArtRendererMatch?.[1] || '';
+check('normal item rendering also synchronizes concrete-base artwork',
+  Boolean(itemArtRendererName) &&
+  new RegExp(`\\b${itemArtRendererName}\\(item\\)`).test(renderItemSource));
+
+const triggerCraftAnimationStart = app.indexOf('function triggerCraftAnimation(');
+const triggerCraftAnimationEnd = triggerCraftAnimationStart >= 0
+  ? app.indexOf('\nfunction ', triggerCraftAnimationStart + 10)
+  : -1;
+const triggerCraftAnimationSource = triggerCraftAnimationStart >= 0
+  ? app.slice(
+    triggerCraftAnimationStart,
+    triggerCraftAnimationEnd >= 0 ? triggerCraftAnimationEnd : app.length,
+  )
+  : '';
+check('craft animation colors and restarts the item silhouette stage',
+  /itemArtStage\.style\.setProperty\(['"]--craft-color['"],\s*color\)/.test(triggerCraftAnimationSource) &&
+  /itemArtStage\.classList\.remove\(['"]craft-active['"]\)/.test(triggerCraftAnimationSource) &&
+  /itemArtStage\.classList\.add\(['"]craft-active['"]\)/.test(triggerCraftAnimationSource));
+check('craft animation falls back to a tooltip flash when base art is unavailable',
+  /tooltip\.classList\.toggle\(['"]craft-fallback['"],\s*!/.test(triggerCraftAnimationSource) ||
+  /if\s*\([^)]*(?:available|loaded|ready|hidden)[^)]*\)[\s\S]{0,300}?tooltip\.classList\.add\(['"]craft-fallback['"]\)/i.test(triggerCraftAnimationSource));
+check('craft animation no longer paints a radial workbench spotlight',
+  !/craftGlow|radial-gradient/.test(triggerCraftAnimationSource));
+
+const itemArtCss = `${baseCss}\n${headerCss}\n${css}`;
+check('item artwork glow follows transparent pixels with drop shadows',
+  /(?:#item-art(?:-aura)?|\.item-art(?:-aura|\b))[^\{]*\{[^\}]*filter:\s*[^;\}]*drop-shadow\(/.test(itemArtCss));
+check('item artwork uses dedicated flash and aura keyframes',
+  /@keyframes\s+itemCraftFlash\b/.test(itemArtCss) &&
+  /@keyframes\s+itemCraftAura\b/.test(itemArtCss));
+check('item artwork animation respects reduced-motion preferences',
+  /@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?(?:item-art|craft-active)/.test(itemArtCss));
+check('Absent Amulet art is installed at its numeric base ID path',
+  fs.existsSync(new URL('./assets/item-bases/2563.png', import.meta.url)));
 check('runtime selector, socket stylesheet, and performance data are versioned in the offline shell',
   /header-fix\.css\?v=19/.test(select) &&
-  /CACHE_NAME = 'poe2-craft-registry-v3'/.test(serviceWorker) &&
+  /CACHE_NAME = 'poe2-craft-registry-v4'/.test(serviceWorker) &&
   serviceWorker.includes("'./header-fix.css?v=19'") &&
   serviceWorker.includes("'./data/crafting/known-items.data.js'"));
+check('Absent Amulet art is available in the versioned offline application shell',
+  serviceWorker.includes("'./assets/item-bases/2563.png'"));
 check('right-click sticky currency mode is explicit, repeatable, and Escape-safe',
   /intent === 'sticky' && isStickyCurrencyDefinition\(definition\)/.test(app) &&
   /const keepArmed = shiftKey \|\| stickyCurrency === currency/.test(app) &&

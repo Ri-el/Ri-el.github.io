@@ -132,6 +132,7 @@ let normalizedIndexes = null;
 const concreteBasePoolCache = new Map();
 let armedCurrency = null;
 let stickyCurrency = null;
+let craftAnimationTimeout = null;
 let showDetails = false;
 let stash = [];
 let dragIndex = null;
@@ -403,7 +404,9 @@ const elements = {
   ilvlFill: document.getElementById('ilvl-fill'),
   ilvlKnob: document.getElementById('ilvl-knob'),
   ilvlValue: document.getElementById('ilvl-value'),
-  craftGlow: document.getElementById('craft-glow'),
+  itemArtStage: document.getElementById('item-art-stage'),
+  itemArt: document.getElementById('item-art'),
+  itemArtAura: document.getElementById('item-art-aura'),
   currencyGrid: document.getElementById('currency-grid'),
   currencyPanel: document.getElementById('currency-panel'),
   craftButtons: document.querySelectorAll('[data-craft-id]'),
@@ -706,6 +709,13 @@ function concreteBaseByIdInCurrentClass(baseItemId) {
 function defaultConcreteBaseForPool(simulatorPoolId) {
   // Normalized mappings are emitted in stable numeric ID order.
   return concreteBasesForPool(simulatorPoolId).find(base => base.selectable) || null;
+}
+
+function concreteBaseArtPath(baseItemId) {
+  const numericId = Number(baseItemId);
+  return Number.isInteger(numericId) && numericId > 0
+    ? `assets/item-bases/${numericId}.png`
+    : '';
 }
 
 function concreteBaseContext() {
@@ -1435,8 +1445,8 @@ function executeCraftOperation(definition, { shiftKey = false } = {}) {
     }
   }
   playSound(currency);
-  triggerCraftAnimation(currency);
   renderItem(result);
+  triggerCraftAnimation(currency);
   const keepArmed = shiftKey || stickyCurrency === currency;
   if (!keepArmed || result.item.corrupted || result.item.sanctified) disarmCurrency();
   return result;
@@ -1583,11 +1593,18 @@ function setupEventListeners() {
   // Model 1 (arm + click): right- or left-click a currency to pick it up (its
   // icon rides the cursor), then LEFT-CLICK the jewel to use it.
   elements.tooltip.addEventListener('click', applyArmedToItem);
+  elements.itemArtStage?.addEventListener('click', applyArmedToItem);
+  elements.itemArtStage?.addEventListener('keydown', (event) => {
+    if (!armedCurrency || (event.key !== 'Enter' && event.key !== ' ')) return;
+    applyArmedToItem(event);
+  });
   // Hinekora's Lock: foresight previews ONLY once a currency is in hand (armed
   // via left- or right-click) and brought over the item -- never on plain hover
   // of a currency button. Moving the cursor off the item clears the preview.
   elements.tooltip.addEventListener('mouseenter', () => { if (armedCurrency) previewForesight(armedCurrency); });
   elements.tooltip.addEventListener('mouseleave', clearForesightPreview);
+  elements.itemArtStage?.addEventListener('mouseenter', () => { if (armedCurrency) previewForesight(armedCurrency); });
+  elements.itemArtStage?.addEventListener('mouseleave', clearForesightPreview);
 
   elements.tooltip.addEventListener('dragover', (e) => {
     if (!dragCurrency) return; // ignore unrelated drags (e.g. stash reordering)
@@ -2094,8 +2111,8 @@ function startDesecrationFlow(bone = 'preserved_cranium') {
 
   desecState = { side: res.side, mode: res.mode, rerollsLeft: res.rerollsLeft, options: res.options, abyssalUsed: false };
   playSound('desecration');
-  triggerCraftAnimation('preserved_cranium');
   renderItem(res);
+  triggerCraftAnimation('preserved_cranium');
   showRevealPanel();
   return res;
 }
@@ -2176,8 +2193,8 @@ function chooseDesec(index) {
   // activated. Nothing left to record here on commit.
   clearDesecration();
   playSound('vaal');
-  triggerCraftAnimation('preserved_cranium');
   renderItem(result);
+  triggerCraftAnimation('preserved_cranium');
 }
 
 function closeWell() {
@@ -2332,8 +2349,8 @@ function applyHinekoraLock(shiftKey = false) {
   foreseenHover = null;
   disarmCurrency();
   playSound('hinekora');
-  triggerCraftAnimation('hinekora');
   renderItem();
+  triggerCraftAnimation('hinekora');
   return { success: true, item: engine.getItem(), action: 'hinekora-lock' };
 }
 
@@ -2538,9 +2555,9 @@ function commitForesight(currency) {
   foreseenHover = null;
   hideForeseenBanner();
   playSound(currency);
-  triggerCraftAnimation(currency);
   disarmCurrency();
   renderItem();
+  triggerCraftAnimation(currency);
   return { ...seal.result, success: true, item: engine.getItem(), specialized: true };
 }
 
@@ -2592,8 +2609,8 @@ function commitDesecrationForesight(bone) {
   // disarms up front).
   disarmCurrency();
   playSound('desecration');
-  triggerCraftAnimation('preserved_cranium');
   renderItem(res);
+  triggerCraftAnimation('preserved_cranium');
   showRevealPanel();
   return { ...res, success: true, item: engine.getItem(), specialized: true };
 }
@@ -3111,6 +3128,56 @@ function renderSocketDetails(item) {
   elements.socketList.replaceChildren(fragment);
 }
 
+function renderItemArt(item) {
+  if (!elements.itemArtStage || !elements.itemArt || !elements.itemArtAura) return;
+  const baseItemId = Number(item?.baseItemId);
+  const assetPath = concreteBaseArtPath(baseItemId);
+  const itemLabel = item?.baseName || 'Selected item';
+  const stage = elements.itemArtStage;
+  const image = elements.itemArt;
+  const aura = elements.itemArtAura;
+
+  stage.setAttribute('aria-label', `${itemLabel} crafting target`);
+  stage.title = `Apply the selected crafting item to ${itemLabel}`;
+  if (!assetPath) {
+    stage.hidden = true;
+    stage.classList.remove('has-art', 'craft-active');
+    image.removeAttribute('src');
+    aura.removeAttribute('src');
+    delete image.dataset.baseItemId;
+    delete aura.dataset.baseItemId;
+    return;
+  }
+
+  const assetKey = String(baseItemId);
+  if (image.dataset.baseItemId === assetKey) return;
+
+  stage.hidden = true;
+  stage.classList.remove('has-art', 'craft-active');
+  image.hidden = true;
+  aura.hidden = true;
+  image.dataset.baseItemId = assetKey;
+  aura.dataset.baseItemId = assetKey;
+
+  image.addEventListener('load', () => {
+    if (image.dataset.baseItemId !== assetKey) return;
+    aura.src = assetPath;
+    image.hidden = false;
+    aura.hidden = false;
+    stage.hidden = false;
+    stage.classList.add('has-art');
+  }, { once: true });
+  image.addEventListener('error', () => {
+    if (image.dataset.baseItemId !== assetKey) return;
+    stage.hidden = true;
+    stage.classList.remove('has-art', 'craft-active');
+    image.hidden = true;
+    aura.hidden = true;
+    aura.removeAttribute('src');
+  }, { once: true });
+  image.src = assetPath;
+}
+
 function renderItem(actionResult = null, overrideItem = null) {
   const item = overrideItem || engine.getItem();
   const liveItem = overrideItem ? engine.getItem() : item;
@@ -3138,6 +3205,7 @@ function renderItem(actionResult = null, overrideItem = null) {
     fullName = buildMagicName(item);
   }
   elements.itemName.textContent = fullName;
+  renderItemArt(item);
 
   // --- PoE2-style header extras: base type + item class ---
   const tipHeader = elements.itemName.parentNode;
@@ -3321,10 +3389,31 @@ function renderItem(actionResult = null, overrideItem = null) {
 
 function triggerCraftAnimation(currency) {
   const color = (CURRENCIES[currency] && CURRENCIES[currency].color) || DEFAULT_ORB_COLOR;
-  elements.craftGlow.style.background = `radial-gradient(circle, ${color} 0%, transparent 60%)`;
-  elements.craftGlow.classList.remove('active');
-  void elements.craftGlow.offsetWidth;
-  elements.craftGlow.classList.add('active');
+  const artAvailable = Boolean(
+    elements.itemArtStage &&
+    !elements.itemArtStage.hidden &&
+    elements.itemArtStage.classList.contains('has-art')
+  );
+
+  elements.itemArtStage.style.setProperty('--craft-color', color);
+  elements.tooltip.style.setProperty('--craft-color', color);
+  elements.itemArtStage.classList.remove('craft-active');
+  elements.tooltip.classList.remove('craft-fallback');
+
+  const animationTarget = artAvailable ? elements.itemArtStage : elements.tooltip;
+  void animationTarget.offsetWidth;
+  if (artAvailable) {
+    elements.itemArtStage.classList.add('craft-active');
+  } else {
+    elements.tooltip.classList.add('craft-fallback');
+  }
+
+  clearTimeout(craftAnimationTimeout);
+  const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  craftAnimationTimeout = setTimeout(() => {
+    elements.itemArtStage.classList.remove('craft-active');
+    elements.tooltip.classList.remove('craft-fallback');
+  }, reducedMotion ? 180 : 700);
 }
 
 function triggerErrorAnimation() {
@@ -3517,8 +3606,8 @@ function renderStash() {
       if (item.corrupted) slot.classList.add('corrupted');
       slot.draggable = true;
 
-      // Jewel icon: use the real PNG (assets/icons/<type>.png) when present,
-      // falling back to the coloured dot if the image is missing.
+      // Prefer concrete-base artwork when present, falling back to the
+      // coloured dot if that base has no checked-in image yet.
       const savedPoolId = item.simulatorPoolId || item.jewelType || item.baseType || '';
       const dot = document.createElement('div');
       dot.className = `jewel-dot ${savedPoolId}`;
@@ -3527,7 +3616,8 @@ function renderStash() {
       img.alt = '';
       img.addEventListener('load', () => slot.classList.add('has-real-icon'));
       img.addEventListener('error', () => img.remove());
-      img.src = `assets/icons/${iconIdForAction(savedPoolId)}.png`;
+      img.src = concreteBaseArtPath(item.baseItemId) ||
+        `assets/icons/${iconIdForAction(savedPoolId)}.png`;
       dot.appendChild(img);
       slot.appendChild(dot);
 

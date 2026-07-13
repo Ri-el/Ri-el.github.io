@@ -257,6 +257,9 @@ body::before {
 #craft-zone {
   display: grid;
   place-items: start center;
+  align-content: start;
+  grid-auto-rows: max-content;
+  row-gap: 14px;
   width: 100%;
   min-height: 430px;
   margin-top: 18px;
@@ -590,6 +593,7 @@ body::before {
   .craft-guide { display: none; }
   #jewel-panel { min-height: 0; padding-inline: 12px; }
   #craft-zone { min-height: 360px; padding: 24px 10px; }
+  .item-art-stage { width: 112px; height: 112px; padding: 5px; }
   #currency-panel { position: relative; inset: auto; }
   #currency-panel .currency-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   #stash-panel .stash-grid { grid-template-columns: repeat(6, 1fr); }

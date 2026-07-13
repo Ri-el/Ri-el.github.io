@@ -113,6 +113,7 @@ No quality currency button is enabled merely from a known description.
 | `tools/build-normalized-data.mjs` | Rebuilds the complete `data/normalized.data.js` audit wrapper and the smaller `data/runtime.data.js` browser projection. | `--check` verifies both outputs against repository-owned sources. |
 | `tools/build-currency-index.mjs` | Rebuilds the 530-entry source inventory, complete 531-definition registry, classic-script browser wrapper, and coverage report. `--check` fails if generated files are stale. | Development-time only; no runtime fetches. |
 | `tools/build-crafting-parity.mjs` | Projects `reports/crafting-parity.json` directly from the authoritative registry without inferring missing mechanics; `docs/crafting-parity.md` explains that generated report. | Run after registry or classification changes. |
+| `tools/build-asset-requirements.mjs` | Generates the complete `reports/asset-requirements.json` and `.md` checklist for every mapped concrete-base image and every known crafting icon. | Base art is keyed by numeric base ID; `--check` fails when either report is stale. |
 | `tools/browser-smoke.mjs` | Optional real-browser regression harness for explicit `file://` and local-HTTP targets. It clears HTTP service-worker state, executes the actual `index.html` scripts, and click-tests representative outer classes, engine context, concrete defaults, tooltip rendering, and the back button. | Run with an existing Playwright installation; it is not a runtime dependency. |
 | `tools/sync-poe2-data.mjs` | Staging-only public-source sync/import utility with HTTPS/public-host checks, rate limits, response limits, hashes, and provenance. `verify` validates the active repository snapshot without downloading. | New fetches are candidates; they do not auto-promote runtime data. |
 | `push.cmd` | **Double-click to upload everything to GitHub.** Inits git if needed, then force-pushes the whole folder to `Ri-el/Ri-el.github.io` (`main`). | Home PC only. Force-push overwrites the old version on GitHub — pull/sync first if the repo changed elsewhere. |
@@ -128,7 +129,7 @@ No quality currency button is enabled merely from a known description.
 | `_scaffold_data.mjs` | One-off Node generator that split the jewel data into per-base files and created the empty scaffolds. Already done its job; kept for reference. Git-ignored. |
 | `fuzz.mjs` | **Node fuzz / regression harness for the crafting engine.** It treats malformed data, engine exceptions, malformed item state, zero meaningful mutations, invariant violations, and fixed-seed digest drift as fatal. The current final boundary is `node fuzz.mjs 30000 542026`; the reviewed digest is recorded in `VALIDATION_REPORT.md` after the full runtime check. |
 | `validation.mjs` | Deterministic 0.5.4-oriented engine/data regression suite, including injectable crafting RNG, schema-v5 concrete identity/state migration, source overlays, base-specific tags/affix limits, structured quality/socket preservation, Abyss/Essence applicability, explicit socket state, and all 56 populated pools. Current checkpoint: **55/55**. |
-| `ui-validation.mjs` | Dependency-free DOM/CSS contract checks for generated registry tabs/cards, shared dispatch, startup isolation, eligibility scope, filters, accessibility, the workbench grid, concrete-base flow, stash markup, item-level slider keyboard/ARIA behavior, marker states, and reduced motion. Current checkpoint: **143/143**. |
+| `ui-validation.mjs` | Dependency-free DOM/CSS contract checks for generated registry tabs/cards, shared dispatch, startup isolation, eligibility scope, filters, accessibility, the workbench grid, concrete-base flow, concrete-base artwork/glow, stash markup, item-level slider keyboard/ARIA behavior, marker states, and reduced motion. Current checkpoint: **157/157**. |
 | `data-validation.mjs` | Validates normalized schemas, all 1,760 concrete records, the complete crafting registry/parity projection, 31-class base parity, provenance, hashes, browser bundles, socketable cohorts, specialized-crafting cohorts, and explicit blockers using only repository-owned files. Current checkpoint: **82/82**. |
 
 ### Validation commands
@@ -140,11 +141,12 @@ node data-validation.mjs
 node tools/build-normalized-data.mjs --check
 node tools/build-currency-index.mjs --check
 node tools/build-crafting-parity.mjs --check
+node tools/build-asset-requirements.mjs --check
 node tools/sync-poe2-data.mjs verify
 node fuzz.mjs 30000 542026
 ```
 
-The current final boundary passes **55/55 engine**, **143/143 UI**, and **82/82 data** checks. The fixed-seed fuzz run passes with zero exceptions, harness errors, or invariant violations; its digest is recorded in `VALIDATION_REPORT.md`. `tools/browser-smoke.mjs` performs real-script click-through checks against explicit `file://` or local-HTTP targets when Playwright is already available.
+The current final boundary passes **55/55 engine**, **157/157 UI**, and **82/82 data** checks. The fixed-seed fuzz run passes with zero exceptions, harness errors, or invariant violations; its digest is recorded in `VALIDATION_REPORT.md`. `tools/browser-smoke.mjs` performs real-script click-through checks against explicit `file://` or local-HTTP targets when Playwright is already available.
 
 ---
 
