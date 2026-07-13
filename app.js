@@ -746,7 +746,11 @@ async function init() {
       setupEventListeners();
     });
     if (typeof performance !== 'undefined') {
-      performanceMetrics.push({ name: 'app-boot', duration: performance.now() - APP_BOOT_STARTED });
+      const bootDuration = performance.now() - APP_BOOT_STARTED;
+      performanceMetrics.push({ name: 'app-boot', duration: bootDuration });
+      document.documentElement.dataset.appBootMs = bootDuration.toFixed(3);
+      const dataLoad = performanceMetrics.find(metric => metric.name === 'initial-data-load');
+      if (dataLoad) document.documentElement.dataset.initialDataLoadMs = dataLoad.duration.toFixed(3);
     }
   } catch (err) {
     console.error('Error initializing simulator:', err);
@@ -1350,8 +1354,6 @@ function setupEventListeners() {
   if (eventsBound) return;
   eventsBound = true;
   if (craftingInventoryReady) setupCraftTabs();
-
-  document.addEventListener('contextmenu', e => e.preventDefault());
 
   elements.jewelBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -2784,13 +2786,7 @@ function renderSocketDetails(item) {
     return;
   }
   const fragment = document.createDocumentFragment();
-  if (!slots.length) {
-    const line = document.createElement('div');
-    line.className = 'socket-line is-unavailable';
-    line.textContent = 'Sockets unavailable — target-version limits and operations are unverified';
-    fragment.appendChild(line);
-  } else {
-    for (const slot of slots) {
+  for (const slot of slots) {
       const line = document.createElement('div');
       line.className = 'socket-line';
       const index = Number(slot.index) + 1;
@@ -2802,7 +2798,6 @@ function renderSocketDetails(item) {
         line.textContent = `Socket ${index}: Empty`;
       }
       fragment.appendChild(line);
-    }
   }
   elements.socketList.replaceChildren(fragment);
 }
@@ -3182,6 +3177,19 @@ function removeFromStash(index) {
 }
 
 function renderStash() {
+  if (stash.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'stash-empty';
+    const title = document.createElement('strong');
+    title.textContent = 'Your stash is empty';
+    const hint = document.createElement('span');
+    hint.textContent = 'Save the current item to keep a crafted result.';
+    empty.append(title, hint);
+    elements.stashGrid.classList.add('is-empty');
+    elements.stashGrid.replaceChildren(empty);
+    return;
+  }
+  elements.stashGrid.classList.remove('is-empty');
   const frag = document.createDocumentFragment();
   for (let i = 0; i < 24; i++) {
     const slot = document.createElement('div');

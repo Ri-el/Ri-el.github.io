@@ -106,15 +106,23 @@ body::before {
 
 .craft-guide {
   grid-area: guide;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  min-height: 60px;
-  padding: 10px 18px;
+  display: block;
+  min-height: 0;
+  padding: 0;
   background: linear-gradient(90deg, rgba(17,20,23,0.82), rgba(10,12,14,0.7));
   border: 1px solid rgba(155, 133, 94, 0.19);
   color: #716c63;
 }
+.craft-guide > summary {
+  padding: 8px 12px;
+  color: #9d8c6b;
+  font: 600 0.62rem/1 'Inter', sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.craft-guide:not([open]) > summary { list-style-position: inside; }
+.guide-content { display: flex; align-items: center; gap: 14px; padding: 6px 12px 10px; }
 
 .guide-step { display: flex; align-items: center; gap: 10px; }
 .guide-step > span {
@@ -630,8 +638,8 @@ body::before {
 
   .craft-guide {
     min-height: 0;
-    height: 44px;
-    padding-block: 6px;
+    height: auto;
+    padding: 0;
     overflow: hidden;
   }
 
@@ -648,8 +656,8 @@ body::before {
 #currency-panel.crafting-stash {
   display: grid;
   grid-template-rows: auto auto auto auto minmax(0, 1fr) auto;
-  gap: 9px;
-  padding: 13px;
+  gap: 6px;
+  padding: 10px;
   overflow: hidden;
 }
 
@@ -676,7 +684,7 @@ body::before {
   grid-template-columns: minmax(0, 1fr) minmax(96px, 0.82fr);
   gap: 6px;
   min-width: 0;
-  padding: 7px;
+  padding: 5px;
   background: #080a0b;
   border: 1px solid rgba(155,133,94,0.24);
 }
@@ -743,16 +751,20 @@ body::before {
 }
 
 .craft-item-description {
-  display: grid;
-  gap: 3px;
+  display: block;
   min-width: 0;
-  min-height: 48px;
-  padding: 7px 9px;
-  background: linear-gradient(145deg, rgba(33,27,19,0.52), rgba(12,14,16,0.94));
-  border: 1px solid rgba(185,130,63,0.22);
+  min-height: 0;
+  padding: 5px 8px;
+  background: rgba(12,14,16,0.74);
+  border: 0;
+  border-left: 2px solid rgba(185,130,63,0.38);
   color: #716b61;
   font: 0.58rem/1.35 'Inter', sans-serif;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
+.craft-item-description span { display: none; }
 
 .craft-item-description strong {
   color: #b9a37d;
@@ -766,14 +778,12 @@ body::before {
 .craft-item-description[data-state="blocked"] strong { color: #c28c78; }
 
 .craft-tab-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-auto-flow: row;
-  grid-auto-rows: 29px;
+  display: flex;
   gap: 4px;
   min-width: 0;
   padding: 5px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   background: #080a0b;
   border: 1px solid rgba(155,133,94,0.24);
 }
@@ -789,8 +799,8 @@ body::before {
 #craft-zone::-webkit-scrollbar-thumb { background: #765a35; border: 1px solid #080a0b; }
 
 .craft-tab {
-  min-width: 0;
-  width: 100%;
+  min-width: max-content;
+  width: auto;
   height: 29px;
   padding: 0 6px;
   border: 1px solid rgba(255,255,255,0.07);
@@ -916,6 +926,23 @@ body::before {
   box-shadow: inset 0 0 14px rgba(185,130,63,0.1), 0 0 10px rgba(185,130,63,0.12);
 }
 
+#currency-panel .currency-btn.sticky,
+#currency-panel .abyss-btn.sticky {
+  position: relative;
+  border-color: #e5b963;
+  box-shadow: inset 0 0 18px rgba(229,185,99,0.18), 0 0 0 2px rgba(229,185,99,0.16);
+}
+#currency-panel .currency-btn.sticky::after,
+#currency-panel .abyss-btn.sticky::after {
+  content: 'REPEAT';
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  color: #f1cf8c;
+  font: 700 0.42rem/1 'Inter', sans-serif;
+  letter-spacing: 0.06em;
+}
+
 #currency-panel .currency-btn.disabled,
 #currency-panel .abyss-btn.disabled,
 #currency-panel .currency-btn:disabled,
@@ -1000,6 +1027,7 @@ body::before {
 
 #currency-panel .crafting-actions {
   display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   gap: 6px;
   padding-top: 1px;
 }
@@ -1051,6 +1079,24 @@ body::before {
 }
 #stash-panel .save-btn { width: 100%; margin-top: auto; }
 
+#stash-panel .stash-grid.is-empty {
+  display: block;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.stash-empty {
+  display: grid;
+  gap: 4px;
+  padding: 18px 12px;
+  border: 1px dashed rgba(155,133,94,0.24);
+  color: #70695d;
+  font: 0.64rem/1.4 'Inter', sans-serif;
+  text-align: center;
+}
+.stash-empty strong { color: #a99670; font-family: 'Cinzel', serif; }
+
 @media (min-width: 1101px) and (max-width: 1280px) {
   #main-content {
     grid-template-columns: minmax(290px, 320px) minmax(400px, 1fr) minmax(270px, 300px);
@@ -1085,8 +1131,7 @@ body::before {
 @media (max-width: 560px) {
   .craft-inventory-controls { grid-template-columns: minmax(0, 1fr); }
   .craft-result-count { text-align: left; }
-  .craft-tab-list { grid-template-columns: minmax(0, 1fr); }
-  #currency-panel.crafting-stash { min-height: 920px; }
+  #currency-panel.crafting-stash { min-height: 690px; }
   #currency-panel .craft-tab-panel .crafting-card-grid,
   #currency-panel .craft-tab-panel .currency-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

@@ -84,6 +84,76 @@ if (targets.length === 0) {
         assert.equal(entered.tooltipName, expectedBase, `${target}: ${classLabel} default base`);
         assert.equal(entered.toast, '', `${target}: ${classLabel} error toast`);
 
+        if (classLabel === 'Amulets') {
+          await page.setViewportSize({ width: 1180, height: 620 });
+          const bounds = await page.evaluate(() => {
+            const panel = document.querySelector('.craft-tab-panel:not([hidden])');
+            const tooltip = document.getElementById('jewel-tooltip');
+            const visibleIcons = [...document.querySelectorAll('[data-craft-id] .currency-icon')]
+              .filter(icon => icon.closest('[data-craft-id]')?.getClientRects().length)
+              .every(icon => icon.classList.contains('has-real-icon') || !!icon.querySelector('.currency-abbr')?.textContent.trim());
+            return {
+              panelHeight: panel?.getBoundingClientRect().height || 0,
+              panelScrollable: (panel?.scrollHeight || 0) > (panel?.clientHeight || 0),
+              tooltipOverflow: (tooltip?.scrollWidth || 0) - (tooltip?.clientWidth || 0),
+              visibleIcons,
+            };
+          });
+          assert(bounds.panelHeight >= 160, `${target}: crafting inventory collapsed at 1180x620`);
+          assert(bounds.panelScrollable, `${target}: short desktop inventory is not internally scrollable`);
+          assert(bounds.tooltipOverflow <= 2, `${target}: tooltip overflows horizontally`);
+          assert(bounds.visibleIcons, `${target}: a visible crafting control has neither icon nor fallback`);
+          const contextMenus = await page.evaluate(() => {
+            const outside = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
+            const control = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
+            document.querySelector('.workbench-heading h2').dispatchEvent(outside);
+            document.querySelector('[data-craft-id="transmutation"]').dispatchEvent(control);
+            return { outsidePrevented: outside.defaultPrevented, controlPrevented: control.defaultPrevented };
+          });
+          assert(!contextMenus.outsidePrevented && contextMenus.controlPrevented,
+            `${target}: context-menu prevention is not scoped to crafting controls`);
+
+          await page.getByRole('button', { name: 'Orb of Transmutation', exact: true }).click();
+          await page.locator('#jewel-tooltip').click();
+          await page.getByRole('button', { name: 'Regal Orb', exact: true }).click();
+          await page.locator('#jewel-tooltip').click();
+          await page.getByRole('button', { name: 'Chaos Orb', exact: true }).click({ button: 'right' });
+          await page.locator('#jewel-tooltip').click();
+          await page.locator('#jewel-tooltip').click();
+          const sticky = await page.locator('[data-craft-id="chaos"]').evaluate(button => ({
+            active: button.classList.contains('sticky'),
+            pressed: button.getAttribute('aria-pressed'),
+            uses: document.getElementById('craft-counter')?.textContent || '',
+          }));
+          assert(sticky.active && sticky.pressed === 'true' && /Chaos2/.test(sticky.uses), `${target}: sticky currency did not repeat`);
+          await page.keyboard.press('Escape');
+          assert(!(await page.locator('[data-craft-id="chaos"]').evaluate(button => button.classList.contains('sticky'))),
+            `${target}: Escape did not clear sticky currency`);
+          await page.setViewportSize({ width: 1280, height: 720 });
+        }
+
+        if (classLabel === 'Gloves') {
+          const beforeNodes = await page.locator('*').count();
+          await page.locator('.concrete-base-trigger').click();
+          const picker = await page.evaluate(before => {
+            const list = document.getElementById('base-picker-list');
+            window.__browserSmokePickerFirst = list?.firstElementChild || null;
+            return {
+              options: list?.querySelectorAll('.concrete-base-option').length || 0,
+              nodeDelta: document.querySelectorAll('*').length - before,
+              images: list?.querySelectorAll('img').length || 0,
+            };
+          }, beforeNodes);
+          assert.equal(picker.options, 198, `${target}: Gloves concrete-base count`);
+          assert(picker.nodeDelta <= picker.options * 4, `${target}: picker DOM is unexpectedly heavy`);
+          assert.equal(picker.images, 0, `${target}: picker eagerly created decorative images`);
+          await page.locator('#base-picker-close').click();
+          await page.locator('.concrete-base-trigger').click();
+          assert(await page.evaluate(() => window.__browserSmokePickerFirst === document.getElementById('base-picker-list')?.firstElementChild),
+            `${target}: picker rows were rebuilt on reopen`);
+          await page.locator('#base-picker-close').click();
+        }
+
         const back = page.locator('#back-to-select');
         assert.equal(await back.count(), 1, `${target}: back button count`);
         await back.click();

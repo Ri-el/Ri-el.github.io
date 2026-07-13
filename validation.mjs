@@ -930,6 +930,20 @@ test('crafting RNG is injectable without changing the default Math.random contra
   assert.throws(() => switched.setRandomSource('not-a-function'), /RNG must be a function or null/);
 });
 
+test('repeated currency applications have deterministic parity with manual reselection', () => {
+  const data = { bases: { repeat_test: syntheticBase(8, 8) } };
+  const run = () => {
+    const engine = new Engine(data, 'repeat_test', null, null, null, null, mulberry32(0x571c4));
+    assert(engine.applyTransmutation().success);
+    assert(engine.applyRegal().success);
+    for (let i = 0; i < 5; i++) assert(engine.applyChaos().success);
+    return engine.getItem();
+  };
+  // Arming/reselecting is UI state only. One sticky item click must dispatch
+  // the same single engine call and consume the same RNG as manual reselection.
+  assert.deepEqual(run(), run());
+});
+
 test('zero-weight modifier tiers are excluded even at random roll zero', () => {
   const data = { bases: { weight_test: {
     name: 'Weight Test',

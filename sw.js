@@ -9,7 +9,7 @@
 //  - On activate we delete every older cache automatically.
 //  - skipWaiting + clients.claim means a new worker takes over instantly.
 
-const CACHE_NAME = 'poe2-craft-perf-runtime-data-v2';
+const CACHE_NAME = 'poe2-craft-ui-redesign-v3';
 
 const APP_SHELL = [
   './',
@@ -18,7 +18,7 @@ const APP_SHELL = [
   './select.css',
   './desecrate.css',
   './overhaul.css',
-  './header-fix.css?v=18',
+  './header-fix.css?v=19',
   './app.js',
   './select.js',
   './crafting.js',

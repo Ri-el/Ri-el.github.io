@@ -105,12 +105,15 @@
     </header>
 
     <main id="main-content">
-      <aside class="craft-guide" aria-label="Crafting instructions">
+      <details class="craft-guide" aria-label="Crafting instructions">
+        <summary>How to craft</summary>
+        <div class="guide-content">
         <div class="guide-step"><span>1</span><p><strong>Choose a currency</strong> from the stash tab</p></div>
         <i aria-hidden="true">→</i>
         <div class="guide-step"><span>2</span><p><strong>Apply it to the item</strong> in the active workbench</p></div>
-        <div class="guide-tip">Right-click an omen to arm it</div>
-      </aside>
+        <div class="guide-tip">Right-click a currency for repeat mode. Shift still repeats.</div>
+        </div>
+      </details>
       <div id="jewel-panel">
         <div class="workbench-heading">
           <h2>Crafting workbench</h2>
@@ -265,25 +268,8 @@
         <button id="base-picker-reset" class="base-picker-reset" type="button">Reset filters</button>
       </div>
       <div class="base-picker-filters" aria-label="Concrete base filters">
-        <label class="base-picker-filter" for="base-picker-required-filter">
-          <span>Required level</span>
-          <select id="base-picker-required-filter" disabled>
-            <option value="">Required level unavailable</option>
-          </select>
-        </label>
-        <label class="base-picker-filter" for="base-picker-drop-level-filter">
-          <span>Drop level</span>
-          <select id="base-picker-drop-level-filter">
-            <option value="">All drop levels</option>
-            <option value="10">Drop level 10 or lower</option>
-            <option value="20">Drop level 20 or lower</option>
-            <option value="40">Drop level 40 or lower</option>
-            <option value="60">Drop level 60 or lower</option>
-            <option value="80">Drop level 80 or lower</option>
-          </select>
-        </label>
         <label id="base-picker-attribute-field" class="base-picker-filter" for="base-picker-attribute-filter" hidden>
-          <span>Attribute family</span>
+          <span>Armour type</span>
           <select id="base-picker-attribute-filter">
             <option value="">All attribute families</option>
           </select>

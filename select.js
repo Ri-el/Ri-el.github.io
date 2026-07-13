@@ -130,12 +130,11 @@ let basePickerList;
 let basePickerCount;
 let basePickerEmpty;
 let basePickerError;
-let basePickerRequiredFilter;
-let basePickerDropLevelFilter;
 let basePickerAttributeField;
 let basePickerAttributeFilter;
 let pendingConcreteBaseId = null;
 let lastBasePickerTrigger = null;
+let renderedConcreteBaseSignature = '';
 
 // Load the focused craft-header layout fix while preserving direct file:// use.
 function ensureCraftHeaderStyles() {
@@ -143,7 +142,7 @@ function ensureCraftHeaderStyles() {
 
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = 'header-fix.css?v=18';
+  link.href = 'header-fix.css?v=19';
   link.dataset.craftHeaderFix = 'true';
   document.head.appendChild(link);
 }
@@ -343,32 +342,6 @@ function concreteBaseContext() {
   return window.CraftForge.getConcreteBaseContext();
 }
 
-function concreteBaseIcon(base) {
-  const wrap = document.createElement('span');
-  wrap.className = 'base-option-icon';
-  const fallback = () => {
-    if (wrap.querySelector('.base-option-monogram')) return;
-    const glyph = document.createElement('span');
-    glyph.className = 'base-option-monogram';
-    glyph.textContent = monogram(base.displayName);
-    wrap.appendChild(glyph);
-  };
-  if (!base.icon) {
-    fallback();
-    return wrap;
-  }
-  const img = document.createElement('img');
-  img.src = `assets/icons/${base.icon}.png`;
-  img.alt = '';
-  img.loading = 'lazy';
-  img.addEventListener('error', () => {
-    img.remove();
-    fallback();
-  });
-  wrap.appendChild(img);
-  return wrap;
-}
-
 function searchableConcreteBaseValue(value) {
   if (value == null) return '';
   if (Array.isArray(value)) return value.map(searchableConcreteBaseValue).filter(Boolean).join(' ');
@@ -402,36 +375,11 @@ function configureConcreteBaseFilters(context) {
   }
   if (basePickerList) basePickerList.setAttribute('aria-label', `${classLabel} concrete bases`);
 
-  const bases = Array.isArray(context?.bases) ? context.bases : [];
-  const requiredLevels = bases
-    .filter(base => base.requiredLevel != null)
-    .map(base => Number(base.requiredLevel))
-    .filter(Number.isFinite);
-  const hasRequiredLevel = context?.hasRequiredLevel === true || requiredLevels.length > 0;
-  if (basePickerRequiredFilter) {
-    const previous = basePickerRequiredFilter.value;
-    if (hasRequiredLevel) {
-      setSelectOptions(basePickerRequiredFilter, [
-        { value: '', label: 'All required levels' },
-        { value: '10', label: 'Required level 10 or lower' },
-        { value: '20', label: 'Required level 20 or lower' },
-        { value: '40', label: 'Required level 40 or lower' },
-        { value: '60', label: 'Required level 60 or lower' },
-        { value: '80', label: 'Required level 80 or lower' },
-      ], previous);
-      basePickerRequiredFilter.disabled = false;
-      if (basePickerRequiredFilter.selectedIndex < 0) basePickerRequiredFilter.value = '';
-    } else {
-      setSelectOptions(basePickerRequiredFilter, [
-        { value: '', label: 'Required level unavailable' },
-      ]);
-      basePickerRequiredFilter.disabled = true;
-    }
-  }
-
   const families = Array.isArray(context?.attributeFamilies)
     ? context.attributeFamilies.filter(family => ATTR_LABELS[family])
     : [];
+  const filterGroup = basePickerAttributeField?.closest('.base-picker-filters');
+  if (filterGroup) filterGroup.hidden = families.length < 2;
   if (basePickerAttributeField) basePickerAttributeField.hidden = families.length < 2;
   if (basePickerAttributeFilter) {
     const previous = basePickerAttributeFilter.value;
@@ -445,8 +393,12 @@ function configureConcreteBaseFilters(context) {
 
 function renderConcreteBaseOptions(context) {
   if (!basePickerList || !basePickerError || !basePickerEmpty || !basePickerCount) return;
+  const renderStarted = performance.now();
+  const recordRender = cacheHit => {
+    concreteBasePicker.dataset.lastRenderMs = (performance.now() - renderStarted).toFixed(3);
+    concreteBasePicker.dataset.renderCacheHit = String(cacheHit);
+  };
   configureConcreteBaseFilters(context);
-  basePickerList.replaceChildren();
   basePickerError.hidden = true;
   basePickerError.textContent = '';
   if (!context || context.error) {
@@ -454,22 +406,34 @@ function renderConcreteBaseOptions(context) {
     basePickerError.hidden = false;
     basePickerEmpty.hidden = true;
     basePickerCount.textContent = 'Base data unavailable';
+    recordRender(false);
     return;
   }
 
-  const duplicateNames = new Map();
-  for (const base of context.bases || []) {
-    duplicateNames.set(base.displayName, (duplicateNames.get(base.displayName) || 0) + 1);
+  const bases = context.bases || [];
+  const signature = `${context.workbenchBaseId || ''}:${bases.map(base => base.id).join(',')}`;
+  if (signature === renderedConcreteBaseSignature) {
+    basePickerList.querySelectorAll('.concrete-base-option').forEach(button => {
+      const selected = Number(button.dataset.baseItemId) === Number(context.selectedBaseItemId);
+      button.classList.toggle('active', selected);
+      button.setAttribute('aria-selected', String(selected));
+    });
+    filterConcreteBaseOptions();
+    recordRender(true);
+    return;
   }
+  renderedConcreteBaseSignature = signature;
+  basePickerList.replaceChildren();
 
+  const duplicateCounts = new Map();
+  const duplicatePositions = new Map();
+  for (const base of bases) duplicateCounts.set(base.displayName, (duplicateCounts.get(base.displayName) || 0) + 1);
   const fragment = document.createDocumentFragment();
-  for (const base of context.bases || []) {
+  for (const base of bases) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'concrete-base-option';
     button.dataset.baseItemId = base.id;
-    button.dataset.requiredLevel = base.requiredLevel == null ? '' : String(base.requiredLevel);
-    button.dataset.dropLevel = base.dropLevel == null ? '' : String(base.dropLevel);
     button.dataset.attributeFamily = base.attributeFamily || '';
     button.setAttribute('role', 'option');
     const selected = Number(base.id) === Number(context.selectedBaseItemId);
@@ -480,7 +444,6 @@ function renderConcreteBaseOptions(context) {
     button.setAttribute('aria-disabled', String(!selectable));
     if (!selectable && base.disabledReason) button.title = base.disabledReason;
 
-    button.appendChild(concreteBaseIcon(base));
     const copy = document.createElement('span');
     copy.className = 'base-option-copy';
     const title = document.createElement('strong');
@@ -488,21 +451,14 @@ function renderConcreteBaseOptions(context) {
     title.textContent = base.displayName;
     copy.appendChild(title);
 
-    if (duplicateNames.get(base.displayName) > 1) {
-      const identity = document.createElement('span');
-      identity.className = 'base-option-identity';
-      identity.textContent = `Source ID ${base.id}`;
-      copy.appendChild(identity);
+    if (duplicateCounts.get(base.displayName) > 1) {
+      const position = (duplicatePositions.get(base.displayName) || 0) + 1;
+      duplicatePositions.set(base.displayName, position);
+      const variant = document.createElement('span');
+      variant.className = 'base-option-variant';
+      variant.textContent = `Variant ${position} of ${duplicateCounts.get(base.displayName)}`;
+      copy.appendChild(variant);
     }
-
-    const levels = document.createElement('span');
-    levels.className = 'base-option-levels';
-    const requiredText = base.requiredLevel == null
-      ? 'Required level unavailable'
-      : `Requires level ${base.requiredLevel}`;
-    const dropLevelText = base.dropLevel == null ? '' : `Drop level ${base.dropLevel}`;
-    levels.textContent = [requiredText, dropLevelText].filter(Boolean).join(' \u00b7 ');
-    copy.appendChild(levels);
 
     const implicitText = (base.implicits || []).map(implicit => implicit.displayText).filter(Boolean).join(' / ');
     if (implicitText) {
@@ -523,9 +479,6 @@ function renderConcreteBaseOptions(context) {
     const requirementText = searchableConcreteBaseValue(base.requirements);
     button.dataset.search = [
       base.displayName,
-      base.id,
-      requiredText,
-      dropLevelText,
       implicitText,
       propertyText,
       requirementText,
@@ -534,11 +487,11 @@ function renderConcreteBaseOptions(context) {
       .join(' ')
       .toLowerCase();
     button.appendChild(copy);
-    if (selectable) button.addEventListener('click', () => chooseConcreteBase(base.id));
     fragment.appendChild(button);
   }
   basePickerList.appendChild(fragment);
   filterConcreteBaseOptions();
+  recordRender(false);
 }
 
 function visibleConcreteBaseOptions() {
@@ -574,23 +527,13 @@ function trapModalFocus(container, event) {
 function filterConcreteBaseOptions() {
   if (!basePickerList || !basePickerCount || !basePickerEmpty) return;
   const query = basePickerSearch?.value.trim().toLowerCase() || '';
-  const requiredMaximum = Number(basePickerRequiredFilter?.value) || null;
-  const dropMaximum = Number(basePickerDropLevelFilter?.value) || null;
   const attributeFamily = basePickerAttributeFilter?.value || '';
   let visible = 0;
   let unavailable = 0;
   basePickerList.querySelectorAll('.concrete-base-option').forEach(option => {
-    const requiredLevel = option.dataset.requiredLevel === '' ? null : Number(option.dataset.requiredLevel);
-    const dropLevel = option.dataset.dropLevel === '' ? null : Number(option.dataset.dropLevel);
     const matchesSearch = !query || (option.dataset.search || '').includes(query);
-    const matchesRequired = requiredMaximum == null || (
-      Number.isFinite(requiredLevel) && requiredLevel <= requiredMaximum
-    );
-    const matchesDrop = dropMaximum == null || (
-      Number.isFinite(dropLevel) && dropLevel <= dropMaximum
-    );
     const matchesAttribute = !attributeFamily || option.dataset.attributeFamily === attributeFamily;
-    const matches = matchesSearch && matchesRequired && matchesDrop && matchesAttribute;
+    const matches = matchesSearch && matchesAttribute;
     option.hidden = !matches;
     if (matches) {
       visible++;
@@ -606,8 +549,6 @@ function openConcreteBasePicker(trigger) {
   if (!concreteBasePicker) return;
   lastBasePickerTrigger = trigger || document.querySelector('.concrete-base-trigger');
   if (basePickerSearch) basePickerSearch.value = '';
-  if (basePickerRequiredFilter && !basePickerRequiredFilter.disabled) basePickerRequiredFilter.value = '';
-  if (basePickerDropLevelFilter) basePickerDropLevelFilter.value = '';
   if (basePickerAttributeFilter) basePickerAttributeFilter.value = '';
   renderConcreteBaseOptions(concreteBaseContext());
   concreteBasePicker.hidden = false;
@@ -743,6 +684,7 @@ function renderWorkbenchBaseSelector(baseId, classLabel) {
 // bridge returns false and we stay on the select screen rather than opening an
 // empty crafter.
 function enterCraft(baseId, classLabel) {
+  const entryStarted = performance.now();
   if (window.CraftForge && typeof window.CraftForge.loadBase === 'function') {
     const ok = window.CraftForge.loadBase(baseId, classLabel);
     if (ok === false) return;
@@ -752,6 +694,7 @@ function enterCraft(baseId, classLabel) {
   craftView.hidden = false;
   selectView.hidden = true;
   window.scrollTo(0, 0);
+  document.documentElement.dataset.workbenchEntryMs = (performance.now() - entryStarted).toFixed(3);
 }
 
 function exitCraft() {
@@ -794,8 +737,6 @@ function setupConcreteBasePicker() {
   basePickerCount = document.getElementById('base-picker-count');
   basePickerEmpty = document.getElementById('base-picker-empty');
   basePickerError = document.getElementById('base-picker-error');
-  basePickerRequiredFilter = document.getElementById('base-picker-required-filter');
-  basePickerDropLevelFilter = document.getElementById('base-picker-drop-level-filter');
   basePickerAttributeField = document.getElementById('base-picker-attribute-field');
   basePickerAttributeFilter = document.getElementById('base-picker-attribute-filter');
   if (!concreteBasePicker || !basePickerSearch || !basePickerList) return;
@@ -803,16 +744,17 @@ function setupConcreteBasePicker() {
   document.getElementById('base-picker-close')?.addEventListener('click', () => closeConcreteBasePicker());
   document.getElementById('base-picker-reset')?.addEventListener('click', () => {
     basePickerSearch.value = '';
-    if (basePickerRequiredFilter && !basePickerRequiredFilter.disabled) basePickerRequiredFilter.value = '';
-    if (basePickerDropLevelFilter) basePickerDropLevelFilter.value = '';
     if (basePickerAttributeFilter) basePickerAttributeFilter.value = '';
     filterConcreteBaseOptions();
     basePickerSearch.focus();
   });
   basePickerSearch.addEventListener('input', filterConcreteBaseOptions);
-  basePickerRequiredFilter?.addEventListener('change', filterConcreteBaseOptions);
-  basePickerDropLevelFilter?.addEventListener('change', filterConcreteBaseOptions);
   basePickerAttributeFilter?.addEventListener('change', filterConcreteBaseOptions);
+  basePickerList.addEventListener('click', event => {
+    const option = event.target.closest('.concrete-base-option');
+    if (!option || option.disabled || !basePickerList.contains(option)) return;
+    chooseConcreteBase(option.dataset.baseItemId);
+  });
   basePickerSearch.addEventListener('keydown', event => {
     if (event.key === 'Enter') {
       const first = visibleConcreteBaseOptions()[0];

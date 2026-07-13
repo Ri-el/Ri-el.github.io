@@ -45,7 +45,6 @@ for (const id of [
   'undo-btn', 'redo-btn', 'reset-btn',
   'base-detail-list', 'quality-list', 'socket-list', 'implicit-list', 'concrete-base-picker',
   'base-picker-search', 'base-picker-reset', 'base-picker-list',
-  'base-picker-required-filter', 'base-picker-drop-level-filter',
   'base-picker-attribute-field', 'base-picker-attribute-filter',
   'base-change-confirmation', 'base-confirm-cancel', 'base-confirm-apply',
 ]) {
@@ -161,6 +160,10 @@ check('all requested 100% viewports use the compact desktop layout without track
   requestedViewports.every(([width, height]) => width >= 1101 && width >= desktopGridMinimum && height >= 640));
 check('crafting panels scroll internally',
   /\.craft-tab-panel\s*\{[\s\S]*?overflow-y:\s*auto;/.test(css));
+check('short desktop layout reserves a real scrollable crafting inventory',
+  /\.craft-tab-list\s*\{[\s\S]*?display:\s*flex;[\s\S]*?overflow-x:\s*auto;/.test(css) &&
+  /\.craft-item-description span\s*\{\s*display:\s*none;\s*\}/.test(css) &&
+  /#currency-panel \.crafting-actions\s*\{[\s\S]*?grid-template-columns:/.test(css));
 check('desktop does not use CSS zoom or scaled workspace layout',
   !/(?:^|[;{])\s*zoom\s*:/m.test(css) &&
   !/#(?:craft-view|main-content|currency-panel|jewel-panel|stash-panel)[^{]*\{[^}]*transform\s*:\s*scale/m.test(css));
@@ -416,16 +419,19 @@ check('deterministic concrete default uses the first selectable normalized mappi
 check('concrete selector supports property-aware search reset and data states',
   /function searchableConcreteBaseValue\(value\)/.test(select) &&
   /basePickerSearch\.addEventListener\('input', filterConcreteBaseOptions\)/.test(select) &&
-  /basePickerSearch\.value = '';[\s\S]*?basePickerDropLevelFilter\.value = '';[\s\S]*?filterConcreteBaseOptions\(\)/.test(select) &&
+  /basePickerSearch\.value = '';[\s\S]*?filterConcreteBaseOptions\(\)/.test(select) &&
   /id="base-picker-empty"[^>]*hidden/.test(html) &&
-  /id="base-picker-error"[^>]*role="alert"[^>]*hidden/.test(html) &&
-  /base-option-monogram/.test(select));
-check('required level remains explicit and distinct from drop level',
-  /id="base-picker-required-filter" disabled>[\s\S]*?Required level unavailable/.test(html) &&
-  /id="base-picker-drop-level-filter">[\s\S]*?All drop levels/.test(html) &&
-  /button\.dataset\.requiredLevel = base\.requiredLevel/.test(select) &&
-  /button\.dataset\.dropLevel = base\.dropLevel/.test(select) &&
-  /requiredMaximum[\s\S]*?dropMaximum/.test(select));
+  /id="base-picker-error"[^>]*role="alert"[^>]*hidden/.test(html));
+check('source/audit levels and source IDs are absent from the player-facing picker',
+  !/id="base-picker-required-filter"/.test(html) &&
+  !/id="base-picker-drop-level-filter"/.test(html) &&
+  !/Source ID/.test(select) &&
+  !/Required level unavailable/.test(select));
+check('concrete selector caches rows and uses one delegated selection handler',
+  /renderedConcreteBaseSignature/.test(select) &&
+  /signature === renderedConcreteBaseSignature/.test(select) &&
+  /basePickerList\.addEventListener\('click'/.test(select) &&
+  !/button\.addEventListener\('click'/.test(select));
 check('attribute family is a contextual filter, never a concrete option',
   /id="base-picker-attribute-field"[^>]*hidden/.test(html) &&
   /families\.length < 2/.test(select) &&
@@ -454,7 +460,7 @@ check('modal focus is trapped and the workbench is inert while a dialog is open'
   /setWorkbenchModalIsolation\(true\)/.test(select) &&
   /event\.target === basePickerSearch && event\.key !== 'ArrowDown'/.test(select));
 check('concrete selector and confirmation have mobile layouts',
-  /@media \(max-width: 768px\)[\s\S]*?\.base-picker-overlay[\s\S]*?\.base-picker-filters \{ grid-template-columns: 1fr; \}[\s\S]*?\.base-picker-list \{ grid-template-columns: 1fr; \}/.test(headerCss));
+  /@media \(max-width: 768px\)[\s\S]*?\.base-picker-overlay[\s\S]*?\.base-picker-list \{ grid-template-columns: 1fr; \}/.test(headerCss));
 check('crafted base changes require explicit cancel or reset confirmation',
   />Cancel<\/button>/.test(html) &&
   />Change Base and Reset Item<\/button>/.test(html) &&
@@ -476,7 +482,8 @@ check('tooltip separates concrete details and implicits from explicit modifiers'
   /id="base-detail-list"[^>]*hidden/.test(html) &&
   /id="implicit-list"[^>]*hidden/.test(html) &&
   /renderConcreteBaseDetails\(item\);[\s\S]*?const allMods =/.test(app) &&
-  /Required Level', 'Unavailable in normalized source'/.test(app));
+  !/Required Level', 'Unavailable in normalized source'/.test(app) &&
+  !/Sockets unavailable/.test(app));
 check('tooltip renders structured quality without mixing it into explicit modifiers',
   /id="quality-list"[^>]*hidden/.test(html) &&
   /function renderQualityDetails\(item\)[\s\S]*?quality\.type[\s\S]*?quality\.cap/.test(app) &&
@@ -490,9 +497,15 @@ check('Jewel-only flavor text is conditional on Jewel mode',
   /flavorEl\.hidden = !isJewelMode/.test(app) &&
   /Place into an allocated Jewel Socket on the Passive Skill Tree/.test(html));
 check('runtime selector, socket stylesheet, and performance data are versioned in the offline shell',
-  /header-fix\.css\?v=18/.test(select) &&
-  /CACHE_NAME = 'poe2-craft-perf-runtime-data-v2'/.test(serviceWorker) &&
-  serviceWorker.includes("'./header-fix.css?v=18'"));
+  /header-fix\.css\?v=19/.test(select) &&
+  /CACHE_NAME = 'poe2-craft-ui-redesign-v3'/.test(serviceWorker) &&
+  serviceWorker.includes("'./header-fix.css?v=19'"));
+check('right-click sticky currency mode is explicit, repeatable, and Escape-safe',
+  /intent === 'sticky' && isStickyCurrencyDefinition\(definition\)/.test(app) &&
+  /const keepArmed = shiftKey \|\| stickyCurrency === currency/.test(app) &&
+  /b\.classList\.toggle\('sticky'/.test(app) &&
+  /if \(e\.key === 'Escape'\)[\s\S]*?disarmCurrency\(\)/.test(app) &&
+  !/document\.addEventListener\('contextmenu',\s*e => e\.preventDefault\(\)\)/.test(app));
 
 console.log(`\nRESULT: ${passed}/${passed + failed} checks passed`);
 if (failed) process.exitCode = 1;
