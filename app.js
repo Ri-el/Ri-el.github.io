@@ -275,6 +275,7 @@ const elements = {
   enchantList: document.getElementById('enchant-list'),
   baseDetailList: document.getElementById('base-detail-list'),
   qualityList: document.getElementById('quality-list'),
+  socketList: document.getElementById('socket-list'),
   implicitList: document.getElementById('implicit-list'),
   corruptedLabel: document.getElementById('corrupted-label'),
   itemLevel: document.getElementById('item-level'),
@@ -2805,6 +2806,40 @@ function renderQualityDetails(item) {
   elements.qualityList.replaceChildren(line);
 }
 
+function renderSocketDetails(item) {
+  if (!elements.socketList) return;
+  const hasConcreteBase = item?.baseItemId != null;
+  elements.socketList.hidden = !hasConcreteBase;
+  if (!hasConcreteBase) {
+    elements.socketList.replaceChildren();
+    return;
+  }
+  const state = item?.socketState && typeof item.socketState === 'object' ? item.socketState : null;
+  const slots = Array.isArray(state?.slots) ? state.slots : [];
+  const fragment = document.createDocumentFragment();
+  if (!slots.length) {
+    const line = document.createElement('div');
+    line.className = 'socket-line is-unavailable';
+    line.textContent = 'Sockets unavailable — target-version limits and operations are unverified';
+    fragment.appendChild(line);
+  } else {
+    for (const slot of slots) {
+      const line = document.createElement('div');
+      line.className = 'socket-line';
+      const index = Number(slot.index) + 1;
+      if (slot.state === 'occupied') {
+        const name = slot.insertedItemType || slot.insertedItemId || 'Socketed item';
+        line.textContent = `Socket ${index}: ${name}`;
+        if (slot.effect) line.title = typeof slot.effect === 'string' ? slot.effect : JSON.stringify(slot.effect);
+      } else {
+        line.textContent = `Socket ${index}: Empty`;
+      }
+      fragment.appendChild(line);
+    }
+  }
+  elements.socketList.replaceChildren(fragment);
+}
+
 function renderItem(actionResult = null, overrideItem = null) {
   const item = overrideItem || engine.getItem();
   const liveItem = overrideItem ? engine.getItem() : item;
@@ -2873,6 +2908,7 @@ function renderItem(actionResult = null, overrideItem = null) {
   }
   renderConcreteBaseDetails(item);
   renderQualityDetails(item);
+  renderSocketDetails(item);
 
   const allMods = [
     ...item.prefixes.map(m => ({ ...m, type: 'prefix' })),

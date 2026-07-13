@@ -3,6 +3,12 @@
 Target game version: **0.5.4**  
 Full parity claimed: **No**
 
+## Task 06 Sockets, Runes, and Soul Cores checkpoint
+
+The registry remains **531 definitions** for target **0.5.4**. Socketing retains **296 definitions** (Artificer's Orb plus 295 socketables), all hidden and unsupported: **288 blocked_missing_data** and **eight deprecated_for_target_version** records. No socketing mutation is claimed or enabled.
+
+Item state now exposes deterministic empty/preserved-unverified socket state with contiguous typed slots and atomic malformed-state validation. The tooltip renders sockets separately from explicit affixes. Source `socketCount` remains metadata only because all 1,760 bases lack verified default/maximum semantics. Artificer's Orb lacks exact caps, class applicability, corruption behavior, and mutation details; Rune/Soul Core effects lack complete target-class resolution, localization, scaling, icons, and version membership; no extraction/removal method is retained. Consequently implemented socket currency, Rune, Soul Core, replacement, and extraction counts remain **zero**.
+
 ## Task 05 Abyss, Breach, Essences, and Omens checkpoint
 
 The registry remains **531 definitions** for target **0.5.4** and the visible surface is intentionally unchanged at **45 cards**. Task 05 adds no speculative controls: the existing Preserved Cranium/Well of Souls and Essence of the Abyss controls remain the only supported Abyss operations, while the other retained Bones, regular/Breach Essences, Catalysts, and unverified Lich guarantees remain blocked with their source-specific reasons.

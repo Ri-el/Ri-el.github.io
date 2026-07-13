@@ -38,7 +38,7 @@ for (const id of [
   'craft-item-description-title', 'craft-item-description-text',
   'craft-tab-list', 'craft-tab-panels', 'well-modal', 'stash-grid', 'jewel-tooltip',
   'undo-btn', 'redo-btn', 'reset-btn',
-  'base-detail-list', 'quality-list', 'implicit-list', 'concrete-base-picker',
+  'base-detail-list', 'quality-list', 'socket-list', 'implicit-list', 'concrete-base-picker',
   'base-picker-search', 'base-picker-reset', 'base-picker-list',
   'base-picker-required-filter', 'base-picker-drop-level-filter',
   'base-picker-attribute-field', 'base-picker-attribute-filter',
@@ -462,13 +462,18 @@ check('tooltip renders structured quality without mixing it into explicit modifi
   /id="quality-list"[^>]*hidden/.test(html) &&
   /function renderQualityDetails\(item\)[\s\S]*?quality\.type[\s\S]*?quality\.cap/.test(app) &&
   /renderConcreteBaseDetails\(item\);[\s\S]*?renderQualityDetails\(item\);/.test(app));
+check('tooltip renders socket state in a dedicated section',
+  /id="socket-list"[^>]*hidden/.test(html) &&
+  /function renderSocketDetails\(item\)[\s\S]*?socket-line/.test(app) &&
+  /renderQualityDetails\(item\);[\s\S]*?renderSocketDetails\(item\);/.test(app) &&
+  /\.socket-list/.test(headerCss));
 check('Jewel-only flavor text is conditional on Jewel mode',
   /flavorEl\.hidden = !isJewelMode/.test(app) &&
   /Place into an allocated Jewel Socket on the Passive Skill Tree/.test(html));
-check('runtime selector and quality stylesheet is versioned in the Task 05 offline shell',
-  /header-fix\.css\?v=17/.test(select) &&
-  /CACHE_NAME = 'poe2-craft-task05-abyss-omens-v1'/.test(serviceWorker) &&
-  serviceWorker.includes("'./header-fix.css?v=17'"));
+check('runtime selector and socket stylesheet is versioned in the Task 06 offline shell',
+  /header-fix\.css\?v=18/.test(select) &&
+  /CACHE_NAME = 'poe2-craft-task06-sockets-runes-v1'/.test(serviceWorker) &&
+  serviceWorker.includes("'./header-fix.css?v=18'"));
 
 console.log(`\nRESULT: ${passed}/${passed + failed} checks passed`);
 if (failed) process.exitCode = 1;

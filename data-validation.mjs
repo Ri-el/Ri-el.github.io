@@ -656,7 +656,7 @@ function countCraftDefinitionsBy(definitions, field, orderedValues = null) {
   return Object.fromEntries(pairs);
 }
 
-check('Task 05 authoritative crafting registry has complete stable coverage',
+check('Task 06 authoritative crafting registry has complete stable coverage',
   currencyIndex.schemaVersion >= 2 &&
   craftRegistry.length === 531 &&
   sourceBackedCraftDefinitions.length === currencyIndex.entries.length &&
@@ -665,7 +665,7 @@ check('Task 05 authoritative crafting registry has complete stable coverage',
   visibleCraftDefinitions.length === currencyIndex.counts.visibleCraftDefinitions &&
   registryCraftIds.size === craftRegistry.length &&
   new Set(craftRegistry.map(definition => definition.id)).size === craftRegistry.length);
-check('every crafting definition exposes the complete Task 05 data contract',
+check('every crafting definition exposes the complete Task 06 data contract',
   craftRegistry.every(definition =>
     requiredCraftDefinitionFields.every(field => Object.prototype.hasOwnProperty.call(definition, field)) &&
     typeof definition.craftId === 'string' && definition.craftId.length > 0 &&
@@ -696,7 +696,7 @@ check('registry tabs preserve runtime controls and surface quality audit cards',
   stable([...visibleCraftDefinitions.filter(definition => definition.category !== 'quality').map(definition => definition.craftId)].sort()) ===
     stable(Object.keys(currencyIndex.runtimeRegistry).sort()) &&
   visibleCraftDefinitions.filter(definition => definition.category === 'quality').length === 8);
-check('registry implementation classifications are exclusive after Task 05 audit surfacing',
+check('registry implementation classifications are exclusive after Task 06 audit surfacing',
   craftRegistry.every(definition => currencyIndex.allowedClassifications.includes(definition.implementationStatus)) &&
   stable(countCraftDefinitionsBy(craftRegistry, 'implementationStatus', currencyIndex.allowedClassifications)) ===
     stable(expectedRegistryClassificationCounts) &&
@@ -723,11 +723,11 @@ check('all Omen trigger craft references resolve inside the authoritative regist
     const triggerCraftId = definition.omenInteraction?.triggerCraftId;
     return triggerCraftId == null || registryCraftIds.has(triggerCraftId);
   }));
-check('Task 05 crafting parity is a direct complete projection of the registry',
+check('Task 06 crafting parity is a direct complete projection of the registry',
   craftingParity.schemaVersion === 2 &&
   craftingParity.targetGameVersion === currencyIndex.targetGameVersion &&
   craftingParity.fullParityClaim === false &&
-  craftingParity.entryDetailStatus === 'authoritative_registry_task05' &&
+  craftingParity.entryDetailStatus === 'authoritative_registry_task06' &&
   craftingParity.entries.length === craftRegistry.length &&
   parityByCraftId.size === craftRegistry.length &&
   craftRegistry.every(definition => {
@@ -746,6 +746,19 @@ check('Task 05 crafting parity is a direct complete projection of the registry',
       stable(parity.testReferences) === stable(definition.testFixtureIds) &&
       parity.blocker === definition.blocker;
   }));
+const task06SocketDefinitions = craftRegistry.filter(definition => definition.category === 'socketing');
+const task06SocketTypeCounts = Object.fromEntries([...new Set(actual.craftingItems.socketables.map(record => record.type))]
+  .sort((a, b) => a - b)
+  .map(type => [String(type), actual.craftingItems.socketables.filter(record => record.type === type).length]));
+check('Task 06 socket inventory remains explicit and blocked',
+  task06SocketDefinitions.length === 296 &&
+  task06SocketDefinitions.every(definition => !definition.supported && !definition.visible) &&
+  task06SocketDefinitions.filter(definition => definition.implementationStatus === 'blocked_missing_data').length === 288 &&
+  task06SocketDefinitions.filter(definition => definition.implementationStatus === 'deprecated_for_target_version').length === 8);
+check('Task 06 retained socketable cohorts match normalized source',
+  actual.craftingItems.socketables.length === 295 &&
+  stable(task06SocketTypeCounts) === stable({ '0': 221, '1': 34, '2': 35, '3': 4, '4': 1 }) &&
+  !actual.craftingItems.methods.some(method => /extract|remove.*socket|socket.*remove/i.test(String(method.handler || ''))));
 check('Task 03 parity counts derive exactly from source, registry, and visible definitions',
   craftingParity.counts.sourceEntries === currencyIndex.counts.entries &&
   craftingParity.counts.registryDefinitions === craftRegistry.length &&

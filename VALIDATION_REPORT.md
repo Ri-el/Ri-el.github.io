@@ -126,6 +126,16 @@ Task 05 deterministic boundary: **46/46 engine**, **122/122 UI**, **67/67 data**
 
 The next numbered task is **Task 06 — Sockets, Runes, and Soul Cores**.
 
+## Task 06 Sockets, Runes, and Soul Cores checkpoint
+
+Task 06 formalizes socket state without inventing socket mechanics. Every item now has an internal deterministic socket-state record; empty/unverified state is preserved without manufacturing slots from the source `socketCount`. Explicit slots are typed (`empty` or `occupied`), indexed contiguously, carry stable inserted-item/source/effect/replacement fields, and reject malformed, duplicate, inconsistent, or over-cap payloads atomically. Save/load, undo snapshots, and concrete-base reset continue to clear or preserve socket state through the existing item-state path. The tooltip has a dedicated sockets section; production bases still report target-version socket limits and operations as unverified.
+
+The normalized source retains **295 socketables** (type distribution: 221 Rune records, 34 Soul Cores, 35 Idols, four Abyssal Eyes, and one Congealed Mist; Rune classification totals 226 because five cross-type records are also classified as Runes). The authoritative registry retains **296 socketing definitions** including Artificer's Orb: **0 supported, 0 visible, 288 blocked_missing_data, and eight deprecated target-version records**. No socket-adding, insertion, replacement, extraction, Rune, or Soul Core mutation is enabled. All 1,760 concrete bases have a source `socketCount`, but none has verified default or maximum semantics; effect localization, class-target resolution, scaling, icons, version membership, and corruption transitions are incomplete, and no extraction method is present.
+
+Task 06 deterministic boundary: **47/47 engine**, **124/124 UI**, **69/69 data**, normalized/currency/parity generators current, sync verification passing, and fixed-seed fuzz **30,016 operations / 3,984 meaningful mutations / 402 Hinekora consumptions / 0 exceptions / 0 invariant violations**, reviewed digest `68cf3661d60c39b202799fff940bab1070d3c24ebb396c55a6d7d9809c0b0b55`. Interactive direct-file browser verification remains blocked by the Codex browser's local-file URL policy; static file:// contracts and generated bundles pass. The service-worker cache is `poe2-craft-task06-sockets-runes-v1`.
+
+The next numbered task is **Task 07 — Expedition and Temple/Atziri/Vaal systems**.
+
 - Baseline deterministic suite against the original engine: **11/17 passed**. Failures covered the stale browser bundle, equipment limits, Magic-only classes, Alchemy count, Whittling ties, and Greater/Perfect semantics.
 - Current deterministic suite: **39/39 passed** with `node validation.mjs`.
 - Current UI DOM/CSS contract suite: **117/117 passed** with `node ui-validation.mjs`.

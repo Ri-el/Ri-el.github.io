@@ -233,6 +233,8 @@ Task 04 is implemented and tested. The registry still has 531 definitions and no
 
 Task 05 is implemented and tested at a verified boundary. The runtime keeps the existing Preserved Cranium/Well of Souls flow, adds source-backed Jewel and Essence of the Abyss applicability gates, rejects unknown Bones and conflicting directional Omens atomically, fixes Omen of Light consumption on successful Annulment (including Hinekora foresight), and uses the engine's verified reroll count in the UI. The other Abyssal Bones, regular and Breach Essences, Catalysts, and target-version Desecrated pool/Well weighting remain explicitly blocked where the checked-in 0.5.4 evidence is incomplete. The next numbered task is Task 06, Sockets, Runes, and Soul Cores.
 
+Task 06 is implemented and tested as an evidence-boundary slice. The item now carries deterministic empty/preserved-unverified socket state with typed contiguous slots, atomic malformed-state rejection, save/load and base-reset preservation, and a dedicated tooltip section. No Artificer's Orb, socket insertion, Rune, Soul Core, replacement, or extraction mutation is enabled: the checked-in source has no verified default/maximum socket semantics, target-version effects/localization, class limits, corruption behavior, or extraction procedure. The next numbered task is Task 07, Expedition and Temple/Atziri/Vaal systems.
+
 Each task must end with:
 
 - relevant tests passing

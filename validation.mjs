@@ -370,6 +370,43 @@ test('schema v4 migration preserves legacy socket payloads without inventing mec
   assert.equal(opaque.legacySocketState.mechanicsApplied, false);
 });
 
+test('explicit socket state is deterministic, typed, and atomic on malformed records', () => {
+  const data = { bases: { amulets: syntheticBase() } };
+  const crimson = { ...concreteAmulet(2546, 'Crimson Amulet', 1, 1564), maximumSockets: 2 };
+  const engine = new Engine(data, 'amulets', null, null, null, crimson);
+  const item = rareItem('amulets');
+  item.baseItemId = 2546;
+  item.simulatorPoolId = 'amulets';
+  item.socketState = {
+    schemaVersion: 1,
+    status: 'verified_fixture',
+    slots: [
+      { index: 1, state: 'occupied', insertedItemId: 625, insertedItemType: 'Rune', effect: 'test effect', source: { sourceId: 625 } },
+      { index: 0, state: 'empty', insertedItemId: null, insertedItemType: null, effect: null, source: null },
+    ],
+  };
+  engine.loadItem(item);
+  const state = engine.getSocketState();
+  assert.deepEqual(state.slots.map(slot => slot.index), [0, 1]);
+  assert.equal(state.currentSockets, 2);
+  assert.equal(state.occupiedSockets, 1);
+  assert.equal(state.slots[1].insertedItemType, 'Rune');
+  assert.deepEqual(engine.getItem().sockets, state.slots);
+
+  const before = engine.getItem();
+  assert.throws(() => engine.loadItem({ ...before, socketState: { slots: [{ index: 0, state: 'occupied' }] } }), /must identify its inserted item/i);
+  assert.deepEqual(engine.getItem(), before);
+  assert.throws(() => engine.loadItem({ ...before, socketState: { slots: [{ index: 0, state: 'empty' }, { index: 0, state: 'empty' }] } }), /duplicate indices/i);
+  assert.deepEqual(engine.getItem(), before);
+
+  const unverified = new Engine(data, 'amulets');
+  const occupiedWithoutCap = rareItem('amulets');
+  occupiedWithoutCap.socketState = {
+    slots: [{ index: 0, state: 'occupied', insertedItemId: 625, insertedItemType: 'Rune' }],
+  };
+  assert.throws(() => unverified.loadItem(occupiedWithoutCap), /verified maximum socket count/i);
+});
+
 test('schema migration rejects incompatible state without mutating the live item', () => {
   const data = { bases: { amulets: syntheticBase(), rings: syntheticBase() } };
   const crimson = concreteAmulet(2546, 'Crimson Amulet', 1, 1564);
@@ -526,7 +563,7 @@ test('fresh-item detection includes irreversible and special item state', () => 
     item => { item.quality.amount = 1; },
     item => { item.quality.type = 'catalyst'; },
     item => { item.quality.source = { id: 'test-source' }; },
-    item => { item.sockets = [{ index: 0, insertedItemId: null }]; },
+    item => { item.sockets = [{ index: 0, state: 'empty', insertedItemId: null, insertedItemType: null }]; },
     item => { item.socketCount = 1; },
     item => { item.legacySocketState = { status: 'preserved-unverified', payload: { count: 1 } }; },
     item => { item.socketedContent = { 0: 'test-rune' }; },

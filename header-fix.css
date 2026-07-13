@@ -687,6 +687,7 @@
 /* Concrete base information is separate from enchantments and random affixes. */
 .base-detail-list,
 .quality-list,
+.socket-list,
 .implicit-list {
   display: grid;
   gap: 3px;
@@ -698,6 +699,7 @@
 
 .base-detail-list[hidden],
 .quality-list[hidden],
+.socket-list[hidden],
 .implicit-list[hidden] {
   display: none !important;
 }
@@ -720,6 +722,15 @@
   line-height: 1.3;
   text-align: center;
 }
+
+.socket-line {
+  color: #b7c4d3;
+  font-size: 0.69rem;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.socket-line.is-unavailable { color: #817968; font-style: italic; }
 
 .implicit-line {
   color: #789bc1;

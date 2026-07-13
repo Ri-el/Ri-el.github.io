@@ -143,7 +143,7 @@ function ensureCraftHeaderStyles() {
 
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = 'header-fix.css?v=17';
+  link.href = 'header-fix.css?v=18';
   link.dataset.craftHeaderFix = 'true';
   document.head.appendChild(link);
 }

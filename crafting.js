@@ -240,7 +240,14 @@ class CraftingEngine {
     item.fracturedMods = [...(item.prefixes || []), ...(item.suffixes || [])]
       .filter(modifier => !!modifier?.fractured)
       .map(modifier => structuredClone(modifier));
+    if (item.socketState?.status === 'unverified' && !item.socketState.slots?.length) {
+      delete item.socketState;
+    }
     return item;
+  }
+
+  getSocketState() {
+    return structuredClone(this._item.socketState);
   }
 
   // Concrete base identity is independent from the simulator modifier pool.
@@ -387,6 +394,14 @@ class CraftingEngine {
     item.defaultSockets = base.defaultSockets;
     item.maximumSockets = base.maximumSockets;
     if (item.socketCount == null && base.defaultSockets != null) item.socketCount = base.defaultSockets;
+    if (item.socketState && typeof item.socketState === 'object') {
+      item.socketState.sourceSocketCount = base.sourceSocketCount;
+      item.socketState.maximumSockets = base.maximumSockets;
+      item.socketState.currentSockets = Array.isArray(item.socketState.slots) ? item.socketState.slots.length : 0;
+      item.socketState.occupiedSockets = Array.isArray(item.socketState.slots)
+        ? item.socketState.slots.filter(slot => slot.state === 'occupied').length
+        : 0;
+    }
     item.baseIcon = base.icon;
     item.targetGameVersion = base.targetGameVersion;
     item.sourceVersion = base.sourceVersion;
@@ -450,12 +465,13 @@ class CraftingEngine {
     if (item.corrupted || item.sanctified || item.mirrored || item.isMirrored || item.hinekoraLocked) return false;
     if (this._pendingDesecration || item.desecratedState || item.abyssState || item.omenState || item.hinekoraState) return false;
     if (Object.values(item.currencyUsed || {}).some(value => Number(value) > 0)) return false;
-    for (const key of ['sockets', 'socketedContent', 'socketState', 'legacySocketState', 'runes', 'soulCores', 'fracturedMods']) {
+    for (const key of ['sockets', 'socketedContent', 'legacySocketState', 'runes', 'soulCores', 'fracturedMods']) {
       const value = item[key];
       if (Array.isArray(value) && value.length) return false;
       if (value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length) return false;
       if (value != null && typeof value !== 'object' && value !== false && Number(value) !== 0) return false;
     }
+    if (item.socketState?.slots?.length || Number(item.socketState?.occupiedSockets) > 0) return false;
     // `baseSocketCount` is retained source metadata with unverified semantics;
     // it must not be treated as the fresh-item default. Any non-zero legacy
     // instantiated count therefore remains conservatively crafted state.
@@ -632,6 +648,83 @@ class CraftingEngine {
     return level;
   }
 
+  _normalizeSocketState(item) {
+    const rawState = item.socketState && typeof item.socketState === 'object' && !Array.isArray(item.socketState)
+      ? item.socketState
+      : null;
+    const sourceSlots = rawState?.slots != null ? rawState.slots : item.sockets;
+    if (!Array.isArray(sourceSlots)) {
+      throw new Error('Saved socket state slots must be an array.');
+    }
+    const slots = sourceSlots.map((raw, position) => {
+      if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+        throw new Error(`Saved socket ${position} must be an object.`);
+      }
+      const index = Number(raw.index);
+      if (!Number.isInteger(index) || index < 0) {
+        throw new Error(`Saved socket ${position} has an invalid index.`);
+      }
+      const state = raw.state || raw.status ||
+        (raw.insertedItemId == null && raw.insertedItemType == null ? 'empty' : null);
+      if (state !== 'empty' && state !== 'occupied') {
+        throw new Error(`Saved socket ${index} must be empty or occupied.`);
+      }
+      const insertedItemId = raw.insertedItemId ?? null;
+      const insertedItemType = raw.insertedItemType ?? null;
+      if (state === 'occupied' && (insertedItemId == null || insertedItemType == null)) {
+        throw new Error(`Occupied socket ${index} must identify its inserted item.`);
+      }
+      if (state === 'empty' && (insertedItemId != null || insertedItemType != null)) {
+        throw new Error(`Empty socket ${index} cannot carry an inserted item.`);
+      }
+      return {
+        index,
+        state,
+        insertedItemId,
+        insertedItemType,
+        effect: raw.effect == null ? null : structuredClone(raw.effect),
+        source: raw.source == null ? null : structuredClone(raw.source),
+        replacement: raw.replacement == null ? null : structuredClone(raw.replacement),
+      };
+    }).sort((a, b) => a.index - b.index);
+    if (new Set(slots.map(slot => slot.index)).size !== slots.length) {
+      throw new Error('Saved socket state contains duplicate indices.');
+    }
+    const maximumSockets = this._concreteBase?.maximumSockets == null
+      ? null
+      : Number(this._concreteBase.maximumSockets);
+    if (maximumSockets != null && (!Number.isInteger(maximumSockets) || maximumSockets < 0)) {
+      throw new Error('Saved socket state has an invalid maximum socket count.');
+    }
+    if (maximumSockets != null && slots.some(slot => slot.index >= maximumSockets)) {
+      throw new Error('Saved socket state exceeds the verified maximum socket count.');
+    }
+    if (maximumSockets == null && slots.some(slot => slot.state === 'occupied')) {
+      throw new Error('Occupied socket state requires a verified maximum socket count.');
+    }
+    if (slots.some((slot, position) => slot.index !== position)) {
+      throw new Error('Saved socket state indices must be contiguous from zero.');
+    }
+    if (rawState?.slots != null && Array.isArray(item.sockets) && item.sockets.length) {
+      const signature = values => values.map(slot => [slot.index, slot.state || slot.status, slot.insertedItemId ?? null, slot.insertedItemType ?? null]);
+      if (JSON.stringify(signature(item.sockets)) !== JSON.stringify(signature(slots))) {
+        throw new Error('Saved socket state disagrees with its redundant socket slots.');
+      }
+    }
+    const occupiedSockets = slots.filter(slot => slot.state === 'occupied').length;
+    item.sockets = structuredClone(slots);
+    item.socketState = {
+      schemaVersion: 1,
+      status: rawState?.status === 'verified_fixture' && maximumSockets != null ? 'verified_fixture' : 'unverified',
+      sourceSocketCount: item.sourceSocketCount ?? null,
+      maximumSockets,
+      currentSockets: slots.length,
+      occupiedSockets,
+      slots: structuredClone(slots),
+    };
+    return item.socketState;
+  }
+
   _migrateItemState(rawItem) {
     if (!rawItem || typeof rawItem !== 'object' || Array.isArray(rawItem)) {
       throw new Error('Saved item state must be an object.');
@@ -719,6 +812,7 @@ class CraftingEngine {
       };
       if (legacySocketCount != null) item.socketCount = legacySocketCount;
     }
+    this._normalizeSocketState(item);
 
     if (!item.currencyUsed || typeof item.currencyUsed !== 'object' || Array.isArray(item.currencyUsed)) {
       item.currencyUsed = {};
@@ -756,8 +850,10 @@ class CraftingEngine {
   }
 
   loadItem(item, pending = null) {
-    this._item = this._migrateItemState(item);
-    this._applyConcreteBaseDefinition(this._item);
+    const migrated = this._migrateItemState(item);
+    this._applyConcreteBaseDefinition(migrated);
+    this._normalizeSocketState(migrated);
+    this._item = migrated;
     // Rebuild the ilvl-eligible candidate pools to match the loaded item's Item
     // Level. Without this, an item loaded from the stash (or restored by
     // undo/redo) keeps whatever ilvl the engine was constructed with (the blank
@@ -1626,6 +1722,15 @@ class CraftingEngine {
       defaultSockets: null,
       maximumSockets: null,
       sockets: [],
+      socketState: {
+        schemaVersion: 1,
+        status: 'unverified',
+        sourceSocketCount: null,
+        maximumSockets: null,
+        currentSockets: 0,
+        occupiedSockets: 0,
+        slots: [],
+      },
       socketedContent: [],
       runes: [],
       soulCores: [],
