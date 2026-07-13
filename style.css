@@ -238,20 +238,24 @@ body::before {
 .item-art-aura {
   z-index: 1;
   opacity: 0;
-  filter: drop-shadow(0 0 0 transparent);
+  transform: scale(0.98);
+  filter: brightness(2.15) saturate(1.45) drop-shadow(0 0 8px var(--craft-color));
+  will-change: opacity, transform;
   pointer-events: none;
 }
 
 .item-art-stage.craft-active .item-art-base {
-  animation: itemCraftFlash 560ms cubic-bezier(0.2, 0.8, 0.25, 1);
+  animation: itemCraftFlash 420ms cubic-bezier(0.2, 0.8, 0.25, 1);
 }
 
 .item-art-stage.craft-active .item-art-aura {
-  animation: itemCraftAura 650ms cubic-bezier(0.16, 0.72, 0.25, 1);
+  animation: itemCraftAura 460ms cubic-bezier(0.16, 0.72, 0.25, 1);
 }
 
 .tooltip.craft-fallback .tooltip-border-glow {
-  animation: itemCraftFallback 560ms ease-out;
+  box-shadow: 0 0 0 1px var(--craft-color), inset 0 0 18px var(--craft-color);
+  will-change: opacity;
+  animation: itemCraftFallback 420ms ease-out both;
 }
 
 /* ============================================================
@@ -533,9 +537,14 @@ body::before {
   }
   .item-art-stage.craft-active .item-art-base {
     animation: none;
-    filter: brightness(1.35) drop-shadow(0 0 5px var(--craft-color));
+    opacity: 0.82;
+    transform: scale(1.005);
   }
-  .item-art-stage.craft-active .item-art-aura { animation: none; opacity: 0; }
+  .item-art-stage.craft-active .item-art-aura {
+    animation: none;
+    opacity: 0.38;
+    transform: scale(1.01);
+  }
   .tooltip.craft-fallback .tooltip-border-glow {
     animation: none;
     box-shadow: 0 0 0 1px var(--craft-color), inset 0 0 12px var(--craft-color);
@@ -1025,17 +1034,16 @@ body::before {
    ============================================================ */
 @keyframes itemCraftFlash {
   0%, 100% {
-    filter: brightness(1) saturate(1) drop-shadow(0 0 0 transparent);
+    opacity: 1;
+    transform: scale(1);
   }
   16% {
-    filter:
-      brightness(2.25)
-      saturate(1.45)
-      drop-shadow(0 0 2px rgba(255, 255, 255, 0.92))
-      drop-shadow(0 0 6px var(--craft-color));
+    opacity: 0.72;
+    transform: scale(1.012);
   }
   45% {
-    filter: brightness(1.35) saturate(1.18) drop-shadow(0 0 5px var(--craft-color));
+    opacity: 0.9;
+    transform: scale(1.004);
   }
 }
 
@@ -1043,36 +1051,23 @@ body::before {
   0% {
     opacity: 0;
     transform: scale(0.98);
-    filter: brightness(2.2) saturate(1.45) drop-shadow(0 0 2px var(--craft-color));
   }
   18% {
     opacity: 0.88;
     transform: scale(1.01);
-    filter:
-      brightness(2.35)
-      saturate(1.55)
-      drop-shadow(0 0 4px var(--craft-color))
-      drop-shadow(0 0 9px var(--craft-color));
   }
   100% {
     opacity: 0;
-    transform: scale(1.07);
-    filter:
-      brightness(1.2)
-      saturate(1.1)
-      drop-shadow(0 0 8px var(--craft-color))
-      drop-shadow(0 0 14px var(--craft-color));
+    transform: scale(1.06);
   }
 }
 
 @keyframes itemCraftFallback {
   0% {
     opacity: 1;
-    box-shadow: 0 0 0 1px var(--craft-color), inset 0 0 18px var(--craft-color);
   }
   100% {
     opacity: 0.15;
-    box-shadow: 0 0 18px 2px transparent, inset 0 0 4px transparent;
   }
 }
 

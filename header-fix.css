@@ -386,8 +386,7 @@
   place-items: center;
   box-sizing: border-box;
   padding: 24px;
-  background: rgba(3, 4, 5, 0.82);
-  backdrop-filter: blur(5px);
+  background: rgba(3, 4, 5, 0.9);
 }
 
 .base-picker-overlay[hidden],
@@ -408,12 +407,22 @@
 
 .base-picker-dialog {
   display: grid;
-  grid-template-rows: auto auto auto auto minmax(0, 1fr) auto;
-  max-height: min(88dvh, 820px);
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "header"
+    "toolbar"
+    "filters"
+    "count"
+    "results";
+  grid-template-rows: auto auto auto auto minmax(0, 1fr);
+  height: min(820px, 88dvh, calc(100dvh - 48px));
+  max-height: none;
   padding: 20px;
+  overflow: hidden;
 }
 
 .base-picker-header {
+  grid-area: header;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -450,12 +459,14 @@
 }
 
 .base-picker-toolbar {
+  grid-area: toolbar;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
 }
 
 .base-picker-filters {
+  grid-area: filters;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
@@ -556,6 +567,7 @@
 }
 
 .base-picker-count {
+  grid-area: count;
   min-height: 15px;
   margin: 8px 0;
   color: #83765d;
@@ -565,13 +577,19 @@
 }
 
 .base-picker-list {
+  grid-area: results;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-content: start;
   gap: 7px;
+  min-width: 0;
   min-height: 0;
+  overflow-x: hidden;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  contain: layout paint;
   padding: 1px 4px 1px 1px;
+  scrollbar-gutter: stable;
   scrollbar-color: #795d32 #0d0e10;
 }
 
@@ -646,11 +664,15 @@
 .base-option-disabled { color: #c18475; }
 
 .base-picker-state {
+  grid-area: results;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 4px;
   padding: 28px 12px;
+  background: #0b0d0f;
   color: #9c9079;
   font: 400 0.74rem/1.4 'Inter', sans-serif;
   text-align: center;
@@ -762,7 +784,8 @@
 
   .base-picker-dialog {
     width: 100%;
-    max-height: 88dvh;
+    height: min(820px, 88dvh);
+    max-height: 100dvh;
     padding: 16px;
     border-right: 0;
     border-bottom: 0;

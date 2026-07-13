@@ -126,6 +126,53 @@ if (targets.length === 0) {
           assert(bounds.panelScrollable, `${target}: short desktop inventory is not internally scrollable`);
           assert(bounds.tooltipOverflow <= 2, `${target}: tooltip overflows horizontally`);
           assert(bounds.visibleIcons, `${target}: a visible crafting control has neither icon nor fallback`);
+
+          await page.locator('.concrete-base-trigger').click();
+          const pickerLayout = await page.evaluate(() => {
+            const dialog = document.querySelector('.base-picker-dialog');
+            const list = document.getElementById('base-picker-list');
+            const filters = document.querySelector('.base-picker-filters');
+            const dialogBounds = dialog.getBoundingClientRect();
+            const listBounds = list.getBoundingClientRect();
+            const dialogStyle = getComputedStyle(dialog);
+            const overlayStyle = getComputedStyle(document.getElementById('concrete-base-picker'));
+            const lastOption = list.lastElementChild;
+            list.scrollTop = list.scrollHeight;
+            const lastBounds = lastOption?.getBoundingClientRect();
+            return {
+              filtersHidden: getComputedStyle(filters).display === 'none',
+              dialogTop: dialogBounds.top,
+              dialogBottom: dialogBounds.bottom,
+              dialogClientHeight: dialog.clientHeight,
+              dialogScrollHeight: dialog.scrollHeight,
+              listTop: listBounds.top,
+              listBottom: listBounds.bottom,
+              listClientHeight: list.clientHeight,
+              listScrollHeight: list.scrollHeight,
+              listScrollTop: list.scrollTop,
+              paddingBottom: Number.parseFloat(dialogStyle.paddingBottom) || 0,
+              lastTop: lastBounds?.top ?? 0,
+              lastBottom: lastBounds?.bottom ?? 0,
+              overlayFilter: overlayStyle.backdropFilter || overlayStyle.webkitBackdropFilter || 'none',
+              horizontalOverflow: document.documentElement.scrollWidth - window.innerWidth,
+            };
+          });
+          assert(pickerLayout.filtersHidden, `${target}: Amulet-only picker unexpectedly shows attribute filters`);
+          assert(pickerLayout.dialogTop >= 0 && pickerLayout.dialogBottom <= 621,
+            `${target}: picker dialog escaped the 1180x620 viewport`);
+          assert(pickerLayout.dialogScrollHeight <= pickerLayout.dialogClientHeight + 1,
+            `${target}: picker content escaped its framed dialog`);
+          assert(pickerLayout.listBottom <= pickerLayout.dialogBottom - pickerLayout.paddingBottom + 1,
+            `${target}: picker list broke through the lower dialog border`);
+          assert(pickerLayout.listClientHeight >= 96 && pickerLayout.listScrollHeight > pickerLayout.listClientHeight,
+            `${target}: picker list did not receive a usable internal scroll viewport`);
+          assert(pickerLayout.listScrollTop > 0 && pickerLayout.lastTop >= pickerLayout.listTop - 1 &&
+            pickerLayout.lastBottom <= pickerLayout.listBottom + 1,
+            `${target}: picker could not scroll its final base inside the list viewport`);
+          assert.equal(pickerLayout.overlayFilter, 'none', `${target}: picker retained a full-viewport backdrop filter`);
+          assert(pickerLayout.horizontalOverflow <= 2, `${target}: picker introduced horizontal page overflow`);
+          await page.locator('#base-picker-close').click();
+
           const contextMenus = await page.evaluate(() => {
             const outside = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
             const control = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
@@ -518,7 +565,7 @@ if (targets.length === 0) {
           }
           return { names, urls };
         });
-        assert(offlineCache.names.includes('poe2-craft-registry-v2'), `${target}: updated service-worker cache missing`);
+        assert(offlineCache.names.includes('poe2-craft-registry-v5'), `${target}: updated service-worker cache missing`);
         assert(offlineCache.urls.some(url => url.endsWith('/data/crafting/known-items.data.js')),
           `${target}: lazy known-items catalog missing from offline cache`);
         page.removeAllListeners('console');

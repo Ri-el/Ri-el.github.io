@@ -540,6 +540,37 @@ check('modal focus is trapped and the workbench is inert while a dialog is open'
   /event\.target === basePickerSearch && event\.key !== 'ArrowDown'/.test(select));
 check('concrete selector and confirmation have mobile layouts',
   /@media \(max-width: 768px\)[\s\S]*?\.base-picker-overlay[\s\S]*?\.base-picker-list \{ grid-template-columns: 1fr; \}/.test(headerCss));
+const pickerDialogStart = headerCss.indexOf('.base-picker-dialog {');
+const pickerDialogEnd = pickerDialogStart >= 0 ? headerCss.indexOf('\n}', pickerDialogStart) : -1;
+const pickerDialogCss = pickerDialogStart >= 0
+  ? headerCss.slice(pickerDialogStart, pickerDialogEnd >= 0 ? pickerDialogEnd : headerCss.length)
+  : '';
+const pickerListStart = headerCss.indexOf('.base-picker-list {');
+const pickerListEnd = pickerListStart >= 0 ? headerCss.indexOf('\n}', pickerListStart) : -1;
+const pickerListCss = pickerListStart >= 0
+  ? headerCss.slice(pickerListStart, pickerListEnd >= 0 ? pickerListEnd : headerCss.length)
+  : '';
+check('concrete selector owns a definite clipped viewport with named result placement',
+  /grid-template-areas:[\s\S]*?"header"[\s\S]*?"toolbar"[\s\S]*?"filters"[\s\S]*?"count"[\s\S]*?"results"/.test(pickerDialogCss) &&
+  /height:\s*min\([^;]*dvh[^;]*\);/.test(pickerDialogCss) &&
+  /overflow:\s*hidden;/.test(pickerDialogCss) &&
+  /\.base-picker-header\s*\{[^}]*grid-area:\s*header;/.test(headerCss) &&
+  /\.base-picker-toolbar\s*\{[^}]*grid-area:\s*toolbar;/.test(headerCss) &&
+  /\.base-picker-filters\s*\{[^}]*grid-area:\s*filters;/.test(headerCss) &&
+  /\.base-picker-count\s*\{[^}]*grid-area:\s*count;/.test(headerCss) &&
+  /grid-area:\s*results;/.test(pickerListCss));
+check('concrete selector scroll is contained inside the dialog border',
+  /min-height:\s*0;/.test(pickerListCss) &&
+  /overflow-y:\s*auto;/.test(pickerListCss) &&
+  /overscroll-behavior:\s*contain;/.test(pickerListCss) &&
+  /contain:\s*layout paint;/.test(pickerListCss));
+const pickerOverlayStart = headerCss.indexOf('.base-picker-overlay,');
+const pickerOverlayEnd = pickerOverlayStart >= 0 ? headerCss.indexOf('\n}', pickerOverlayStart) : -1;
+const pickerOverlayCss = pickerOverlayStart >= 0
+  ? headerCss.slice(pickerOverlayStart, pickerOverlayEnd >= 0 ? pickerOverlayEnd : headerCss.length)
+  : '';
+check('concrete selector avoids full-viewport backdrop-filter repainting',
+  pickerOverlayCss.length > 0 && !/backdrop-filter\s*:/.test(pickerOverlayCss));
 check('crafted base changes require explicit cancel or reset confirmation',
   />Cancel<\/button>/.test(html) &&
   />Change Base and Reset Item<\/button>/.test(html) &&
@@ -627,6 +658,34 @@ check('craft animation no longer paints a radial workbench spotlight',
 const itemArtCss = `${baseCss}\n${headerCss}\n${css}`;
 check('item artwork glow follows transparent pixels with drop shadows',
   /(?:#item-art(?:-aura)?|\.item-art(?:-aura|\b))[^\{]*\{[^\}]*filter:\s*[^;\}]*drop-shadow\(/.test(itemArtCss));
+const itemAuraRuleStart = baseCss.indexOf('.item-art-aura {');
+const itemAuraRuleEnd = itemAuraRuleStart >= 0 ? baseCss.indexOf('\n}', itemAuraRuleStart) : -1;
+const itemAuraRuleCss = itemAuraRuleStart >= 0
+  ? baseCss.slice(itemAuraRuleStart, itemAuraRuleEnd >= 0 ? itemAuraRuleEnd : baseCss.length)
+  : '';
+const itemFlashKeyframeStart = baseCss.indexOf('@keyframes itemCraftFlash');
+const itemAuraKeyframeStart = baseCss.indexOf('@keyframes itemCraftAura');
+const itemFallbackKeyframeStart = baseCss.indexOf('@keyframes itemCraftFallback');
+const nextItemKeyframeStart = baseCss.indexOf('@keyframes modFadeIn');
+const itemFlashKeyframeCss = itemFlashKeyframeStart >= 0 && itemAuraKeyframeStart > itemFlashKeyframeStart
+  ? baseCss.slice(itemFlashKeyframeStart, itemAuraKeyframeStart)
+  : '';
+const itemAuraKeyframeCss = itemAuraKeyframeStart >= 0 && itemFallbackKeyframeStart > itemAuraKeyframeStart
+  ? baseCss.slice(itemAuraKeyframeStart, itemFallbackKeyframeStart)
+  : '';
+const itemFallbackKeyframeCss = itemFallbackKeyframeStart >= 0 && nextItemKeyframeStart > itemFallbackKeyframeStart
+  ? baseCss.slice(itemFallbackKeyframeStart, nextItemKeyframeStart)
+  : '';
+check('item glow pre-rasterizes one silhouette filter on its aura layer',
+  (itemAuraRuleCss.match(/drop-shadow\(/g) || []).length === 1 &&
+  /will-change:\s*opacity,\s*transform;/.test(itemAuraRuleCss));
+check('craft feedback keyframes animate compositor properties only',
+  itemFlashKeyframeCss.length > 0 && itemAuraKeyframeCss.length > 0 && itemFallbackKeyframeCss.length > 0 &&
+  [itemFlashKeyframeCss, itemAuraKeyframeCss, itemFallbackKeyframeCss]
+    .every(source => !/(?:filter|box-shadow|text-shadow)\s*:/.test(source)) &&
+  [itemFlashKeyframeCss, itemAuraKeyframeCss]
+    .every(source => /opacity\s*:/.test(source) && /transform\s*:/.test(source)) &&
+  /opacity\s*:/.test(itemFallbackKeyframeCss));
 check('item artwork uses dedicated flash and aura keyframes',
   /@keyframes\s+itemCraftFlash\b/.test(itemArtCss) &&
   /@keyframes\s+itemCraftAura\b/.test(itemArtCss));
@@ -635,9 +694,9 @@ check('item artwork animation respects reduced-motion preferences',
 check('Absent Amulet art is installed at its numeric base ID path',
   fs.existsSync(new URL('./assets/item-bases/2563.png', import.meta.url)));
 check('runtime selector, socket stylesheet, and performance data are versioned in the offline shell',
-  /header-fix\.css\?v=19/.test(select) &&
-  /CACHE_NAME = 'poe2-craft-registry-v4'/.test(serviceWorker) &&
-  serviceWorker.includes("'./header-fix.css?v=19'") &&
+  /header-fix\.css\?v=20/.test(select) &&
+  /CACHE_NAME = 'poe2-craft-registry-v5'/.test(serviceWorker) &&
+  serviceWorker.includes("'./header-fix.css?v=20'") &&
   serviceWorker.includes("'./data/crafting/known-items.data.js'"));
 check('Absent Amulet art is available in the versioned offline application shell',
   serviceWorker.includes("'./assets/item-bases/2563.png'"));

@@ -3413,7 +3413,7 @@ function triggerCraftAnimation(currency) {
   craftAnimationTimeout = setTimeout(() => {
     elements.itemArtStage.classList.remove('craft-active');
     elements.tooltip.classList.remove('craft-fallback');
-  }, reducedMotion ? 180 : 700);
+  }, reducedMotion ? 180 : 520);
 }
 
 function triggerErrorAnimation() {
