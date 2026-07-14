@@ -937,6 +937,7 @@ class CraftingEngine {
     // crafts — and hiding tiers that should be available at a higher ilvl.
     this._prefixCandidates = this._buildCandidatePool(this._prefixPool, 'prefix');
     this._suffixCandidates = this._buildCandidatePool(this._suffixPool, 'suffix');
+    this._hydrateLoadedModifierMetadata();
     // Optionally restore a pending (unrevealed) desecration so undo/redo can
     // bring the Reveal step back exactly as it was.
     this._pendingDesecration = pending ? structuredClone(pending) : null;
@@ -1031,6 +1032,89 @@ class CraftingEngine {
     const candidates = this._eligibleCandidates(side, existingGroups);
     const filtered = this._filterByMinModifierLevel(candidates, this._craftOptions(options).minModLevel);
     return new Set(filtered.map(candidate => candidate.groupIdentity)).size;
+  }
+
+  // Deterministic audit surface for exact roll probabilities. The returned
+  // denominator and candidate numerators are the same weights consumed by
+  // _selectAndApplyCandidate; no random sampling or value rolling is involved.
+  getExactModifierOdds(rarity, options = {}, { side = null, clearExisting = false } = {}) {
+    if (side != null && side !== 'prefix' && side !== 'suffix') {
+      throw new Error(`Invalid exact-odds affix side: ${String(side)}.`);
+    }
+    const limits = this._limits[rarity];
+    const craftOptions = this._craftOptions(options);
+    if (!limits) {
+      return {
+        rarity,
+        side,
+        minModLevel: craftOptions.minModLevel,
+        totalWeight: 0,
+        candidates: [],
+        groups: [],
+      };
+    }
+
+    const existingGroups = clearExisting ? new Set() : this._existingGroups();
+    const candidates = [];
+    const appendSide = type => {
+      if (side && side !== type) return;
+      const current = clearExisting ? 0 : (type === 'prefix' ? this._item.prefixes.length : this._item.suffixes.length);
+      const cap = type === 'prefix' ? limits.prefixes : limits.suffixes;
+      if (current < cap) candidates.push(...this._eligibleCandidates(type, existingGroups));
+    };
+    appendSide('prefix');
+    appendSide('suffix');
+    const filtered = this._filterByMinModifierLevel(candidates, craftOptions.minModLevel);
+    const totalWeight = filtered.reduce((total, candidate) => total + Number(candidate.weight), 0);
+    const groupWeights = new Map();
+    for (const candidate of filtered) {
+      const groupKey = `${candidate.type}:${candidate.groupIdentity}`;
+      groupWeights.set(groupKey, (groupWeights.get(groupKey) || 0) + Number(candidate.weight));
+    }
+    const snapshots = filtered.map(candidate => {
+      const source = candidate.source || {};
+      const groupKey = `${candidate.type}:${candidate.groupIdentity}`;
+      return {
+        candidateKey: source.stableModifierId != null
+          ? `source:${source.stableModifierId}`
+          : `${candidate.type}:${candidate.group.modGroup}:${candidate.tier.ilvlReq}:${candidate.tier.tier}`,
+        type: candidate.type,
+        legacyGroup: candidate.group.modGroup,
+        groupIdentity: candidate.groupIdentity,
+        groupKey,
+        stableModifierId: source.stableModifierId ?? null,
+        sourceModifierKey: source.sourceModifierKey ?? null,
+        sourceModifierGroupId: source.sourceModifierGroupId ?? null,
+        legacyTier: candidate.tier.tier,
+        displayTier: source.displayTier ?? candidate.tier.displayTier ?? candidate.tier.tier,
+        sourceTier: source.sourceTier ?? null,
+        requiredItemLevel: candidate.tier.ilvlReq,
+        modLine: candidate.tier.modLine ?? null,
+        lines: Array.isArray(candidate.tier.lines)
+          ? candidate.tier.lines.map(line => line.modLine ?? null)
+          : [],
+        min: candidate.tier.min ?? null,
+        max: candidate.tier.max ?? null,
+        weight: Number(candidate.weight),
+        groupWeight: groupWeights.get(groupKey),
+        denominator: totalWeight,
+      };
+    });
+    return {
+      rarity,
+      side,
+      minModLevel: craftOptions.minModLevel,
+      totalWeight,
+      candidates: snapshots,
+      groups: [...groupWeights].map(([groupKey, weight]) => ({
+        groupKey,
+        weight,
+        denominator: totalWeight,
+        candidateKeys: snapshots
+          .filter(candidate => candidate.groupKey === groupKey)
+          .map(candidate => candidate.candidateKey),
+      })),
+    };
   }
 
   applyAugmentation(options = {}) {
@@ -1970,10 +2054,12 @@ class CraftingEngine {
     for (const m of this._item.prefixes) {
       groups.add(`name:${m.modGroup}`);
       if (m.sourceModifierGroupId != null) groups.add(`source:${m.sourceModifierGroupId}`);
+      else groups.add(`legacy-name:${m.modGroup}`);
     }
     for (const m of this._item.suffixes) {
       groups.add(`name:${m.modGroup}`);
       if (m.sourceModifierGroupId != null) groups.add(`source:${m.sourceModifierGroupId}`);
+      else groups.add(`legacy-name:${m.modGroup}`);
     }
     return groups;
   }
@@ -1989,9 +2075,8 @@ class CraftingEngine {
     if (!pool) return out;
     for (const group of pool) {
       for (const tier of (group.tiers || [])) {
-        const overlayKey = `${type}|${group.modGroup}|${Number(tier.ilvlReq) || 0}`;
-        const source = this._sourceModifierOverlay.get(overlayKey) || null;
-        const weight = Number(source?.spawnWeight != null ? source.spawnWeight : tier.weight);
+        const source = this._modifierOverlaySource(type, group.modGroup, tier);
+        const weight = this._effectiveSourceWeight(source, tier);
         if (tier.ilvlReq <= this._item.ilvl && Number.isFinite(weight) && weight > 0 && this._sourceTagsAllow(source)) {
           out.push({
             type,
@@ -2021,10 +2106,56 @@ class CraftingEngine {
     return true;
   }
 
+  _modifierOverlaySource(type, legacyGroup, tier) {
+    const detailedKey = [
+      type,
+      legacyGroup,
+      Number(tier?.ilvlReq) || 0,
+      String(tier?.tier ?? ''),
+    ].join('|');
+    const legacyKey = `${type}|${legacyGroup}|${Number(tier?.ilvlReq) || 0}`;
+    return this._sourceModifierOverlay.get(detailedKey) ||
+      this._sourceModifierOverlay.get(legacyKey) ||
+      null;
+  }
+
+  _effectiveSourceWeight(source, tier) {
+    const modifierPoolClassId = Number(this._concreteBase?.modifierPoolClassId ?? this._item?.modifierPoolClassId);
+    if (Number.isFinite(modifierPoolClassId) && Array.isArray(source?.sourceClassWeights)) {
+      const classWeight = source.sourceClassWeights
+        .find(([classId]) => Number(classId) === modifierPoolClassId)?.[1];
+      if (classWeight != null && Number.isFinite(Number(classWeight))) return Number(classWeight);
+    }
+    const sourceWeight = source?.spawnWeight;
+    return Number(sourceWeight != null ? sourceWeight : tier.weight);
+  }
+
+  _hydrateLoadedModifierMetadata() {
+    for (const [type, modifiers] of [['prefix', this._item.prefixes], ['suffix', this._item.suffixes]]) {
+      for (const modifier of modifiers || []) {
+        if (modifier?.desecrated || modifier?.unrevealed) continue;
+        const source = this._modifierOverlaySource(type, modifier.modGroup, modifier);
+        if (!source) continue;
+        if (modifier.stableModifierId != null &&
+            Number(modifier.stableModifierId) !== Number(source.stableModifierId)) {
+          // A conflicting stable ID is not safe to guess across source versions.
+          // Preserve the saved record and its conservative legacy group fallback.
+          continue;
+        }
+        this._applySourceIdentity(modifier, source);
+      }
+    }
+  }
+
   _eligibleCandidates(type, existingGroups) {
     const src = type === 'prefix' ? this._prefixCandidates : this._suffixCandidates;
-    return src.filter(c =>
-      !existingGroups.has(c.groupIdentity) && !existingGroups.has(`name:${c.group.modGroup}`));
+    return src.filter(candidate => {
+      if (candidate.groupIdentity.startsWith('source:')) {
+        return !existingGroups.has(candidate.groupIdentity) &&
+          !existingGroups.has(`legacy-name:${candidate.group.modGroup}`);
+      }
+      return !existingGroups.has(`name:${candidate.group.modGroup}`);
+    });
   }
 
   _craftOptions(options) {
@@ -2159,6 +2290,10 @@ class CraftingEngine {
     record.stableModifierId = source.stableModifierId;
     record.sourceModifierKey = source.sourceModifierKey;
     record.sourceModifierGroupId = source.sourceModifierGroupId;
+    if (source.displayTier != null) record.displayTier = source.displayTier;
+    if (source.sourceTier != null) record.sourceTier = source.sourceTier;
+    if (source.overlayMatchStrategy) record.overlayMatchStrategy = source.overlayMatchStrategy;
+    if (source.overlayMatchedUniquely != null) record.overlayMatchedUniquely = !!source.overlayMatchedUniquely;
     if (source.modifierTags?.length) record.modifierTags = source.modifierTags.slice();
     return record;
   }

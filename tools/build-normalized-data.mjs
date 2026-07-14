@@ -3,6 +3,7 @@
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { buildModifierOverlayAudit } from './modifier-overlay.mjs';
 
 const TOOL_DIR = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(TOOL_DIR, '..');
@@ -77,12 +78,6 @@ function loadResolvedModBases(baseDirectory = BASE_DIR, sharedDirectory = SHARED
   return bases;
 }
 
-function addToMapArray(map, key, value) {
-  if (key == null) return;
-  if (!map.has(key)) map.set(key, []);
-  map.get(key).push(value);
-}
-
 export function buildNormalizedBrowserSource(directory = NORMALIZED_DIR) {
   const parts = [];
   for (const [key, fileName] of Object.entries(SOURCES)) {
@@ -104,50 +99,34 @@ export function buildRuntimeData(
   const manifest = readJson(path.join(directory, SOURCES.manifest));
   const modBases = loadResolvedModBases(baseDirectory, sharedDirectory);
   const modifiersById = new Map(modifiers.modifiers.map(modifier => [modifier.id, modifier]));
-  const modifiersByClassGroupLevel = new Map();
-
-  for (const modifier of modifiers.modifiers) {
-    for (const [classId] of modifier.spawnWeights || []) {
-      const key = `${classId}|${modifier.affix}|${modifier.modifierGroup}|${modifier.requiredItemLevel}`;
-      addToMapArray(modifiersByClassGroupLevel, key, modifier);
-    }
+  const overlayAudit = buildModifierOverlayAudit(modBases, baseItems, modifiers);
+  if (overlayAudit.failures.length) {
+    const sample = overlayAudit.failures.slice(0, 5)
+      .map(row => `${row.poolId}:${row.overlayKey} (${row.resolvedCandidateIds.join(', ') || 'no candidates'})`)
+      .join('; ');
+    throw new Error(`Modifier overlay has ${overlayAudit.failures.length} unresolved rows: ${sample}`);
   }
 
   const overlayByPool = {};
   const sourceModifierIds = new Set();
-  for (const [poolId, mapping] of Object.entries(baseItems.simulatorBaseMap || {})) {
-    const typeData = modBases[poolId];
-    const rows = [];
-    if (typeData) {
-      for (const [affix, groups] of [['prefix', typeData.prefixes || []], ['suffix', typeData.suffixes || []]]) {
-        for (const group of groups) {
-          for (const tier of group.tiers || []) {
-            const matches = [];
-            for (const classId of mapping.classIds || []) {
-              const key = `${classId}|${affix}|${group.modGroup}|${Number(tier.ilvlReq) || 0}`;
-              for (const modifier of modifiersByClassGroupLevel.get(key) || []) {
-                if (modifier.desecrated || modifier.essence || modifier.corrupted || modifier.enchantment) continue;
-                matches.push(modifier);
-              }
-            }
-            const ids = [...new Set(matches.map(modifier => modifier.id))];
-            if (ids.length !== 1) continue;
-            const modifier = modifiersById.get(ids[0]);
-            const weights = (modifier.spawnWeights || [])
-              .filter(([classId]) => (mapping.classIds || []).includes(classId))
-              .map(([, weight]) => Number(weight));
-            const uniqueWeights = [...new Set(weights)];
-            rows.push([
-              `${affix}|${group.modGroup}|${Number(tier.ilvlReq) || 0}`,
-              modifier.id,
-              uniqueWeights.length === 1 ? uniqueWeights[0] : null,
-            ]);
-            sourceModifierIds.add(modifier.id);
-          }
-        }
-      }
-    }
-    overlayByPool[poolId] = rows;
+  for (const poolId of Object.keys(baseItems.simulatorBaseMap || {})) {
+    overlayByPool[poolId] = [];
+  }
+  for (const row of overlayAudit.rows) {
+    const modifier = row.modifier;
+    sourceModifierIds.add(modifier.id);
+    // Compact tuple layout:
+    // [lookup key, stable source id, pool weight, display tier, source tier,
+    //  match strategy, class weights when the pool weight is class-dependent]
+    overlayByPool[row.poolId].push([
+      row.overlayKey,
+      modifier.id,
+      row.poolSpawnWeight,
+      row.displayTier,
+      modifier.tier ?? null,
+      row.matchStrategy,
+      row.poolSpawnWeight == null ? row.classWeights : null,
+    ]);
   }
 
   const implicitModifierIds = new Set((baseItems.bases || [])
@@ -204,6 +183,9 @@ export function buildRuntimeData(
       tags: tags.size,
       desecratedPools: desecratedPools.size,
       craftingItems: (craftingItems.items || []).length,
+      modifierOverlayRows: overlayAudit.summary.totalRows,
+      modifierDisplayTierMismatches: overlayAudit.rows.filter(row =>
+        Number(row.legacyTier.tier) !== Number(row.displayTier)).length,
     },
     baseItems: {
       simulatorBaseMap: baseItems.simulatorBaseMap || {},

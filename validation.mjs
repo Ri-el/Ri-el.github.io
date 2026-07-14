@@ -5,6 +5,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { buildModifierOverlayAudit } from './tools/modifier-overlay.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BASE_DIR = path.join(HERE, 'data', 'bases');
@@ -27,6 +28,27 @@ const desecratedData = JSON.parse(readFileSync(path.join(HERE, 'data', 'desecrat
 const normalizedBaseItems = JSON.parse(readFileSync(path.join(HERE, 'data', 'normalized', 'base-items.json'), 'utf8'));
 const normalizedModifiers = JSON.parse(readFileSync(path.join(HERE, 'data', 'normalized', 'modifiers.json'), 'utf8'));
 const normalizedModifiersById = new Map(normalizedModifiers.modifiers.map(modifier => [modifier.id, modifier]));
+const modifierOverlayAudit = buildModifierOverlayAudit(bases, normalizedBaseItems, normalizedModifiers);
+
+function sourceModifierOverlay(poolId) {
+  return new Map(modifierOverlayAudit.rows
+    .filter(row => row.poolId === poolId && row.modifier)
+    .map(row => [row.overlayKey, {
+      stableModifierId: row.modifier.id,
+      sourceModifierKey: row.modifier.key,
+      sourceModifierGroupId: row.modifier.modifierGroupId,
+      spawnWeight: row.poolSpawnWeight,
+      sourceClassWeights: row.classWeights,
+      displayTier: row.displayTier,
+      sourceTier: row.modifier.tier,
+      overlayMatchStrategy: row.matchStrategy,
+      overlayMatchedUniquely: row.matchedUniquely,
+      modifierTags: row.modifier.modifierTags || [],
+      requiredTags: row.modifier.requiredTags || [],
+      forbiddenTags: row.modifier.forbiddenTags || [],
+      weightConditions: row.modifier.weightConditions || [],
+    }]));
+}
 
 function mulberry32(seed) {
   return () => {
@@ -892,6 +914,17 @@ test('Omen of Whittling uses modifier level and randomises equal-lowest ties', (
   const second = withRandom(() => 0.999999, () => make().applyChaos('whittling').removedMods[0].modGroup);
   assert.equal(first, 'P0');
   assert.equal(second, 'P1');
+
+  const tierIndependent = new Engine(data, 'test_equipment');
+  tierIndependent.loadItem(rareItem('test_equipment', [
+    record('P0', 20, { displayTier: 99 }),
+    record('P1', 40, { displayTier: 1 }),
+  ], [record('S0', 60, { displayTier: 1 })]));
+  const removed = withRandom(() => 0, () =>
+    tierIndependent.applyChaos('whittling').removedMods[0]);
+  assert.equal(removed.modGroup, 'P0');
+  assert.equal(removed.ilvlReq, 20);
+  assert.equal(removed.displayTier, 99);
 });
 
 test('Desecration rejects unknown Bones and incompatible directional Omen combinations atomically', () => {
@@ -1253,6 +1286,228 @@ test('zero-weight modifier tiers are excluded even at random roll zero', () => {
   const result = withRandom(() => 0, () => engine.applyTransmutation());
   assert(result.success);
   assert.equal(result.addedMods[0].modGroup, 'Eligible');
+});
+
+test('every legacy tier has one normalized identity and a required-level-ranked display tier', () => {
+  assert.equal(modifierOverlayAudit.summary.totalRows, 7929);
+  assert.equal(modifierOverlayAudit.summary.matchedRows, 7929);
+  assert.equal(modifierOverlayAudit.failures.length, 0);
+  assert.deepEqual(modifierOverlayAudit.summary.matchStrategies, {
+    coarse: 7466,
+    range: 79,
+    semantic: 384,
+  });
+
+  const levelsByGroup = new Map();
+  for (const row of modifierOverlayAudit.rows) {
+    const key = `${row.poolId}|${row.affix}|${row.modifier.modifierGroupId}`;
+    if (!levelsByGroup.has(key)) levelsByGroup.set(key, new Set());
+    levelsByGroup.get(key).add(Number(row.legacyTier.ilvlReq));
+  }
+  for (const row of modifierOverlayAudit.rows) {
+    const key = `${row.poolId}|${row.affix}|${row.modifier.modifierGroupId}`;
+    const levels = [...levelsByGroup.get(key)].sort((left, right) => right - left);
+    assert.equal(row.displayTier, levels.indexOf(Number(row.legacyTier.ilvlReq)) + 1);
+  }
+  assert.equal(modifierOverlayAudit.rows.filter(row =>
+    Number(row.legacyTier.tier) !== Number(row.displayTier)).length, 520);
+});
+
+test('same-level semantic variants craft with player-facing tiers instead of sequential legacy rows', () => {
+  const overlay = sourceModifierOverlay('amulets');
+  const absent = normalizedConcreteBase(2563, 'amulets');
+  const engine = new Engine(modData, 'amulets', null, overlay, null, absent, () => 0);
+  const group = bases.amulets.suffixes.find(candidate => candidate.modGroup === 'IncreaseSocketedGemLevel');
+  const cases = [
+    ['Melee Skills', 3, 1],
+    ['Minion Skills', 3, 1],
+    ['Projectile Skills', 3, 1],
+    ['Spell Skills', 3, 1],
+    ['Projectile Skills', 2, 2],
+    ['Projectile Skills', 1, 3],
+  ];
+  for (const [text, value, expectedDisplayTier] of cases) {
+    const sourceTier = group.tiers.find(candidate =>
+      candidate.min === value && candidate.modLine.includes(text));
+    assert(sourceTier, `missing ${value} ${text}`);
+    const source = engine._modifierOverlaySource('suffix', group.modGroup, sourceTier);
+    assert(source?.stableModifierId != null);
+    const crafted = engine._applyMod('suffix', group, sourceTier, 0, source);
+    assert.equal(crafted.displayTier, expectedDisplayTier);
+    assert.equal(crafted.sourceTier, source.sourceTier);
+    assert.equal(crafted.tier, sourceTier.tier, 'legacy tier remains untouched');
+    engine._item.suffixes.pop();
+  }
+});
+
+test('stash-style loading rehydrates corrected display tiers and stable source identity', () => {
+  const overlay = sourceModifierOverlay('amulets');
+  const absent = normalizedConcreteBase(2563, 'amulets');
+  const group = bases.amulets.suffixes.find(candidate => candidate.modGroup === 'IncreaseSocketedGemLevel');
+  const tierTemplate = group.tiers.find(candidate =>
+    candidate.min === 3 && candidate.modLine.includes('Projectile Skills'));
+  const legacySaved = new Engine(modData, 'amulets', null, overlay, null, absent).getItem();
+  legacySaved.rarity = 'rare';
+  legacySaved.suffixes = [{
+    modGroup: group.modGroup,
+    tier: tierTemplate.tier,
+    tierName: tierTemplate.name,
+    ilvlReq: tierTemplate.ilvlReq,
+    modLine: tierTemplate.modLine,
+    displayText: '+3 to Level of all Projectile Skills',
+    value: 3,
+    min: 3,
+    max: 3,
+    fractured: false,
+  }];
+
+  const restored = new Engine(modData, 'amulets', null, overlay, null, absent);
+  restored.loadItem(JSON.parse(JSON.stringify(legacySaved)));
+  const modifier = restored.getItem().suffixes[0];
+  assert.equal(modifier.tier, 3);
+  assert.equal(modifier.displayTier, 1);
+  assert.equal(modifier.sourceTier, 2);
+  assert.equal(modifier.stableModifierId, 867);
+  assert.equal(modifier.sourceModifierGroupId, 695);
+});
+
+test('Spirit source weights and exact Absent Amulet odds match the normalized source', () => {
+  const overlay = sourceModifierOverlay('amulets');
+  const absent = normalizedConcreteBase(2563, 'amulets');
+  const engine = new Engine(modData, 'amulets', null, overlay, null, absent);
+  const odds = engine.getExactModifierOdds('rare');
+  const prefixOdds = engine.getExactModifierOdds('rare', {}, { side: 'prefix' });
+  const spirit = odds.candidates.filter(candidate => candidate.sourceModifierGroupId === 281);
+  assert.deepEqual(spirit.map(candidate => [
+    candidate.stableModifierId,
+    candidate.displayTier,
+    candidate.requiredItemLevel,
+    candidate.weight,
+  ]), [
+    [1140, 1, 54, 400],
+    [1139, 2, 46, 500],
+    [1138, 3, 33, 500],
+    [1137, 4, 25, 500],
+    [1136, 5, 16, 500],
+  ]);
+  assert.equal(odds.totalWeight, 173650);
+  assert.equal(prefixOdds.totalWeight, 72200);
+  assert.equal(spirit.reduce((total, candidate) => total + candidate.weight, 0), 2400);
+  assert.equal(spirit.find(candidate => candidate.displayTier === 1).weight, 400);
+  assert.equal(2400 / odds.totalWeight, 0.013820904117477686);
+  assert.equal(400 / odds.totalWeight, 0.002303484019579614);
+  assert.equal(2400 / prefixOdds.totalWeight, 0.0332409972299169);
+});
+
+test('exact group-then-tier probabilities equal direct weighted candidate probabilities', () => {
+  const engine = new Engine(
+    modData,
+    'amulets',
+    null,
+    sourceModifierOverlay('amulets'),
+    null,
+    normalizedConcreteBase(2563, 'amulets'),
+  );
+  const odds = engine.getExactModifierOdds('rare');
+  assert.equal(odds.candidates.reduce((total, candidate) => total + candidate.weight, 0), odds.totalWeight);
+  assert.equal(odds.groups.reduce((total, group) => total + group.weight, 0), odds.totalWeight);
+  for (const candidate of odds.candidates) {
+    const direct = candidate.weight / odds.totalWeight;
+    const staged = (candidate.groupWeight / odds.totalWeight) *
+      (candidate.weight / candidate.groupWeight);
+    assert(Math.abs(direct - staged) <= Number.EPSILON);
+  }
+});
+
+test('exact Spirit probability agrees with a seeded large-sample weighted simulation', () => {
+  const engine = new Engine(
+    modData,
+    'amulets',
+    null,
+    sourceModifierOverlay('amulets'),
+    null,
+    normalizedConcreteBase(2563, 'amulets'),
+  );
+  const odds = engine.getExactModifierOdds('rare');
+  const random = mulberry32(542026);
+  const sampleCount = 300000;
+  let spiritHits = 0;
+  for (let index = 0; index < sampleCount; index++) {
+    let roll = random() * odds.totalWeight;
+    let selected = odds.candidates.at(-1);
+    for (const candidate of odds.candidates) {
+      roll -= candidate.weight;
+      if (roll <= 0) {
+        selected = candidate;
+        break;
+      }
+    }
+    if (selected.sourceModifierGroupId === 281) spiritHits++;
+  }
+  const observed = spiritHits / sampleCount;
+  const exact = 2400 / odds.totalWeight;
+  assert(Math.abs(observed - exact) < 0.00075, `${observed} versus ${exact}`);
+});
+
+test('minimum modifier levels preserve the highest eligible Spirit tier when the floor would remove its group', () => {
+  const engine = new Engine(
+    modData,
+    'amulets',
+    null,
+    sourceModifierOverlay('amulets'),
+    null,
+    normalizedConcreteBase(2563, 'amulets'),
+  );
+  for (const [itemLevel, minimumLevel, expectedId] of [
+    [33, 35, 1138],
+    [46, 50, 1139],
+    [83, 70, 1140],
+  ]) {
+    engine.setItemLevel(itemLevel);
+    const spirit = engine.getExactModifierOdds('rare', { minModLevel: minimumLevel })
+      .candidates.filter(candidate => candidate.sourceModifierGroupId === 281);
+    assert.deepEqual(spirit.map(candidate => candidate.stableModifierId), [expectedId]);
+  }
+});
+
+test('normalized source groups block only related variants and concrete classes select exact weights', () => {
+  const amuletOverlay = sourceModifierOverlay('amulets');
+  const absent = normalizedConcreteBase(2563, 'amulets');
+  const skills = bases.amulets.suffixes.find(group => group.modGroup === 'IncreaseSocketedGemLevel');
+  const meleeTier = skills.tiers.find(tier => tier.min === 3 && tier.modLine.includes('Melee Skills'));
+  const engine = new Engine(modData, 'amulets', null, amuletOverlay, null, absent);
+  engine._item.rarity = 'rare';
+  engine._applyMod('suffix', skills, meleeTier, 0,
+    engine._modifierOverlaySource('suffix', skills.modGroup, meleeTier));
+  const afterMelee = engine.getExactModifierOdds('rare');
+  assert(!afterMelee.candidates.some(candidate => candidate.sourceModifierGroupId === 59));
+  assert(afterMelee.candidates.some(candidate => candidate.sourceModifierGroupId === 695));
+
+  const spiritGroup = bases.amulets.prefixes.find(group => group.modGroup === 'BaseSpirit');
+  const spiritTier = spiritGroup.tiers[0];
+  engine._applyMod('prefix', spiritGroup, spiritTier, 0,
+    engine._modifierOverlaySource('prefix', spiritGroup.modGroup, spiritTier));
+  assert(!engine.getExactModifierOdds('rare').candidates
+    .some(candidate => candidate.sourceModifierGroupId === 281));
+
+  const crossbowBases = normalizedBaseItems.bases
+    .filter(base => normalizedBaseItems.simulatorBaseMap.crossbows.concreteBaseIds.includes(base.id));
+  const class58 = crossbowBases.find(base => base.modifierPoolClassId === 58);
+  const class103 = crossbowBases.find(base => base.modifierPoolClassId === 103);
+  assert(class58 && class103);
+  for (const [base, expectedWeight] of [[class58, 100], [class103, 110]]) {
+    const crossbow = new Engine(
+      modData,
+      'crossbows',
+      null,
+      sourceModifierOverlay('crossbows'),
+      null,
+      normalizedConcreteBase(base.id, 'crossbows'),
+    );
+    const fireTier = crossbow.getExactModifierOdds('rare', {}, { side: 'prefix' })
+      .candidates.find(candidate => candidate.stableModifierId === 531);
+    assert.equal(fireTier.weight, expectedWeight);
+  }
 });
 
 test('normalized source weights and stable modifier identity are applied', () => {

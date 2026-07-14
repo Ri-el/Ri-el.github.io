@@ -11,6 +11,7 @@ import {
   buildRuntimeBrowserSource,
   buildRuntimeData,
 } from './tools/build-normalized-data.mjs';
+import { buildModifierOverlayAudit } from './tools/modifier-overlay.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const NORMALIZED_DIR = path.join(HERE, 'data', 'normalized');
@@ -1167,7 +1168,7 @@ check('runtime projection retains exactly the implicit and source modifiers it r
   stable(Object.keys(runtime.implicits)) === stable(expectedImplicitIds) &&
   stable(Object.keys(runtime.sourceModifiers)) === stable(runtimeOverlayModifierIds) &&
   Object.values(runtime.overlayByPool).every(rows => rows.every(row =>
-    Array.isArray(row) && row.length === 3 && runtime.sourceModifiers[row[1]])));
+    Array.isArray(row) && row.length === 7 && runtime.sourceModifiers[row[1]])));
 
 const runtimeBaseFields = [
   'id', 'metadataKey', 'displayName', 'itemClass', 'equipmentSlot',
@@ -1207,14 +1208,6 @@ check('runtime source-modifier tuples preserve exact identity and tag conditions
     ]);
   }));
 
-const fullModifiersByClassGroupLevel = new Map();
-for (const modifier of actual.modifiers.modifiers) {
-  for (const [classId] of modifier.spawnWeights || []) {
-    const key = `${classId}|${modifier.affix}|${modifier.modifierGroup}|${modifier.requiredItemLevel}`;
-    if (!fullModifiersByClassGroupLevel.has(key)) fullModifiersByClassGroupLevel.set(key, []);
-    fullModifiersByClassGroupLevel.get(key).push(modifier);
-  }
-}
 const sharedPools = {};
 if (existsSync(SHARED_DIR)) {
   for (const file of readdirSync(SHARED_DIR).filter(file => file.endsWith('.json')).sort()) {
@@ -1253,42 +1246,60 @@ check('selectable zero-Magic-capacity concrete-base audit matches the reviewed d
 console.log(`  INFO  zero-Magic-capacity selectable bases: ${zeroMagicCapacityBases
   .map(base => `${base.displayName} (${base.baseItemId}, ${base.simulatorPoolId}, ${base.magic.prefixes}/${base.magic.suffixes})`)
   .join(', ') || 'none'}`);
-let overlayParity = true;
-for (const [poolId, mapping] of Object.entries(actual.baseItems.simulatorBaseMap)) {
-  const expectedRows = [];
-  const typeData = resolvedBasePools[poolId];
-  if (typeData) {
-    for (const [affix, groups] of [['prefix', typeData.prefixes || []], ['suffix', typeData.suffixes || []]]) {
-      for (const group of groups) {
-        for (const tier of group.tiers || []) {
-          const matches = [];
-          for (const classId of mapping.classIds || []) {
-            const key = `${classId}|${affix}|${group.modGroup}|${Number(tier.ilvlReq) || 0}`;
-            for (const modifier of fullModifiersByClassGroupLevel.get(key) || []) {
-              if (!modifier.desecrated && !modifier.essence && !modifier.corrupted && !modifier.enchantment) {
-                matches.push(modifier);
-              }
-            }
-          }
-          const ids = [...new Set(matches.map(modifier => modifier.id))];
-          if (ids.length !== 1) continue;
-          const modifier = fullModifiersById.get(ids[0]);
-          const weights = (modifier.spawnWeights || [])
-            .filter(([classId]) => mapping.classIds.includes(classId))
-            .map(([, weight]) => Number(weight));
-          const uniqueWeights = [...new Set(weights)];
-          expectedRows.push([
-            `${affix}|${group.modGroup}|${Number(tier.ilvlReq) || 0}`,
-            modifier.id,
-            uniqueWeights.length === 1 ? uniqueWeights[0] : null,
-          ]);
-        }
-      }
-    }
-  }
-  if (stable(runtime.overlayByPool[poolId]) !== stable(expectedRows)) overlayParity = false;
+const modifierOverlayAudit = buildModifierOverlayAudit(
+  resolvedBasePools,
+  actual.baseItems,
+  actual.modifiers,
+);
+check('every legacy modifier tier maps uniquely to a normalized stable modifier',
+  modifierOverlayAudit.summary.totalRows === 7929 &&
+  modifierOverlayAudit.summary.matchedRows === 7929 &&
+  modifierOverlayAudit.failures.length === 0,
+  stable(modifierOverlayAudit.summary));
+check('modifier overlay matcher records the reviewed deterministic strategy counts',
+  stable(modifierOverlayAudit.summary.matchStrategies) === stable({
+    coarse: 7466,
+    range: 79,
+    semantic: 384,
+  }));
+check('modifier audit detects every failure in the former coarse overlay matcher',
+  stable(modifierOverlayAudit.summary.legacyMatcher) === stable({
+    unique: 6002,
+    ambiguous: 474,
+    missing: 1453,
+    wrongUnique: 6,
+  }));
+
+const expectedOverlayByPool = Object.fromEntries(
+  Object.keys(actual.baseItems.simulatorBaseMap).map(poolId => [poolId, []]));
+for (const row of modifierOverlayAudit.rows) {
+  expectedOverlayByPool[row.poolId].push([
+    row.overlayKey,
+    row.modifier.id,
+    row.poolSpawnWeight,
+    row.displayTier,
+    row.modifier.tier ?? null,
+    row.matchStrategy,
+    row.poolSpawnWeight == null ? row.classWeights : null,
+  ]);
 }
-check('runtime modifier overlays exactly preserve legacy identity and effective weights', overlayParity);
+check('runtime modifier overlays exactly preserve stable identity, display tiers, and class weights',
+  stable(runtime.overlayByPool) === stable(expectedOverlayByPool));
+check('every source-backed display tier is the required-level rank within its concrete pool and source group',
+  modifierOverlayAudit.rows.every(row => Number.isInteger(row.displayTier) && row.displayTier > 0) &&
+  modifierOverlayAudit.rows.filter(row =>
+    Number(row.legacyTier.tier) !== Number(row.displayTier)).length === 520);
+check('identical required levels never receive inconsistent display tiers within a source group',
+  [...new Set(modifierOverlayAudit.rows.map(row =>
+    `${row.poolId}|${row.affix}|${row.modifier.modifierGroupId}|${row.legacyTier.ilvlReq}`))]
+    .every(identity => {
+      const [poolId, affix, sourceGroupId, requiredLevel] = identity.split('|');
+      return new Set(modifierOverlayAudit.rows
+        .filter(row => row.poolId === poolId && row.affix === affix &&
+          String(row.modifier.modifierGroupId) === sourceGroupId &&
+          String(row.legacyTier.ilvlReq) === requiredLevel)
+        .map(row => row.displayTier)).size === 1;
+    }));
 
 if (existsSync(COVERAGE_PATH)) {
   const report = readJson(COVERAGE_PATH);

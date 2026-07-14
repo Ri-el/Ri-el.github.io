@@ -414,6 +414,11 @@ check('runtime data is a local classic-script projection with complete base and 
   /^window\.COE_RUNTIME_DATA=/.test(runtimeData) &&
   /"baseItems":/.test(runtimeData) && /"overlayByPool":/.test(runtimeData) &&
   /"sourceModifiers":/.test(runtimeData) && /"implicits":/.test(runtimeData));
+check('runtime modifier overlays carry stable identity, display tier, source tier, and class-specific weights',
+  /for \(const \[\s*key,\s*modifierId,\s*poolSpawnWeight,\s*displayTier,\s*sourceTier,\s*matchStrategy,\s*classWeights,?\s*\] of rows\)/.test(app) &&
+  /stableModifierId:\s*Number\(modifierId\)/.test(app) &&
+  /displayTier,\s*sourceTier,/.test(app) &&
+  /sourceClassWeights:\s*classWeights \|\| \[\]/.test(app));
 check('browser mod data is generated through the minifying JSON builder',
   /JSON\.stringify\(readJson/.test(modDataBuilder) &&
   /data\/mods\.data\.js is stale/.test(modDataBuilder));
@@ -423,7 +428,11 @@ const loadFromStashStart = app.indexOf('function loadFromStash(index)');
 const loadFromStashEnd = app.indexOf('\nfunction removeFromStash', loadFromStashStart);
 const loadFromStashSource = app.slice(loadFromStashStart, loadFromStashEnd);
 check('stash reload rebuilds the normalized modifier overlay for the saved simulator pool',
-  /new CraftingEngine\(\s*modData,\s*savedPoolId,\s*desecData,\s*buildSourceModifierOverlay\(savedPoolId\),\s*null,\s*savedConcreteBase,\s*craftingRandomSource,?\s*\)/.test(loadFromStashSource));
+  /new CraftingEngine\(\s*modData,\s*savedPoolId,\s*desecData,\s*buildSourceModifierOverlay\(savedPoolId, savedConcreteBase\),\s*null,\s*savedConcreteBase,\s*craftingRandomSource,?\s*\)/.test(loadFromStashSource));
+check('player-facing affix labels consistently prefer normalized display tiers',
+  /const displayTier = mod\.displayTier != null \? mod\.displayTier : mod\.tier;/.test(app) &&
+  /const affixLabel = [^;]+displayTier/.test(app) &&
+  /hover\.textContent = [^;]+displayTier/.test(app));
 check('incompatible stash migration is transactional and preserves the live engine',
   /let candidateEngine;[\s\S]*?try \{[\s\S]*?candidateEngine\.loadItem\(item, pending\);[\s\S]*?catch \(error\)[\s\S]*?showError\(`[\s\S]*?return;[\s\S]*?engine = candidateEngine;/.test(loadFromStashSource));
 check('requested performance paths are instrumented',
@@ -695,7 +704,7 @@ check('Absent Amulet art is installed at its numeric base ID path',
   fs.existsSync(new URL('./assets/item-bases/2563.png', import.meta.url)));
 check('runtime selector, socket stylesheet, and performance data are versioned in the offline shell',
   /header-fix\.css\?v=20/.test(select) &&
-  /CACHE_NAME = 'poe2-craft-registry-v5'/.test(serviceWorker) &&
+  /CACHE_NAME = 'poe2-craft-registry-v6'/.test(serviceWorker) &&
   serviceWorker.includes("'./header-fix.css?v=20'") &&
   serviceWorker.includes("'./data/crafting/known-items.data.js'"));
 check('Absent Amulet art is available in the versioned offline application shell',

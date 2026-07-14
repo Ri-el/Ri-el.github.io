@@ -756,7 +756,7 @@ function requestConcreteBaseConfirmation(result) {
   }));
 }
 
-function buildSourceModifierOverlay(baseType) {
+function buildSourceModifierOverlay(baseType, concreteBase = null) {
   if (!normalizedIndexes || !normalizedData) return null;
   const rows = normalizedData.overlayByPool?.[baseType];
   const typeData = modData?.bases?.[baseType];
@@ -764,7 +764,15 @@ function buildSourceModifierOverlay(baseType) {
 
   return measureOperation('base-modifier-overlay', () => {
     const overlay = new Map();
-    for (const [key, modifierId, spawnWeight] of rows) {
+    for (const [
+      key,
+      modifierId,
+      poolSpawnWeight,
+      displayTier,
+      sourceTier,
+      matchStrategy,
+      classWeights,
+    ] of rows) {
       const source = normalizedIndexes.sourceModifiersById.get(Number(modifierId));
       if (!source) throw new Error(`Runtime modifier overlay references unknown source modifier ${modifierId}.`);
       const [sourceModifierKey, sourceModifierGroupId, modifierTags, requiredTags, forbiddenTags, weightConditions] = source;
@@ -772,7 +780,12 @@ function buildSourceModifierOverlay(baseType) {
         stableModifierId: Number(modifierId),
         sourceModifierKey,
         sourceModifierGroupId,
-        spawnWeight,
+        spawnWeight: poolSpawnWeight,
+        displayTier,
+        sourceTier,
+        overlayMatchStrategy: matchStrategy,
+        overlayMatchedUniquely: true,
+        sourceClassWeights: classWeights || [],
         modifierTags: modifierTags || [],
         requiredTags: requiredTags || [],
         forbiddenTags: forbiddenTags || [],
@@ -938,7 +951,7 @@ function createEngine(type, concreteBase = null) {
       modData,
       type,
       desecData,
-      buildSourceModifierOverlay(type),
+      buildSourceModifierOverlay(type, selectedConcreteBase),
       null,
       selectedConcreteBase,
       craftingRandomSource,
@@ -1050,7 +1063,7 @@ function selectConcreteBase(baseItemId, options = {}) {
       modData,
       nextBase.simulatorPoolId,
       desecData,
-      buildSourceModifierOverlay(nextBase.simulatorPoolId),
+      buildSourceModifierOverlay(nextBase.simulatorPoolId, nextBase),
       null,
       nextBase,
       craftingRandomSource,
@@ -1086,7 +1099,7 @@ function syncConcreteBaseTemplateFromItem(item) {
       modData,
       simulatorPoolId,
       desecData,
-      buildSourceModifierOverlay(simulatorPoolId),
+      buildSourceModifierOverlay(simulatorPoolId, base),
       null,
       base,
       craftingRandomSource,
@@ -3260,10 +3273,11 @@ function renderItem(actionResult = null, overrideItem = null) {
     const frag = document.createDocumentFragment();
     allMods.forEach(mod => {
       const isPrefix = mod.type === 'prefix';
+      const displayTier = mod.displayTier != null ? mod.displayTier : mod.tier;
       // PoE2 affix tag = side + modifier TIER (e.g. P1 = a tier-1 prefix).
       // Show just P/S normally; reveal the tier number (and the unrevealed "?")
       // only in the Alt inspect/detail view.
-      const affixLabel = (isPrefix ? 'P' : 'S') + (showDetails ? (mod.unrevealed ? '?' : mod.tier) : '');
+      const affixLabel = (isPrefix ? 'P' : 'S') + (showDetails ? (mod.unrevealed ? '?' : displayTier) : '');
 
       const line = document.createElement('div');
       line.className = 'mod-line';
@@ -3301,7 +3315,7 @@ function renderItem(actionResult = null, overrideItem = null) {
         line.innerHTML = affixTag + `<span class="mod-body">${textHtml}</span>`;
         const hover = document.createElement('div');
         hover.className = 'mod-detail hover-detail';
-        hover.textContent = `${isPrefix ? 'P' : 'S'}${mod.unrevealed ? '?' : mod.tier} ${rangeText}`;
+        hover.textContent = `${isPrefix ? 'P' : 'S'}${mod.unrevealed ? '?' : displayTier} ${rangeText}`;
         line.appendChild(hover);
       }
       frag.appendChild(line);
@@ -3537,7 +3551,7 @@ function loadFromStash(index) {
       modData,
       savedPoolId,
       desecData,
-      buildSourceModifierOverlay(savedPoolId),
+      buildSourceModifierOverlay(savedPoolId, savedConcreteBase),
       null,
       savedConcreteBase,
       craftingRandomSource,
