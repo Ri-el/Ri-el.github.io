@@ -1839,46 +1839,56 @@
       "metadataKey": "Metadata/Items/Currency/CurrencyCorruptedEssenceBreach",
       "displayName": "Essence of the Breach",
       "category": "breach",
-      "equipmentRelevance": "equipment_relevant_blocked",
+      "equipmentRelevance": "equipment_runtime",
       "displayOrder": 10,
       "iconId": "breach-essence",
       "iconFallback": "EBrc",
       "accentColor": "#c0506f",
       "cssClasses": [
-        "unsupported-item-card"
+        "essence-btn"
       ],
-      "description": "The retained Breach Essence identity is visible, but its target-version Rare-item replacement and Maximum Quality modifier mutation are not enabled.",
-      "actionType": "unsupported",
-      "activation": "none",
+      "description": "Inferred atomic transition: removes one eligible explicit modifier from a Rare Ring or Amulet and adds the retained +20 Maximum Quality Prefix.",
+      "assumption": "When the Prefix side is full, removal is limited to a removable Prefix so the retained remove-one/add-one transition can complete.",
+      "actionType": "direct",
+      "activation": "arm",
       "engineAction": "essence_breach",
-      "applicabilityPredicate": "unsupportedReason",
-      "disabledReasonHandler": "staticDisabledReason",
-      "disabledReason": "Mechanic blocked because a Ring or Amulet receives a +20% Maximum Quality Prefix, but full-Prefix-side removal behavior and runtime quality-cap derivation from that explicit modifier are not encoded.",
-      "handler": null,
-      "sourceHandler": null,
+      "applicabilityPredicate": "essenceDisabledReason",
+      "disabledReasonHandler": "essenceDisabledReason",
+      "disabledReason": "",
+      "handler": "applyEssence",
+      "sourceHandler": "poe2_essence",
       "triggeringAction": null,
       "omenInteraction": {
         "omenId": null,
         "exclusiveGroup": null,
-        "consumeOn": "never",
+        "consumeOn": "successful_operation",
         "triggerCraftId": null
       },
-      "corruptionRestriction": "unverified",
-      "validItemClasses": [],
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": ["Amulet", "Ring"],
       "validItemTags": [],
-      "qualityRestriction": "unverified",
+      "qualityRestriction": "none",
       "socketRestriction": "none",
-      "operationOptions": {},
+      "operationOptions": {
+        "essenceItemId": 144,
+        "essenceType": 4,
+        "requiredRarity": "rare",
+        "transition": "rare_remove_add"
+      },
       "sourceEvidence": [
-        "data/normalized/crafting-items.json#item:144"
+        "data/normalized/crafting-items.json#item:144",
+        "data/normalized/essences.json#essence:57",
+        "data/normalized/modifiers.json#modifier:4592"
       ],
-      "implementationStatus": "blocked_missing_data",
-      "verificationStatus": "blocked_missing_target_version_data",
-      "blocker": "Mechanic blocked because a Ring or Amulet receives a +20% Maximum Quality Prefix, but full-Prefix-side removal behavior and runtime quality-cap derivation from that explicit modifier are not encoded.",
+      "implementationStatus": "implemented",
+      "verificationStatus": "inferred_atomic_transition_from_normalized_method",
+      "confidence": "inferred",
+      "blocker": null,
       "testFixtureIds": [
-        "ui:unsupported-registry-entry-cannot-dispatch"
+        "validation:normalized-essence-transitions",
+        "ui:implemented-essence-registry-dispatch"
       ],
-      "supported": false,
+      "supported": true,
       "visible": true
     },
     {

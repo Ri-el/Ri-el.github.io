@@ -167,8 +167,6 @@
   justify-content: center;
   padding: 24px;
   background: radial-gradient(ellipse at 50% 40%, rgba(10, 45, 28, 0.55), rgba(0, 0, 0, 0.82));
-  -webkit-backdrop-filter: blur(3px);
-  backdrop-filter: blur(3px);
   animation: wellFadeIn 200ms ease;
 }
 .well-modal[hidden] { display: none; }
@@ -694,11 +692,37 @@
 .well-modal.well-revealing .well-option:nth-child(3) { animation-delay: 340ms; }
 .well-modal.well-revealing .well-option:nth-child(4) { animation-delay: 450ms; }
 @keyframes wellReveal {
-  0%   { opacity: 0; transform: scale(0.92) translateY(8px); filter: brightness(0.6); }
-  60%  { filter: brightness(1.15); }
-  100% { opacity: 1; transform: scale(1) translateY(0); filter: brightness(1); }
+  0%   { opacity: 0; transform: scale(0.92) translateY(8px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 @keyframes wellOptionIn {
   0%   { opacity: 0; transform: translateY(10px); }
   100% { opacity: 1; transform: translateY(0); }
+}
+
+/* The workbench remains mounted behind the Well. Pause its ambient loops while
+   the modal is open so they do not trigger needless paints under the overlay. */
+body.well-open .currency-btn.armed,
+body.well-open .tooltip.corrupted .tooltip-border-glow,
+body.well-open .tooltip.sanctified .tooltip-border-glow,
+body.well-open .foreseen-banner,
+body.well-open .workbench-state .status-dot,
+body.well-open .mod-line.unrevealed-mod {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .well-modal,
+  .well-dialog,
+  .well-modal.well-revealing .well-dialog,
+  .well-modal.well-revealing .well-option,
+  .mod-line.unrevealed-mod {
+    animation: none;
+  }
+
+  .well-option,
+  .well-btn,
+  .reveal-btn {
+    transition: none;
+  }
 }

@@ -76,7 +76,7 @@ if (targets.length === 0) {
       assert(startup.modBaseCount > 0, `${target}: MOD_BASES did not initialize`);
       assert(startup.runtimeDataPresent, `${target}: runtime data did not initialize`);
       assert(startup.currencyIndexPresent, `${target}: currency index did not initialize`);
-      assert.equal(startup.craftRegistryLength, 46, `${target}: available runtime registry length`);
+      assert.equal(startup.craftRegistryLength, 415, `${target}: available runtime registry length`);
       assert.equal(startup.craftTabsLength, 10, `${target}: tab length`);
       assert(startup.craftForgePresent && startup.normalizedCounts, `${target}: CraftForge bridge/indexes unavailable`);
       assert.equal(startup.toast, '', `${target}: startup toast`);
@@ -199,12 +199,13 @@ if (targets.length === 0) {
             assert.equal(knownInventory.at(-1).cards, expectedCards, `${target}: ${tab} known card count`);
             assert.equal(knownInventory.at(-1).populatedPanels, 1, `${target}: ${tab} accumulated inactive card DOM`);
             if (tab === 'essences') {
-              const blockedEssence = page.locator('[data-craft-id]').first();
-              assert.equal(await blockedEssence.getAttribute('aria-disabled'), 'true', `${target}: blocked Essence is interactive`);
-              assert.equal(await blockedEssence.locator('.craft-status').textContent(), 'Blocked',
-                `${target}: blocked Essence lacks a textual status`);
-              assert((await blockedEssence.getAttribute('title'))?.startsWith('Mechanic blocked because'),
-                `${target}: blocked Essence lacks a precise explanation`);
+              const retainedEssence = page.locator('[data-craft-id]').first();
+              assert.equal(await retainedEssence.getAttribute('aria-disabled'), 'true',
+                `${target}: Essence should be unavailable on a Normal item`);
+              assert.match(await retainedEssence.locator('.craft-status').textContent(), /Verified|Inferred/,
+                `${target}: implemented Essence lacks a confidence label`);
+              assert(!((await retainedEssence.getAttribute('title')) || '').startsWith('Mechanic blocked because'),
+                `${target}: implemented Essence retained its old catalogue blocker`);
             }
           }
           assert.match(knownInventory[0].count, /0 available .* 80 known/i, `${target}: Essence category count`);
@@ -214,6 +215,13 @@ if (targets.length === 0) {
           assert.equal(await page.evaluate(() => window.CraftForge.getCraftRegistry()['preserved-collarbone']?.supported), true,
             `${target}: inferred Bone has no executable registry path`);
           await page.evaluate(() => window.CraftForge.setCraftTab('socketing'));
+          assert.equal(await page.locator('[data-craft-id="artificers-orb"]').getAttribute('aria-disabled'), 'true',
+            `${target}: Artificer's Orb incorrectly accepts an Amulet`);
+          assert.match(await page.locator('[data-craft-id="artificers-orb"]').getAttribute('data-disabled-reason'),
+            /requires a concrete weapon or armour base/i,
+            `${target}: invalid socket class lacks a precise reason`);
+          assert.equal(await page.locator('[data-craft-id="artificers-orb"] .craft-status').textContent(), 'Inferred',
+            `${target}: inferred socket operation is not visibly labelled`);
           await page.locator('#craft-show-deprecated').check();
           assert.equal(await page.locator('[data-craft-id]').count(), 296, `${target}: deprecated socket audit count`);
           await page.locator('input[name="craft-inventory-mode"][value="available"]').check();
@@ -351,6 +359,57 @@ if (targets.length === 0) {
           await page.locator('#base-picker-close').click();
         }
 
+        if (classLabel === 'Body Armours') {
+          await page.evaluate(() => window.CraftForge.setCraftTab('socketing'));
+          const artificer = page.locator('[data-craft-id="artificers-orb"]');
+          assert.equal(await artificer.getAttribute('aria-disabled'), 'false',
+            `${target}: Artificer's Orb is unavailable on Rusted Cuirass`);
+          await artificer.click();
+          await page.locator('#jewel-tooltip').click();
+          assert.deepEqual(await page.locator('#socket-list .socket-line').allTextContents(), ['Socket 1: Empty'],
+            `${target}: Artificer's Orb did not add one empty socket`);
+
+          const desertRune = page.locator('[data-craft-id="socketable-624"]');
+          assert.equal(await desertRune.getAttribute('aria-disabled'), 'false',
+            `${target}: Desert Rune is unavailable for an empty Body Armour socket`);
+          await desertRune.click();
+          await page.locator('#jewel-tooltip').click();
+          assert.deepEqual(await page.locator('#socket-list .socket-line').allTextContents(), ['Socket 1: Desert Rune'],
+            `${target}: Desert Rune insertion was not rendered`);
+          assert.match(await page.locator('#socket-list .socket-line').getAttribute('title'), /base_fire_damage_resistance_%: 14/,
+            `${target}: Desert Rune retained effect was not rendered`);
+
+          await artificer.click();
+          await page.locator('#jewel-tooltip').click();
+          const soulCore = page.locator('[data-craft-id="socketable-740"]');
+          assert.equal(await soulCore.getAttribute('aria-disabled'), 'false',
+            `${target}: Soul Core is unavailable for the second Body Armour socket`);
+          await soulCore.click();
+          await page.locator('#jewel-tooltip').click();
+          assert.deepEqual(await page.locator('#socket-list .socket-line').allTextContents(),
+            ['Socket 1: Desert Rune', 'Socket 2: Soul Core of Tacati'],
+            `${target}: Rune and Soul Core compatibility state was not rendered`);
+          assert.equal(await artificer.getAttribute('aria-disabled'), 'true',
+            `${target}: Artificer's Orb ignored the two-socket cap`);
+          assert.match(await artificer.getAttribute('data-disabled-reason'), /maximum \(2\)/i,
+            `${target}: socket-cap disabled reason is imprecise`);
+          assert.equal(await desertRune.getAttribute('aria-disabled'), 'true',
+            `${target}: full sockets still allow replacement`);
+          assert.match(await desertRune.getAttribute('data-disabled-reason'), /empty Rune Socket.*cannot be replaced or removed/i,
+            `${target}: replacement restriction is imprecise`);
+          assert.match(await page.locator('#craft-counter').textContent(), /Desert Rune.*Soul Core of Tacati/s,
+            `${target}: socket history does not retain augment identities`);
+
+          await page.locator('#undo-btn').click();
+          assert.deepEqual(await page.locator('#socket-list .socket-line').allTextContents(),
+            ['Socket 1: Desert Rune', 'Socket 2: Empty'],
+            `${target}: socket undo did not restore the exact empty slot`);
+          await page.locator('#redo-btn').click();
+          assert.deepEqual(await page.locator('#socket-list .socket-line').allTextContents(),
+            ['Socket 1: Desert Rune', 'Socket 2: Soul Core of Tacati'],
+            `${target}: socket redo did not restore exact socket contents`);
+        }
+
         const back = page.locator('#back-to-select');
         assert.equal(await back.count(), 1, `${target}: back button count`);
         await back.click();
@@ -471,6 +530,25 @@ if (targets.length === 0) {
       await page.locator('#base-picker-search').fill('Crimson Amulet');
       await page.locator('.concrete-base-option', { hasText: 'Crimson Amulet' }).click();
       await page.evaluate(() => window.CraftForge.setCraftTab('currency'));
+      await applyCraft('transmutation');
+      await page.evaluate(() => window.CraftForge.setCraftTab('essences'));
+      const bodyEssence = page.locator('[data-craft-id="essence-99"]');
+      assert.equal(await bodyEssence.getAttribute('aria-disabled'), 'false',
+        `${target}: Essence of the Body is unavailable on a qualifying Magic Amulet`);
+      assert.equal(await bodyEssence.locator('.craft-status').textContent(), 'Verified',
+        `${target}: source-backed Essence does not show its confidence`);
+      await applyCraft('essence-99');
+      const essenceRare = await absentState();
+      assert.equal(essenceRare.rarity, 'rare', `${target}: Essence did not upgrade Magic to Rare`);
+      assert.equal(essenceRare.mods, 2, `${target}: Essence did not preserve the Magic modifier and add one forced modifier`);
+      assert.match(essenceRare.counter, /Essence of the Body/i, `${target}: exact Essence identity is absent from history`);
+      await page.locator('#undo-btn').click();
+      assert.equal((await absentState()).rarity, 'magic', `${target}: Essence undo did not restore Magic rarity`);
+      await page.locator('#redo-btn').click();
+      assert.deepEqual(await absentState(), essenceRare, `${target}: Essence redo did not restore the exact result`);
+
+      await page.locator('#reset-btn').click();
+      await page.evaluate(() => window.CraftForge.setCraftTab('currency'));
       await applyCraft('alchemy');
       const omenBaseMods = (await absentState()).mods;
       await page.evaluate(() => window.CraftForge.setCraftTab('ritual'));
@@ -496,6 +574,11 @@ if (targets.length === 0) {
       await page.locator('#reset-btn').click();
       await page.evaluate(() => window.CraftForge.setCraftTab('currency'));
       await applyCraft('alchemy');
+      const echoesDefinition = await page.evaluate(() => window.CraftForge.getCraftRegistry()['omen-abyssal-echoes']);
+      await page.evaluate(tab => window.CraftForge.setCraftTab(tab), echoesDefinition.tab);
+      assert.equal(await page.locator('[data-craft-id="omen-abyssal-echoes"]').getAttribute('aria-disabled'), 'false',
+        `${target}: Abyssal Echoes is unavailable before a qualifying Desecration`);
+      await page.locator('[data-craft-id="omen-abyssal-echoes"]').click();
       await page.evaluate(() => window.CraftForge.setCraftTab('abyss'));
       assert.equal(await page.locator('[data-craft-id="preserved-collarbone"]').getAttribute('aria-disabled'), 'false',
         `${target}: Preserved Collarbone is unavailable on a qualifying Amulet`);
@@ -507,8 +590,72 @@ if (targets.length === 0) {
       await page.locator('#jewel-tooltip').click();
       assert(await page.locator('#reveal-panel').isVisible(), `${target}: Preserved Collarbone did not start Desecration`);
       assert.equal(await page.locator('#mod-list .unrevealed-mod').count(), 1, `${target}: inferred Bone did not place one unrevealed modifier`);
+
+      await page.locator('#reveal-btn').click();
+      assert(await page.locator('#well-modal').isVisible(), `${target}: Reveal did not open the Well`);
+      assert(await page.locator('body').evaluate(body => body.classList.contains('well-open')),
+        `${target}: open Well did not pause background animations`);
+      const wellPaintStyles = await page.evaluate(() => {
+        const modalStyle = getComputedStyle(document.querySelector('#well-modal'));
+        const dialogStyle = getComputedStyle(document.querySelector('#well-modal .well-dialog'));
+        return {
+          backdrop: modalStyle.getPropertyValue('backdrop-filter') || modalStyle.getPropertyValue('-webkit-backdrop-filter'),
+          dialogFilter: dialogStyle.filter,
+        };
+      });
+      assert(!wellPaintStyles.backdrop || wellPaintStyles.backdrop === 'none',
+        `${target}: Well retained a full-screen backdrop filter`);
+      assert.equal(wellPaintStyles.dialogFilter, 'none', `${target}: Well reveal retained a dialog filter animation`);
+      assert((await page.locator('#well-options .well-option').count()) > 0, `${target}: Well rendered no reveal choices`);
+      assert(await page.locator('#well-reroll').isVisible(), `${target}: Abyssal Echoes did not expose the Well reroll`);
+
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      const reducedAnimationNames = await page.evaluate(() => [
+        document.querySelector('#well-modal'),
+        document.querySelector('#well-modal .well-dialog'),
+        document.querySelector('#well-modal .well-option'),
+        document.querySelector('#mod-list .unrevealed-mod'),
+      ].map(element => getComputedStyle(element).animationName));
+      assert(reducedAnimationNames.every(name => name === 'none'),
+        `${target}: reduced-motion mode retained a Well or unrevealed animation`);
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
+
+      await page.locator('#well-reroll').click();
+      assert(!(await page.locator('#well-reroll').isVisible()), `${target}: Well reroll remained available after use`);
+      const rerolledOptions = await page.locator('#well-options .well-option').allTextContents();
+      assert(rerolledOptions.length > 0, `${target}: Well reroll cleared all choices`);
+      await page.locator('#well-cancel').click();
+      assert(!(await page.locator('#well-modal').isVisible()), `${target}: Cancel did not close the Well`);
+      assert(!(await page.locator('body').evaluate(body => body.classList.contains('well-open'))),
+        `${target}: Cancel left background animations paused`);
+      assert(await page.locator('#reveal-panel').isVisible(), `${target}: Cancel removed the pending Reveal panel`);
+
       await page.locator('#undo-btn').click();
       assert(!(await page.locator('#reveal-panel').isVisible()), `${target}: undo did not restore the pre-Bone state`);
+      assert.equal(await page.locator('#well-options .well-option').count(), 0,
+        `${target}: undo left stale Well choices in the closed modal`);
+      await page.locator('#redo-btn').click();
+      assert(await page.locator('#reveal-panel').isVisible(), `${target}: redo did not restore pending Desecration`);
+      assert.equal(await page.locator('#mod-list .unrevealed-mod').count(), 1,
+        `${target}: redo did not restore the unrevealed modifier`);
+      await page.locator('#reveal-btn').click();
+      assert.deepEqual(await page.locator('#well-options .well-option').allTextContents(), rerolledOptions,
+        `${target}: reopening after undo/redo did not restore the exact pending Well choices`);
+      await page.locator('#well-options .well-option').first().click();
+      assert(!(await page.locator('#well-modal').isVisible()), `${target}: selecting a Well option did not close it`);
+      assert(!(await page.locator('#reveal-panel').isVisible()), `${target}: selecting a Well option left the Reveal panel open`);
+      assert.equal(await page.locator('#well-options .well-option').count(), 0,
+        `${target}: selecting a Well option left stale choices in the modal`);
+      assert.equal(await page.locator('#mod-list .unrevealed-mod').count(), 0,
+        `${target}: selecting a Well option left the modifier unrevealed`);
+      assert.equal(await page.locator('#mod-list .desecrated-mod').count(), 1,
+        `${target}: selecting a Well option did not commit a Desecrated modifier`);
+      await page.locator('#undo-btn').click();
+      assert.equal(await page.locator('#mod-list .desecrated-mod').count(), 0,
+        `${target}: undo did not restore the pre-Desecration item after selection`);
+      await page.locator('#redo-btn').click();
+      assert.equal(await page.locator('#mod-list .desecrated-mod').count(), 1,
+        `${target}: redo did not restore the selected Desecrated modifier`);
 
       await page.locator('#reset-btn').click();
       await page.evaluate(() => window.CraftForge.setCraftTab('currency'));
@@ -565,7 +712,7 @@ if (targets.length === 0) {
           }
           return { names, urls };
         });
-        assert(offlineCache.names.includes('poe2-craft-registry-v5'), `${target}: updated service-worker cache missing`);
+        assert(offlineCache.names.includes('poe2-craft-registry-v8'), `${target}: updated service-worker cache missing`);
         assert(offlineCache.urls.some(url => url.endsWith('/data/crafting/known-items.data.js')),
           `${target}: lazy known-items catalog missing from offline cache`);
         page.removeAllListeners('console');

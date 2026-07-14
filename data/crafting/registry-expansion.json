@@ -18,6 +18,24 @@
       "url": "https://poe2db.tw/us/Abyss"
     }
   ],
+  "generatedFamilies": [
+    {
+      "kind": "essences",
+      "includedTypes": [0, 1, 2, 3, 4],
+      "excludedSourceItemIds": [143, 144],
+      "sourceHandler": "poe2_essence"
+    },
+    {
+      "kind": "artificer",
+      "sourceItemId": 35,
+      "sourceHandler": "artificer"
+    },
+    {
+      "kind": "socketables",
+      "excludeDeprecated": true,
+      "sourceHandler": "poe2_socketable"
+    }
+  ],
   "definitions": [
     {
       "craftId": "omen-sinistral-alchemy",

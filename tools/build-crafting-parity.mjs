@@ -85,7 +85,7 @@ export function buildReport(index) {
     fullParityClaim: false,
     inventorySource: 'data/crafting/currency-index.json',
     registrySource: 'data/crafting/currency-index.json#craftRegistry',
-    entryDetailStatus: 'authoritative_registry_task07',
+    entryDetailStatus: 'authoritative_registry_crafting_implementation',
     counts: {
       sourceEntries: index.counts.entries,
       registryDefinitions: definitions.length,
@@ -111,23 +111,23 @@ export function buildReport(index) {
       atomicDesecrationValidation: ['unknown_bone', 'conflicting_directional_omens'],
       lightOmenConsumption: 'successful_annulment_once_including_hinekora_commit',
       rerollCountSource: 'engine_result',
-      note: 'Task 05 gates supported Abyss controls to source-backed targets and keeps unresolved Bones, Essences, Catalysts, and target-version Desecrated weighting as explicit blockers.',
+      note: 'The Abyss transaction now treats revealed and unrevealed Desecrated affixes as ordinary removable explicit modifiers, preserves pending Well state atomically, and keeps only source-incomplete Bones blocked.',
     },
     task06Change: {
       socketingDefinitions: definitions.filter(definition => definition.category === 'socketing').length,
       socketingSupported: definitions.filter(definition => definition.category === 'socketing' && definition.supported).length,
       socketingVisible: definitions.filter(definition => definition.category === 'socketing' && definition.visible).length,
-      socketState: 'explicit_empty_or_preserved_unverified',
+      socketState: 'explicit_slots_with_inferred_source_socket_count_cap',
       socketOperations: {
-        adding: 'blocked_missing_data',
-        insertion: 'blocked_missing_data',
-        replacement: 'blocked_missing_data',
-        extraction: 'blocked_missing_data',
+        adding: 'implemented_inferred',
+        insertion: 'implemented_inferred_exact_retained_effects',
+        replacement: 'not_exposed_no_retained_method',
+        extraction: 'not_exposed_no_retained_method',
       },
       retainedSocketables: 295,
-      retainedRunes: 226,
+      retainedRunes: 221,
       retainedSoulCores: 34,
-      note: 'Task 06 formalizes deterministic empty/preserved socket state and a dedicated tooltip section. It does not enable Artificer, Rune, Soul Core, or extraction mutations because target-version limits, effects, and transitions are incomplete.',
+      note: 'Artificer and 287 non-deprecated socketable augments are enabled as explicit inference from retained socket counts, exact class effects, corruption flags, and per-item limit codes. Replacement and extraction remain unavailable because no retained operation defines them.',
     },
     task07Change: {
       expeditionRuneforgingDefinitions: definitions.filter(definition => definition.category === 'runeforging').length,
@@ -147,7 +147,7 @@ export function buildReport(index) {
     blockers: [
       'Full parity remains blocked while retained registry definitions still have implementation or verification blockers.',
       'Hinekora\'s Lock remains implemented for compatibility but has no normalized source-item identity in the checked-in export.',
-      'Tasks 06-07 must resolve remaining mechanic-specific blocked_missing_data and probability_unverified records from verified target-version evidence.',
+      'Quality, unresolved Ritual/Abyss records, Catalysts, Delirium, Runeforging, and corruption still require their definition-specific target-version evidence.',
     ],
   };
 }

@@ -639,8 +639,11 @@ function concreteBaseDefinition(base, simulatorPoolId) {
       : {},
     implicits: (base.implicitModifierIds || []).map(normalizedImplicitSnapshot),
     sourceSocketCount: base.socketCount != null && Number.isFinite(Number(base.socketCount)) ? Number(base.socketCount) : null,
-    defaultSockets: null,
-    maximumSockets: null,
+    defaultSockets: base.socketCount != null && Number.isFinite(Number(base.socketCount)) ? 0 : null,
+    maximumSockets: base.socketCount != null && Number.isFinite(Number(base.socketCount)) ? Number(base.socketCount) : null,
+    socketCapacityStatus: base.socketCount != null && Number.isFinite(Number(base.socketCount))
+      ? 'inferred_source_cap'
+      : null,
     icon: base.icon || sourceClass?.iconKey || null,
     selectable: !base.unmodifiable,
     disabledReason: base.unmodifiable ? 'This normalized base is marked unmodifiable.' : '',
@@ -799,7 +802,8 @@ function buildSourceModifierOverlay(baseType, concreteBase = null) {
 const CRAFT_VALIDATORS = Object.freeze({
   currencyDisabledReason: (definition, item) => currencyDisabledReason(definition.engineAction, item),
   boneDisabledReason: (definition, item) => boneDisabledReason(definition, item),
-  essenceDisabledReason: (definition, item) => essenceDisabledReason(definition.engineAction, item),
+  essenceDisabledReason: (definition, item) => essenceDisabledReason(definition, item),
+  socketDisabledReason: (definition, item) => socketDisabledReason(definition, item),
   omenDisabledReason: (definition, item) => omenDisabledReason(definition, item),
   unsupportedReason: definition => definition.unsupportedReason,
   staticDisabledReason: definition => definition.unsupportedReason,
@@ -955,6 +959,7 @@ function createEngine(type, concreteBase = null) {
       null,
       selectedConcreteBase,
       craftingRandomSource,
+      normalizedData?.craftingMechanics,
     );
     undoStack = [];
     redoStack = [];
@@ -1067,6 +1072,7 @@ function selectConcreteBase(baseItemId, options = {}) {
       null,
       nextBase,
       craftingRandomSource,
+      normalizedData?.craftingMechanics,
     );
     engine.setItemLevel(currentItem.itemLevel ?? currentItem.ilvl);
     currentJewelType = nextBase.simulatorPoolId;
@@ -1103,6 +1109,7 @@ function syncConcreteBaseTemplateFromItem(item) {
       null,
       base,
       craftingRandomSource,
+      normalizedData?.craftingMechanics,
     );
   } else {
     engine.setConcreteBase(base, { resetItem: false });
@@ -1740,6 +1747,9 @@ function applyCurrencyToEngine(currency, eng = engine) {
       case 'applyFracturing':
       case 'applyEssenceOfAbyss':
       case 'applyEssenceOfBreach': return eng[definition.handler]();
+      case 'applyEssence': return eng[definition.handler](definition.operationOptions?.essenceItemId);
+      case 'applyArtificerOrb': return eng[definition.handler]();
+      case 'applySocketable': return eng[definition.handler](definition.operationOptions?.socketableItemId);
       default: return { success: false, error: 'Registered crafting handler is unavailable.' };
     }
   });
@@ -2143,9 +2153,9 @@ function openWell() {
   renderWell();
   if (elements.wellModal) {
     elements.wellModal.hidden = false;
-    // Replay the Well of Souls reveal animation every time the modal opens.
-    elements.wellModal.classList.remove('well-revealing');
-    void elements.wellModal.offsetWidth;
+    document.body.classList.add('well-open');
+    // closeWell removes this class, so adding it is enough to replay the
+    // reveal animation without forcing a synchronous layout of the overlay.
     elements.wellModal.classList.add('well-revealing');
   }
   playSound('desecration');
@@ -2211,6 +2221,7 @@ function chooseDesec(index) {
 }
 
 function closeWell() {
+  document.body.classList.remove('well-open');
   if (elements.wellModal) {
     elements.wellModal.hidden = true;
     elements.wellModal.classList.remove('well-revealing');
@@ -2224,6 +2235,9 @@ function clearDesecration() {
   closeWell();
   hideRevealPanel();
   desecState = null;
+  if (elements.wellOptions) elements.wellOptions.replaceChildren();
+  if (elements.wellSub) elements.wellSub.textContent = '';
+  if (elements.wellReroll) elements.wellReroll.hidden = true;
   // Abyssal Echoes only applies to an active reveal; drop it when the reveal ends.
   selectedOmens.delete('abyssal_echoes');
   elements.omenBtns.forEach(b => {
@@ -2473,8 +2487,9 @@ function computeForesight(currency) {
     return { result };
   }
   const afterItem = engine.getItem();
+  const afterPending = engine.getPendingDesecration();
   engine.loadItem(snapshot, snapshotPending);
-  return { result, afterItem };
+  return { result, afterItem, afterPending };
 }
 
 // Desecration foresight is special: run the engine's desecration on a snapshot
@@ -2550,7 +2565,7 @@ function commitForesight(currency) {
     return { success: false, error };
   }
   const before = snapshotState(engine.getItem());
-  engine.loadItem(seal.afterItem);   // commit the exact sealed outcome
+  engine.loadItem(seal.afterItem, seal.afterPending);   // commit the exact sealed outcome
   consumeCraftOmen(currency);
   engine.recordCurrencyUse(craftIdForAction(currency));
   engine.clearHinekoraLock();        // "The Lock is removed when this item is modified."
@@ -2803,7 +2818,7 @@ function removableItemMods(item, side = null) {
   const source = side === 'prefix' ? (item.prefixes || [])
     : side === 'suffix' ? (item.suffixes || [])
       : allItemMods(item);
-  return source.filter(mod => !mod.fractured && !mod.unrevealed);
+  return source.filter(mod => !mod.fractured);
 }
 
 function modHasNumericRange(mod) {
@@ -2877,7 +2892,7 @@ function currencyDisabledReason(currency, item) {
       return noEligibleModifier('rare');
     case 'chaos': {
       if (item.rarity !== 'rare') return 'Requires a Rare item.';
-      if (!removable.length) return 'No removable modifier; fractured and unrevealed modifiers are protected.';
+      if (!removable.length) return 'No removable modifier; fractured modifiers are protected.';
       if (selectedCraftOmen === 'sinistral_erasure' && !removableItemMods(item, 'prefix').length) return 'Omen of Sinistral Erasure requires a removable Prefix.';
       if (selectedCraftOmen === 'dextral_erasure' && !removableItemMods(item, 'suffix').length) return 'Omen of Dextral Erasure requires a removable Suffix.';
       if (selectedCraftOmen === 'whittling') {
@@ -2891,8 +2906,8 @@ function currencyDisabledReason(currency, item) {
     }
     case 'annulment':
       if (item.rarity === 'normal') return 'Requires a Magic or Rare item.';
-      if (!removable.length) return 'No removable modifier; fractured and unrevealed modifiers are protected.';
-      if (omenOfLightActive && !removable.some(mod => mod.desecrated)) return 'Omen of Light requires a revealed Desecrated modifier.';
+      if (!removable.length) return 'No removable modifier; fractured modifiers are protected.';
+      if (omenOfLightActive && !removable.some(mod => mod.desecrated && !mod.mark)) return 'Omen of Light requires an eligible Desecrated modifier.';
       if (selectedCraftOmen === 'sinistral_annulment' && !removableItemMods(item, 'prefix').length) return 'Omen of Sinistral Annulment requires a removable Prefix.';
       if (selectedCraftOmen === 'dextral_annulment' && !removableItemMods(item, 'suffix').length) return 'Omen of Dextral Annulment requires a removable Suffix.';
       return '';
@@ -2945,8 +2960,14 @@ function boneDisabledReason(definition, item) {
   return '';
 }
 
-function essenceDisabledReason(action, item) {
-  if (action !== 'essence_abyss') return UNSUPPORTED_REASON;
+function essenceDisabledReason(definition, item) {
+  const action = definition?.engineAction;
+  if (action !== 'essence_abyss') {
+    const essenceItemId = definition?.operationOptions?.essenceItemId;
+    if (essenceItemId == null) return UNSUPPORTED_REASON;
+    const result = engine.validateEssence(essenceItemId);
+    return result.success ? '' : result.error;
+  }
   if (item.corrupted) return 'Item is corrupted and cannot be modified.';
   if (item.sanctified) return 'Item is sanctified and cannot be modified further.';
   if (item.mirrored || item.isMirrored) return 'Item is mirrored and cannot be modified.';
@@ -2958,6 +2979,20 @@ function essenceDisabledReason(action, item) {
   if (allItemMods(item).some(mod => mod.mark)) return 'Item already carries the Mark of the Abyssal Lord.';
   if (allItemMods(item).some(mod => mod.crafted)) return 'Item already has its maximum of one crafted modifier.';
   return '';
+}
+
+function socketDisabledReason(definition) {
+  if (definition?.handler === 'applyArtificerOrb') {
+    const result = engine.validateArtificerOrb();
+    return result.success ? '' : result.error;
+  }
+  if (definition?.handler === 'applySocketable') {
+    const itemId = definition.operationOptions?.socketableItemId;
+    if (itemId == null) return UNSUPPORTED_REASON;
+    const result = engine.validateSocketable(itemId);
+    return result.success ? '' : result.error;
+  }
+  return UNSUPPORTED_REASON;
 }
 
 function omenDisabledReason(definition, item) {
@@ -2973,9 +3008,9 @@ function omenDisabledReason(definition, item) {
     const alreadyDesecrated = allItemMods(item).some(mod => mod.desecrated && !mod.mark);
     const hasRevealedDesecrated = allItemMods(item).some(mod => mod.desecrated && !mod.mark && !mod.unrevealed);
     if (omen === 'omen_of_light') {
-      return allItemMods(item).some(mod => mod.desecrated && !mod.mark && !mod.unrevealed)
+      return allItemMods(item).some(mod => mod.desecrated && !mod.mark && !mod.fractured)
         ? ''
-        : 'Omen of Light requires a revealed Desecrated modifier.';
+        : 'Omen of Light requires an eligible Desecrated modifier.';
     }
     if (item.rarity !== 'rare') return 'Requires a Rare item.';
     if (omen === 'abyssal_echoes') {
@@ -3130,9 +3165,14 @@ function renderSocketDetails(item) {
       line.className = 'socket-line';
       const index = Number(slot.index) + 1;
       if (slot.state === 'occupied') {
-        const name = slot.insertedItemType || slot.insertedItemId || 'Socketed item';
+        const name = slot.source?.displayName || slot.insertedItemType || slot.insertedItemId || 'Socketed item';
         line.textContent = `Socket ${index}: ${name}`;
-        if (slot.effect) line.title = typeof slot.effect === 'string' ? slot.effect : JSON.stringify(slot.effect);
+        if (slot.effect) {
+          const value = slot.effect.value == null ? '' : `: ${slot.effect.value}`;
+          line.title = slot.effect.statId
+            ? `${slot.effect.statId}${value}`
+            : typeof slot.effect === 'string' ? slot.effect : JSON.stringify(slot.effect);
+        }
       } else {
         line.textContent = `Socket ${index}: Empty`;
       }
@@ -3362,8 +3402,13 @@ function renderItem(actionResult = null, overrideItem = null) {
     if (hasPendingReveal && desecState) {
       showRevealPanel();
     } else {
-      if (!hasPendingReveal) desecState = null;
-      hideRevealPanel();
+      const staleRevealUi = !hasPendingReveal && (
+        desecState || engine.getPendingDesecration() ||
+        (elements.wellModal && !elements.wellModal.hidden) ||
+        (elements.wellOptions && elements.wellOptions.childElementCount > 0)
+      );
+      if (staleRevealUi) clearDesecration();
+      else hideRevealPanel();
     }
   }
 
@@ -3555,6 +3600,7 @@ function loadFromStash(index) {
       null,
       savedConcreteBase,
       craftingRandomSource,
+      normalizedData?.craftingMechanics,
     );
     candidateEngine.loadItem(item, pending);
   } catch (error) {

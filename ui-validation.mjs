@@ -2,6 +2,7 @@ import fs from 'node:fs';
 
 const html = fs.readFileSync(new URL('./index.html', import.meta.url), 'utf8');
 const baseCss = fs.readFileSync(new URL('./style.css', import.meta.url), 'utf8');
+const desecrateCss = fs.readFileSync(new URL('./desecrate.css', import.meta.url), 'utf8');
 const css = fs.readFileSync(new URL('./overhaul.css', import.meta.url), 'utf8');
 const headerCss = fs.readFileSync(new URL('./header-fix.css', import.meta.url), 'utf8');
 const app = fs.readFileSync(new URL('./app.js', import.meta.url), 'utf8');
@@ -146,15 +147,15 @@ check('crafting inventory classifies every retained source item exactly once',
 const visibleCraftDefinitions = craftRegistry.filter(definition => definition.visible === true);
 const craftIds = visibleCraftDefinitions.map(definition => definition.craftId);
 check('authoritative registry audits 531 definitions and exposes all non-deprecated known items',
-  currencyIndex.counts.runtimeDefinitions === 51 &&
-  Object.keys(currencyIndex.runtimeRegistry).length === 51 &&
+  currencyIndex.counts.runtimeDefinitions === 419 &&
+  Object.keys(currencyIndex.runtimeRegistry).length === 419 &&
   craftRegistry.length === 531 && visibleCraftDefinitions.length === 522 &&
   craftIds.length === new Set(craftIds).size &&
   craftIds.every(id => currencyIndex.runtimeRegistry[id] ||
     craftRegistry.find(definition => definition.craftId === id)?.sourceItemId != null));
-check('startup browser registry contains only the 46 available definitions',
+check('startup browser registry contains all 415 available definitions',
   currencyBrowserSource.startsWith(currencyBrowserPrefix) &&
-  currencyBrowserIndex.craftRegistry.length === 46 &&
+  currencyBrowserIndex.craftRegistry.length === 415 &&
   currencyBrowserIndex.craftRegistry.every(definition => definition.supported === true));
 check('lazy browser registry contains every retained definition',
   knownBrowserSource.startsWith(knownBrowserPrefix) &&
@@ -174,6 +175,22 @@ check('existing Ritual, Abyss, and Corruption controls retain their registry cat
   craftRegistry.find(definition => definition.craftId === 'preserved-cranium')?.tab === 'abyss' &&
   craftRegistry.find(definition => definition.craftId === 'essence-abyss')?.tab === 'abyss' &&
   craftRegistry.find(definition => definition.craftId === 'vaal')?.tab === 'corruption');
+const implementedEssences = craftRegistry.filter(definition => definition.category === 'essences');
+check('implemented Essence definitions are available with exact source identities and handlers',
+  implementedEssences.length === 80 &&
+  implementedEssences.every(definition =>
+    definition.supported && definition.visible && definition.handler === 'applyEssence' &&
+    Number(definition.operationOptions?.essenceItemId) === Number(definition.sourceItemId) &&
+    ['magic_to_rare_add', 'rare_remove_add'].includes(definition.operationOptions?.transition)) &&
+  implementedEssences.filter(definition => definition.confidence === 'verified').length === 57 &&
+  implementedEssences.filter(definition => definition.confidence === 'inferred').length === 23);
+const implementedSocketing = craftRegistry.filter(definition => definition.category === 'socketing' && definition.supported);
+check('implemented socket definitions are visibly inferred and retain exact dispatch identities',
+  implementedSocketing.length === 288 &&
+  implementedSocketing.every(definition => definition.confidence === 'inferred') &&
+  implementedSocketing.filter(definition => definition.handler === 'applyArtificerOrb').length === 1 &&
+  implementedSocketing.filter(definition => definition.handler === 'applySocketable').length === 287 &&
+  /definition\.confidence === 'inferred'[\s\S]*?\? 'Inferred'/.test(app));
 check('unsupported visible definitions carry a specific blocker',
   visibleCraftDefinitions.filter(definition => !definition.supported).length > 0 &&
   visibleCraftDefinitions.filter(definition => !definition.supported).every(definition => {
@@ -195,6 +212,51 @@ check('encounter resources are retained for parity but are not workbench control
 
 check('Well of Souls starts hidden', /<div id="well-modal" class="well-modal" hidden>/.test(html));
 check('hidden state wins over panel rules', /\[hidden\]\s*\{\s*display:\s*none\s*!important;\s*\}/.test(css));
+const openWellStart = app.indexOf('function openWell()');
+const renderWellStart = app.indexOf('\nfunction renderWell()', openWellStart);
+const openWellSource = openWellStart >= 0 && renderWellStart > openWellStart
+  ? app.slice(openWellStart, renderWellStart)
+  : '';
+const closeWellStart = app.indexOf('function closeWell()');
+const clearDesecrationStart = app.indexOf('\nfunction clearDesecration()', closeWellStart);
+const closeWellSource = closeWellStart >= 0 && clearDesecrationStart > closeWellStart
+  ? app.slice(closeWellStart, clearDesecrationStart)
+  : '';
+const clearDesecrationEnd = app.indexOf('\nfunction showRevealPanel()', clearDesecrationStart);
+const clearDesecrationSource = clearDesecrationStart >= 0 && clearDesecrationEnd > clearDesecrationStart
+  ? app.slice(clearDesecrationStart, clearDesecrationEnd)
+  : '';
+const wellModalRuleStart = desecrateCss.indexOf('.well-modal {');
+const wellModalRuleEnd = desecrateCss.indexOf('\n}', wellModalRuleStart);
+const wellModalRule = wellModalRuleStart >= 0
+  ? desecrateCss.slice(wellModalRuleStart, wellModalRuleEnd >= 0 ? wellModalRuleEnd : desecrateCss.length)
+  : '';
+const wellRevealStart = desecrateCss.indexOf('@keyframes wellReveal');
+const wellOptionStart = desecrateCss.indexOf('@keyframes wellOptionIn', wellRevealStart);
+const wellRevealKeyframes = wellRevealStart >= 0 && wellOptionStart > wellRevealStart
+  ? desecrateCss.slice(wellRevealStart, wellOptionStart)
+  : '';
+check('opening the Well does not force synchronous layout',
+  /wellModal\.hidden\s*=\s*false/.test(openWellSource) &&
+  /wellModal\.classList\.add\(['"]well-revealing['"]\)/.test(openWellSource) &&
+  !/offsetWidth|offsetHeight|getBoundingClientRect|getComputedStyle/.test(openWellSource));
+check('opening and closing the Well pauses and resumes background animation state',
+  /document\.body\.classList\.add\(['"]well-open['"]\)/.test(openWellSource) &&
+  /document\.body\.classList\.remove\(['"]well-open['"]\)/.test(closeWellSource) &&
+  /body\.well-open[\s\S]*?animation-play-state:\s*paused/.test(desecrateCss));
+check('Well overlay and reveal animation avoid paint-heavy filters',
+  wellModalRule.length > 0 && wellRevealKeyframes.length > 0 &&
+  !/(?:backdrop-filter|filter)\s*:/.test(wellModalRule) &&
+  !/filter\s*:/.test(wellRevealKeyframes));
+check('Well open only renders its choice list, not the item or crafting inventory',
+  (openWellSource.match(/\brenderWell\(\)/g) || []).length === 1 &&
+  !/renderItem|renderCraft|renderCurrency|renderInventory/.test(openWellSource));
+check('clearing Desecration removes stale Well content and controls',
+  /wellOptions\.replaceChildren\(\)/.test(clearDesecrationSource) &&
+  /wellSub\.textContent\s*=\s*['"]['"]/.test(clearDesecrationSource) &&
+  /wellReroll\.hidden\s*=\s*true/.test(clearDesecrationSource));
+check('Well and unrevealed animations respect reduced motion',
+  /@media \(prefers-reduced-motion:\s*reduce\)[\s\S]*?\.well-modal[\s\S]*?\.mod-line\.unrevealed-mod[\s\S]*?animation:\s*none/.test(desecrateCss));
 const readyKeyframeStart = css.indexOf('@keyframes workbenchReadyBreath');
 const readyKeyframeEnd = css.indexOf('@media (prefers-reduced-motion: reduce)', readyKeyframeStart);
 const readyKeyframeCss = css.slice(readyKeyframeStart, readyKeyframeEnd);
@@ -321,6 +383,15 @@ check('central operation pipeline prevalidates before snapshot and mutation disp
 check('central operation pipeline records history and consumes Omens only after success',
   /result\.success[\s\S]*?pushUndo\(/.test(executeCraftSource) &&
   /result\.success[\s\S]*?consumeCraftOmen\(/.test(executeCraftSource));
+check('implemented Essence and socket dispatch forwards each definition exact normalized item ID',
+  /case 'applyEssence': return eng\[definition\.handler\]\(definition\.operationOptions\?\.essenceItemId\)/.test(app) &&
+  /case 'applyArtificerOrb': return eng\[definition\.handler\]\(\)/.test(app) &&
+  /case 'applySocketable': return eng\[definition\.handler\]\(definition\.operationOptions\?\.socketableItemId\)/.test(app) &&
+  /engine\.recordCurrencyUse\(definition\.craftId\)/.test(executeCraftSource));
+check('ordinary, Greater, and Perfect Essence history keys remain separate in the UI registry',
+  ['essence-99', 'essence-111', 'essence-125'].every(craftId =>
+    implementedEssences.some(definition => definition.craftId === craftId)) &&
+  new Set(['essence-99', 'essence-111', 'essence-125']).size === 3);
 check('browser and engine crafting RNG can share an injected deterministic source',
   /window\.CraftForge\.setCraftingRandomSource\s*=/.test(app) &&
   /craftingRandomSource\s*=\s*source[\s\S]*?engine\.setRandomSource\(source\)/.test(app) &&
@@ -335,12 +406,12 @@ check('Essence of the Abyss uses the Hinekora foresight commit path',
   /const FORESEEABLE = new Set\(VISIBLE_CRAFT_DEFINITIONS[\s\S]*?definition\.actionType === 'direct'/.test(app) &&
   /engine\.getItem\(\)\.hinekoraLocked && FORESEEABLE\.has\(currency\)[\s\S]*?commitForesight\(currency\)/.test(executeCraftSource));
 check('foresight commit preserves undo and consumes Hinekora lock',
-  /const before = snapshotState\(engine\.getItem\(\)\);[\s\S]*?engine\.loadItem\(seal\.afterItem\);[\s\S]*?engine\.recordCurrencyUse\(craftIdForAction\(currency\)\);[\s\S]*?engine\.clearHinekoraLock\(\);[\s\S]*?pushUndo\(before\)/.test(commitForesightSource));
+  /const before = snapshotState\(engine\.getItem\(\)\);[\s\S]*?engine\.loadItem\(seal\.afterItem, seal\.afterPending\);[\s\S]*?engine\.recordCurrencyUse\(craftIdForAction\(currency\)\);[\s\S]*?engine\.clearHinekoraLock\(\);[\s\S]*?pushUndo\(before\)/.test(commitForesightSource));
 check('foresight rollback preserves pending Desecration state',
   /function computeForesight\(currency\)[\s\S]*?const snapshotPending = engine\.getPendingDesecration\(\)[\s\S]*?engine\.loadItem\(snapshot, snapshotPending\)/.test(app) &&
   /function computeDesecrationForesight\(bone\)[\s\S]*?const snapshotPending = engine\.getPendingDesecration\(\)[\s\S]*?engine\.loadItem\(snapshot, snapshotPending\)/.test(app));
-check('Omen of Light requires a revealed Desecrated modifier and is consumed exactly once',
-  /omen === 'omen_of_light'[\s\S]*?revealed Desecrated modifier/.test(app) &&
+check('Omen of Light accepts any eligible Desecrated modifier and is consumed exactly once',
+  /omen === 'omen_of_light'[\s\S]*?allItemMods\(item\)\.some\(mod => mod\.desecrated && !mod\.mark && !mod\.fractured\)[\s\S]*?eligible Desecrated modifier/.test(app) &&
   /currency === 'annulment' && omenOfLightActive[\s\S]*?engine\.recordCurrencyUse\(craftIdForOmen\('omen_of_light'\)\)/.test(app) &&
   /engine\.clearHinekoraLock\(\)[\s\S]*?currency === 'annulment' && omenOfLightActive[\s\S]*?engine\.recordCurrencyUse\(craftIdForOmen\('omen_of_light'\)\)/.test(app));
 const inventoryEventsMatch = app.match(/function ((?:setup|bind)Craft(?:ing)?InventoryEvents)\s*\(/);
@@ -428,7 +499,7 @@ const loadFromStashStart = app.indexOf('function loadFromStash(index)');
 const loadFromStashEnd = app.indexOf('\nfunction removeFromStash', loadFromStashStart);
 const loadFromStashSource = app.slice(loadFromStashStart, loadFromStashEnd);
 check('stash reload rebuilds the normalized modifier overlay for the saved simulator pool',
-  /new CraftingEngine\(\s*modData,\s*savedPoolId,\s*desecData,\s*buildSourceModifierOverlay\(savedPoolId, savedConcreteBase\),\s*null,\s*savedConcreteBase,\s*craftingRandomSource,?\s*\)/.test(loadFromStashSource));
+  /new CraftingEngine\(\s*modData,\s*savedPoolId,\s*desecData,\s*buildSourceModifierOverlay\(savedPoolId, savedConcreteBase\),\s*null,\s*savedConcreteBase,\s*craftingRandomSource,\s*normalizedData\?\.craftingMechanics,?\s*\)/.test(loadFromStashSource));
 check('player-facing affix labels consistently prefer normalized display tiers',
   /const displayTier = mod\.displayTier != null \? mod\.displayTier : mod\.tier;/.test(app) &&
   /const affixLabel = [^;]+displayTier/.test(app) &&
@@ -704,7 +775,7 @@ check('Absent Amulet art is installed at its numeric base ID path',
   fs.existsSync(new URL('./assets/item-bases/2563.png', import.meta.url)));
 check('runtime selector, socket stylesheet, and performance data are versioned in the offline shell',
   /header-fix\.css\?v=20/.test(select) &&
-  /CACHE_NAME = 'poe2-craft-registry-v6'/.test(serviceWorker) &&
+  /CACHE_NAME = 'poe2-craft-registry-v8'/.test(serviceWorker) &&
   serviceWorker.includes("'./header-fix.css?v=20'") &&
   serviceWorker.includes("'./data/crafting/known-items.data.js'"));
 check('Absent Amulet art is available in the versioned offline application shell',

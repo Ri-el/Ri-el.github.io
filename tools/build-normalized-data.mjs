@@ -96,6 +96,7 @@ export function buildRuntimeData(
   const baseItems = readJson(path.join(directory, SOURCES.baseItems));
   const modifiers = readJson(path.join(directory, SOURCES.modifiers));
   const craftingItems = readJson(path.join(directory, SOURCES.craftingItems));
+  const essences = readJson(path.join(directory, SOURCES.essences));
   const manifest = readJson(path.join(directory, SOURCES.manifest));
   const modBases = loadResolvedModBases(baseDirectory, sharedDirectory);
   const modifiersById = new Map(modifiers.modifiers.map(modifier => [modifier.id, modifier]));
@@ -171,6 +172,57 @@ export function buildRuntimeData(
     for (const [classId] of modifier.spawnWeights || []) desecratedPools.add(classId);
   }
 
+  // Mechanics are projected separately from the audit payload so the classic
+  // file:// runtime gets stable IDs and exact source ranges without parsing the
+  // complete normalized modifier/crafting exports. Essence types 0-4 are the
+  // retained PoE2 Essence families; type 5 is the separately audited Alloy
+  // family and remains outside this implementation slice.
+  const runtimeEssences = (essences.essences || []).filter(essence => Number(essence.type) <= 4);
+  const essenceModifierIds = new Set(runtimeEssences
+    .flatMap(essence => essence.guaranteedModifiersByItemClass || [])
+    .flatMap(mapping => mapping.modifierIds || []));
+  const essenceModifiers = Object.fromEntries([...essenceModifierIds]
+    .sort((left, right) => left - right)
+    .map(id => {
+      const modifier = modifiersById.get(id);
+      if (!modifier) throw new Error(`Essence runtime projection references missing modifier ${id}.`);
+      return [String(id), pickFields(modifier, [
+        'id', 'key', 'affix', 'generationType', 'modifierGroupId', 'modifierGroup',
+        'tier', 'requiredItemLevel', 'spawnWeight', 'spawnWeights', 'modifierTags',
+        'requiredTags', 'forbiddenTags', 'weightConditions', 'stats',
+      ])];
+    }));
+  const essenceTypeNames = (essences.types || []).map(type => type.id);
+  const essencesByItemId = Object.fromEntries(runtimeEssences.map(essence => [
+    String(essence.itemId),
+    {
+      id: essence.id,
+      itemId: essence.itemId,
+      displayName: essence.displayName,
+      type: essence.type,
+      typeName: essenceTypeNames[essence.type] || `Type ${essence.type}`,
+      requiredRarity: Number(essence.type) <= 2 ? 'magic' : 'rare',
+      transition: Number(essence.type) <= 2 ? 'magic_to_rare_add' : 'rare_remove_add',
+      guaranteedModifiersByItemClass: essence.guaranteedModifiersByItemClass || [],
+    },
+  ]));
+
+  const socketableTypeNames = (craftingItems.socketableTypes || []).map(type => type.id);
+  const socketablesByItemId = Object.fromEntries((craftingItems.socketables || []).map(socketable => [
+    String(socketable.itemId),
+    {
+      itemId: socketable.itemId,
+      displayName: socketable.displayName,
+      classifications: socketable.classifications || [],
+      type: socketable.type,
+      typeName: socketableTypeNames[socketable.type] || `Type ${socketable.type}`,
+      limit: socketable.limit,
+      bound: !!socketable.bound,
+      allowsCorrupted: !!socketable.corrupt,
+      effects: socketable.effects || { martial: null, armour: null, caster: null, all: null, classes: {} },
+    },
+  ]));
+
   return {
     schemaVersion: 1,
     targetGameVersion: manifest.targetGameVersion,
@@ -196,6 +248,22 @@ export function buildRuntimeData(
     sourceModifiers,
     overlayByPool,
     craftingHandlers: [...craftingHandlers].sort(),
+    craftingMechanics: {
+      schemaVersion: 1,
+      targetGameVersion: manifest.targetGameVersion,
+      socketCapacity: {
+        sourceField: 'baseItems.bases[].socketCount',
+        interpretation: 'inferred_maximum',
+        defaultSockets: 0,
+        confidence: 'inferred',
+      },
+      essenceTypes: essenceTypeNames,
+      essencesByItemId,
+      essenceModifiersById: essenceModifiers,
+      socketableTypes: socketableTypeNames,
+      socketableLimits: craftingItems.socketableLimits || [],
+      socketablesByItemId,
+    },
   };
 }
 

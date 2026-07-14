@@ -28,6 +28,9 @@ const desecratedData = JSON.parse(readFileSync(path.join(HERE, 'data', 'desecrat
 const normalizedBaseItems = JSON.parse(readFileSync(path.join(HERE, 'data', 'normalized', 'base-items.json'), 'utf8'));
 const normalizedModifiers = JSON.parse(readFileSync(path.join(HERE, 'data', 'normalized', 'modifiers.json'), 'utf8'));
 const normalizedModifiersById = new Map(normalizedModifiers.modifiers.map(modifier => [modifier.id, modifier]));
+const runtimeDataContext = { window: {} };
+vm.runInNewContext(readFileSync(path.join(HERE, 'data', 'runtime.data.js'), 'utf8'), runtimeDataContext);
+const runtimeMechanics = runtimeDataContext.window.COE_RUNTIME_DATA.craftingMechanics;
 const modifierOverlayAudit = buildModifierOverlayAudit(bases, normalizedBaseItems, normalizedModifiers);
 
 function sourceModifierOverlay(poolId) {
@@ -179,6 +182,14 @@ function normalizedConcreteBase(baseItemId, simulatorPoolId) {
   };
 }
 
+function mechanicsConcreteBase(baseItemId, simulatorPoolId) {
+  const base = normalizedConcreteBase(baseItemId, simulatorPoolId);
+  base.defaultSockets = 0;
+  base.maximumSockets = base.sourceSocketCount;
+  base.socketCapacityStatus = 'inferred_source_cap';
+  return base;
+}
+
 function desecrationTransactionFixture() {
   const baseType = 'desecration_transaction_test';
   const data = { bases: { [baseType]: {
@@ -199,6 +210,28 @@ function desecrationTransactionFixture() {
     suffixes: ['DS0', 'DS1', 'DS2'].map(makeDesecrated),
   } } };
   return { baseType, data, desecrated };
+}
+
+function normalizedMechanicsEngine(baseItemId, simulatorPoolId, seed = 0x504054) {
+  return new Engine(
+    modData,
+    simulatorPoolId,
+    null,
+    sourceModifierOverlay(simulatorPoolId),
+    null,
+    mechanicsConcreteBase(baseItemId, simulatorPoolId),
+    typeof seed === 'function' ? seed : mulberry32(seed),
+    runtimeMechanics,
+  );
+}
+
+function loadExplicitAffixes(engine, rarity, prefixes = [], suffixes = []) {
+  const item = engine.getItem();
+  item.rarity = rarity;
+  item.prefixes = structuredClone(prefixes);
+  item.suffixes = structuredClone(suffixes);
+  engine.loadItem(item);
+  return engine;
 }
 
 const tests = [];
@@ -465,7 +498,7 @@ test('explicit socket state is deterministic, typed, and atomic on malformed rec
   occupiedWithoutCap.socketState = {
     slots: [{ index: 0, state: 'occupied', insertedItemId: 625, insertedItemType: 'Rune' }],
   };
-  assert.throws(() => unverified.loadItem(occupiedWithoutCap), /verified maximum socket count/i);
+  assert.throws(() => unverified.loadItem(occupiedWithoutCap), /known maximum socket count/i);
 });
 
 test('schema migration rejects incompatible state without mutating the live item', () => {
@@ -1068,6 +1101,140 @@ test('Desecration rerolls are enforced and decremented by the engine', () => {
   assert.equal(noEchoes.rerollDesecration().success, false);
 });
 
+test('ordinary Annulment gives a Desecrated modifier exactly one removable slot in six or five', () => {
+  const data = { bases: { annul_desecrated_test: syntheticBase(6, 6) } };
+  const sixPrefixes = [record('P0', 1), record('P1', 1), record('P2', 1)];
+  const sixSuffixes = [
+    record('S0', 1),
+    record('S1', 1),
+    record('S2', 1, { desecrated: true }),
+  ];
+  let removedFromSix = 0;
+  for (let bin = 0; bin < 6; bin++) {
+    const engine = new Engine(data, 'annul_desecrated_test', null, null, null, null, () => (bin + 0.5) / 6);
+    engine.loadItem(rareItem('annul_desecrated_test', sixPrefixes, sixSuffixes));
+    const result = engine.applyAnnulment();
+    assert(result.success);
+    if (result.removedMods[0].desecrated) removedFromSix++;
+  }
+  assert.equal(removedFromSix, 1, 'one Desecrated affix must occupy exactly one of six uniform selection bins');
+
+  const fivePrefixes = [
+    record('P0', 1, { fractured: true }),
+    record('P1', 1),
+    record('P2', 1),
+  ];
+  let removedFromFive = 0;
+  for (let bin = 0; bin < 5; bin++) {
+    const engine = new Engine(data, 'annul_desecrated_test', null, null, null, null, () => (bin + 0.5) / 5);
+    engine.loadItem(rareItem('annul_desecrated_test', fivePrefixes, sixSuffixes));
+    const result = engine.applyAnnulment();
+    assert(result.success);
+    assert.notEqual(result.removedMods[0].modGroup, 'P0', 'fractured modifiers are not removable');
+    if (result.removedMods[0].desecrated) removedFromFive++;
+  }
+  assert.equal(removedFromFive, 1, 'one Desecrated affix must occupy exactly one of five removable selection bins');
+});
+
+test('Omen of Light selects an eligible Desecrated modifier and excludes fractured protection', () => {
+  const data = { bases: { omen_light_test: syntheticBase() } };
+  const engine = new Engine(data, 'omen_light_test', null, null, null, null, () => 0);
+  engine.loadItem(rareItem('omen_light_test', [
+    record('FracturedDesecrated', 1, { desecrated: true, fractured: true }),
+    record('Ordinary', 1),
+  ], [record('EligibleDesecrated', 1, { desecrated: true })]));
+  const result = engine.applyAnnulment({ desecratedOnly: true });
+  assert(result.success);
+  assert.equal(result.removedMods[0].modGroup, 'EligibleDesecrated');
+  assert(engine.getItem().prefixes.some(mod => mod.modGroup === 'FracturedDesecrated' && mod.fractured));
+});
+
+test('ordinary Chaos can remove revealed and unrevealed Desecrated modifiers', () => {
+  const data = { bases: { chaos_desecrated_test: syntheticBase(6, 6) } };
+  const revealed = new Engine(data, 'chaos_desecrated_test');
+  revealed.loadItem(rareItem('chaos_desecrated_test', [
+    record('P0', 1),
+    record('P1', 1),
+    record('P2', 1, { desecrated: true }),
+  ], [record('S0', 1), record('S1', 1), record('S2', 1)]));
+  const revealedRolls = [0.4, 0, 0, 0];
+  revealed.setRandomSource(() => revealedRolls.shift() ?? 0);
+  const revealedResult = revealed.applyChaos();
+  assert(revealedResult.success);
+  assert.equal(revealedResult.removedMods[0].modGroup, 'P2');
+  assert.equal(revealedResult.removedMods[0].desecrated, true);
+
+  const fixture = desecrationTransactionFixture();
+  const pendingEngine = new Engine(fixture.data, fixture.baseType, fixture.desecrated);
+  pendingEngine.loadItem(rareItem(fixture.baseType, [record('P0', 1)], [record('S0', 1)]));
+  pendingEngine.setRandomSource(() => 0);
+  const started = pendingEngine.startDesecration({
+    bone: 'preserved_cranium',
+    omen: 'sinistral_necromancy',
+  });
+  assert(started.success);
+  const beforeChaosItem = pendingEngine.getItem();
+  const beforeChaosPending = pendingEngine.getPendingDesecration();
+  assert(beforeChaosPending?.options.length > 0);
+  assert(beforeChaosItem.prefixes.some(mod => mod.unrevealed && mod.desecrated));
+
+  const placeholderRolls = [0.5, 0, 0, 0];
+  pendingEngine.setRandomSource(() => placeholderRolls.shift() ?? 0);
+  const placeholderResult = pendingEngine.applyChaos();
+  assert(placeholderResult.success);
+  assert.equal(placeholderResult.removedMods[0].modGroup, '__desecrated_pending__');
+  assert.equal(placeholderResult.clearedPendingDesecration, true);
+  assert.equal(pendingEngine.getPendingDesecration(), null);
+  assert(!pendingEngine.getItem().prefixes.concat(pendingEngine.getItem().suffixes)
+    .some(mod => mod.unrevealed && mod.desecrated));
+
+  const afterChaosItem = pendingEngine.getItem();
+  pendingEngine.loadItem(beforeChaosItem, beforeChaosPending);
+  assert.deepEqual(pendingEngine.getItem(), beforeChaosItem, 'undo restores the exact placeholder');
+  assert.deepEqual(pendingEngine.getPendingDesecration(), beforeChaosPending, 'undo restores the exact Well choices');
+  pendingEngine.loadItem(afterChaosItem, null);
+  assert.deepEqual(pendingEngine.getItem(), afterChaosItem, 'redo restores the exact post-Chaos item');
+  assert.equal(pendingEngine.getPendingDesecration(), null, 'redo removes stale Well choices');
+
+  const pendingStash = new Engine(fixture.data, fixture.baseType, fixture.desecrated);
+  pendingStash.loadItem(beforeChaosItem, beforeChaosPending);
+  assert.deepEqual(pendingStash.getPendingDesecration(), beforeChaosPending);
+  const resolved = pendingStash.chooseDesecratedMod(0);
+  assert(resolved.success);
+  const resolvedItem = pendingStash.getItem();
+  assert.equal(pendingStash.getPendingDesecration(), null);
+  assert(!resolvedItem.prefixes.concat(resolvedItem.suffixes).some(mod => mod.unrevealed));
+  const resolvedStash = new Engine(fixture.data, fixture.baseType, fixture.desecrated);
+  resolvedStash.loadItem(resolvedItem, null);
+  assert.deepEqual(resolvedStash.getItem(), resolvedItem);
+  assert.equal(resolvedStash.getPendingDesecration(), null);
+});
+
+test('failed Chaos replacement restores an unrevealed placeholder and its Well choices atomically', () => {
+  const baseType = 'desecration_atomic_rollback';
+  const data = { bases: { [baseType]: {
+    name: 'Desecration Atomic Rollback',
+    limits: { magic: { prefixes: 1, suffixes: 1 }, rare: { prefixes: 2, suffixes: 2 } },
+    prefixes: [],
+    suffixes: [],
+  } } };
+  const desecrated = { bases: { [baseType]: {
+    prefixes: [{ modGroup: 'DesecratedOnly', weight: 100, modLine: '+{0} test', min: 1, max: 1 }],
+    suffixes: [],
+  } } };
+  const engine = new Engine(data, baseType, desecrated, null, null, null, () => 0);
+  engine.loadItem(rareItem(baseType, [record('External', 1)], []));
+  assert(engine.startDesecration({ bone: 'preserved_cranium', omen: 'sinistral_necromancy' }).success);
+  const beforeItem = engine.getItem();
+  const beforePending = engine.getPendingDesecration();
+  engine.setRandomSource(() => 0.75);
+  const result = engine.applyChaos();
+  assert.equal(result.success, false);
+  assert.match(result.error, /no eligible replacement modifier/i);
+  assert.deepEqual(engine.getItem(), beforeItem);
+  assert.deepEqual(engine.getPendingDesecration(), beforePending);
+});
+
 test('weights produce the expected 1:3 selection ratio', () => {
   const data = { bases: { weight_test: {
     name: 'Weight Test',
@@ -1613,6 +1780,130 @@ test('Essence of the Abyss rejects Jewel, Flask, and Charm targets when class me
     assert.match(result.error, /not applicable/i);
     assert.deepEqual(engine.getItem(), before);
   }
+});
+
+test('validation:normalized-essence-transitions', () => {
+  const ordinary = loadExplicitAffixes(normalizedMechanicsEngine(2546, 'amulets', 0x99), 'magic');
+  const ordinaryResult = ordinary.applyEssence(99);
+  assert(ordinaryResult.success, ordinaryResult.error);
+  assert.equal(ordinaryResult.essenceItemId, 99);
+  assert.equal(ordinaryResult.previousRarity, 'magic');
+  assert.equal(ordinary.getItem().rarity, 'rare');
+  assert.equal(ordinaryResult.addedMods[0].stableModifierId, 83);
+  assert.equal(ordinaryResult.addedMods[0].modGroup, 'IncreasedLife');
+
+  const greater = loadExplicitAffixes(normalizedMechanicsEngine(2546, 'amulets', 0x111), 'magic');
+  const greaterResult = greater.applyEssence(111);
+  assert(greaterResult.success, greaterResult.error);
+  assert.equal(greaterResult.essenceItemId, 111);
+  assert.equal(greaterResult.addedMods[0].stableModifierId, 84);
+  assert.equal(greaterResult.addedMods[0].modGroup, 'IncreasedLife');
+
+  const perfectAffixes = [record('LegacyPrefix', 1)];
+  const perfectSuffixes = [record('LegacySuffix', 1)];
+  const runPerfect = seed => {
+    const engine = loadExplicitAffixes(
+      normalizedMechanicsEngine(2546, 'amulets', seed),
+      'rare',
+      perfectAffixes,
+      perfectSuffixes,
+    );
+    const result = engine.applyEssence(125);
+    return { result, item: engine.getItem() };
+  };
+  const perfect = runPerfect(0x125);
+  assert(perfect.result.success, perfect.result.error);
+  assert.equal(perfect.result.essenceItemId, 125);
+  assert.equal(perfect.result.removedMods.length, 1);
+  assert.equal(perfect.result.addedMods[0].stableModifierId, 14260);
+  assert.equal(perfect.result.addedMods[0].modGroup, 'AllDefences');
+  assert.deepEqual(runPerfect(0x125), perfect, 'seeded Perfect Essence outcomes must be reproducible');
+
+  const wrongClass = loadExplicitAffixes(
+    normalizedMechanicsEngine(2546, 'amulets', 0x123),
+    'rare',
+    perfectAffixes,
+    perfectSuffixes,
+  );
+  const wrongClassBefore = wrongClass.getItem();
+  const wrongClassResult = wrongClass.applyEssence(123);
+  assert.equal(wrongClassResult.success, false);
+  assert.match(wrongClassResult.error, /not applicable to Amulet/i);
+  assert.deepEqual(wrongClass.getItem(), wrongClassBefore);
+
+  const breach = loadExplicitAffixes(
+    normalizedMechanicsEngine(2546, 'amulets', 0x144),
+    'rare',
+    perfectAffixes,
+    perfectSuffixes,
+  );
+  const breachResult = breach.applyEssenceOfBreach();
+  assert(breachResult.success, breachResult.error);
+  assert.equal(breachResult.essenceItemId, 144);
+  assert.equal(breachResult.addedMods[0].stableModifierId, 4592);
+  assert.equal(breachResult.addedMods[0].modGroup, 'LocalMaximumQuality');
+
+  assert.deepEqual(
+    [ordinaryResult.essenceItemId, greaterResult.essenceItemId, perfect.result.essenceItemId],
+    [99, 111, 125],
+    'ordinary, Greater, and Perfect Essence history identities remain distinct',
+  );
+});
+
+test('validation:socketing-augments', () => {
+  const engine = normalizedMechanicsEngine(2241, 'body_armours_str', 0x50c);
+  assert.equal(engine.getItem().maximumSockets, 2);
+  assert.equal(engine.getItem().socketState.currentSockets, 0);
+
+  const firstSocket = engine.applyArtificerOrb();
+  assert(firstSocket.success, firstSocket.error);
+  assert.equal(engine.getItem().socketState.currentSockets, 1);
+  const rune = engine.applySocketable(624);
+  assert(rune.success, rune.error);
+  assert.equal(rune.occupiedSocket.insertedItemType, 'Rune');
+  assert.equal(rune.occupiedSocket.effect.statId, 'base_fire_damage_resistance_%');
+  assert.equal(rune.occupiedSocket.effect.value, 14);
+
+  const secondSocket = engine.applyArtificerOrb();
+  assert(secondSocket.success, secondSocket.error);
+  const soulCore = engine.applySocketable(740);
+  assert(soulCore.success, soulCore.error);
+  assert.equal(soulCore.occupiedSocket.insertedItemType, 'SoulCore');
+  assert.equal(soulCore.occupiedSocket.effect.statId, 'base_chaos_damage_resistance_%');
+  assert.equal(soulCore.occupiedSocket.effect.value, 11);
+  assert.equal(engine.getItem().runes.length, 1);
+  assert.equal(engine.getItem().soulCores.length, 1);
+
+  const fullItem = engine.getItem();
+  const overCap = engine.applyArtificerOrb();
+  assert.equal(overCap.success, false);
+  assert.match(overCap.error, /maximum \(2\)/i);
+  assert.deepEqual(engine.getItem(), fullItem);
+  const replacement = engine.applySocketable(624);
+  assert.equal(replacement.success, false);
+  assert.match(replacement.error, /empty Rune Socket.*cannot be replaced or removed/i);
+  assert.deepEqual(engine.getItem(), fullItem);
+
+  const restored = normalizedMechanicsEngine(2241, 'body_armours_str', 0x50d);
+  restored.loadItem(fullItem);
+  assert.deepEqual(restored.getItem(), fullItem, 'socket augment state must survive save/load exactly');
+
+  const duplicateLimited = normalizedMechanicsEngine(2241, 'body_armours_str', 0x50e);
+  assert(duplicateLimited.applyArtificerOrb().success);
+  assert(duplicateLimited.applyArtificerOrb().success);
+  assert(duplicateLimited.applySocketable(5081).success);
+  const duplicateBefore = duplicateLimited.getItem();
+  const duplicate = duplicateLimited.applySocketable(5081);
+  assert.equal(duplicate.success, false);
+  assert.match(duplicate.error, /exceeds the 1 .*per-item limit/i);
+  assert.deepEqual(duplicateLimited.getItem(), duplicateBefore);
+
+  const invalidClass = normalizedMechanicsEngine(2546, 'amulets', 0x50f);
+  const invalidBefore = invalidClass.getItem();
+  const invalid = invalidClass.applyArtificerOrb();
+  assert.equal(invalid.success, false);
+  assert.match(invalid.error, /requires a concrete weapon or armour base/i);
+  assert.deepEqual(invalidClass.getItem(), invalidBefore);
 });
 
 test('Greater/Perfect modifier-level options filter tiers', () => {

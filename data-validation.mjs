@@ -21,6 +21,8 @@ const PROVENANCE_PATH = path.join(HERE, 'data', 'source-cache', 'provenance.json
 const COVERAGE_PATH = path.join(HERE, 'reports', 'data-coverage.json');
 const BASE_PARITY_PATH = path.join(HERE, 'reports', 'base-item-parity.json');
 const CRAFTING_PARITY_PATH = path.join(HERE, 'reports', 'crafting-parity.json');
+const IMPLEMENTATION_STATUS_PATH = path.join(HERE, 'reports', 'crafting-implementation-status.json');
+const IMPLEMENTATION_STATUS_MARKDOWN_PATH = path.join(HERE, 'reports', 'crafting-implementation-status.md');
 const CURRENCY_INDEX_PATH = path.join(HERE, 'data', 'crafting', 'currency-index.json');
 const NORMALIZED_FILES = {
   baseItems: 'base-items.json',
@@ -509,6 +511,7 @@ const actual = Object.fromEntries(Object.entries(NORMALIZED_FILES)
 const provenance = readJson(PROVENANCE_PATH);
 const baseParity = readJson(BASE_PARITY_PATH);
 const craftingParity = readJson(CRAFTING_PARITY_PATH);
+const implementationStatus = readJson(IMPLEMENTATION_STATUS_PATH);
 const currencyIndex = readJson(CURRENCY_INDEX_PATH);
 const activeSnapshot = (provenance.snapshots || [])
   .find(snapshot => snapshot.id === provenance.activeSnapshotId);
@@ -759,11 +762,13 @@ check('registry source identities exactly cover the retained crafting inventory'
   }) &&
   runtimeOnlyCraftDefinitions[0].metadataKey == null &&
   runtimeOnlyCraftDefinitions[0].sourceIdentityStatus !== 'resolved');
-check('registry tabs preserve runtime controls and surface quality audit cards',
+check('registry tabs expose every supported mechanics definition and quality audit card',
   craftTabs.length === 10 &&
   registryTabIds.size === craftTabs.length &&
   craftRegistry.every(definition => registryTabIds.has(definition.tab)) &&
-  craftRegistry.filter(definition => definition.supported).length === 46 &&
+  craftRegistry.filter(definition => definition.supported).length ===
+    craftRegistry.filter(definition => definition.implementationStatus === 'implemented').length &&
+  craftRegistry.filter(definition => definition.supported).length === 415 &&
   craftRegistry.filter(definition => definition.supported).every(definition => definition.visible) &&
   visibleCraftDefinitions.filter(definition => definition.category === 'quality').length === 8);
 check('registry implementation classifications are exclusive after Task 07 audit surfacing',
@@ -793,11 +798,11 @@ check('all Omen trigger craft references resolve inside the authoritative regist
     const triggerCraftId = definition.omenInteraction?.triggerCraftId;
     return triggerCraftId == null || registryCraftIds.has(triggerCraftId);
   }));
-check('Task 07 crafting parity is a direct complete projection of the registry',
+check('crafting parity is a direct complete projection of the implementation registry',
   craftingParity.schemaVersion === 2 &&
   craftingParity.targetGameVersion === currencyIndex.targetGameVersion &&
   craftingParity.fullParityClaim === false &&
-  craftingParity.entryDetailStatus === 'authoritative_registry_task07' &&
+  craftingParity.entryDetailStatus === 'authoritative_registry_crafting_implementation' &&
   craftingParity.entries.length === craftRegistry.length &&
   parityByCraftId.size === craftRegistry.length &&
   craftRegistry.every(definition => {
@@ -820,11 +825,14 @@ const task06SocketDefinitions = craftRegistry.filter(definition => definition.ca
 const task06SocketTypeCounts = Object.fromEntries([...new Set(actual.craftingItems.socketables.map(record => record.type))]
   .sort((a, b) => a - b)
   .map(type => [String(type), actual.craftingItems.socketables.filter(record => record.type === type).length]));
-check('Task 06 socket inventory remains explicit and blocked',
+check('socket inventory exposes inferred insertion mechanics and retains deprecated records',
   task06SocketDefinitions.length === 296 &&
-  task06SocketDefinitions.every(definition => !definition.supported) &&
+  task06SocketDefinitions.filter(definition => definition.supported).length === 288 &&
   task06SocketDefinitions.filter(definition => definition.visible).length === 288 &&
-  task06SocketDefinitions.filter(definition => definition.implementationStatus === 'blocked_missing_data').length === 288 &&
+  task06SocketDefinitions.filter(definition => definition.implementationStatus === 'implemented').length === 288 &&
+  task06SocketDefinitions.filter(definition => definition.confidence === 'inferred').length === 288 &&
+  task06SocketDefinitions.filter(definition => definition.supported)
+    .every(definition => ['applyArtificerOrb', 'applySocketable'].includes(definition.handler)) &&
   task06SocketDefinitions.filter(definition => definition.implementationStatus === 'deprecated_for_target_version').length === 8);
 check('Task 06 retained socketable cohorts match normalized source',
   actual.craftingItems.socketables.length === 295 &&
@@ -848,11 +856,13 @@ check('Task 07 Expedition, Delirium, and specialized corruption definitions rema
   task07Definitions.filter(definition => definition.craftId !== 'vaal').every(definition => definition.handler == null && definition.engineAction == null) &&
   task07Definitions.every(definition => definition.visible) &&
   task07Definitions.find(definition => definition.craftId === 'vaal')?.implementationStatus === 'probability_unverified');
-check('Task 07 source identities retain explicit blockers without invented outcomes',
+check('specialized source identities retain blockers while exact socketable effects use generic insertion',
   task07SpecializedEntries.length === task07ExpeditionSourceIds.length + task07SpecializedSourceIds.length + task07ThesisSourceIds.length &&
   task07SpecializedEntries.every(entry => typeof entry.reason === 'string' && entry.reason.length > 0) &&
   task07InfuserDefinitions.length === 4 && task07InfuserDefinitions.every(definition => definition.category === 'quality' && definition.visible && !definition.supported) &&
-  task07ThesisDefinitions.length === 4 && task07ThesisDefinitions.every(definition => definition.category === 'socketing' && definition.visible && !definition.supported) &&
+  task07ThesisDefinitions.length === 4 && task07ThesisDefinitions.every(definition =>
+    definition.category === 'socketing' && definition.visible && definition.supported &&
+    definition.handler === 'applySocketable' && definition.confidence === 'inferred') &&
   currencyIndex.entries.filter(entry => task07ExcludedSourceIds.includes(Number(entry.sourceItemId))).length === task07ExcludedSourceIds.length &&
   actual.craftingItems.methods.every(method => !/extract|sacrifice.*outcome|vaal.*outcome/i.test(String(method.handler || ''))));
 check('Task 03 parity counts derive exactly from source, registry, and visible definitions',
@@ -871,6 +881,51 @@ check('Task 03 parity counts derive exactly from source, registry, and visible d
   stable(craftingParity.counts.visibleByTab) ===
     stable(countCraftDefinitionsBy(visibleCraftDefinitions, 'tab')) &&
   Array.isArray(craftingParity.blockers) && craftingParity.blockers.length > 0);
+
+const implementationByCraftId = new Map((implementationStatus.definitions || [])
+  .map(definition => [definition.craftId, definition]));
+const expectedImplementationStatus = definition => {
+  if (definition.confidence === 'deprecated' ||
+      definition.implementationStatus === 'deprecated_for_target_version') return 'deprecated';
+  if (definition.confidence === 'non_item' ||
+      definition.implementationStatus === 'non_item_currency') return 'non_equipment';
+  if (definition.supported && definition.confidence === 'verified') return 'verified';
+  if (definition.supported && definition.confidence === 'inferred') return 'inferred';
+  if (definition.confidence === 'blocked' || definition.blocker) return 'blocked';
+  return 'catalogue_only';
+};
+check('crafting implementation audit covers every definition with current provenance and exact blockers',
+  implementationStatus.schemaVersion === 1 &&
+  implementationStatus.targetGameVersion === currencyIndex.targetGameVersion &&
+  implementationStatus.generatedFrom?.sha256 === sha256(readFileSync(CURRENCY_INDEX_PATH, 'utf8')) &&
+  implementationByCraftId.size === craftRegistry.length &&
+  craftRegistry.every(definition => {
+    const audit = implementationByCraftId.get(definition.craftId);
+    if (!audit) return false;
+    const expectedStatus = expectedImplementationStatus(definition);
+    return audit.category === definition.category &&
+      audit.displayName === definition.displayName &&
+      audit.sourceItemId === definition.sourceItemId &&
+      audit.implementationStatus === expectedStatus &&
+      audit.confidence === definition.confidence &&
+      stable(audit.evidenceSource) === stable(definition.sourceEvidence) &&
+      stable(audit.supportedItemClasses) === stable(definition.validItemClasses) &&
+      stable(audit.testCoverage) === stable(definition.testFixtureIds) &&
+      audit.blocker === definition.blocker &&
+      (expectedStatus === 'blocked'
+        ? typeof audit.exactUnresolvedQuestion === 'string' && audit.exactUnresolvedQuestion.length > 20
+        : audit.exactUnresolvedQuestion == null);
+  }));
+const implementationMarkdown = existsSync(IMPLEMENTATION_STATUS_MARKDOWN_PATH)
+  ? readFileSync(IMPLEMENTATION_STATUS_MARKDOWN_PATH, 'utf8')
+  : '';
+check('human-readable implementation audit includes baseline, current totals, and all category sections',
+  implementationMarkdown.includes('## Pre-implementation audit') &&
+  implementationMarkdown.includes('## Current audit') &&
+  implementationMarkdown.includes('## Every retained definition') &&
+  ['Currency', 'Quality', 'Socketing / Augments', 'Ritual / Omens', 'Essences', 'Abyss',
+    'Breach / Genesis', 'Delirium / Instilling', 'Runeforging', 'Corruption / Sacrifice']
+    .every(label => implementationMarkdown.includes(`### ${label}`)));
 
 check('base records reference retained classes and implicit modifiers',
   actual.baseItems.bases.every(base =>
@@ -1155,6 +1210,25 @@ check('runtime projection retains source counts and provenance without audit-onl
   runtime.targetGameVersion === actual.manifest.targetGameVersion &&
   runtime.source.sha256 === actual.manifest.source.sha256 &&
   runtime.modifiers == null && runtime.craftingItems == null && runtime.essences == null);
+const runtimeMechanics = runtime.craftingMechanics;
+check('runtime mechanics projection retains exact Essence and socketable records without full audit payloads',
+  runtimeMechanics?.schemaVersion === 1 &&
+  runtimeMechanics.targetGameVersion === actual.manifest.targetGameVersion &&
+  runtimeMechanics.socketCapacity?.sourceField === 'baseItems.bases[].socketCount' &&
+  runtimeMechanics.socketCapacity?.interpretation === 'inferred_maximum' &&
+  runtimeMechanics.socketCapacity?.defaultSockets === 0 &&
+  runtimeMechanics.socketCapacity?.confidence === 'inferred' &&
+  Object.keys(runtimeMechanics.essencesByItemId || {}).length ===
+    actual.essences.essences.filter(essence => Number(essence.type) <= 4).length &&
+  Object.keys(runtimeMechanics.essenceModifiersById || {}).length === 152 &&
+  runtimeMechanics.essencesByItemId?.['99']?.transition === 'magic_to_rare_add' &&
+  runtimeMechanics.essencesByItemId?.['125']?.transition === 'rare_remove_add' &&
+  runtimeMechanics.essenceModifiersById?.['83']?.modifierGroup === 'IncreasedLife' &&
+  Object.keys(runtimeMechanics.socketablesByItemId || {}).length === actual.craftingItems.socketables.length &&
+  stable(runtimeMechanics.socketableTypes) === stable(['Rune', 'SoulCore', 'Idol', 'AbyssalEye', 'CongealedMist']) &&
+  runtimeMechanics.socketablesByItemId?.['624']?.effects?.armour?.statId === 'base_fire_damage_resistance_%' &&
+  runtimeMechanics.socketablesByItemId?.['5081']?.limit === 0 &&
+  runtimeMechanics.socketableLimits?.[0]?.number === 1);
 check('runtime projection preserves every simulator mapping and concrete base identity',
   stable(runtime.baseItems.simulatorBaseMap) === stable(actual.baseItems.simulatorBaseMap) &&
   stable(runtime.baseItems.bases.map(base => base.id)) === stable(actual.baseItems.bases.map(base => base.id)) &&

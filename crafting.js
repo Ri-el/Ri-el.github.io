@@ -207,7 +207,7 @@ class CraftingEngine {
   ]);
 
   // `desecratedData` is the parsed contents of data/desecrated-mods.json (or null).
-  constructor(modData, baseType = 'ruby', desecratedData = null, sourceModifierOverlay = null, qualityRules = null, concreteBase = null, rng = null) {
+  constructor(modData, baseType = 'ruby', desecratedData = null, sourceModifierOverlay = null, qualityRules = null, concreteBase = null, rng = null, mechanicsData = null) {
     this._modData = modData;
     // Keep `jewelType` for backwards-compatibility (stash records, UI), and
     // expose `baseType` as the generic alias.
@@ -217,6 +217,14 @@ class CraftingEngine {
     // deliberately reads Math.random at call time so existing harnesses that
     // temporarily replace it retain identical behavior.
     this._rng = typeof rng === 'function' ? rng : null;
+    const globalMechanics = typeof globalThis !== 'undefined'
+      ? globalThis.COE_RUNTIME_DATA?.craftingMechanics
+      : null;
+    this._mechanicsData = mechanicsData || globalMechanics || {};
+    this._essencesByItemId = this._mechanicsData.essencesByItemId || {};
+    this._essenceModifiersById = this._mechanicsData.essenceModifiersById || {};
+    this._socketablesByItemId = this._mechanicsData.socketablesByItemId || {};
+    this._socketableLimits = this._mechanicsData.socketableLimits || [];
 
     const typeData = modData?.bases?.[baseType] ?? modData?.jewelTypes?.[baseType];
     if (!typeData) throw new Error(`Invalid base type: ${baseType}`);
@@ -335,12 +343,15 @@ class CraftingEngine {
         ? structuredClone(base.baseProperties)
         : {},
       implicits: Array.isArray(base.implicits) ? structuredClone(base.implicits) : [],
-      // The normalized source calls this value `socketCount`, but its exact
-      // gameplay meaning is not verified. Keep it as source metadata instead
-      // of claiming it is either the default or maximum socket count.
+      // The checked-in source calls this value `socketCount`. The implementation
+      // audit found exactly one transition compatible with its complete class
+      // distribution: a concrete-base maximum, with fresh items starting at 0.
+      // Keep the confidence label explicit because the source field itself does
+      // not spell out "maximum".
       sourceSocketCount,
       defaultSockets,
       maximumSockets,
+      socketCapacityStatus: base.socketCapacityStatus || null,
       icon: base.icon || null,
       targetGameVersion: base.targetGameVersion || null,
       sourceVersion: base.sourceVersion || null,
@@ -426,10 +437,14 @@ class CraftingEngine {
     item.baseSocketCount = base.sourceSocketCount;
     item.defaultSockets = base.defaultSockets;
     item.maximumSockets = base.maximumSockets;
+    item.socketCapacityStatus = base.socketCapacityStatus;
     if (item.socketCount == null && base.defaultSockets != null) item.socketCount = base.defaultSockets;
     if (item.socketState && typeof item.socketState === 'object') {
       item.socketState.sourceSocketCount = base.sourceSocketCount;
       item.socketState.maximumSockets = base.maximumSockets;
+      if (base.socketCapacityStatus && item.socketState.status !== 'verified_fixture') {
+        item.socketState.status = base.socketCapacityStatus;
+      }
       item.socketState.currentSockets = Array.isArray(item.socketState.slots) ? item.socketState.slots.length : 0;
       item.socketState.occupiedSockets = Array.isArray(item.socketState.slots)
         ? item.socketState.slots.filter(slot => slot.state === 'occupied').length
@@ -670,6 +685,331 @@ class CraftingEngine {
     });
   }
 
+  _mechanicsRecord(collection, id) {
+    return collection?.[String(id)] || collection?.[id] || null;
+  }
+
+  _essenceCandidatesForItem(rule) {
+    const mapping = (rule?.guaranteedModifiersByItemClass || [])
+      .find(entry => entry.itemClass === this._item.itemClass);
+    if (!mapping) return [];
+    const concreteClassId = Number(this._item.modifierPoolClassId ?? this._item.baseClassId);
+    const candidates = [];
+    for (const modifierId of mapping.modifierIds || []) {
+      const modifier = this._mechanicsRecord(this._essenceModifiersById, modifierId);
+      if (!modifier) continue;
+      const classWeight = Number.isFinite(concreteClassId)
+        ? (modifier.spawnWeights || []).find(([classId]) => Number(classId) === concreteClassId)?.[1]
+        : null;
+      if ((modifier.spawnWeights || []).length && Number.isFinite(concreteClassId) &&
+          !(Number(classWeight) > 0)) continue;
+      const weight = Number(classWeight) > 0
+        ? Number(classWeight)
+        : Number(modifier.spawnWeight) > 0 ? Number(modifier.spawnWeight) : 1;
+      candidates.push({ modifier, weight });
+    }
+    return candidates;
+  }
+
+  _essenceModifierSide(modifier) {
+    const side = String(modifier?.affix || modifier?.generationType || '').toLocaleLowerCase();
+    if (side === 'prefix') return 'prefix';
+    if (side === 'suffix') return 'suffix';
+    return null;
+  }
+
+  _hasEssenceGroupConflict(modifier) {
+    const sourceGroup = modifier?.modifierGroupId;
+    const sourceName = modifier?.modifierGroup;
+    return this._allModEntries().some(({ mod }) =>
+      (sourceGroup != null && mod.sourceModifierGroupId != null &&
+        Number(mod.sourceModifierGroupId) === Number(sourceGroup)) ||
+      (sourceName && mod.modGroup === sourceName)
+    );
+  }
+
+  validateEssence(itemId) {
+    const rule = this._mechanicsRecord(this._essencesByItemId, itemId);
+    if (!rule) return this._fail(`Unknown normalized Essence: ${String(itemId)}.`);
+    const immutable = this._checkCorrupted();
+    if (immutable) return immutable;
+    if (this._item.rarity !== rule.requiredRarity) {
+      return this._fail(`${rule.displayName} requires a ${rule.requiredRarity === 'rare' ? 'Rare' : 'Magic'} item.`);
+    }
+    if (!this.supportsRarity('rare')) {
+      return this._fail(`${this._item.baseName} cannot have Rare modifiers.`);
+    }
+    const candidates = this._essenceCandidatesForItem(rule)
+      .filter(({ modifier }) => {
+        const side = this._essenceModifierSide(modifier);
+        if (!side || this._hasEssenceGroupConflict(modifier)) return false;
+        const limits = this._limits.rare;
+        const current = side === 'prefix' ? this._item.prefixes.length : this._item.suffixes.length;
+        const cap = side === 'prefix' ? limits.prefixes : limits.suffixes;
+        if (rule.transition === 'magic_to_rare_add') return current < cap;
+        if (current < cap) return this._allModEntries().some(entry => !entry.mod.fractured);
+        return this._allModEntries().some(entry => entry.type === side && !entry.mod.fractured);
+      });
+    if (!candidates.length) {
+      const hasClassMapping = (rule.guaranteedModifiersByItemClass || [])
+        .some(entry => entry.itemClass === this._item.itemClass);
+      if (!hasClassMapping) {
+        return this._fail(`${rule.displayName} is not applicable to ${this._item.itemClass || 'this item class'}.`);
+      }
+      if (this._essenceCandidatesForItem(rule).some(({ modifier }) => this._hasEssenceGroupConflict(modifier))) {
+        return this._fail(`${rule.displayName} conflicts with an existing modifier group; replacement of that conflict is not verified.`);
+      }
+      return this._fail(`${rule.displayName} has no eligible forced modifier or removable ${rule.transition === 'rare_remove_add' ? 'affix' : 'slot'} for this concrete base.`);
+    }
+    return { success: true, item: this.getItem(), rule: structuredClone(rule), candidates };
+  }
+
+  _normalizedEssenceRecord(modifier, essenceItemId) {
+    const lines = (modifier.stats || []).map(stat => {
+      const range = Array.isArray(stat.range) ? stat.range : [null, null];
+      const value = this._rollSpec(range[0], range[1], 0);
+      return {
+        modLine: stat.id,
+        min: range[0],
+        max: range[1],
+        value,
+        text: value == null ? String(stat.id) : `${stat.id}: ${value}`,
+        sourceStatId: stat.id,
+      };
+    });
+    return {
+      modGroup: modifier.modifierGroup || `source-modifier-${modifier.id}`,
+      tier: modifier.tier ?? 'E',
+      tierName: modifier.key || `Essence modifier ${modifier.id}`,
+      ilvlReq: modifier.requiredItemLevel ?? 0,
+      lines,
+      displayText: lines.length ? lines.map(line => line.text).join('\n') : (modifier.key || `Modifier ${modifier.id}`),
+      fractured: false,
+      stableModifierId: modifier.id,
+      sourceModifierKey: modifier.key || null,
+      sourceModifierGroupId: modifier.modifierGroupId ?? null,
+      displayTier: modifier.tier ?? 'E',
+      sourceTier: modifier.tier ?? null,
+      modifierTags: (modifier.modifierTags || []).slice(),
+      essence: true,
+      essenceItemId,
+      displaySource: 'normalized_stat_id',
+    };
+  }
+
+  _addEssenceModifier(modifier, essenceItemId) {
+    const side = this._essenceModifierSide(modifier);
+    if (!side) return null;
+    const exactCandidate = [...this._prefixCandidates, ...this._suffixCandidates]
+      .find(candidate => candidate.type === side &&
+        Number(candidate.source?.stableModifierId) === Number(modifier.id));
+    if (exactCandidate) {
+      const added = this._applyMod(
+        side,
+        exactCandidate.group,
+        exactCandidate.tier,
+        0,
+        exactCandidate.source
+      );
+      const target = side === 'prefix' ? this._item.prefixes : this._item.suffixes;
+      const stored = target[target.length - 1];
+      stored.essence = true;
+      stored.essenceItemId = essenceItemId;
+      return { ...stored, type: side };
+    }
+    const record = this._normalizedEssenceRecord(modifier, essenceItemId);
+    (side === 'prefix' ? this._item.prefixes : this._item.suffixes).push(record);
+    return { ...record, type: side };
+  }
+
+  applyEssence(itemId) {
+    const validation = this.validateEssence(itemId);
+    if (!validation.success) return validation;
+    const selected = this._weightedRandomFromPairs(
+      validation.candidates.map(candidate => [candidate.modifier, candidate.weight])
+    );
+    if (!selected) return this._fail(`${validation.rule.displayName} has no weighted forced modifier candidate.`);
+
+    const itemSnapshot = structuredClone(this._item);
+    const pendingSnapshot = this.getPendingDesecration();
+    const previousRarity = this._item.rarity;
+    const removedMods = [];
+    if (validation.rule.transition === 'rare_remove_add') {
+      const side = this._essenceModifierSide(selected);
+      const limits = this._limits.rare;
+      const current = side === 'prefix' ? this._item.prefixes.length : this._item.suffixes.length;
+      const cap = side === 'prefix' ? limits.prefixes : limits.suffixes;
+      const removed = this._removeMod({ side: current >= cap ? side : null });
+      if (!removed) {
+        this._item = itemSnapshot;
+        this._pendingDesecration = pendingSnapshot;
+        return this._fail(`${validation.rule.displayName} has no eligible modifier to replace.`);
+      }
+      removedMods.push(removed);
+    } else {
+      this._item.rarity = 'rare';
+      this._item.generatedName = this._generateRareName();
+      this._item.name = this._item.generatedName;
+    }
+
+    const added = this._addEssenceModifier(selected, Number(itemId));
+    if (!added) {
+      this._item = itemSnapshot;
+      this._pendingDesecration = pendingSnapshot;
+      return this._fail(`${validation.rule.displayName} could not add its forced modifier; the item was not changed.`);
+    }
+    return this._success({
+      action: 'essence',
+      essenceItemId: Number(itemId),
+      essenceType: validation.rule.typeName,
+      addedMods: [added],
+      removedMods,
+      previousRarity,
+      clearedPendingDesecration: !!removedMods.find(mod => mod.unrevealed && mod.desecrated),
+    });
+  }
+
+  validateArtificerOrb() {
+    const immutable = this._checkCorrupted();
+    if (immutable) return immutable;
+    const maximumSockets = Number(this._concreteBase?.maximumSockets);
+    if (!Number.isInteger(maximumSockets) || maximumSockets <= 0) {
+      return this._fail("Artificer's Orb requires a concrete weapon or armour base with a retained socket capacity.");
+    }
+    const state = this._normalizeSocketState(this._item);
+    if (state.currentSockets >= maximumSockets) {
+      return this._fail(`Item is already at its Rune Socket maximum (${maximumSockets}).`);
+    }
+    return { success: true, item: this.getItem(), maximumSockets };
+  }
+
+  _syncSocketCompatibilityState(item = this._item) {
+    const occupied = (item.socketState?.slots || []).filter(slot => slot.state === 'occupied');
+    item.socketedContent = occupied.map(slot => structuredClone(slot.source || {
+      itemId: slot.insertedItemId,
+      typeName: slot.insertedItemType,
+    }));
+    item.runes = occupied.filter(slot => slot.source?.typeName === 'Rune')
+      .map(slot => structuredClone(slot.source));
+    item.soulCores = occupied.filter(slot => slot.source?.typeName === 'SoulCore' || slot.source?.typeName === 'Soul Core')
+      .map(slot => structuredClone(slot.source));
+    item.socketCount = item.socketState?.currentSockets || 0;
+    return item;
+  }
+
+  applyArtificerOrb() {
+    const validation = this.validateArtificerOrb();
+    if (!validation.success) return validation;
+    const slots = structuredClone(this._item.socketState.slots || []);
+    const slot = {
+      index: slots.length,
+      state: 'empty',
+      insertedItemId: null,
+      insertedItemType: null,
+      effect: null,
+      source: { craftId: 'artificers-orb', confidence: 'inferred_source_cap' },
+      replacement: null,
+    };
+    slots.push(slot);
+    this._item.sockets = structuredClone(slots);
+    this._item.socketState.slots = structuredClone(slots);
+    this._item.socketState.status = this._concreteBase?.socketCapacityStatus || 'inferred_source_cap';
+    this._normalizeSocketState(this._item);
+    this._syncSocketCompatibilityState();
+    return this._success({
+      action: 'add-socket',
+      addedSockets: [structuredClone(slot)],
+      maximumSockets: validation.maximumSockets,
+      previousRarity: this._item.rarity,
+    });
+  }
+
+  _socketableEffectForItem(socketable) {
+    const effects = socketable?.effects || {};
+    const classId = String(this._item.baseClassId ?? this._item.modifierPoolClassId ?? '');
+    if (classId && effects.classes?.[classId]) return { family: `class:${classId}`, effect: effects.classes[classId] };
+    if (effects.all) return { family: 'all', effect: effects.all };
+    const tags = new Set(this._item.baseTags || []);
+    if (tags.has('armour') && effects.armour) return { family: 'armour', effect: effects.armour };
+    if (tags.has('weapon') && effects.martial) return { family: 'martial', effect: effects.martial };
+    if (['Wand', 'Staff', 'Sceptre'].includes(this._item.itemClass) && effects.caster) {
+      return { family: 'caster', effect: effects.caster };
+    }
+    return null;
+  }
+
+  validateSocketable(itemId) {
+    const socketable = this._mechanicsRecord(this._socketablesByItemId, itemId);
+    if (!socketable) return this._fail(`Unknown normalized socketable augment: ${String(itemId)}.`);
+    if (this._item.sanctified) return this._fail('Item is sanctified and cannot be modified further.');
+    if (this._item.mirrored || this._item.isMirrored) return this._fail('Item is mirrored and cannot be modified.');
+    if (this._item.corrupted && !socketable.allowsCorrupted) {
+      return this._fail(`${socketable.displayName} cannot be inserted into a corrupted item.`);
+    }
+    const state = this._normalizeSocketState(this._item);
+    const emptySlot = state.slots.find(slot => slot.state === 'empty');
+    if (!emptySlot) {
+      return this._fail(`${socketable.displayName} requires an empty Rune Socket; socket contents cannot be replaced or removed by this operation.`);
+    }
+    const resolvedEffect = this._socketableEffectForItem(socketable);
+    if (!resolvedEffect) {
+      return this._fail(`${socketable.displayName} has no retained effect for ${this._item.itemClass || 'this concrete item class'}.`);
+    }
+    if (socketable.limit != null) {
+      const limit = this._socketableLimits[Number(socketable.limit)];
+      const maximum = Number(limit?.number);
+      const matching = state.slots.filter(slot => slot.state === 'occupied' &&
+        Number(slot.source?.limitCode) === Number(socketable.limit)).length;
+      if (Number.isInteger(maximum) && maximum >= 0 && matching >= maximum) {
+        const family = limit?.text || socketable.typeName || 'this augment family';
+        return this._fail(`${socketable.displayName} exceeds the ${maximum} ${family} per-item limit.`);
+      }
+    }
+    return {
+      success: true,
+      item: this.getItem(),
+      socketable: structuredClone(socketable),
+      emptySlotIndex: emptySlot.index,
+      effectFamily: resolvedEffect.family,
+      effect: structuredClone(resolvedEffect.effect),
+    };
+  }
+
+  applySocketable(itemId) {
+    const validation = this.validateSocketable(itemId);
+    if (!validation.success) return validation;
+    const effect = structuredClone(validation.effect);
+    const range = Array.isArray(effect.range) ? effect.range : [null, null];
+    effect.value = this._rollSpec(range[0], range[1], 0);
+    effect.effectFamily = validation.effectFamily;
+    const slot = this._item.socketState.slots.find(candidate => candidate.index === validation.emptySlotIndex);
+    slot.state = 'occupied';
+    slot.insertedItemId = Number(itemId);
+    slot.insertedItemType = validation.socketable.typeName;
+    slot.effect = effect;
+    slot.source = {
+      itemId: Number(itemId),
+      displayName: validation.socketable.displayName,
+      type: validation.socketable.type,
+      typeName: validation.socketable.typeName,
+      classifications: validation.socketable.classifications || [],
+      limitCode: validation.socketable.limit,
+      bound: !!validation.socketable.bound,
+      allowsCorrupted: !!validation.socketable.allowsCorrupted,
+      confidence: 'inferred',
+    };
+    slot.replacement = null;
+    this._item.sockets = structuredClone(this._item.socketState.slots);
+    this._normalizeSocketState(this._item);
+    this._syncSocketCompatibilityState();
+    return this._success({
+      action: 'socket-augment',
+      socketableItemId: Number(itemId),
+      occupiedSocket: structuredClone(this._item.socketState.slots[validation.emptySlotIndex]),
+      previousRarity: this._item.rarity,
+    });
+  }
+
   _normalizeItemLevelState(item) {
     const raw = item?.ilvl != null ? item.ilvl : item?.itemLevel;
     const parsed = Number(raw);
@@ -730,10 +1070,10 @@ class CraftingEngine {
       throw new Error('Saved socket state has an invalid maximum socket count.');
     }
     if (maximumSockets != null && slots.some(slot => slot.index >= maximumSockets)) {
-      throw new Error('Saved socket state exceeds the verified maximum socket count.');
+      throw new Error('Saved socket state exceeds the concrete-base maximum socket count.');
     }
     if (maximumSockets == null && slots.some(slot => slot.state === 'occupied')) {
-      throw new Error('Occupied socket state requires a verified maximum socket count.');
+      throw new Error('Occupied socket state requires a known maximum socket count.');
     }
     if (slots.some((slot, position) => slot.index !== position)) {
       throw new Error('Saved socket state indices must be contiguous from zero.');
@@ -748,7 +1088,11 @@ class CraftingEngine {
     item.sockets = structuredClone(slots);
     item.socketState = {
       schemaVersion: 1,
-      status: rawState?.status === 'verified_fixture' && maximumSockets != null ? 'verified_fixture' : 'unverified',
+      status: rawState?.status === 'verified_fixture' && maximumSockets != null
+        ? 'verified_fixture'
+        : maximumSockets != null
+          ? (this._concreteBase?.socketCapacityStatus || rawState?.status || 'inferred_source_cap')
+          : 'unverified',
       sourceSocketCount: item.sourceSocketCount ?? null,
       maximumSockets,
       currentSockets: slots.length,
@@ -1211,12 +1555,13 @@ class CraftingEngine {
     // empty after every eligibility filter, restore this snapshot so neither the
     // item nor an armed Omen is consumed by a partial remove-only result.
     const preChaos = structuredClone(this._item);
+    const preChaosPending = this.getPendingDesecration();
     let removed;
     if (omen === 'whittling') {
       // Whittling compares numeric modifier levels, not displayed tiers. Some
       // imported Desecrated records still have no numeric level; guessing would
       // risk removing the wrong modifier, so fail without mutating the item.
-      const removable = this._allModEntries().filter(e => !e.mod.fractured && !e.mod.unrevealed);
+      const removable = this._allModEntries().filter(e => !e.mod.fractured);
       const hasUnknownLevel = removable.some(({ mod }) => {
         const level = Number(mod.ilvlReq != null ? mod.ilvlReq : mod.tier);
         return !Number.isFinite(level);
@@ -1240,9 +1585,13 @@ class CraftingEngine {
     const added = this._addRandomMod('rare', options);
     if (!added) {
       this._item = preChaos;
+      this._pendingDesecration = preChaosPending;
       return this._fail('Chaos Orb has no eligible replacement modifier; the item was not changed.');
     }
-    return this._success({ action: 'reroll', addedMods: [added], removedMods: [removed], previousRarity: 'rare', omen });
+    return this._success({
+      action: 'reroll', addedMods: [added], removedMods: [removed], previousRarity: 'rare', omen,
+      clearedPendingDesecration: !!(removed.unrevealed && removed.desecrated),
+    });
   }
 
   applyAlchemy(options = {}) {
@@ -1315,51 +1664,68 @@ class CraftingEngine {
     if (this._allModEntries().length === 0) return this._fail('Item has no mods to remove.');
     const previousRarity = this._item.rarity;
 
-    // Omen of Light: the next Orb of Annulment removes ONLY a Desecrated mod.
+    // Omen of Light changes selection, not removability. A pending unrevealed
+    // Desecrated placeholder is an ordinary removable explicit modifier; the
+    // Mark of the Abyssal Lord remains a separate crafted Mark identity.
     if (opts.desecratedOnly) {
-      // Exclude the UNREVEALED pending placeholder (it also carries
-      // desecrated:true): Omen of Light must only strip a real, revealed
-      // Desecrated modifier, never the hidden pending one before it is revealed.
       const desEntries = this._allModEntries()
-        .filter(e => !e.mod.fractured && e.mod.desecrated && !e.mod.unrevealed);
+        .filter(e => !e.mod.fractured && e.mod.desecrated && !e.mod.mark);
       if (desEntries.length === 0) {
-        return this._fail('Omen of Light: this item has no Desecrated modifier to remove.');
+        return this._fail('Omen of Light: this item has no eligible Desecrated modifier to remove.');
       }
       const pick = desEntries[this._randomInt(0, desEntries.length - 1)];
       if (pick.type === 'prefix') this._item.prefixes.splice(pick.index, 1);
       else this._item.suffixes.splice(pick.index, 1);
-      return this._success({ action: 'remove', removedMods: [{ ...pick.mod, type: pick.type }], previousRarity });
+      this._clearPendingDesecrationForRemovedMod(pick.mod);
+      return this._success({
+        action: 'remove', removedMods: [{ ...pick.mod, type: pick.type }], previousRarity,
+        clearedPendingDesecration: !!(pick.mod.unrevealed && pick.mod.desecrated),
+      });
     }
 
     // Sinistral / Dextral Annulment omens remove ONLY a prefix / suffix.
     if (opts.omen === 'sinistral_annulment') {
       const removed = this._removeMod({ side: 'prefix' });
       if (!removed) return this._fail('Omen of Sinistral Annulment: no removable prefix to remove.');
-      return this._success({ action: 'remove', removedMods: [removed], previousRarity, omen: opts.omen });
+      return this._success({
+        action: 'remove', removedMods: [removed], previousRarity, omen: opts.omen,
+        clearedPendingDesecration: !!(removed.unrevealed && removed.desecrated),
+      });
     }
     if (opts.omen === 'dextral_annulment') {
       const removed = this._removeMod({ side: 'suffix' });
       if (!removed) return this._fail('Omen of Dextral Annulment: no removable suffix to remove.');
-      return this._success({ action: 'remove', removedMods: [removed], previousRarity, omen: opts.omen });
+      return this._success({
+        action: 'remove', removedMods: [removed], previousRarity, omen: opts.omen,
+        clearedPendingDesecration: !!(removed.unrevealed && removed.desecrated),
+      });
     }
 
     if (opts.omen === 'greater_annulment') {
       const snapshot = structuredClone(this._item);
+      const pendingSnapshot = this.getPendingDesecration();
       const removedMods = [];
       for (let index = 0; index < 2; index++) {
         const removed = this._removeRandomMod();
         if (!removed) {
           this._item = snapshot;
+          this._pendingDesecration = pendingSnapshot;
           return this._fail('Omen of Greater Annulment requires two removable modifiers.');
         }
         removedMods.push(removed);
       }
-      return this._success({ action: 'remove', removedMods, previousRarity, omen: opts.omen });
+      return this._success({
+        action: 'remove', removedMods, previousRarity, omen: opts.omen,
+        clearedPendingDesecration: removedMods.some(mod => mod.unrevealed && mod.desecrated),
+      });
     }
 
     const removed = this._removeRandomMod();
     if (!removed) return this._fail('All modifiers are fractured and cannot be removed.');
-    return this._success({ action: 'remove', removedMods: [removed], previousRarity });
+    return this._success({
+      action: 'remove', removedMods: [removed], previousRarity,
+      clearedPendingDesecration: !!(removed.unrevealed && removed.desecrated),
+    });
   }
 
   // `omen` may be 'sanctification': the Divine Orb instead SANCTIFIES the item,
@@ -1511,14 +1877,16 @@ class CraftingEngine {
       affix: side,
     };
     (side === 'prefix' ? this._item.prefixes : this._item.suffixes).push(mark);
-    return this._success({ action: 'mark', addedMods: [{ ...mark, type: side }], removedMods: [removed], previousRarity: 'rare' });
+    return this._success({
+      action: 'mark', addedMods: [{ ...mark, type: side }], removedMods: [removed], previousRarity: 'rare',
+      clearedPendingDesecration: !!(removed.unrevealed && removed.desecrated),
+    });
   }
 
-  // Essence of the Breach has no effect on Jewels (its guaranteed modifier
-  // category does not exist on jewel bases). Intentionally a no-op here and
-  // disabled in the jewel UI; it will be implemented when other bases land.
+  // Retained as a stable compatibility handler; the generic normalized Essence
+  // path owns its Ring/Amulet prefix identity and atomic replacement.
   applyEssenceOfBreach() {
-    return this._fail('Unsupported — verification required');
+    return this.applyEssence(144);
   }
 
   startDesecration({ bone = 'preserved_cranium', omen = null, omens = null } = {}) {
@@ -2298,15 +2666,20 @@ class CraftingEngine {
     return record;
   }
 
-  // Remove a single (non-fractured) modifier.
+  _clearPendingDesecrationForRemovedMod(modifier) {
+    if (modifier?.unrevealed && modifier?.desecrated && !modifier?.mark) {
+      this._pendingDesecration = null;
+      return true;
+    }
+    return false;
+  }
+
+  // Remove a single (non-fractured) modifier. Desecrated modifiers and their
+  // unrevealed placeholder participate exactly like other explicit modifiers.
   //  - `side`: 'prefix' | 'suffix' | null (any side)
   //  - `mode`: 'random' (default) or 'lowest' (lowest modifier level / ilvlReq)
   _removeMod({ side = null, mode = 'random' } = {}) {
-    // Never strip a pending UNREVEALED desecrated placeholder via Annulment /
-    // Chaos / Essence removals — it must persist until it is revealed (or removed
-    // explicitly by Omen of Light). This keeps the Reveal panel alive when an
-    // unrelated modifier is annulled.
-    let entries = this._allModEntries().filter(e => !e.mod.fractured && !e.mod.unrevealed);
+    let entries = this._allModEntries().filter(e => !e.mod.fractured);
     if (side) entries = entries.filter(e => e.type === side);
     if (entries.length === 0) return null;
 
@@ -2332,6 +2705,7 @@ class CraftingEngine {
 
     if (pick.type === 'prefix') this._item.prefixes.splice(pick.index, 1);
     else this._item.suffixes.splice(pick.index, 1);
+    this._clearPendingDesecrationForRemovedMod(pick.mod);
     return { ...pick.mod, type: pick.type };
   }
 

@@ -534,6 +534,7 @@ function validateGeneratedRegistry(craftRegistry, sourceEntries, craftTabs) {
 export function buildCurrencyIndex() {
   const crafting = readJson('crafting-items.json');
   const essences = readJson('essences.json');
+  const baseItems = readJson('base-items.json');
   const manifestRaw = readFileSync(path.join(NORMALIZED_DIR, 'version-manifest.json'), 'utf8');
   const manifest = JSON.parse(manifestRaw);
   const registryRaw = readFileSync(REGISTRY_SOURCE, 'utf8');
@@ -545,8 +546,14 @@ export function buildCurrencyIndex() {
   const methodByItemId = buildMethodIndex(crafting.methods);
   const expandedDefinitions = expandRegistryDefinitions(
     expansionSource,
-    crafting.items || [],
-    methodByItemId
+    {
+      craftingItems: crafting.items || [],
+      socketables: crafting.socketables || [],
+      socketableLimits: crafting.socketableLimits || [],
+      essences: essences.essences || [],
+      bases: baseItems.bases || [],
+      methodByItemId,
+    }
   );
   const authoredDefinitions = [...registrySource.definitions, ...expandedDefinitions];
   assert(new Set(authoredDefinitions.map(definition => definition.craftId)).size === authoredDefinitions.length,
@@ -674,14 +681,216 @@ const BONE_ITEM_CLASSES = Object.freeze({
   collarbone: ['Amulet', 'Ring', 'Belt'],
 });
 
-function expandRegistryDefinitions(expansion, craftingItems, methodByItemId) {
+function socketableHasEffect(socketable) {
+  const effects = socketable?.effects || {};
+  return [effects.martial, effects.armour, effects.caster, effects.all,
+    ...Object.values(effects.classes || {})].some(Boolean);
+}
+
+function socketableItemClasses(socketable, bases) {
+  const effects = socketable?.effects || {};
+  const classIds = new Set(Object.entries(effects.classes || {})
+    .filter(([, effect]) => !!effect)
+    .map(([classId]) => Number(classId)));
+  const matches = base => {
+    if (!Number.isInteger(Number(base.socketCount)) || Number(base.socketCount) <= 0) return false;
+    if (classIds.has(Number(base.classId))) return true;
+    if (effects.all) return true;
+    const tags = new Set(base.tags || []);
+    if (effects.armour && tags.has('armour')) return true;
+    if (effects.martial && tags.has('weapon')) return true;
+    return !!effects.caster && ['Wand', 'Staff', 'Sceptre'].includes(base.itemClass);
+  };
+  return unique(bases.filter(matches).map(base => base.itemClass)).sort();
+}
+
+function generatedEssenceDefinition(essence, item) {
+  const type = Number(essence.type);
+  const rareReplacement = type >= 3;
+  const confidence = rareReplacement ? 'inferred' : 'verified';
+  const validItemClasses = unique((essence.guaranteedModifiersByItemClass || [])
+    .map(mapping => mapping.itemClass)).sort();
+  return {
+    craftId: `essence-${essence.itemId}`,
+    sourceItemId: essence.itemId,
+    metadataKey: item.metadataKey,
+    displayName: item.displayName,
+    category: 'essences',
+    equipmentRelevance: 'equipment_runtime',
+    displayOrder: 100 + type * 100 + Number(essence.id),
+    iconId: `essence-${essence.itemId}`,
+    iconFallback: fallbackIconText(item.displayName),
+    accentColor: TAB_ACCENTS.essences,
+    cssClasses: ['essence-btn'],
+    description: rareReplacement
+      ? 'Inferred atomic transition: removes one eligible explicit modifier from a Rare item and adds the exact normalized guaranteed modifier for its concrete item class.'
+      : 'Upgrades a Magic item to Rare and adds the exact normalized guaranteed modifier for its concrete item class.',
+    assumption: rareReplacement
+      ? 'When the forced affix side is full, removal is limited to that side so the retained remove-one/add-one transition can complete; conflicting modifier groups fail without mutation.'
+      : null,
+    actionType: 'direct',
+    activation: 'arm',
+    engineAction: `essence:${essence.itemId}`,
+    applicabilityPredicate: 'essenceDisabledReason',
+    disabledReasonHandler: 'essenceDisabledReason',
+    disabledReason: '',
+    handler: 'applyEssence',
+    sourceHandler: 'poe2_essence',
+    triggeringAction: null,
+    omenInteraction: { omenId: null, exclusiveGroup: null, consumeOn: 'successful_operation', triggerCraftId: null },
+    corruptionRestriction: 'blocked_if_corrupted_or_sanctified',
+    validItemClasses,
+    validItemTags: [],
+    qualityRestriction: 'none',
+    socketRestriction: 'none',
+    operationOptions: {
+      essenceItemId: essence.itemId,
+      essenceType: type,
+      requiredRarity: rareReplacement ? 'rare' : 'magic',
+      transition: rareReplacement ? 'rare_remove_add' : 'magic_to_rare_add',
+    },
+    sourceEvidence: [
+      `data/normalized/crafting-items.json#item:${essence.itemId}`,
+      `data/normalized/essences.json#essence:${essence.id}`,
+      'data/normalized/modifiers.json#essence-modifiers',
+      'data/normalized/crafting-items.json#method:34',
+      'data/crafting/registry-expansion.json',
+    ],
+    implementationStatus: 'implemented',
+    verificationStatus: rareReplacement
+      ? 'inferred_atomic_transition_from_normalized_method'
+      : 'verified_normalized_magic_to_rare_transition',
+    confidence,
+    blocker: null,
+    testFixtureIds: [
+      'validation:normalized-essence-transitions',
+      'ui:implemented-essence-registry-dispatch',
+    ],
+    supported: true,
+    visible: true,
+  };
+}
+
+function generatedArtificerDefinition(item, bases) {
+  return {
+    craftId: 'artificers-orb',
+    sourceItemId: item.id,
+    metadataKey: item.metadataKey,
+    displayName: item.displayName,
+    category: 'socketing',
+    equipmentRelevance: 'equipment_runtime',
+    displayOrder: 10,
+    iconId: 'artificers-orb',
+    iconFallback: 'Art',
+    accentColor: TAB_ACCENTS.socketing,
+    cssClasses: ['currency-btn', 'socket-currency-btn'],
+    description: 'Inferred from the retained socket method and per-base socketCount: adds one empty Rune Socket up to the normalized concrete-base cap.',
+    assumption: 'baseItems.bases[].socketCount is the maximum Rune Socket count and a fresh item starts with zero added sockets.',
+    actionType: 'direct',
+    activation: 'arm',
+    engineAction: 'artificer',
+    applicabilityPredicate: 'socketDisabledReason',
+    disabledReasonHandler: 'socketDisabledReason',
+    disabledReason: '',
+    handler: 'applyArtificerOrb',
+    sourceHandler: 'artificer',
+    triggeringAction: null,
+    omenInteraction: { omenId: null, exclusiveGroup: null, consumeOn: 'successful_operation', triggerCraftId: null },
+    corruptionRestriction: 'blocked_if_corrupted_or_sanctified',
+    validItemClasses: unique(bases.filter(base => Number(base.socketCount) > 0).map(base => base.itemClass)).sort(),
+    validItemTags: [],
+    qualityRestriction: 'none',
+    socketRestriction: 'requires_below_inferred_concrete_base_cap',
+    operationOptions: {
+      socketCapacityStatus: 'inferred_source_cap',
+      sourceSocketField: 'socketCount',
+    },
+    sourceEvidence: [
+      'data/normalized/crafting-items.json#item:35',
+      'data/normalized/crafting-items.json#method:29',
+      'data/normalized/base-items.json#bases[].socketCount',
+      'docs/craft-of-exile-data-schema.md',
+      'data/crafting/registry-expansion.json',
+    ],
+    implementationStatus: 'implemented',
+    verificationStatus: 'inferred_single_transition_from_source_cap_pattern',
+    confidence: 'inferred',
+    blocker: null,
+    testFixtureIds: ['validation:socketing-augments', 'ui:implemented-socket-registry-dispatch'],
+    supported: true,
+    visible: true,
+  };
+}
+
+function generatedSocketableDefinition(socketable, item, bases, socketableLimits) {
+  assert(socketableHasEffect(socketable), `Socketable ${socketable.itemId} has no retained effect.`);
+  const limit = socketable.limit == null ? null : socketableLimits[Number(socketable.limit)] || null;
+  const typeNames = ['Rune', 'Soul Core', 'Idol', 'Abyssal Eye', 'Congealed Mist'];
+  const typeName = typeNames[Number(socketable.type)] || `Socketable type ${socketable.type}`;
+  return {
+    craftId: `socketable-${socketable.itemId}`,
+    sourceItemId: socketable.itemId,
+    metadataKey: item.metadataKey,
+    displayName: item.displayName,
+    category: 'socketing',
+    equipmentRelevance: 'equipment_runtime',
+    displayOrder: 100 + Number(socketable.type) * 1000 + Number(socketable.itemId),
+    iconId: `socketable-${socketable.itemId}`,
+    iconFallback: fallbackIconText(item.displayName),
+    accentColor: TAB_ACCENTS.socketing,
+    cssClasses: ['socketable-btn'],
+    description: `Inferred insertion transition: places this ${typeName} in an empty Rune Socket and applies the exact retained class-specific stat record. Existing socket contents are never replaced or removed.`,
+    assumption: 'The retained effect precedence is concrete class, then all-equipment, then armour/martial/caster family; limit codes cap matching augment families.',
+    actionType: 'direct',
+    activation: 'arm',
+    engineAction: `socketable:${socketable.itemId}`,
+    applicabilityPredicate: 'socketDisabledReason',
+    disabledReasonHandler: 'socketDisabledReason',
+    disabledReason: '',
+    handler: 'applySocketable',
+    sourceHandler: 'poe2_socketable',
+    triggeringAction: null,
+    omenInteraction: { omenId: null, exclusiveGroup: null, consumeOn: 'successful_operation', triggerCraftId: null },
+    corruptionRestriction: socketable.corrupt ? 'allowed_if_socketable_source_flag' : 'blocked_if_corrupted',
+    validItemClasses: socketableItemClasses(socketable, bases),
+    validItemTags: [],
+    qualityRestriction: 'none',
+    socketRestriction: 'requires_empty_socket_no_replacement_or_removal',
+    operationOptions: {
+      socketableItemId: socketable.itemId,
+      socketableType: typeName,
+      limitCode: socketable.limit,
+      duplicateLimit: limit?.number ?? null,
+      duplicateLimitText: limit?.text || null,
+      allowsCorrupted: !!socketable.corrupt,
+      bindsItem: !!socketable.bound,
+      socketCapacityStatus: 'inferred_source_cap',
+    },
+    sourceEvidence: [
+      `data/normalized/crafting-items.json#item:${socketable.itemId}`,
+      `data/normalized/crafting-items.json#socketable:${socketable.itemId}`,
+      'data/normalized/crafting-items.json#method:52',
+      'data/crafting/registry-expansion.json',
+    ],
+    implementationStatus: 'implemented',
+    verificationStatus: 'inferred_structured_socketable_transition',
+    confidence: 'inferred',
+    blocker: null,
+    testFixtureIds: ['validation:socketing-augments', 'ui:implemented-socket-registry-dispatch'],
+    supported: true,
+    visible: true,
+  };
+}
+
+function expandRegistryDefinitions(expansion, context) {
   assert(expansion?.schemaVersion === 1, 'Unsupported registry expansion schema.');
   assert(expansion.targetGameVersion === TARGET_VERSION,
     `Registry expansion target ${expansion.targetGameVersion} does not match ${TARGET_VERSION}.`);
   assert(Array.isArray(expansion.definitions), 'Registry expansion definitions are missing.');
+  const { craftingItems, socketables, essences, bases, methodByItemId } = context;
   const itemById = new Map(craftingItems.map(item => [String(item.id), item]));
   const craftIds = new Set();
-  return expansion.definitions.map(compact => {
+  const definitions = expansion.definitions.map(compact => {
     assert(!craftIds.has(compact.craftId), `Duplicate expansion craft ID ${compact.craftId}.`);
     craftIds.add(compact.craftId);
     assert(compact.confidence === 'verified' || compact.confidence === 'inferred',
@@ -763,6 +972,52 @@ function expandRegistryDefinitions(expansion, craftingItems, methodByItemId) {
       visible: true,
     };
   });
+
+  const generatedFamilies = expansion.generatedFamilies || [];
+  for (const family of generatedFamilies) {
+    if (family.kind === 'essences') {
+      const includedTypes = new Set((family.includedTypes || []).map(Number));
+      const excluded = new Set((family.excludedSourceItemIds || []).map(Number));
+      for (const essence of essences) {
+        if (!includedTypes.has(Number(essence.type)) || excluded.has(Number(essence.itemId))) continue;
+        const item = itemById.get(String(essence.itemId));
+        assert(item, `Generated Essence references unknown item ${essence.itemId}.`);
+        const definition = generatedEssenceDefinition(essence, item);
+        assert(!craftIds.has(definition.craftId), `Duplicate expansion craft ID ${definition.craftId}.`);
+        craftIds.add(definition.craftId);
+        definitions.push(definition);
+      }
+      continue;
+    }
+    if (family.kind === 'artificer') {
+      const item = itemById.get(String(family.sourceItemId));
+      assert(item, `Generated Artificer definition references unknown item ${family.sourceItemId}.`);
+      const definition = generatedArtificerDefinition(item, bases);
+      assert(!craftIds.has(definition.craftId), `Duplicate expansion craft ID ${definition.craftId}.`);
+      craftIds.add(definition.craftId);
+      definitions.push(definition);
+      continue;
+    }
+    if (family.kind === 'socketables') {
+      for (const socketable of socketables) {
+        const item = itemById.get(String(socketable.itemId));
+        assert(item, `Generated socketable definition references unknown item ${socketable.itemId}.`);
+        if (family.excludeDeprecated && isDeprecated(item)) continue;
+        const definition = generatedSocketableDefinition(
+          socketable,
+          item,
+          bases,
+          context.socketableLimits || []
+        );
+        assert(!craftIds.has(definition.craftId), `Duplicate expansion craft ID ${definition.craftId}.`);
+        craftIds.add(definition.craftId);
+        definitions.push(definition);
+      }
+      continue;
+    }
+    throw new Error(`Unknown generated registry family ${String(family.kind)}.`);
+  }
+  return definitions;
 }
 
 // The complete index remains checked in as JSON for provenance and audit
