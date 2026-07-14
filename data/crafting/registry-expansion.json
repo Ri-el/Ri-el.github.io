@@ -148,6 +148,21 @@
       "confidence": "inferred"
     },
     {
+      "craftId": "ancient-jawbone",
+      "sourceItemId": 4857,
+      "kind": "abyss_bone",
+      "boneId": "ancient_jawbone",
+      "boneFamily": "jawbone",
+      "displayOrder": 40,
+      "iconFallback": "AJ",
+      "description": "Starts Desecration for a weapon or quiver, applies Minimum Modifier Level 40 to the Well pool, and reveals three options.",
+      "confidence": "inferred",
+      "sourceEvidence": [
+        "data/normalized/modifiers.json#desecrated-requiredItemLevel",
+        "reports/poe2db-data-sources.md#hard-coded-bundle-catalogue"
+      ]
+    },
+    {
       "craftId": "gnawed-rib",
       "sourceItemId": 4858,
       "kind": "abyss_bone",
@@ -170,6 +185,21 @@
       "confidence": "inferred"
     },
     {
+      "craftId": "ancient-rib",
+      "sourceItemId": 4860,
+      "kind": "abyss_bone",
+      "boneId": "ancient_rib",
+      "boneFamily": "rib",
+      "displayOrder": 70,
+      "iconFallback": "AR",
+      "description": "Starts Desecration for an armour item, applies Minimum Modifier Level 40 to the Well pool, and reveals three options.",
+      "confidence": "inferred",
+      "sourceEvidence": [
+        "data/normalized/modifiers.json#desecrated-requiredItemLevel",
+        "reports/poe2db-data-sources.md#hard-coded-bundle-catalogue"
+      ]
+    },
+    {
       "craftId": "gnawed-collarbone",
       "sourceItemId": 4861,
       "kind": "abyss_bone",
@@ -190,6 +220,21 @@
       "iconFallback": "PC",
       "description": "Starts Desecration for jewellery and reveals three Well of Souls options.",
       "confidence": "inferred"
+    },
+    {
+      "craftId": "ancient-collarbone",
+      "sourceItemId": 4863,
+      "kind": "abyss_bone",
+      "boneId": "ancient_collarbone",
+      "boneFamily": "collarbone",
+      "displayOrder": 100,
+      "iconFallback": "AC",
+      "description": "Starts Desecration for jewellery, applies Minimum Modifier Level 40 to the Well pool, and reveals three options.",
+      "confidence": "inferred",
+      "sourceEvidence": [
+        "data/normalized/modifiers.json#desecrated-requiredItemLevel",
+        "reports/poe2db-data-sources.md#hard-coded-bundle-catalogue"
+      ]
     }
   ]
 }

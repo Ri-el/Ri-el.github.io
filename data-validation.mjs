@@ -768,7 +768,7 @@ check('registry tabs expose every supported mechanics definition and quality aud
   craftRegistry.every(definition => registryTabIds.has(definition.tab)) &&
   craftRegistry.filter(definition => definition.supported).length ===
     craftRegistry.filter(definition => definition.implementationStatus === 'implemented').length &&
-  craftRegistry.filter(definition => definition.supported).length === 412 &&
+  craftRegistry.filter(definition => definition.supported).length === 415 &&
   craftRegistry.filter(definition => definition.supported).every(definition => definition.visible) &&
   visibleCraftDefinitions.filter(definition => definition.category === 'quality').length === 8);
 check('registry implementation classifications are exclusive after Task 07 audit surfacing',

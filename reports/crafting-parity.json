@@ -12,28 +12,28 @@
     "unresolvedSourceIdentities": 1,
     "unclassified": 0,
     "sourceByClassification": {
-      "implemented": 411,
+      "implemented": 414,
       "conditional": 0,
       "non_item_currency": 3,
-      "blocked_missing_data": 106,
+      "blocked_missing_data": 103,
       "probability_unverified": 1,
       "intentionally_out_of_scope": 0,
       "deprecated_for_target_version": 9
     },
     "registryByClassification": {
-      "implemented": 412,
+      "implemented": 415,
       "conditional": 0,
       "non_item_currency": 3,
-      "blocked_missing_data": 106,
+      "blocked_missing_data": 103,
       "probability_unverified": 1,
       "intentionally_out_of_scope": 0,
       "deprecated_for_target_version": 9
     },
     "visibleByClassification": {
-      "implemented": 412,
+      "implemented": 415,
       "conditional": 0,
       "non_item_currency": 3,
-      "blocked_missing_data": 106,
+      "blocked_missing_data": 103,
       "probability_unverified": 1,
       "intentionally_out_of_scope": 0,
       "deprecated_for_target_version": 0
@@ -24109,6 +24109,72 @@
       "visible": true
     },
     {
+      "stableId": "ancient-jawbone",
+      "craftId": "ancient-jawbone",
+      "sourceItemId": 4857,
+      "metadataKey": "Metadata/Items/Currency/AbyssalBenchTicketWeaponHigh",
+      "sourceIdentityStatus": "normalized_exact",
+      "exactName": "Ancient Jawbone",
+      "targetGameVersion": "0.5.4",
+      "equipmentRelevance": "equipment_runtime",
+      "category": "abyss",
+      "tab": "abyss",
+      "implementationStatus": "implemented",
+      "verificationStatus": "inferred_shared_desecration_transition",
+      "applicability": {
+        "predicate": "boneDisabledReason",
+        "validItemClasses": [
+          "Claw",
+          "Dagger",
+          "Wand",
+          "One Hand Sword",
+          "One Hand Axe",
+          "One Hand Mace",
+          "Spear",
+          "Flail",
+          "Bow",
+          "Staff",
+          "Two Hand Sword",
+          "Two Hand Axe",
+          "Two Hand Mace",
+          "Quiver",
+          "Sceptre",
+          "Warstaff",
+          "Crossbow",
+          "Talisman"
+        ],
+        "validItemTags": [],
+        "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+        "qualityRestriction": "none",
+        "socketRestriction": "none"
+      },
+      "handler": "startDesecrationFlow",
+      "disabledReasonHandler": "boneDisabledReason",
+      "disabledReason": "",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:4857",
+        "data/normalized/crafting-items.json#method:42",
+        "https://poe2db.tw/us/Abyss",
+        "data/crafting/registry-expansion.json",
+        "data/normalized/modifiers.json#desecrated-requiredItemLevel",
+        "reports/poe2db-data-sources.md#hard-coded-bundle-catalogue",
+        "data/crafting/currency-index.json#source-item:4857"
+      ],
+      "testReferences": [
+        "validation:expanded-abyss-bones"
+      ],
+      "blocker": null,
+      "supported": true,
+      "visible": true
+    },
+    {
       "stableId": "gnawed-rib",
       "craftId": "gnawed-rib",
       "sourceItemId": 4858,
@@ -24206,6 +24272,61 @@
         "https://poe2db.tw/us/Abyss",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:4859"
+      ],
+      "testReferences": [
+        "validation:expanded-abyss-bones"
+      ],
+      "blocker": null,
+      "supported": true,
+      "visible": true
+    },
+    {
+      "stableId": "ancient-rib",
+      "craftId": "ancient-rib",
+      "sourceItemId": 4860,
+      "metadataKey": "Metadata/Items/Currency/AbyssalBenchTicketArmourHigh",
+      "sourceIdentityStatus": "normalized_exact",
+      "exactName": "Ancient Rib",
+      "targetGameVersion": "0.5.4",
+      "equipmentRelevance": "equipment_runtime",
+      "category": "abyss",
+      "tab": "abyss",
+      "implementationStatus": "implemented",
+      "verificationStatus": "inferred_shared_desecration_transition",
+      "applicability": {
+        "predicate": "boneDisabledReason",
+        "validItemClasses": [
+          "Gloves",
+          "Boots",
+          "Body Armour",
+          "Helmet",
+          "Shield",
+          "Buckler",
+          "Focus"
+        ],
+        "validItemTags": [],
+        "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+        "qualityRestriction": "none",
+        "socketRestriction": "none"
+      },
+      "handler": "startDesecrationFlow",
+      "disabledReasonHandler": "boneDisabledReason",
+      "disabledReason": "",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:4860",
+        "data/normalized/crafting-items.json#method:43",
+        "https://poe2db.tw/us/Abyss",
+        "data/crafting/registry-expansion.json",
+        "data/normalized/modifiers.json#desecrated-requiredItemLevel",
+        "reports/poe2db-data-sources.md#hard-coded-bundle-catalogue",
+        "data/crafting/currency-index.json#source-item:4860"
       ],
       "testReferences": [
         "validation:expanded-abyss-bones"
@@ -24313,123 +24434,54 @@
       "visible": true
     },
     {
-      "stableId": "source-item:4857",
-      "craftId": "source-item:4857",
-      "sourceItemId": 4857,
-      "metadataKey": "Metadata/Items/Currency/AbyssalBenchTicketWeaponHigh",
-      "sourceIdentityStatus": "normalized_exact",
-      "exactName": "Ancient Jawbone",
-      "targetGameVersion": "0.5.4",
-      "equipmentRelevance": "equipment_crafting_candidate_unverified",
-      "category": "abyss",
-      "tab": "abyss",
-      "implementationStatus": "blocked_missing_data",
-      "verificationStatus": "not_verified",
-      "applicability": {
-        "predicate": "unsupportedReason",
-        "validItemClasses": [],
-        "validItemTags": [],
-        "corruptionRestriction": "unverified",
-        "qualityRestriction": "none",
-        "socketRestriction": "none"
-      },
-      "handler": null,
-      "disabledReasonHandler": "staticDisabledReason",
-      "disabledReason": "Mechanic blocked because Ancient Jawbone requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete.",
-      "triggeringAction": null,
-      "omenInteraction": {
-        "omenId": null,
-        "exclusiveGroup": null,
-        "consumeOn": "never",
-        "triggerCraftId": null
-      },
-      "sourceEvidence": [
-        "data/crafting/currency-index.json#source-item:4857",
-        "data/normalized/crafting-items.json#item:4857"
-      ],
-      "testReferences": [],
-      "blocker": "Mechanic blocked because Ancient Jawbone requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete.",
-      "supported": false,
-      "visible": true
-    },
-    {
-      "stableId": "source-item:4860",
-      "craftId": "source-item:4860",
-      "sourceItemId": 4860,
-      "metadataKey": "Metadata/Items/Currency/AbyssalBenchTicketArmourHigh",
-      "sourceIdentityStatus": "normalized_exact",
-      "exactName": "Ancient Rib",
-      "targetGameVersion": "0.5.4",
-      "equipmentRelevance": "equipment_crafting_candidate_unverified",
-      "category": "abyss",
-      "tab": "abyss",
-      "implementationStatus": "blocked_missing_data",
-      "verificationStatus": "not_verified",
-      "applicability": {
-        "predicate": "unsupportedReason",
-        "validItemClasses": [],
-        "validItemTags": [],
-        "corruptionRestriction": "unverified",
-        "qualityRestriction": "none",
-        "socketRestriction": "none"
-      },
-      "handler": null,
-      "disabledReasonHandler": "staticDisabledReason",
-      "disabledReason": "Mechanic blocked because Ancient Rib requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete.",
-      "triggeringAction": null,
-      "omenInteraction": {
-        "omenId": null,
-        "exclusiveGroup": null,
-        "consumeOn": "never",
-        "triggerCraftId": null
-      },
-      "sourceEvidence": [
-        "data/crafting/currency-index.json#source-item:4860",
-        "data/normalized/crafting-items.json#item:4860"
-      ],
-      "testReferences": [],
-      "blocker": "Mechanic blocked because Ancient Rib requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete.",
-      "supported": false,
-      "visible": true
-    },
-    {
-      "stableId": "source-item:4863",
-      "craftId": "source-item:4863",
+      "stableId": "ancient-collarbone",
+      "craftId": "ancient-collarbone",
       "sourceItemId": 4863,
       "metadataKey": "Metadata/Items/Currency/AbyssalBenchTicketJewelleryHigh",
       "sourceIdentityStatus": "normalized_exact",
       "exactName": "Ancient Collarbone",
       "targetGameVersion": "0.5.4",
-      "equipmentRelevance": "equipment_crafting_candidate_unverified",
+      "equipmentRelevance": "equipment_runtime",
       "category": "abyss",
       "tab": "abyss",
-      "implementationStatus": "blocked_missing_data",
-      "verificationStatus": "not_verified",
+      "implementationStatus": "implemented",
+      "verificationStatus": "inferred_shared_desecration_transition",
       "applicability": {
-        "predicate": "unsupportedReason",
-        "validItemClasses": [],
+        "predicate": "boneDisabledReason",
+        "validItemClasses": [
+          "Amulet",
+          "Ring",
+          "Belt"
+        ],
         "validItemTags": [],
-        "corruptionRestriction": "unverified",
+        "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
         "qualityRestriction": "none",
         "socketRestriction": "none"
       },
-      "handler": null,
-      "disabledReasonHandler": "staticDisabledReason",
-      "disabledReason": "Mechanic blocked because Ancient Collarbone requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete.",
+      "handler": "startDesecrationFlow",
+      "disabledReasonHandler": "boneDisabledReason",
+      "disabledReason": "",
       "triggeringAction": null,
       "omenInteraction": {
         "omenId": null,
         "exclusiveGroup": null,
-        "consumeOn": "never",
+        "consumeOn": "successful_operation",
         "triggerCraftId": null
       },
       "sourceEvidence": [
-        "data/crafting/currency-index.json#source-item:4863",
-        "data/normalized/crafting-items.json#item:4863"
+        "data/normalized/crafting-items.json#item:4863",
+        "data/normalized/crafting-items.json#method:41",
+        "https://poe2db.tw/us/Abyss",
+        "data/crafting/registry-expansion.json",
+        "data/normalized/modifiers.json#desecrated-requiredItemLevel",
+        "reports/poe2db-data-sources.md#hard-coded-bundle-catalogue",
+        "data/crafting/currency-index.json#source-item:4863"
       ],
-      "testReferences": [],
-      "blocker": "Mechanic blocked because Ancient Collarbone requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete.",
-      "supported": false,
+      "testReferences": [
+        "validation:expanded-abyss-bones"
+      ],
+      "blocker": null,
+      "supported": true,
       "visible": true
     },
     {

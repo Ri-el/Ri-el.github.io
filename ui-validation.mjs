@@ -147,15 +147,15 @@ check('crafting inventory classifies every retained source item exactly once',
 const visibleCraftDefinitions = craftRegistry.filter(definition => definition.visible === true);
 const craftIds = visibleCraftDefinitions.map(definition => definition.craftId);
 check('authoritative registry audits 531 definitions and exposes all non-deprecated known items',
-  currencyIndex.counts.runtimeDefinitions === 419 &&
-  Object.keys(currencyIndex.runtimeRegistry).length === 419 &&
+  currencyIndex.counts.runtimeDefinitions === 422 &&
+  Object.keys(currencyIndex.runtimeRegistry).length === 422 &&
   craftRegistry.length === 531 && visibleCraftDefinitions.length === 522 &&
   craftIds.length === new Set(craftIds).size &&
   craftIds.every(id => currencyIndex.runtimeRegistry[id] ||
     craftRegistry.find(definition => definition.craftId === id)?.sourceItemId != null));
-check('startup browser registry contains all 412 available definitions',
+check('startup browser registry contains all 415 available definitions',
   currencyBrowserSource.startsWith(currencyBrowserPrefix) &&
-  currencyBrowserIndex.craftRegistry.length === 412 &&
+  currencyBrowserIndex.craftRegistry.length === 415 &&
   currencyBrowserIndex.craftRegistry.every(definition => definition.supported === true));
 check('lazy browser registry contains every retained definition',
   knownBrowserSource.startsWith(knownBrowserPrefix) &&
@@ -184,6 +184,18 @@ check('implemented Essence definitions are available with exact source identitie
     ['magic_to_rare_add', 'rare_remove_add'].includes(definition.operationOptions?.transition)) &&
   implementedEssences.filter(definition => definition.confidence === 'verified').length === 57 &&
   implementedEssences.filter(definition => definition.confidence === 'inferred').length === 23);
+const abyssDefinitions = craftRegistry.filter(definition => definition.category === 'abyss');
+const ancientBones = abyssDefinitions.filter(definition => /^ancient-(?:jawbone|rib|collarbone)$/.test(definition.craftId));
+check('all equipment Abyssal Bones are available and Ancient variants enforce level 40',
+  abyssDefinitions.length === 12 &&
+  abyssDefinitions.filter(definition => definition.supported).length === 11 &&
+  ancientBones.length === 3 &&
+  ancientBones.every(definition =>
+    definition.supported && definition.confidence === 'inferred' &&
+    definition.handler === 'startDesecrationFlow' &&
+    definition.operationOptions?.minModifierLevel === 40) &&
+  abyssDefinitions.filter(definition => !definition.supported).length === 1 &&
+  abyssDefinitions.find(definition => !definition.supported)?.displayName === 'Preserved Vertebrae');
 const implementedSocketing = craftRegistry.filter(definition => definition.category === 'socketing' && definition.supported);
 check('implemented socket definitions are visibly inferred and retain exact dispatch identities',
   implementedSocketing.length === 285 &&
@@ -779,7 +791,7 @@ check('Absent Amulet art is installed at its numeric base ID path',
   fs.existsSync(new URL('./assets/item-bases/2563.png', import.meta.url)));
 check('runtime selector, socket stylesheet, and performance data are versioned in the offline shell',
   /header-fix\.css\?v=20/.test(select) &&
-  /CACHE_NAME = 'poe2-craft-registry-v9'/.test(serviceWorker) &&
+  /CACHE_NAME = 'poe2-craft-registry-v10'/.test(serviceWorker) &&
   serviceWorker.includes("'./header-fix.css?v=20'") &&
   serviceWorker.includes("'./data/crafting/known-items.data.js'"));
 check('Absent Amulet art is available in the versioned offline application shell',

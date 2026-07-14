@@ -2135,7 +2135,7 @@ function startDesecrationFlow(bone = 'preserved_cranium') {
   desecState = { side: res.side, mode: res.mode, rerollsLeft: res.rerollsLeft, options: res.options, abyssalUsed: false };
   playSound('desecration');
   renderItem(res);
-  triggerCraftAnimation('preserved_cranium');
+  triggerCraftAnimation(bone || 'preserved_cranium');
   showRevealPanel();
   return res;
 }
@@ -2638,7 +2638,7 @@ function commitDesecrationForesight(bone) {
   disarmCurrency();
   playSound('desecration');
   renderItem(res);
-  triggerCraftAnimation('preserved_cranium');
+  triggerCraftAnimation(bone || 'preserved_cranium');
   showRevealPanel();
   return { ...res, success: true, item: engine.getItem(), specialized: true };
 }

@@ -30,7 +30,7 @@ This is the Phase 1 registry checkpoint captured before the Essence/socket mecha
 | Socketing / Augments | 296 | 0 | 285 | 3 | 8 | 0 |
 | Ritual / Omens | 38 | 18 | 0 | 19 | 1 | 0 |
 | Essences | 80 | 57 | 23 | 0 | 0 | 0 |
-| Abyss | 12 | 2 | 6 | 4 | 0 | 0 |
+| Abyss | 12 | 2 | 9 | 1 | 0 | 0 |
 | Breach / Genesis | 28 | 0 | 1 | 27 | 0 | 0 |
 | Delirium / Instilling | 26 | 0 | 0 | 26 | 0 | 0 |
 | Runeforging | 19 | 0 | 0 | 17 | 0 | 2 |
@@ -58,7 +58,7 @@ Existing supported UI handlers:
 - `executeCraftOperation -> applyRegal`: 3
 - `executeCraftOperation -> applySocketable`: 284
 - `executeCraftOperation -> applyTransmutation`: 3
-- `executeCraftOperation -> startDesecrationFlow`: 7
+- `executeCraftOperation -> startDesecrationFlow`: 10
 - `executeCraftOperation -> toggleCraftOmen`: 14
 - `executeCraftOperation -> toggleOmen`: 4
 
@@ -69,7 +69,7 @@ Discoverable but disabled definitions:
 - Socketing / Augments: 3
 - Ritual / Omens: 19
 - Essences: 0
-- Abyss: 4
+- Abyss: 1
 - Breach / Genesis: 27
 - Delirium / Instilling: 26
 - Runeforging: 17
@@ -80,9 +80,10 @@ Mechanics implemented directly from checked-in retained data:
 - 80 regular, Greater, and Perfect Essence definitions with exact normalized class-to-modifier mappings
 - Essence of the Breach with its retained Amulet/Ring forced prefix identity
 - Artificer's Orb using the retained concrete-base socket count as an explicitly inferred cap
+- Nine equipment Abyssal Bones, with the Ancient level-40 modifier floor reconciled from normalized Desecrated modifier levels
 - 287 non-deprecated Runes, Soul Cores, Idols, Abyssal Eyes, and Congealed Mist records with exact retained effects and limit codes
 
-Mechanics implemented from the supplied PoE2DB files: none. Those files were used for route and schema research only; see `reports/poe2db-data-sources.md`.
+Mechanics implemented solely from the supplied PoE2DB files: none. Those files were used for catalogue completeness and corroboration; checked-in normalized methods and modifier levels supply the Ancient mechanics. See `reports/poe2db-data-sources.md`.
 
 Genuinely ambiguous mechanics remain blocked. Their full blocker and exact unresolved question appear in the per-definition tables and JSON report.
 
@@ -563,13 +564,13 @@ Genuinely ambiguous mechanics remain blocked. Their full blocker and exact unres
 | essence-abyss | Essence of the Abyss | 143 | verified | verified | Amulet<br>Ring<br>Dagger<br>Wand<br>One Hand Sword<br>One Hand Axe<br>One Hand Mace<br>Bow<br>Staff<br>Two Hand Sword<br>Two Hand Axe<br>Two Hand Mace<br>Quiver<br>Belt<br>Gloves<br>Boots<br>Body Armour<br>Helmet<br>Shield<br>Sceptre<br>Warstaff<br>Spear<br>Crossbow<br>Focus<br>Flail<br>Buckler<br>Talisman | Rare | CraftingEngine.applyEssenceOfAbyss | executeCraftOperation -> applyEssenceOfAbyss | data/normalized/crafting-items.json#item:143<br>crafting.js#applyEssenceOfAbyss<br>data/crafting/currency-index.json#source-item:143 | validation:essence-abyss-mark-and-crafted-limit | — | — |
 | gnawed-jawbone | Gnawed Jawbone | 4855 | inferred | inferred | Claw<br>Dagger<br>Wand<br>One Hand Sword<br>One Hand Axe<br>One Hand Mace<br>Spear<br>Flail<br>Bow<br>Staff<br>Two Hand Sword<br>Two Hand Axe<br>Two Hand Mace<br>Quiver<br>Sceptre<br>Warstaff<br>Crossbow<br>Talisman | Rare | CraftingEngine.startDesecration | executeCraftOperation -> startDesecrationFlow | data/normalized/crafting-items.json#item:4855<br>data/normalized/crafting-items.json#method:45<br>https://poe2db.tw/us/Abyss<br>data/crafting/registry-expansion.json<br>data/crafting/currency-index.json#source-item:4855 | validation:expanded-abyss-bones | — | — |
 | preserved-jawbone | Preserved Jawbone | 4856 | inferred | inferred | Claw<br>Dagger<br>Wand<br>One Hand Sword<br>One Hand Axe<br>One Hand Mace<br>Spear<br>Flail<br>Bow<br>Staff<br>Two Hand Sword<br>Two Hand Axe<br>Two Hand Mace<br>Quiver<br>Sceptre<br>Warstaff<br>Crossbow<br>Talisman | Rare | CraftingEngine.startDesecration | executeCraftOperation -> startDesecrationFlow | data/normalized/crafting-items.json#item:4856<br>data/normalized/crafting-items.json#method:49<br>https://poe2db.tw/us/Abyss<br>data/crafting/registry-expansion.json<br>data/crafting/currency-index.json#source-item:4856 | validation:expanded-abyss-bones | — | — |
+| ancient-jawbone | Ancient Jawbone | 4857 | inferred | inferred | Claw<br>Dagger<br>Wand<br>One Hand Sword<br>One Hand Axe<br>One Hand Mace<br>Spear<br>Flail<br>Bow<br>Staff<br>Two Hand Sword<br>Two Hand Axe<br>Two Hand Mace<br>Quiver<br>Sceptre<br>Warstaff<br>Crossbow<br>Talisman | Rare | CraftingEngine.startDesecration | executeCraftOperation -> startDesecrationFlow | data/normalized/crafting-items.json#item:4857<br>data/normalized/crafting-items.json#method:42<br>https://poe2db.tw/us/Abyss<br>data/crafting/registry-expansion.json<br>data/normalized/modifiers.json#desecrated-requiredItemLevel<br>reports/poe2db-data-sources.md#hard-coded-bundle-catalogue<br>data/crafting/currency-index.json#source-item:4857 | validation:expanded-abyss-bones | — | — |
 | gnawed-rib | Gnawed Rib | 4858 | inferred | inferred | Gloves<br>Boots<br>Body Armour<br>Helmet<br>Shield<br>Buckler<br>Focus | Rare | CraftingEngine.startDesecration | executeCraftOperation -> startDesecrationFlow | data/normalized/crafting-items.json#item:4858<br>data/normalized/crafting-items.json#method:46<br>https://poe2db.tw/us/Abyss<br>data/crafting/registry-expansion.json<br>data/crafting/currency-index.json#source-item:4858 | validation:expanded-abyss-bones | — | — |
 | preserved-rib | Preserved Rib | 4859 | inferred | inferred | Gloves<br>Boots<br>Body Armour<br>Helmet<br>Shield<br>Buckler<br>Focus | Rare | CraftingEngine.startDesecration | executeCraftOperation -> startDesecrationFlow | data/normalized/crafting-items.json#item:4859<br>data/normalized/crafting-items.json#method:50<br>https://poe2db.tw/us/Abyss<br>data/crafting/registry-expansion.json<br>data/crafting/currency-index.json#source-item:4859 | validation:expanded-abyss-bones | — | — |
+| ancient-rib | Ancient Rib | 4860 | inferred | inferred | Gloves<br>Boots<br>Body Armour<br>Helmet<br>Shield<br>Buckler<br>Focus | Rare | CraftingEngine.startDesecration | executeCraftOperation -> startDesecrationFlow | data/normalized/crafting-items.json#item:4860<br>data/normalized/crafting-items.json#method:43<br>https://poe2db.tw/us/Abyss<br>data/crafting/registry-expansion.json<br>data/normalized/modifiers.json#desecrated-requiredItemLevel<br>reports/poe2db-data-sources.md#hard-coded-bundle-catalogue<br>data/crafting/currency-index.json#source-item:4860 | validation:expanded-abyss-bones | — | — |
 | gnawed-collarbone | Gnawed Collarbone | 4861 | inferred | inferred | Amulet<br>Ring<br>Belt | Rare | CraftingEngine.startDesecration | executeCraftOperation -> startDesecrationFlow | data/normalized/crafting-items.json#item:4861<br>data/normalized/crafting-items.json#method:44<br>https://poe2db.tw/us/Abyss<br>data/crafting/registry-expansion.json<br>data/crafting/currency-index.json#source-item:4861 | validation:expanded-abyss-bones | — | — |
 | preserved-collarbone | Preserved Collarbone | 4862 | inferred | inferred | Amulet<br>Ring<br>Belt | Rare | CraftingEngine.startDesecration | executeCraftOperation -> startDesecrationFlow | data/normalized/crafting-items.json#item:4862<br>data/normalized/crafting-items.json#method:47<br>https://poe2db.tw/us/Abyss<br>data/crafting/registry-expansion.json<br>data/crafting/currency-index.json#source-item:4862 | validation:expanded-abyss-bones | — | — |
-| source-item:4857 | Ancient Jawbone | 4857 | blocked | blocked | — | Unresolved; see blocker | — | — | data/crafting/currency-index.json#source-item:4857<br>data/normalized/crafting-items.json#item:4857 | — | Mechanic blocked because Ancient Jawbone requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete. | What exact target-version evidence resolves this blocker: Ancient Jawbone requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete? |
-| source-item:4860 | Ancient Rib | 4860 | blocked | blocked | — | Unresolved; see blocker | — | — | data/crafting/currency-index.json#source-item:4860<br>data/normalized/crafting-items.json#item:4860 | — | Mechanic blocked because Ancient Rib requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete. | What exact target-version evidence resolves this blocker: Ancient Rib requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete? |
-| source-item:4863 | Ancient Collarbone | 4863 | blocked | blocked | — | Unresolved; see blocker | — | — | data/crafting/currency-index.json#source-item:4863<br>data/normalized/crafting-items.json#item:4863 | — | Mechanic blocked because Ancient Collarbone requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete. | What exact target-version evidence resolves this blocker: Ancient Collarbone requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete? |
+| ancient-collarbone | Ancient Collarbone | 4863 | inferred | inferred | Amulet<br>Ring<br>Belt | Rare | CraftingEngine.startDesecration | executeCraftOperation -> startDesecrationFlow | data/normalized/crafting-items.json#item:4863<br>data/normalized/crafting-items.json#method:41<br>https://poe2db.tw/us/Abyss<br>data/crafting/registry-expansion.json<br>data/normalized/modifiers.json#desecrated-requiredItemLevel<br>reports/poe2db-data-sources.md#hard-coded-bundle-catalogue<br>data/crafting/currency-index.json#source-item:4863 | validation:expanded-abyss-bones | — | — |
 | source-item:4865 | Preserved Vertebrae | 4865 | blocked | blocked | — | Unresolved; see blocker | — | — | data/crafting/currency-index.json#source-item:4865<br>data/normalized/crafting-items.json#item:4865 | — | Mechanic blocked because Preserved Vertebrae targets Waystones and the simulator has no verified Waystone item-state or modifier-pool model. | What exact target-version evidence resolves this blocker: Preserved Vertebrae targets Waystones and the simulator has no verified Waystone item-state or modifier-pool model? |
 
 ### Breach / Genesis

@@ -8,7 +8,7 @@
     "runtimeRegistrySource": "data/crafting/runtime-registry.json",
     "runtimeRegistrySha256": "735d71209737be00ebcdb63103c223be20428b4a8274c611b55f19d25af4bdb8",
     "registryExpansionSource": "data/crafting/registry-expansion.json",
-    "registryExpansionSha256": "00066b3914c98afbd912e0681c790bde90e538f3d6681208491540143029ea10"
+    "registryExpansionSha256": "fadad83b406fb674c7139d536eee168da556023a2f9e74413d336cd528d31887"
   },
   "allowedClassifications": [
     "implemented",
@@ -63,24 +63,24 @@
   "migration": {
     "mode": "authoritative-generated-registry",
     "behaviorOwner": "Registry records reference stable JavaScript validator and handler names; executable functions remain in classic browser scripts.",
-    "runtimeDefinitions": 419,
+    "runtimeDefinitions": 422,
     "retainedStartupDefinitions": 37,
-    "expandedDefinitions": 382
+    "expandedDefinitions": 385
   },
   "counts": {
     "entries": 530,
     "byClassification": {
-      "implemented": 411,
+      "implemented": 414,
       "conditional": 0,
       "non_item_currency": 3,
-      "blocked_missing_data": 106,
+      "blocked_missing_data": 103,
       "probability_unverified": 1,
       "intentionally_out_of_scope": 0,
       "deprecated_for_target_version": 9
     },
-    "runtimeDefinitions": 419,
+    "runtimeDefinitions": 422,
     "runtimeByClassification": {
-      "implemented": 412,
+      "implemented": 415,
       "conditional": 0,
       "non_item_currency": 0,
       "blocked_missing_data": 6,
@@ -37387,8 +37387,8 @@
         "abyss-btn",
         "bone-btn"
       ],
-      "description": "Starts Desecration for a weapon or quiver of item level 64 or lower and reveals three Well of Souls options. Inferred assumption: Gnawed and Preserved family variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
-      "assumption": "Gnawed and Preserved family variants share Preserved Cranium's three-option Well of Souls reveal flow.",
+      "description": "Starts Desecration for a weapon or quiver of item level 64 or lower and reveals three Well of Souls options. Inferred assumption: equipment Abyssal Bone variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
+      "assumption": "Equipment Abyssal Bone variants share Preserved Cranium's three-option Well of Souls reveal flow.",
       "actionType": "specialized",
       "activation": "arm",
       "engineAction": "gnawed_jawbone",
@@ -37480,8 +37480,8 @@
         "abyss-btn",
         "bone-btn"
       ],
-      "description": "Starts Desecration for a weapon or quiver and reveals three Well of Souls options. Inferred assumption: Gnawed and Preserved family variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
-      "assumption": "Gnawed and Preserved family variants share Preserved Cranium's three-option Well of Souls reveal flow.",
+      "description": "Starts Desecration for a weapon or quiver and reveals three Well of Souls options. Inferred assumption: equipment Abyssal Bone variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
+      "assumption": "Equipment Abyssal Bone variants share Preserved Cranium's three-option Well of Souls reveal flow.",
       "actionType": "specialized",
       "activation": "arm",
       "engineAction": "preserved_jawbone",
@@ -37555,6 +37555,101 @@
       ]
     },
     {
+      "craftId": "ancient-jawbone",
+      "id": "ancient-jawbone",
+      "sourceItemId": 4857,
+      "metadataKey": "Metadata/Items/Currency/AbyssalBenchTicketWeaponHigh",
+      "sourceIdentityStatus": "normalized_exact",
+      "displayName": "Ancient Jawbone",
+      "category": "abyss",
+      "tab": "abyss",
+      "tabOrder": 60,
+      "displayOrder": 40,
+      "equipmentRelevance": "equipment_runtime",
+      "iconId": "ancient-jawbone",
+      "iconFallback": "AJ",
+      "accentColor": "#5fd38a",
+      "cssClasses": [
+        "abyss-btn",
+        "bone-btn"
+      ],
+      "description": "Starts Desecration for a weapon or quiver, applies Minimum Modifier Level 40 to the Well pool, and reveals three options. Inferred assumption: equipment Abyssal Bone variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
+      "assumption": "Equipment Abyssal Bone variants share Preserved Cranium's three-option Well of Souls reveal flow.",
+      "actionType": "specialized",
+      "activation": "arm",
+      "engineAction": "ancient_jawbone",
+      "applicabilityPredicate": "boneDisabledReason",
+      "disabledReasonHandler": "boneDisabledReason",
+      "disabledReason": "",
+      "handler": "startDesecrationFlow",
+      "sourceHandler": "poe2_desecrate_high",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [
+        "Claw",
+        "Dagger",
+        "Wand",
+        "One Hand Sword",
+        "One Hand Axe",
+        "One Hand Mace",
+        "Spear",
+        "Flail",
+        "Bow",
+        "Staff",
+        "Two Hand Sword",
+        "Two Hand Axe",
+        "Two Hand Mace",
+        "Quiver",
+        "Sceptre",
+        "Warstaff",
+        "Crossbow",
+        "Talisman"
+      ],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "boneId": "ancient_jawbone",
+        "boneFamily": "jawbone",
+        "revealCount": 3,
+        "maxItemLevel": null,
+        "minModifierLevel": 40
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:4857",
+        "data/normalized/crafting-items.json#method:42",
+        "https://poe2db.tw/us/Abyss",
+        "data/crafting/registry-expansion.json",
+        "data/normalized/modifiers.json#desecrated-requiredItemLevel",
+        "reports/poe2db-data-sources.md#hard-coded-bundle-catalogue",
+        "data/crafting/currency-index.json#source-item:4857"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "inferred_shared_desecration_transition",
+      "confidence": "inferred",
+      "historyTier": null,
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:expanded-abyss-bones"
+      ],
+      "supported": true,
+      "visible": true,
+      "targetGameVersion": "0.5.4",
+      "sourceClassifications": [
+        "crafting-method"
+      ],
+      "sourceTags": [
+        "currency",
+        "default"
+      ]
+    },
+    {
       "craftId": "gnawed-rib",
       "id": "gnawed-rib",
       "sourceItemId": 4858,
@@ -37573,8 +37668,8 @@
         "abyss-btn",
         "bone-btn"
       ],
-      "description": "Starts Desecration for an armour item of item level 64 or lower and reveals three Well of Souls options. Inferred assumption: Gnawed and Preserved family variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
-      "assumption": "Gnawed and Preserved family variants share Preserved Cranium's three-option Well of Souls reveal flow.",
+      "description": "Starts Desecration for an armour item of item level 64 or lower and reveals three Well of Souls options. Inferred assumption: equipment Abyssal Bone variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
+      "assumption": "Equipment Abyssal Bone variants share Preserved Cranium's three-option Well of Souls reveal flow.",
       "actionType": "specialized",
       "activation": "arm",
       "engineAction": "gnawed_rib",
@@ -37655,8 +37750,8 @@
         "abyss-btn",
         "bone-btn"
       ],
-      "description": "Starts Desecration for an armour item and reveals three Well of Souls options. Inferred assumption: Gnawed and Preserved family variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
-      "assumption": "Gnawed and Preserved family variants share Preserved Cranium's three-option Well of Souls reveal flow.",
+      "description": "Starts Desecration for an armour item and reveals three Well of Souls options. Inferred assumption: equipment Abyssal Bone variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
+      "assumption": "Equipment Abyssal Bone variants share Preserved Cranium's three-option Well of Souls reveal flow.",
       "actionType": "specialized",
       "activation": "arm",
       "engineAction": "preserved_rib",
@@ -37719,6 +37814,90 @@
       ]
     },
     {
+      "craftId": "ancient-rib",
+      "id": "ancient-rib",
+      "sourceItemId": 4860,
+      "metadataKey": "Metadata/Items/Currency/AbyssalBenchTicketArmourHigh",
+      "sourceIdentityStatus": "normalized_exact",
+      "displayName": "Ancient Rib",
+      "category": "abyss",
+      "tab": "abyss",
+      "tabOrder": 60,
+      "displayOrder": 70,
+      "equipmentRelevance": "equipment_runtime",
+      "iconId": "ancient-rib",
+      "iconFallback": "AR",
+      "accentColor": "#5fd38a",
+      "cssClasses": [
+        "abyss-btn",
+        "bone-btn"
+      ],
+      "description": "Starts Desecration for an armour item, applies Minimum Modifier Level 40 to the Well pool, and reveals three options. Inferred assumption: equipment Abyssal Bone variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
+      "assumption": "Equipment Abyssal Bone variants share Preserved Cranium's three-option Well of Souls reveal flow.",
+      "actionType": "specialized",
+      "activation": "arm",
+      "engineAction": "ancient_rib",
+      "applicabilityPredicate": "boneDisabledReason",
+      "disabledReasonHandler": "boneDisabledReason",
+      "disabledReason": "",
+      "handler": "startDesecrationFlow",
+      "sourceHandler": "poe2_desecrate_high",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [
+        "Gloves",
+        "Boots",
+        "Body Armour",
+        "Helmet",
+        "Shield",
+        "Buckler",
+        "Focus"
+      ],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "boneId": "ancient_rib",
+        "boneFamily": "rib",
+        "revealCount": 3,
+        "maxItemLevel": null,
+        "minModifierLevel": 40
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:4860",
+        "data/normalized/crafting-items.json#method:43",
+        "https://poe2db.tw/us/Abyss",
+        "data/crafting/registry-expansion.json",
+        "data/normalized/modifiers.json#desecrated-requiredItemLevel",
+        "reports/poe2db-data-sources.md#hard-coded-bundle-catalogue",
+        "data/crafting/currency-index.json#source-item:4860"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "inferred_shared_desecration_transition",
+      "confidence": "inferred",
+      "historyTier": null,
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:expanded-abyss-bones"
+      ],
+      "supported": true,
+      "visible": true,
+      "targetGameVersion": "0.5.4",
+      "sourceClassifications": [
+        "crafting-method"
+      ],
+      "sourceTags": [
+        "currency",
+        "default"
+      ]
+    },
+    {
       "craftId": "gnawed-collarbone",
       "id": "gnawed-collarbone",
       "sourceItemId": 4861,
@@ -37737,8 +37916,8 @@
         "abyss-btn",
         "bone-btn"
       ],
-      "description": "Starts Desecration for jewellery of item level 64 or lower and reveals three Well of Souls options. Inferred assumption: Gnawed and Preserved family variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
-      "assumption": "Gnawed and Preserved family variants share Preserved Cranium's three-option Well of Souls reveal flow.",
+      "description": "Starts Desecration for jewellery of item level 64 or lower and reveals three Well of Souls options. Inferred assumption: equipment Abyssal Bone variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
+      "assumption": "Equipment Abyssal Bone variants share Preserved Cranium's three-option Well of Souls reveal flow.",
       "actionType": "specialized",
       "activation": "arm",
       "engineAction": "gnawed_collarbone",
@@ -37815,8 +37994,8 @@
         "abyss-btn",
         "bone-btn"
       ],
-      "description": "Starts Desecration for jewellery and reveals three Well of Souls options. Inferred assumption: Gnawed and Preserved family variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
-      "assumption": "Gnawed and Preserved family variants share Preserved Cranium's three-option Well of Souls reveal flow.",
+      "description": "Starts Desecration for jewellery and reveals three Well of Souls options. Inferred assumption: equipment Abyssal Bone variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
+      "assumption": "Equipment Abyssal Bone variants share Preserved Cranium's three-option Well of Souls reveal flow.",
       "actionType": "specialized",
       "activation": "arm",
       "engineAction": "preserved_collarbone",
@@ -37875,132 +38054,8 @@
       ]
     },
     {
-      "craftId": "source-item:4857",
-      "id": "source-item:4857",
-      "sourceItemId": 4857,
-      "metadataKey": "Metadata/Items/Currency/AbyssalBenchTicketWeaponHigh",
-      "sourceIdentityStatus": "normalized_exact",
-      "displayName": "Ancient Jawbone",
-      "category": "abyss",
-      "tab": "abyss",
-      "tabOrder": 60,
-      "displayOrder": 5857,
-      "equipmentRelevance": "equipment_crafting_candidate_unverified",
-      "iconId": "source-item-4857",
-      "iconFallback": "AJ",
-      "accentColor": "#5fd38a",
-      "cssClasses": [
-        "craft-item-btn",
-        "unsupported-item-card"
-      ],
-      "description": "Ancient Jawbone is retained in the target-version crafting inventory for audit.",
-      "actionType": "unsupported",
-      "activation": "none",
-      "engineAction": null,
-      "applicabilityPredicate": "unsupportedReason",
-      "disabledReasonHandler": "staticDisabledReason",
-      "disabledReason": "Mechanic blocked because Ancient Jawbone requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete.",
-      "handler": null,
-      "sourceHandler": null,
-      "triggeringAction": null,
-      "omenInteraction": {
-        "omenId": null,
-        "exclusiveGroup": null,
-        "consumeOn": "never",
-        "triggerCraftId": null
-      },
-      "corruptionRestriction": "unverified",
-      "validItemClasses": [],
-      "validItemTags": [],
-      "qualityRestriction": "none",
-      "socketRestriction": "none",
-      "operationOptions": {},
-      "sourceEvidence": [
-        "data/crafting/currency-index.json#source-item:4857",
-        "data/normalized/crafting-items.json#item:4857"
-      ],
-      "implementationStatus": "blocked_missing_data",
-      "verificationStatus": "not_verified",
-      "confidence": "blocked",
-      "historyTier": null,
-      "blocker": "Mechanic blocked because Ancient Jawbone requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete.",
-      "testFixtureIds": [],
-      "supported": false,
-      "visible": true,
-      "targetGameVersion": "0.5.4",
-      "sourceClassifications": [
-        "crafting-method"
-      ],
-      "sourceTags": [
-        "currency",
-        "default"
-      ]
-    },
-    {
-      "craftId": "source-item:4860",
-      "id": "source-item:4860",
-      "sourceItemId": 4860,
-      "metadataKey": "Metadata/Items/Currency/AbyssalBenchTicketArmourHigh",
-      "sourceIdentityStatus": "normalized_exact",
-      "displayName": "Ancient Rib",
-      "category": "abyss",
-      "tab": "abyss",
-      "tabOrder": 60,
-      "displayOrder": 5860,
-      "equipmentRelevance": "equipment_crafting_candidate_unverified",
-      "iconId": "source-item-4860",
-      "iconFallback": "AR",
-      "accentColor": "#5fd38a",
-      "cssClasses": [
-        "craft-item-btn",
-        "unsupported-item-card"
-      ],
-      "description": "Ancient Rib is retained in the target-version crafting inventory for audit.",
-      "actionType": "unsupported",
-      "activation": "none",
-      "engineAction": null,
-      "applicabilityPredicate": "unsupportedReason",
-      "disabledReasonHandler": "staticDisabledReason",
-      "disabledReason": "Mechanic blocked because Ancient Rib requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete.",
-      "handler": null,
-      "sourceHandler": null,
-      "triggeringAction": null,
-      "omenInteraction": {
-        "omenId": null,
-        "exclusiveGroup": null,
-        "consumeOn": "never",
-        "triggerCraftId": null
-      },
-      "corruptionRestriction": "unverified",
-      "validItemClasses": [],
-      "validItemTags": [],
-      "qualityRestriction": "none",
-      "socketRestriction": "none",
-      "operationOptions": {},
-      "sourceEvidence": [
-        "data/crafting/currency-index.json#source-item:4860",
-        "data/normalized/crafting-items.json#item:4860"
-      ],
-      "implementationStatus": "blocked_missing_data",
-      "verificationStatus": "not_verified",
-      "confidence": "blocked",
-      "historyTier": null,
-      "blocker": "Mechanic blocked because Ancient Rib requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete.",
-      "testFixtureIds": [],
-      "supported": false,
-      "visible": true,
-      "targetGameVersion": "0.5.4",
-      "sourceClassifications": [
-        "crafting-method"
-      ],
-      "sourceTags": [
-        "currency",
-        "default"
-      ]
-    },
-    {
-      "craftId": "source-item:4863",
-      "id": "source-item:4863",
+      "craftId": "ancient-collarbone",
+      "id": "ancient-collarbone",
       "sourceItemId": 4863,
       "metadataKey": "Metadata/Items/Currency/AbyssalBenchTicketJewelleryHigh",
       "sourceIdentityStatus": "normalized_exact",
@@ -38008,48 +38063,66 @@
       "category": "abyss",
       "tab": "abyss",
       "tabOrder": 60,
-      "displayOrder": 5863,
-      "equipmentRelevance": "equipment_crafting_candidate_unverified",
-      "iconId": "source-item-4863",
+      "displayOrder": 100,
+      "equipmentRelevance": "equipment_runtime",
+      "iconId": "ancient-collarbone",
       "iconFallback": "AC",
       "accentColor": "#5fd38a",
       "cssClasses": [
-        "craft-item-btn",
-        "unsupported-item-card"
+        "abyss-btn",
+        "bone-btn"
       ],
-      "description": "Ancient Collarbone is retained in the target-version crafting inventory for audit.",
-      "actionType": "unsupported",
-      "activation": "none",
-      "engineAction": null,
-      "applicabilityPredicate": "unsupportedReason",
-      "disabledReasonHandler": "staticDisabledReason",
-      "disabledReason": "Mechanic blocked because Ancient Collarbone requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete.",
-      "handler": null,
-      "sourceHandler": null,
+      "description": "Starts Desecration for jewellery, applies Minimum Modifier Level 40 to the Well pool, and reveals three options. Inferred assumption: equipment Abyssal Bone variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
+      "assumption": "Equipment Abyssal Bone variants share Preserved Cranium's three-option Well of Souls reveal flow.",
+      "actionType": "specialized",
+      "activation": "arm",
+      "engineAction": "ancient_collarbone",
+      "applicabilityPredicate": "boneDisabledReason",
+      "disabledReasonHandler": "boneDisabledReason",
+      "disabledReason": "",
+      "handler": "startDesecrationFlow",
+      "sourceHandler": "poe2_desecrate_high",
       "triggeringAction": null,
       "omenInteraction": {
         "omenId": null,
         "exclusiveGroup": null,
-        "consumeOn": "never",
+        "consumeOn": "successful_operation",
         "triggerCraftId": null
       },
-      "corruptionRestriction": "unverified",
-      "validItemClasses": [],
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [
+        "Amulet",
+        "Ring",
+        "Belt"
+      ],
       "validItemTags": [],
       "qualityRestriction": "none",
       "socketRestriction": "none",
-      "operationOptions": {},
+      "operationOptions": {
+        "boneId": "ancient_collarbone",
+        "boneFamily": "collarbone",
+        "revealCount": 3,
+        "maxItemLevel": null,
+        "minModifierLevel": 40
+      },
       "sourceEvidence": [
-        "data/crafting/currency-index.json#source-item:4863",
-        "data/normalized/crafting-items.json#item:4863"
+        "data/normalized/crafting-items.json#item:4863",
+        "data/normalized/crafting-items.json#method:41",
+        "https://poe2db.tw/us/Abyss",
+        "data/crafting/registry-expansion.json",
+        "data/normalized/modifiers.json#desecrated-requiredItemLevel",
+        "reports/poe2db-data-sources.md#hard-coded-bundle-catalogue",
+        "data/crafting/currency-index.json#source-item:4863"
       ],
-      "implementationStatus": "blocked_missing_data",
-      "verificationStatus": "not_verified",
-      "confidence": "blocked",
+      "implementationStatus": "implemented",
+      "verificationStatus": "inferred_shared_desecration_transition",
+      "confidence": "inferred",
       "historyTier": null,
-      "blocker": "Mechanic blocked because Ancient Collarbone requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete.",
-      "testFixtureIds": [],
-      "supported": false,
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:expanded-abyss-bones"
+      ],
+      "supported": true,
       "visible": true,
       "targetGameVersion": "0.5.4",
       "sourceClassifications": [
@@ -46382,8 +46455,8 @@
         "abyss-btn",
         "bone-btn"
       ],
-      "description": "Starts Desecration for a weapon or quiver of item level 64 or lower and reveals three Well of Souls options. Inferred assumption: Gnawed and Preserved family variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
-      "assumption": "Gnawed and Preserved family variants share Preserved Cranium's three-option Well of Souls reveal flow.",
+      "description": "Starts Desecration for a weapon or quiver of item level 64 or lower and reveals three Well of Souls options. Inferred assumption: equipment Abyssal Bone variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
+      "assumption": "Equipment Abyssal Bone variants share Preserved Cranium's three-option Well of Souls reveal flow.",
       "actionType": "specialized",
       "activation": "arm",
       "engineAction": "gnawed_jawbone",
@@ -46481,8 +46554,8 @@
         "abyss-btn",
         "bone-btn"
       ],
-      "description": "Starts Desecration for a weapon or quiver and reveals three Well of Souls options. Inferred assumption: Gnawed and Preserved family variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
-      "assumption": "Gnawed and Preserved family variants share Preserved Cranium's three-option Well of Souls reveal flow.",
+      "description": "Starts Desecration for a weapon or quiver and reveals three Well of Souls options. Inferred assumption: equipment Abyssal Bone variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
+      "assumption": "Equipment Abyssal Bone variants share Preserved Cranium's three-option Well of Souls reveal flow.",
       "actionType": "specialized",
       "activation": "arm",
       "engineAction": "preserved_jawbone",
@@ -46561,6 +46634,107 @@
       ],
       "sourceMissing": false
     },
+    "ancient-jawbone": {
+      "craftId": "ancient-jawbone",
+      "id": "ancient-jawbone",
+      "sourceItemId": 4857,
+      "metadataKey": "Metadata/Items/Currency/AbyssalBenchTicketWeaponHigh",
+      "sourceIdentityStatus": "normalized_exact",
+      "displayName": "Ancient Jawbone",
+      "category": "abyss",
+      "tab": "abyss",
+      "tabOrder": 60,
+      "displayOrder": 40,
+      "equipmentRelevance": "equipment_runtime",
+      "iconId": "ancient-jawbone",
+      "iconFallback": "AJ",
+      "accentColor": "#5fd38a",
+      "cssClasses": [
+        "abyss-btn",
+        "bone-btn"
+      ],
+      "description": "Starts Desecration for a weapon or quiver, applies Minimum Modifier Level 40 to the Well pool, and reveals three options. Inferred assumption: equipment Abyssal Bone variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
+      "assumption": "Equipment Abyssal Bone variants share Preserved Cranium's three-option Well of Souls reveal flow.",
+      "actionType": "specialized",
+      "activation": "arm",
+      "engineAction": "ancient_jawbone",
+      "applicabilityPredicate": "boneDisabledReason",
+      "disabledReasonHandler": "boneDisabledReason",
+      "disabledReason": "",
+      "handler": "startDesecrationFlow",
+      "sourceHandler": "poe2_desecrate_high",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [
+        "Claw",
+        "Dagger",
+        "Wand",
+        "One Hand Sword",
+        "One Hand Axe",
+        "One Hand Mace",
+        "Spear",
+        "Flail",
+        "Bow",
+        "Staff",
+        "Two Hand Sword",
+        "Two Hand Axe",
+        "Two Hand Mace",
+        "Quiver",
+        "Sceptre",
+        "Warstaff",
+        "Crossbow",
+        "Talisman"
+      ],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "boneId": "ancient_jawbone",
+        "boneFamily": "jawbone",
+        "revealCount": 3,
+        "maxItemLevel": null,
+        "minModifierLevel": 40
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:4857",
+        "data/normalized/crafting-items.json#method:42",
+        "https://poe2db.tw/us/Abyss",
+        "data/crafting/registry-expansion.json",
+        "data/normalized/modifiers.json#desecrated-requiredItemLevel",
+        "reports/poe2db-data-sources.md#hard-coded-bundle-catalogue",
+        "data/crafting/currency-index.json#source-item:4857"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "inferred_shared_desecration_transition",
+      "confidence": "inferred",
+      "historyTier": null,
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:expanded-abyss-bones"
+      ],
+      "supported": true,
+      "visible": true,
+      "targetGameVersion": "0.5.4",
+      "sourceClassifications": [
+        "crafting-method"
+      ],
+      "sourceTags": [
+        "currency",
+        "default"
+      ],
+      "classification": "implemented",
+      "reason": "Implemented by stable runtime craft ancient-jawbone.",
+      "sourceHandlers": [
+        "poe2_desecrate_high"
+      ],
+      "sourceMissing": false
+    },
     "gnawed-rib": {
       "craftId": "gnawed-rib",
       "id": "gnawed-rib",
@@ -46580,8 +46754,8 @@
         "abyss-btn",
         "bone-btn"
       ],
-      "description": "Starts Desecration for an armour item of item level 64 or lower and reveals three Well of Souls options. Inferred assumption: Gnawed and Preserved family variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
-      "assumption": "Gnawed and Preserved family variants share Preserved Cranium's three-option Well of Souls reveal flow.",
+      "description": "Starts Desecration for an armour item of item level 64 or lower and reveals three Well of Souls options. Inferred assumption: equipment Abyssal Bone variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
+      "assumption": "Equipment Abyssal Bone variants share Preserved Cranium's three-option Well of Souls reveal flow.",
       "actionType": "specialized",
       "activation": "arm",
       "engineAction": "gnawed_rib",
@@ -46668,8 +46842,8 @@
         "abyss-btn",
         "bone-btn"
       ],
-      "description": "Starts Desecration for an armour item and reveals three Well of Souls options. Inferred assumption: Gnawed and Preserved family variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
-      "assumption": "Gnawed and Preserved family variants share Preserved Cranium's three-option Well of Souls reveal flow.",
+      "description": "Starts Desecration for an armour item and reveals three Well of Souls options. Inferred assumption: equipment Abyssal Bone variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
+      "assumption": "Equipment Abyssal Bone variants share Preserved Cranium's three-option Well of Souls reveal flow.",
       "actionType": "specialized",
       "activation": "arm",
       "engineAction": "preserved_rib",
@@ -46737,6 +46911,96 @@
       ],
       "sourceMissing": false
     },
+    "ancient-rib": {
+      "craftId": "ancient-rib",
+      "id": "ancient-rib",
+      "sourceItemId": 4860,
+      "metadataKey": "Metadata/Items/Currency/AbyssalBenchTicketArmourHigh",
+      "sourceIdentityStatus": "normalized_exact",
+      "displayName": "Ancient Rib",
+      "category": "abyss",
+      "tab": "abyss",
+      "tabOrder": 60,
+      "displayOrder": 70,
+      "equipmentRelevance": "equipment_runtime",
+      "iconId": "ancient-rib",
+      "iconFallback": "AR",
+      "accentColor": "#5fd38a",
+      "cssClasses": [
+        "abyss-btn",
+        "bone-btn"
+      ],
+      "description": "Starts Desecration for an armour item, applies Minimum Modifier Level 40 to the Well pool, and reveals three options. Inferred assumption: equipment Abyssal Bone variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
+      "assumption": "Equipment Abyssal Bone variants share Preserved Cranium's three-option Well of Souls reveal flow.",
+      "actionType": "specialized",
+      "activation": "arm",
+      "engineAction": "ancient_rib",
+      "applicabilityPredicate": "boneDisabledReason",
+      "disabledReasonHandler": "boneDisabledReason",
+      "disabledReason": "",
+      "handler": "startDesecrationFlow",
+      "sourceHandler": "poe2_desecrate_high",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [
+        "Gloves",
+        "Boots",
+        "Body Armour",
+        "Helmet",
+        "Shield",
+        "Buckler",
+        "Focus"
+      ],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "boneId": "ancient_rib",
+        "boneFamily": "rib",
+        "revealCount": 3,
+        "maxItemLevel": null,
+        "minModifierLevel": 40
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:4860",
+        "data/normalized/crafting-items.json#method:43",
+        "https://poe2db.tw/us/Abyss",
+        "data/crafting/registry-expansion.json",
+        "data/normalized/modifiers.json#desecrated-requiredItemLevel",
+        "reports/poe2db-data-sources.md#hard-coded-bundle-catalogue",
+        "data/crafting/currency-index.json#source-item:4860"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "inferred_shared_desecration_transition",
+      "confidence": "inferred",
+      "historyTier": null,
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:expanded-abyss-bones"
+      ],
+      "supported": true,
+      "visible": true,
+      "targetGameVersion": "0.5.4",
+      "sourceClassifications": [
+        "crafting-method"
+      ],
+      "sourceTags": [
+        "currency",
+        "default"
+      ],
+      "classification": "implemented",
+      "reason": "Implemented by stable runtime craft ancient-rib.",
+      "sourceHandlers": [
+        "poe2_desecrate_high"
+      ],
+      "sourceMissing": false
+    },
     "gnawed-collarbone": {
       "craftId": "gnawed-collarbone",
       "id": "gnawed-collarbone",
@@ -46756,8 +47020,8 @@
         "abyss-btn",
         "bone-btn"
       ],
-      "description": "Starts Desecration for jewellery of item level 64 or lower and reveals three Well of Souls options. Inferred assumption: Gnawed and Preserved family variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
-      "assumption": "Gnawed and Preserved family variants share Preserved Cranium's three-option Well of Souls reveal flow.",
+      "description": "Starts Desecration for jewellery of item level 64 or lower and reveals three Well of Souls options. Inferred assumption: equipment Abyssal Bone variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
+      "assumption": "Equipment Abyssal Bone variants share Preserved Cranium's three-option Well of Souls reveal flow.",
       "actionType": "specialized",
       "activation": "arm",
       "engineAction": "gnawed_collarbone",
@@ -46840,8 +47104,8 @@
         "abyss-btn",
         "bone-btn"
       ],
-      "description": "Starts Desecration for jewellery and reveals three Well of Souls options. Inferred assumption: Gnawed and Preserved family variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
-      "assumption": "Gnawed and Preserved family variants share Preserved Cranium's three-option Well of Souls reveal flow.",
+      "description": "Starts Desecration for jewellery and reveals three Well of Souls options. Inferred assumption: equipment Abyssal Bone variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
+      "assumption": "Equipment Abyssal Bone variants share Preserved Cranium's three-option Well of Souls reveal flow.",
       "actionType": "specialized",
       "activation": "arm",
       "engineAction": "preserved_collarbone",
@@ -46902,6 +47166,92 @@
       "reason": "Implemented by stable runtime craft preserved-collarbone.",
       "sourceHandlers": [
         "poe2_desecrate_mid"
+      ],
+      "sourceMissing": false
+    },
+    "ancient-collarbone": {
+      "craftId": "ancient-collarbone",
+      "id": "ancient-collarbone",
+      "sourceItemId": 4863,
+      "metadataKey": "Metadata/Items/Currency/AbyssalBenchTicketJewelleryHigh",
+      "sourceIdentityStatus": "normalized_exact",
+      "displayName": "Ancient Collarbone",
+      "category": "abyss",
+      "tab": "abyss",
+      "tabOrder": 60,
+      "displayOrder": 100,
+      "equipmentRelevance": "equipment_runtime",
+      "iconId": "ancient-collarbone",
+      "iconFallback": "AC",
+      "accentColor": "#5fd38a",
+      "cssClasses": [
+        "abyss-btn",
+        "bone-btn"
+      ],
+      "description": "Starts Desecration for jewellery, applies Minimum Modifier Level 40 to the Well pool, and reveals three options. Inferred assumption: equipment Abyssal Bone variants use the same three-option Well of Souls reveal flow as Preserved Cranium.",
+      "assumption": "Equipment Abyssal Bone variants share Preserved Cranium's three-option Well of Souls reveal flow.",
+      "actionType": "specialized",
+      "activation": "arm",
+      "engineAction": "ancient_collarbone",
+      "applicabilityPredicate": "boneDisabledReason",
+      "disabledReasonHandler": "boneDisabledReason",
+      "disabledReason": "",
+      "handler": "startDesecrationFlow",
+      "sourceHandler": "poe2_desecrate_high",
+      "triggeringAction": null,
+      "omenInteraction": {
+        "omenId": null,
+        "exclusiveGroup": null,
+        "consumeOn": "successful_operation",
+        "triggerCraftId": null
+      },
+      "corruptionRestriction": "blocked_if_corrupted_or_sanctified",
+      "validItemClasses": [
+        "Amulet",
+        "Ring",
+        "Belt"
+      ],
+      "validItemTags": [],
+      "qualityRestriction": "none",
+      "socketRestriction": "none",
+      "operationOptions": {
+        "boneId": "ancient_collarbone",
+        "boneFamily": "collarbone",
+        "revealCount": 3,
+        "maxItemLevel": null,
+        "minModifierLevel": 40
+      },
+      "sourceEvidence": [
+        "data/normalized/crafting-items.json#item:4863",
+        "data/normalized/crafting-items.json#method:41",
+        "https://poe2db.tw/us/Abyss",
+        "data/crafting/registry-expansion.json",
+        "data/normalized/modifiers.json#desecrated-requiredItemLevel",
+        "reports/poe2db-data-sources.md#hard-coded-bundle-catalogue",
+        "data/crafting/currency-index.json#source-item:4863"
+      ],
+      "implementationStatus": "implemented",
+      "verificationStatus": "inferred_shared_desecration_transition",
+      "confidence": "inferred",
+      "historyTier": null,
+      "blocker": null,
+      "testFixtureIds": [
+        "validation:expanded-abyss-bones"
+      ],
+      "supported": true,
+      "visible": true,
+      "targetGameVersion": "0.5.4",
+      "sourceClassifications": [
+        "crafting-method"
+      ],
+      "sourceTags": [
+        "currency",
+        "default"
+      ],
+      "classification": "implemented",
+      "reason": "Implemented by stable runtime craft ancient-collarbone.",
+      "sourceHandlers": [
+        "poe2_desecrate_high"
       ],
       "sourceMissing": false
     },
@@ -96606,9 +96956,11 @@
       "sourceItemId": 4857,
       "metadataKey": "Metadata/Items/Currency/AbyssalBenchTicketWeaponHigh",
       "displayName": "Ancient Jawbone",
-      "classification": "blocked_missing_data",
-      "reason": "Source identity is known, but a complete target-version applicability/mutation specification is not yet implemented.",
-      "runtimeCraftIds": [],
+      "classification": "implemented",
+      "reason": "Implemented by stable runtime craft ancient-jawbone.",
+      "runtimeCraftIds": [
+        "ancient-jawbone"
+      ],
       "sourceClassifications": [
         "crafting-method"
       ],
@@ -96723,9 +97075,11 @@
       "sourceItemId": 4860,
       "metadataKey": "Metadata/Items/Currency/AbyssalBenchTicketArmourHigh",
       "displayName": "Ancient Rib",
-      "classification": "blocked_missing_data",
-      "reason": "Source identity is known, but a complete target-version applicability/mutation specification is not yet implemented.",
-      "runtimeCraftIds": [],
+      "classification": "implemented",
+      "reason": "Implemented by stable runtime craft ancient-rib.",
+      "runtimeCraftIds": [
+        "ancient-rib"
+      ],
       "sourceClassifications": [
         "crafting-method"
       ],
@@ -96840,9 +97194,11 @@
       "sourceItemId": 4863,
       "metadataKey": "Metadata/Items/Currency/AbyssalBenchTicketJewelleryHigh",
       "displayName": "Ancient Collarbone",
-      "classification": "blocked_missing_data",
-      "reason": "Source identity is known, but a complete target-version applicability/mutation specification is not yet implemented.",
-      "runtimeCraftIds": [],
+      "classification": "implemented",
+      "reason": "Implemented by stable runtime craft ancient-collarbone.",
+      "runtimeCraftIds": [
+        "ancient-collarbone"
+      ],
       "sourceClassifications": [
         "crafting-method"
       ],

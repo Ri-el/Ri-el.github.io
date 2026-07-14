@@ -1,5 +1,19 @@
 window.DESECRATED_MODS_RAW = {
-  "_note": "Real PoE2 0.3 jewel Desecrated modifier pool.",
+  "_note": "Retained PoE2 Desecrated display pools. Display templates originate from the legacy 0.3 pool; 0.5.4-targeted normalized modifier levels are reconciled separately and do not claim refreshed text or weights.",
+  "modifierLevelDefaults": {
+    "jewelTypes": {
+      "requiredItemLevel": 1,
+      "normalizedModifierRecords": 32,
+      "retainedPoolRows": 20,
+      "evidence": "data/normalized/modifiers.json#desecrated=true"
+    },
+    "bases": {
+      "requiredItemLevel": 65,
+      "normalizedModifierRecords": 193,
+      "retainedPoolRows": 680,
+      "evidence": "data/normalized/modifiers.json#desecrated=true"
+    }
+  },
   "bones": {
     "preserved_cranium": {
       "name": "Preserved Cranium",

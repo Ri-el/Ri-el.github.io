@@ -496,10 +496,11 @@ const FIXED_SNAPSHOT = {
 	iterations: 30000,
 	seed: 542026,
 	// PoE2 mechanics checkpoint: the reviewed event stream now includes inferred
-	// per-base socket-cap state plus the user-verified Desecrated removal and
-	// pending-Well cleanup semantics. Focused tests cover Essence/socketable RNG;
-	// this golden still guards the legacy 56-pool action stream and invariants.
-	digest: '1f765c8a805e2c9378c702562347e35aeb71331b28e2ff936ccb8ed5152b3ca1',
+	// per-base socket-cap state, persisted Desecrated modifier levels, Ancient
+	// Bone level floors, and the user-verified pending-Well cleanup semantics.
+	// Focused tests cover Essence/socketable RNG; this golden still guards the
+	// legacy 56-pool action stream and invariants.
+	digest: '4ae6fdf09d9fb5f3b9cd55ff16749b0fb01a5c79500e89bf593799d7cc868e88',
 }
 const runHash = createHash('sha256')
 function hashEvent(event) {

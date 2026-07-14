@@ -206,7 +206,9 @@ function desecrationTransactionFixture() {
     modGroup: name, name, tier: 'D', weight: 100,
     modLine: '+{0} desecrated test', min: 1, max: 2,
   });
-  const desecrated = { bases: { [baseType]: {
+  const desecrated = {
+    modifierLevelDefaults: { bases: { requiredItemLevel: 65 } },
+    bases: { [baseType]: {
     prefixes: ['DP0', 'DP1', 'DP2'].map(makeDesecrated),
     suffixes: ['DS0', 'DS1', 'DS2'].map(makeDesecrated),
   } } };
@@ -1348,17 +1350,62 @@ test('validation:expanded-crafting-omens', () => {
   assert.deepEqual(limited.getItem(), beforeExalt);
 });
 
+test('normalized Desecrated modifier levels cover every retained Well pool row', () => {
+  const normalizedDesecrated = normalizedModifiers.modifiers.filter(modifier => modifier.desecrated);
+  const levels = Object.fromEntries([...new Set(normalizedDesecrated.map(modifier => modifier.requiredItemLevel))]
+    .sort((left, right) => left - right)
+    .map(level => [level, normalizedDesecrated.filter(modifier => modifier.requiredItemLevel === level).length]));
+  assert.deepEqual(levels, { 1: 32, 65: 193 });
+  const jewelClassIds = new Set(normalizedBaseItems.classes
+    .filter(sourceClass => sourceClass.itemClass === 'Jewel')
+    .map(sourceClass => sourceClass.id));
+  assert(normalizedDesecrated.filter(modifier => modifier.requiredItemLevel === 1)
+    .every(modifier => modifier.spawnWeights.every(([classId]) => jewelClassIds.has(classId))));
+  assert(normalizedDesecrated.filter(modifier => modifier.requiredItemLevel === 65)
+    .every(modifier => modifier.spawnWeights.every(([classId]) => !jewelClassIds.has(classId))));
+
+  const countRows = pools => Object.values(pools || {})
+    .reduce((sum, pool) => sum + (pool.prefixes || []).length + (pool.suffixes || []).length, 0);
+  assert.equal(countRows(desecratedData.jewelTypes), 20);
+  assert.equal(countRows(desecratedData.bases), 680);
+  assert.equal(desecratedData.modifierLevelDefaults.jewelTypes.requiredItemLevel, 1);
+  assert.equal(desecratedData.modifierLevelDefaults.jewelTypes.normalizedModifierRecords, 32);
+  assert.equal(desecratedData.modifierLevelDefaults.jewelTypes.retainedPoolRows, 20);
+  assert.equal(desecratedData.modifierLevelDefaults.bases.requiredItemLevel, 65);
+  assert.equal(desecratedData.modifierLevelDefaults.bases.normalizedModifierRecords, 193);
+  assert.equal(desecratedData.modifierLevelDefaults.bases.retainedPoolRows, 680);
+});
+
+test('Ancient Bone modifier-level filtering preserves group fallback and rejects unknown levels', () => {
+  const fixture = desecrationTransactionFixture();
+  const engine = new Engine(fixture.data, fixture.baseType, fixture.desecrated);
+  const filtered = engine._filterDesecratedByMinModifierLevel([
+    { modGroup: 'HasHigh', ilvlReq: 10 },
+    { modGroup: 'HasHigh', ilvlReq: 65 },
+    { modGroup: 'Fallback', ilvlReq: 30 },
+    { modGroup: 'Fallback', ilvlReq: 1 },
+    { modGroup: 'Unknown' },
+  ], 40);
+  assert.deepEqual(filtered.map(candidate => [candidate.modGroup, candidate.ilvlReq]), [
+    ['HasHigh', 65],
+    ['Fallback', 30],
+  ]);
+});
+
 test('validation:expanded-abyss-bones', () => {
   const fixture = desecrationTransactionFixture();
   const cases = [
-    ['gnawed_jawbone', 'Bow', 64],
-    ['preserved_jawbone', 'Bow', 83],
-    ['gnawed_rib', 'Helmet', 64],
-    ['preserved_rib', 'Helmet', 83],
-    ['gnawed_collarbone', 'Amulet', 64],
-    ['preserved_collarbone', 'Amulet', 83],
+    ['gnawed_jawbone', 'Bow', 64, 0],
+    ['preserved_jawbone', 'Bow', 83, 0],
+    ['ancient_jawbone', 'Bow', 83, 40],
+    ['gnawed_rib', 'Helmet', 64, 0],
+    ['preserved_rib', 'Helmet', 83, 0],
+    ['ancient_rib', 'Helmet', 83, 40],
+    ['gnawed_collarbone', 'Amulet', 64, 0],
+    ['preserved_collarbone', 'Amulet', 83, 0],
+    ['ancient_collarbone', 'Amulet', 83, 40],
   ];
-  for (const [bone, itemClass, ilvl] of cases) {
+  for (const [bone, itemClass, ilvl, minModLevel] of cases) {
     const engine = new Engine(fixture.data, fixture.baseType, fixture.desecrated);
     const item = rareItem(fixture.baseType, [record('P0', 1)], [record('S0', 1)]);
     item.itemClass = itemClass;
@@ -1369,6 +1416,10 @@ test('validation:expanded-abyss-bones', () => {
     assert.equal(result.success, true, bone);
     assert.equal(result.options.length, 3, bone);
     assert.equal(engine.getPendingDesecration().bone, bone);
+    assert.equal(engine.getPendingDesecration().minModLevel, minModLevel, bone);
+    if (minModLevel > 0) {
+      assert(result.options.every(option => option.ilvlReq >= minModLevel), bone);
+    }
     assert.equal(engine.cancelDesecration().success, true);
   }
 
@@ -1394,7 +1445,7 @@ test('validation:expanded-abyss-bones', () => {
   assert.match(wrongResult.error, /requires an Armour base/i);
   assert.deepEqual(wrongFamily.getItem(), beforeWrong);
 
-  assert.equal(wrongFamily.startDesecration({ bone: 'ancient_collarbone' }).success, false);
+  assert.equal(wrongFamily.startDesecration({ bone: 'unretained_bone' }).success, false);
 });
 
 test('schema v5 history migration preserves exact variants and isolates ambiguous base counts', () => {

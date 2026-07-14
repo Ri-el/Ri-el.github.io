@@ -20,11 +20,11 @@ Regenerate with `node tools/build-asset-requirements.mjs` and verify with `node 
 | Mapped concrete-base assets | 1759 | 1 | 1758 |
 | Known craft-icon assets | 521 | 11 | 510 |
 | Current craft-icon assets | 512 | 11 | 501 |
-| Supported craft-icon assets | 36 | 10 | 26 |
+| Supported craft-icon assets | 405 | 10 | 395 |
 
 - Simulator pools: **65**
 - Mapped concrete bases: **1759** (1757 selectable; 2 unselectable)
-- Craft definitions: **531 known**, **522 current**, **46 supported**, **522 visible**
+- Craft definitions: **531 known**, **522 current**, **415 supported**, **522 visible**
 
 ## Concrete-base assets
 
@@ -1801,16 +1801,100 @@ All known definitions are grouped by their shared `iconId`. Definition entries i
 | `abyss-essence` | `assets/icons/abyss-essence.png` | missing | 1 | 1 | 1 | `essence-abyss`; source `143` — Essence of the Abyss (abyss; implemented; supported; current) |
 | `abyssal-echoes` | `assets/icons/abyssal-echoes.png` | missing | 1 | 1 | 1 | `omen-abyssal-echoes`; source `4449` — Omen of Abyssal Echoes (ritual; implemented; supported; current) |
 | `alchemy` | `assets/icons/alchemy.png` | existing | 1 | 1 | 1 | `alchemy`; source `9` — Orb of Alchemy (currency; implemented; supported; current) |
+| `ancient-collarbone` | `assets/icons/ancient-collarbone.png` | missing | 1 | 1 | 1 | `ancient-collarbone`; source `4863` — Ancient Collarbone (abyss; implemented; supported; current) |
+| `ancient-jawbone` | `assets/icons/ancient-jawbone.png` | missing | 1 | 1 | 1 | `ancient-jawbone`; source `4857` — Ancient Jawbone (abyss; implemented; supported; current) |
+| `ancient-rib` | `assets/icons/ancient-rib.png` | missing | 1 | 1 | 1 | `ancient-rib`; source `4860` — Ancient Rib (abyss; implemented; supported; current) |
 | `annulment` | `assets/icons/annulment.png` | existing | 1 | 1 | 1 | `annulment`; source `196` — Orb of Annulment (currency; implemented; supported; current) |
+| `artificers-orb` | `assets/icons/artificers-orb.png` | missing | 1 | 1 | 1 | `artificers-orb`; source `35` — Artificer's Orb (socketing; implemented; supported; current) |
 | `augmentation` | `assets/icons/augmentation.png` | existing | 3 | 3 | 3 | `augmentation`; source `24` — Orb of Augmentation (currency; implemented; supported; current)<br>`greater-augmentation`; source `25` — Greater Orb of Augmentation (currency; implemented; supported; current)<br>`perfect-augmentation`; source `26` — Perfect Orb of Augmentation (currency; implemented; supported; current) |
 | `blackblooded` | `assets/icons/blackblooded.png` | missing | 1 | 1 | 0 | `omen-blackblooded`; source `4452` — Omen of the Blackblooded (ritual; blocked_missing_data; current) |
-| `breach-essence` | `assets/icons/breach-essence.png` | missing | 1 | 1 | 0 | `essence-breach`; source `144` — Essence of the Breach (breach; blocked_missing_data; current) |
+| `breach-essence` | `assets/icons/breach-essence.png` | missing | 1 | 1 | 1 | `essence-breach`; source `144` — Essence of the Breach (breach; implemented; supported; current) |
 | `chaos` | `assets/icons/chaos.png` | existing | 3 | 3 | 3 | `chaos`; source `3` — Chaos Orb (currency; implemented; supported; current)<br>`greater-chaos`; source `4` — Greater Chaos Orb (currency; implemented; supported; current)<br>`perfect-chaos`; source `5` — Perfect Chaos Orb (currency; implemented; supported; current) |
 | `cranium` | `assets/icons/cranium.png` | missing | 1 | 1 | 1 | `preserved-cranium`; source `4864` — Preserved Cranium (abyss; implemented; supported; current) |
 | `dextral-annulment` | `assets/icons/dextral-annulment.png` | missing | 1 | 1 | 1 | `omen-dextral-annulment`; source `4428` — Omen of Dextral Annulment (ritual; implemented; supported; current) |
 | `dextral-erasure` | `assets/icons/dextral-erasure.png` | missing | 1 | 1 | 1 | `omen-dextral-erasure`; source `4417` — Omen of Dextral Erasure (ritual; implemented; supported; current) |
 | `dextral-necromancy` | `assets/icons/dextral-necromancy.png` | missing | 1 | 1 | 1 | `omen-dextral-necromancy`; source `4456` — Omen of Dextral Necromancy (ritual; implemented; supported; current) |
 | `divine` | `assets/icons/divine.png` | existing | 1 | 1 | 1 | `divine`; source `36` — Divine Orb (currency; implemented; supported; current) |
+| `essence-100` | `assets/icons/essence-100.png` | missing | 1 | 1 | 1 | `essence-100`; source `100` — Essence of the Mind (essences; implemented; supported; current) |
+| `essence-101` | `assets/icons/essence-101.png` | missing | 1 | 1 | 1 | `essence-101`; source `101` — Essence of Enhancement (essences; implemented; supported; current) |
+| `essence-102` | `assets/icons/essence-102.png` | missing | 1 | 1 | 1 | `essence-102`; source `102` — Essence of Abrasion (essences; implemented; supported; current) |
+| `essence-103` | `assets/icons/essence-103.png` | missing | 1 | 1 | 1 | `essence-103`; source `103` — Essence of Flames (essences; implemented; supported; current) |
+| `essence-104` | `assets/icons/essence-104.png` | missing | 1 | 1 | 1 | `essence-104`; source `104` — Essence of Ice (essences; implemented; supported; current) |
+| `essence-105` | `assets/icons/essence-105.png` | missing | 1 | 1 | 1 | `essence-105`; source `105` — Essence of Electricity (essences; implemented; supported; current) |
+| `essence-106` | `assets/icons/essence-106.png` | missing | 1 | 1 | 1 | `essence-106`; source `106` — Essence of Ruin (essences; implemented; supported; current) |
+| `essence-107` | `assets/icons/essence-107.png` | missing | 1 | 1 | 1 | `essence-107`; source `107` — Essence of Battle (essences; implemented; supported; current) |
+| `essence-108` | `assets/icons/essence-108.png` | missing | 1 | 1 | 1 | `essence-108`; source `108` — Essence of Sorcery (essences; implemented; supported; current) |
+| `essence-109` | `assets/icons/essence-109.png` | missing | 1 | 1 | 1 | `essence-109`; source `109` — Essence of Haste (essences; implemented; supported; current) |
+| `essence-110` | `assets/icons/essence-110.png` | missing | 1 | 1 | 1 | `essence-110`; source `110` — Essence of the Infinite (essences; implemented; supported; current) |
+| `essence-111` | `assets/icons/essence-111.png` | missing | 1 | 1 | 1 | `essence-111`; source `111` — Greater Essence of the Body (essences; implemented; supported; current) |
+| `essence-112` | `assets/icons/essence-112.png` | missing | 1 | 1 | 1 | `essence-112`; source `112` — Greater Essence of the Mind (essences; implemented; supported; current) |
+| `essence-113` | `assets/icons/essence-113.png` | missing | 1 | 1 | 1 | `essence-113`; source `113` — Greater Essence of Enhancement (essences; implemented; supported; current) |
+| `essence-114` | `assets/icons/essence-114.png` | missing | 1 | 1 | 1 | `essence-114`; source `114` — Greater Essence of Abrasion (essences; implemented; supported; current) |
+| `essence-115` | `assets/icons/essence-115.png` | missing | 1 | 1 | 1 | `essence-115`; source `115` — Greater Essence of Flames (essences; implemented; supported; current) |
+| `essence-116` | `assets/icons/essence-116.png` | missing | 1 | 1 | 1 | `essence-116`; source `116` — Greater Essence of Ice (essences; implemented; supported; current) |
+| `essence-117` | `assets/icons/essence-117.png` | missing | 1 | 1 | 1 | `essence-117`; source `117` — Greater Essence of Electricity (essences; implemented; supported; current) |
+| `essence-118` | `assets/icons/essence-118.png` | missing | 1 | 1 | 1 | `essence-118`; source `118` — Greater Essence of Ruin (essences; implemented; supported; current) |
+| `essence-119` | `assets/icons/essence-119.png` | missing | 1 | 1 | 1 | `essence-119`; source `119` — Greater Essence of Battle (essences; implemented; supported; current) |
+| `essence-120` | `assets/icons/essence-120.png` | missing | 1 | 1 | 1 | `essence-120`; source `120` — Greater Essence of Sorcery (essences; implemented; supported; current) |
+| `essence-121` | `assets/icons/essence-121.png` | missing | 1 | 1 | 1 | `essence-121`; source `121` — Greater Essence of Haste (essences; implemented; supported; current) |
+| `essence-122` | `assets/icons/essence-122.png` | missing | 1 | 1 | 1 | `essence-122`; source `122` — Greater Essence of the Infinite (essences; implemented; supported; current) |
+| `essence-123` | `assets/icons/essence-123.png` | missing | 1 | 1 | 1 | `essence-123`; source `123` — Perfect Essence of the Body (essences; implemented; supported; current) |
+| `essence-124` | `assets/icons/essence-124.png` | missing | 1 | 1 | 1 | `essence-124`; source `124` — Perfect Essence of the Mind (essences; implemented; supported; current) |
+| `essence-125` | `assets/icons/essence-125.png` | missing | 1 | 1 | 1 | `essence-125`; source `125` — Perfect Essence of Enhancement (essences; implemented; supported; current) |
+| `essence-126` | `assets/icons/essence-126.png` | missing | 1 | 1 | 1 | `essence-126`; source `126` — Perfect Essence of Abrasion (essences; implemented; supported; current) |
+| `essence-127` | `assets/icons/essence-127.png` | missing | 1 | 1 | 1 | `essence-127`; source `127` — Perfect Essence of Flames (essences; implemented; supported; current) |
+| `essence-128` | `assets/icons/essence-128.png` | missing | 1 | 1 | 1 | `essence-128`; source `128` — Perfect Essence of Ice (essences; implemented; supported; current) |
+| `essence-129` | `assets/icons/essence-129.png` | missing | 1 | 1 | 1 | `essence-129`; source `129` — Perfect Essence of Electricity (essences; implemented; supported; current) |
+| `essence-130` | `assets/icons/essence-130.png` | missing | 1 | 1 | 1 | `essence-130`; source `130` — Perfect Essence of Ruin (essences; implemented; supported; current) |
+| `essence-131` | `assets/icons/essence-131.png` | missing | 1 | 1 | 1 | `essence-131`; source `131` — Perfect Essence of Battle (essences; implemented; supported; current) |
+| `essence-132` | `assets/icons/essence-132.png` | missing | 1 | 1 | 1 | `essence-132`; source `132` — Perfect Essence of Sorcery (essences; implemented; supported; current) |
+| `essence-133` | `assets/icons/essence-133.png` | missing | 1 | 1 | 1 | `essence-133`; source `133` — Perfect Essence of Haste (essences; implemented; supported; current) |
+| `essence-134` | `assets/icons/essence-134.png` | missing | 1 | 1 | 1 | `essence-134`; source `134` — Perfect Essence of the Infinite (essences; implemented; supported; current) |
+| `essence-135` | `assets/icons/essence-135.png` | missing | 1 | 1 | 1 | `essence-135`; source `135` — Lesser Essence of Seeking (essences; implemented; supported; current) |
+| `essence-136` | `assets/icons/essence-136.png` | missing | 1 | 1 | 1 | `essence-136`; source `136` — Essence of Seeking (essences; implemented; supported; current) |
+| `essence-137` | `assets/icons/essence-137.png` | missing | 1 | 1 | 1 | `essence-137`; source `137` — Greater Essence of Seeking (essences; implemented; supported; current) |
+| `essence-138` | `assets/icons/essence-138.png` | missing | 1 | 1 | 1 | `essence-138`; source `138` — Perfect Essence of Seeking (essences; implemented; supported; current) |
+| `essence-139` | `assets/icons/essence-139.png` | missing | 1 | 1 | 1 | `essence-139`; source `139` — Essence of Hysteria (essences; implemented; supported; current) |
+| `essence-140` | `assets/icons/essence-140.png` | missing | 1 | 1 | 1 | `essence-140`; source `140` — Essence of Delirium (essences; implemented; supported; current) |
+| `essence-141` | `assets/icons/essence-141.png` | missing | 1 | 1 | 1 | `essence-141`; source `141` — Essence of Horror (essences; implemented; supported; current) |
+| `essence-142` | `assets/icons/essence-142.png` | missing | 1 | 1 | 1 | `essence-142`; source `142` — Essence of Insanity (essences; implemented; supported; current) |
+| `essence-145` | `assets/icons/essence-145.png` | missing | 1 | 1 | 1 | `essence-145`; source `145` — Lesser Essence of Insulation (essences; implemented; supported; current) |
+| `essence-146` | `assets/icons/essence-146.png` | missing | 1 | 1 | 1 | `essence-146`; source `146` — Essence of Insulation (essences; implemented; supported; current) |
+| `essence-147` | `assets/icons/essence-147.png` | missing | 1 | 1 | 1 | `essence-147`; source `147` — Greater Essence of Insulation (essences; implemented; supported; current) |
+| `essence-148` | `assets/icons/essence-148.png` | missing | 1 | 1 | 1 | `essence-148`; source `148` — Perfect Essence of Insulation (essences; implemented; supported; current) |
+| `essence-149` | `assets/icons/essence-149.png` | missing | 1 | 1 | 1 | `essence-149`; source `149` — Lesser Essence of Thawing (essences; implemented; supported; current) |
+| `essence-150` | `assets/icons/essence-150.png` | missing | 1 | 1 | 1 | `essence-150`; source `150` — Essence of Thawing (essences; implemented; supported; current) |
+| `essence-151` | `assets/icons/essence-151.png` | missing | 1 | 1 | 1 | `essence-151`; source `151` — Greater Essence of Thawing (essences; implemented; supported; current) |
+| `essence-152` | `assets/icons/essence-152.png` | missing | 1 | 1 | 1 | `essence-152`; source `152` — Perfect Essence of Thawing (essences; implemented; supported; current) |
+| `essence-153` | `assets/icons/essence-153.png` | missing | 1 | 1 | 1 | `essence-153`; source `153` — Lesser Essence of Grounding (essences; implemented; supported; current) |
+| `essence-154` | `assets/icons/essence-154.png` | missing | 1 | 1 | 1 | `essence-154`; source `154` — Essence of Grounding (essences; implemented; supported; current) |
+| `essence-155` | `assets/icons/essence-155.png` | missing | 1 | 1 | 1 | `essence-155`; source `155` — Greater Essence of Grounding (essences; implemented; supported; current) |
+| `essence-156` | `assets/icons/essence-156.png` | missing | 1 | 1 | 1 | `essence-156`; source `156` — Perfect Essence of Grounding (essences; implemented; supported; current) |
+| `essence-157` | `assets/icons/essence-157.png` | missing | 1 | 1 | 1 | `essence-157`; source `157` — Lesser Essence of Alacrity (essences; implemented; supported; current) |
+| `essence-158` | `assets/icons/essence-158.png` | missing | 1 | 1 | 1 | `essence-158`; source `158` — Essence of Alacrity (essences; implemented; supported; current) |
+| `essence-159` | `assets/icons/essence-159.png` | missing | 1 | 1 | 1 | `essence-159`; source `159` — Greater Essence of Alacrity (essences; implemented; supported; current) |
+| `essence-160` | `assets/icons/essence-160.png` | missing | 1 | 1 | 1 | `essence-160`; source `160` — Perfect Essence of Alacrity (essences; implemented; supported; current) |
+| `essence-161` | `assets/icons/essence-161.png` | missing | 1 | 1 | 1 | `essence-161`; source `161` — Lesser Essence of Opulence (essences; implemented; supported; current) |
+| `essence-162` | `assets/icons/essence-162.png` | missing | 1 | 1 | 1 | `essence-162`; source `162` — Essence of Opulence (essences; implemented; supported; current) |
+| `essence-163` | `assets/icons/essence-163.png` | missing | 1 | 1 | 1 | `essence-163`; source `163` — Greater Essence of Opulence (essences; implemented; supported; current) |
+| `essence-164` | `assets/icons/essence-164.png` | missing | 1 | 1 | 1 | `essence-164`; source `164` — Perfect Essence of Opulence (essences; implemented; supported; current) |
+| `essence-165` | `assets/icons/essence-165.png` | missing | 1 | 1 | 1 | `essence-165`; source `165` — Lesser Essence of Command (essences; implemented; supported; current) |
+| `essence-166` | `assets/icons/essence-166.png` | missing | 1 | 1 | 1 | `essence-166`; source `166` — Essence of Command (essences; implemented; supported; current) |
+| `essence-167` | `assets/icons/essence-167.png` | missing | 1 | 1 | 1 | `essence-167`; source `167` — Greater Essence of Command (essences; implemented; supported; current) |
+| `essence-168` | `assets/icons/essence-168.png` | missing | 1 | 1 | 1 | `essence-168`; source `168` — Perfect Essence of Command (essences; implemented; supported; current) |
+| `essence-87` | `assets/icons/essence-87.png` | missing | 1 | 1 | 1 | `essence-87`; source `87` — Lesser Essence of the Body (essences; implemented; supported; current) |
+| `essence-88` | `assets/icons/essence-88.png` | missing | 1 | 1 | 1 | `essence-88`; source `88` — Lesser Essence of the Mind (essences; implemented; supported; current) |
+| `essence-89` | `assets/icons/essence-89.png` | missing | 1 | 1 | 1 | `essence-89`; source `89` — Lesser Essence of Enhancement (essences; implemented; supported; current) |
+| `essence-90` | `assets/icons/essence-90.png` | missing | 1 | 1 | 1 | `essence-90`; source `90` — Lesser Essence of Abrasion (essences; implemented; supported; current) |
+| `essence-91` | `assets/icons/essence-91.png` | missing | 1 | 1 | 1 | `essence-91`; source `91` — Lesser Essence of Flames (essences; implemented; supported; current) |
+| `essence-92` | `assets/icons/essence-92.png` | missing | 1 | 1 | 1 | `essence-92`; source `92` — Lesser Essence of Ice (essences; implemented; supported; current) |
+| `essence-93` | `assets/icons/essence-93.png` | missing | 1 | 1 | 1 | `essence-93`; source `93` — Lesser Essence of Electricity (essences; implemented; supported; current) |
+| `essence-94` | `assets/icons/essence-94.png` | missing | 1 | 1 | 1 | `essence-94`; source `94` — Lesser Essence of Ruin (essences; implemented; supported; current) |
+| `essence-95` | `assets/icons/essence-95.png` | missing | 1 | 1 | 1 | `essence-95`; source `95` — Lesser Essence of Battle (essences; implemented; supported; current) |
+| `essence-96` | `assets/icons/essence-96.png` | missing | 1 | 1 | 1 | `essence-96`; source `96` — Lesser Essence of Sorcery (essences; implemented; supported; current) |
+| `essence-97` | `assets/icons/essence-97.png` | missing | 1 | 1 | 1 | `essence-97`; source `97` — Lesser Essence of Haste (essences; implemented; supported; current) |
+| `essence-98` | `assets/icons/essence-98.png` | missing | 1 | 1 | 1 | `essence-98`; source `98` — Lesser Essence of the Infinite (essences; implemented; supported; current) |
+| `essence-99` | `assets/icons/essence-99.png` | missing | 1 | 1 | 1 | `essence-99`; source `99` — Essence of the Body (essences; implemented; supported; current) |
 | `exalted` | `assets/icons/exalted.png` | existing | 3 | 3 | 3 | `exalted`; source `18` — Exalted Orb (currency; implemented; supported; current)<br>`greater-exalted`; source `19` — Greater Exalted Orb (currency; implemented; supported; current)<br>`perfect-exalted`; source `20` — Perfect Exalted Orb (currency; implemented; supported; current) |
 | `fracturing` | `assets/icons/fracturing.png` | existing | 1 | 1 | 1 | `fracturing`; source `203` — Fracturing Orb (currency; implemented; supported; current) |
 | `gnawed-collarbone` | `assets/icons/gnawed-collarbone.png` | missing | 1 | 1 | 1 | `gnawed-collarbone`; source `4861` — Gnawed Collarbone (abyss; implemented; supported; current) |
@@ -1835,18 +1919,295 @@ All known definitions are grouped by their shared `iconId`. Definition entries i
 | `sinistral-annulment` | `assets/icons/sinistral-annulment.png` | missing | 1 | 1 | 1 | `omen-sinistral-annulment`; source `4427` — Omen of Sinistral Annulment (ritual; implemented; supported; current) |
 | `sinistral-erasure` | `assets/icons/sinistral-erasure.png` | missing | 1 | 1 | 1 | `omen-sinistral-erasure`; source `4416` — Omen of Sinistral Erasure (ritual; implemented; supported; current) |
 | `sinistral-necromancy` | `assets/icons/sinistral-necromancy.png` | missing | 1 | 1 | 1 | `omen-sinistral-necromancy`; source `4455` — Omen of Sinistral Necromancy (ritual; implemented; supported; current) |
+| `socketable-5072` | `assets/icons/socketable-5072.png` | missing | 1 | 1 | 1 | `socketable-5072`; source `5072` — Lesser Ward Rune (socketing; implemented; supported; current) |
+| `socketable-5073` | `assets/icons/socketable-5073.png` | missing | 1 | 1 | 1 | `socketable-5073`; source `5073` — Ward Rune (socketing; implemented; supported; current) |
+| `socketable-5074` | `assets/icons/socketable-5074.png` | missing | 1 | 1 | 1 | `socketable-5074`; source `5074` — Greater Ward Rune (socketing; implemented; supported; current) |
+| `socketable-5075` | `assets/icons/socketable-5075.png` | missing | 1 | 1 | 1 | `socketable-5075`; source `5075` — Perfect Ward Rune (socketing; implemented; supported; current) |
+| `socketable-5076` | `assets/icons/socketable-5076.png` | missing | 1 | 1 | 1 | `socketable-5076`; source `5076` — Lesser Charging Rune (socketing; implemented; supported; current) |
+| `socketable-5077` | `assets/icons/socketable-5077.png` | missing | 1 | 1 | 1 | `socketable-5077`; source `5077` — Charging Rune (socketing; implemented; supported; current) |
+| `socketable-5078` | `assets/icons/socketable-5078.png` | missing | 1 | 1 | 1 | `socketable-5078`; source `5078` — Greater Charging Rune (socketing; implemented; supported; current) |
+| `socketable-5079` | `assets/icons/socketable-5079.png` | missing | 1 | 1 | 1 | `socketable-5079`; source `5079` — Perfect Charging Rune (socketing; implemented; supported; current) |
+| `socketable-5080` | `assets/icons/socketable-5080.png` | missing | 1 | 1 | 1 | `socketable-5080`; source `5080` — Warding Rune of Reinforcement (socketing; implemented; supported; current) |
+| `socketable-5081` | `assets/icons/socketable-5081.png` | missing | 1 | 1 | 1 | `socketable-5081`; source `5081` — Warding Rune of Protection (socketing; implemented; supported; current) |
+| `socketable-5082` | `assets/icons/socketable-5082.png` | missing | 1 | 1 | 1 | `socketable-5082`; source `5082` — Warding Rune of Disintegration (socketing; implemented; supported; current) |
+| `socketable-5083` | `assets/icons/socketable-5083.png` | missing | 1 | 1 | 1 | `socketable-5083`; source `5083` — Warding Rune of Desperation (socketing; implemented; supported; current) |
+| `socketable-5084` | `assets/icons/socketable-5084.png` | missing | 1 | 1 | 1 | `socketable-5084`; source `5084` — Warding Rune of Symbiosis (socketing; implemented; supported; current) |
+| `socketable-5085` | `assets/icons/socketable-5085.png` | missing | 1 | 1 | 1 | `socketable-5085`; source `5085` — Warding Rune of Courage (socketing; implemented; supported; current) |
+| `socketable-5086` | `assets/icons/socketable-5086.png` | missing | 1 | 1 | 1 | `socketable-5086`; source `5086` — Warding Rune of Stability (socketing; implemented; supported; current) |
+| `socketable-5087` | `assets/icons/socketable-5087.png` | missing | 1 | 1 | 1 | `socketable-5087`; source `5087` — Warding Rune of Glancing (socketing; implemented; supported; current) |
+| `socketable-5088` | `assets/icons/socketable-5088.png` | missing | 1 | 1 | 1 | `socketable-5088`; source `5088` — Warding Rune of Heart (socketing; implemented; supported; current) |
+| `socketable-5089` | `assets/icons/socketable-5089.png` | missing | 1 | 1 | 1 | `socketable-5089`; source `5089` — Warding Rune of Nourishment (socketing; implemented; supported; current) |
+| `socketable-5090` | `assets/icons/socketable-5090.png` | missing | 1 | 1 | 1 | `socketable-5090`; source `5090` — Warding Rune of Annihilation (socketing; implemented; supported; current) |
+| `socketable-5091` | `assets/icons/socketable-5091.png` | missing | 1 | 1 | 1 | `socketable-5091`; source `5091` — Warding Rune of Armature (socketing; implemented; supported; current) |
+| `socketable-5092` | `assets/icons/socketable-5092.png` | missing | 1 | 1 | 1 | `socketable-5092`; source `5092` — Warding Rune of Obsession (socketing; implemented; supported; current) |
+| `socketable-5093` | `assets/icons/socketable-5093.png` | missing | 1 | 1 | 1 | `socketable-5093`; source `5093` — Warding Rune of Equinox (socketing; implemented; supported; current) |
+| `socketable-5094` | `assets/icons/socketable-5094.png` | missing | 1 | 1 | 1 | `socketable-5094`; source `5094` — Warding Rune of Salvaging (socketing; implemented; supported; current) |
+| `socketable-5095` | `assets/icons/socketable-5095.png` | missing | 1 | 1 | 1 | `socketable-5095`; source `5095` — Warding Rune of Bodyguards (socketing; implemented; supported; current) |
+| `socketable-5096` | `assets/icons/socketable-5096.png` | missing | 1 | 1 | 1 | `socketable-5096`; source `5096` — Warding Rune of Hollowing (socketing; implemented; supported; current) |
+| `socketable-5097` | `assets/icons/socketable-5097.png` | missing | 1 | 1 | 1 | `socketable-5097`; source `5097` — Passion of Aldur (socketing; implemented; supported; current) |
+| `socketable-5098` | `assets/icons/socketable-5098.png` | missing | 1 | 1 | 1 | `socketable-5098`; source `5098` — Breath of Aldur (socketing; implemented; supported; current) |
+| `socketable-5099` | `assets/icons/socketable-5099.png` | missing | 1 | 1 | 1 | `socketable-5099`; source `5099` — Ire of Aldur (socketing; implemented; supported; current) |
+| `socketable-5100` | `assets/icons/socketable-5100.png` | missing | 1 | 1 | 1 | `socketable-5100`; source `5100` — Betrayal of Aldur (socketing; implemented; supported; current) |
+| `socketable-5101` | `assets/icons/socketable-5101.png` | missing | 1 | 1 | 1 | `socketable-5101`; source `5101` — Ancient Rune of Splinters (socketing; implemented; supported; current) |
+| `socketable-5102` | `assets/icons/socketable-5102.png` | missing | 1 | 1 | 1 | `socketable-5102`; source `5102` — Ancient Rune of Dueling (socketing; implemented; supported; current) |
+| `socketable-5103` | `assets/icons/socketable-5103.png` | missing | 1 | 1 | 1 | `socketable-5103`; source `5103` — Ancient Rune of the Titan (socketing; implemented; supported; current) |
+| `socketable-5104` | `assets/icons/socketable-5104.png` | missing | 1 | 1 | 1 | `socketable-5104`; source `5104` — Ancient Rune of Shattering (socketing; implemented; supported; current) |
+| `socketable-5105` | `assets/icons/socketable-5105.png` | missing | 1 | 1 | 1 | `socketable-5105`; source `5105` — Ancient Rune of Prowess (socketing; implemented; supported; current) |
+| `socketable-5106` | `assets/icons/socketable-5106.png` | missing | 1 | 1 | 1 | `socketable-5106`; source `5106` — Ancient Rune of Control (socketing; implemented; supported; current) |
+| `socketable-5107` | `assets/icons/socketable-5107.png` | missing | 1 | 1 | 1 | `socketable-5107`; source `5107` — Ancient Rune of Discovery (socketing; implemented; supported; current) |
+| `socketable-5108` | `assets/icons/socketable-5108.png` | missing | 1 | 1 | 1 | `socketable-5108`; source `5108` — Ancient Rune of Decay (socketing; implemented; supported; current) |
+| `socketable-5109` | `assets/icons/socketable-5109.png` | missing | 1 | 1 | 1 | `socketable-5109`; source `5109` — Ancient Rune of Witchcraft (socketing; implemented; supported; current) |
+| `socketable-5110` | `assets/icons/socketable-5110.png` | missing | 1 | 1 | 1 | `socketable-5110`; source `5110` — Ancient Rune of the Horde (socketing; implemented; supported; current) |
+| `socketable-5111` | `assets/icons/socketable-5111.png` | missing | 1 | 1 | 0 | `socketable-5111`; source `5111` — Ancient Rune of Animosity (socketing; blocked_missing_data; current) |
+| `socketable-5112` | `assets/icons/socketable-5112.png` | missing | 1 | 1 | 1 | `socketable-5112`; source `5112` — Ancient Rune of Detonation (socketing; implemented; supported; current) |
+| `socketable-5113` | `assets/icons/socketable-5113.png` | missing | 1 | 1 | 1 | `socketable-5113`; source `5113` — Ancient Rune of Retaliation (socketing; implemented; supported; current) |
+| `socketable-5114` | `assets/icons/socketable-5114.png` | missing | 1 | 1 | 1 | `socketable-5114`; source `5114` — Rune of Vitality (socketing; implemented; supported; current) |
+| `socketable-5115` | `assets/icons/socketable-5115.png` | missing | 1 | 1 | 1 | `socketable-5115`; source `5115` — Rune of the Hunt (socketing; implemented; supported; current) |
+| `socketable-5116` | `assets/icons/socketable-5116.png` | missing | 1 | 1 | 1 | `socketable-5116`; source `5116` — Rune of Acrobatics (socketing; implemented; supported; current) |
+| `socketable-5117` | `assets/icons/socketable-5117.png` | missing | 1 | 1 | 1 | `socketable-5117`; source `5117` — Rune of Culmination (socketing; implemented; supported; current) |
+| `socketable-5118` | `assets/icons/socketable-5118.png` | missing | 1 | 1 | 1 | `socketable-5118`; source `5118` — Rune of Renown (socketing; implemented; supported; current) |
+| `socketable-5119` | `assets/icons/socketable-5119.png` | missing | 1 | 1 | 1 | `socketable-5119`; source `5119` — Rune of Accumulation (socketing; implemented; supported; current) |
+| `socketable-5120` | `assets/icons/socketable-5120.png` | missing | 1 | 1 | 1 | `socketable-5120`; source `5120` — Rune of Foundations (socketing; implemented; supported; current) |
+| `socketable-5121` | `assets/icons/socketable-5121.png` | missing | 1 | 1 | 1 | `socketable-5121`; source `5121` — Rune of the Prism (socketing; implemented; supported; current) |
+| `socketable-5122` | `assets/icons/socketable-5122.png` | missing | 1 | 1 | 1 | `socketable-5122`; source `5122` — Rune of the Blossom (socketing; implemented; supported; current) |
+| `socketable-5123` | `assets/icons/socketable-5123.png` | missing | 1 | 1 | 1 | `socketable-5123`; source `5123` — Rune of Consistency (socketing; implemented; supported; current) |
+| `socketable-5124` | `assets/icons/socketable-5124.png` | missing | 1 | 1 | 1 | `socketable-5124`; source `5124` — Rune of Reach (socketing; implemented; supported; current) |
+| `socketable-5125` | `assets/icons/socketable-5125.png` | missing | 1 | 1 | 1 | `socketable-5125`; source `5125` — Rune of Vital Flame (socketing; implemented; supported; current) |
+| `socketable-5126` | `assets/icons/socketable-5126.png` | missing | 1 | 1 | 1 | `socketable-5126`; source `5126` — Rune of Confrontation (socketing; implemented; supported; current) |
+| `socketable-5136` | `assets/icons/socketable-5136.png` | missing | 1 | 1 | 1 | `socketable-5136`; source `5136` — Serle's Triumph (socketing; implemented; supported; current) |
+| `socketable-5137` | `assets/icons/socketable-5137.png` | missing | 1 | 1 | 1 | `socketable-5137`; source `5137` — Cadigan's Epiphany (socketing; implemented; supported; current) |
+| `socketable-5138` | `assets/icons/socketable-5138.png` | missing | 1 | 1 | 1 | `socketable-5138`; source `5138` — Astrid's Creativity (socketing; implemented; supported; current) |
+| `socketable-5139` | `assets/icons/socketable-5139.png` | missing | 1 | 1 | 1 | `socketable-5139`; source `5139` — Uhtred's Sidereus (socketing; implemented; supported; current) |
+| `socketable-5140` | `assets/icons/socketable-5140.png` | missing | 1 | 1 | 1 | `socketable-5140`; source `5140` — Kolr's Hunt (socketing; implemented; supported; current) |
+| `socketable-5141` | `assets/icons/socketable-5141.png` | missing | 1 | 1 | 1 | `socketable-5141`; source `5141` — Vorana's Carnage (socketing; implemented; supported; current) |
+| `socketable-5142` | `assets/icons/socketable-5142.png` | missing | 1 | 1 | 1 | `socketable-5142`; source `5142` — Thrud's Might (socketing; implemented; supported; current) |
+| `socketable-5143` | `assets/icons/socketable-5143.png` | missing | 1 | 1 | 1 | `socketable-5143`; source `5143` — Medved's Tending (socketing; implemented; supported; current) |
+| `socketable-5144` | `assets/icons/socketable-5144.png` | missing | 1 | 1 | 1 | `socketable-5144`; source `5144` — Katla's Gloom (socketing; implemented; supported; current) |
+| `socketable-5145` | `assets/icons/socketable-5145.png` | missing | 1 | 1 | 1 | `socketable-5145`; source `5145` — Aldur's Legacy (socketing; implemented; supported; current) |
+| `socketable-5146` | `assets/icons/socketable-5146.png` | missing | 1 | 1 | 1 | `socketable-5146`; source `5146` — Legacy of Bramblejack (socketing; implemented; supported; current) |
+| `socketable-5147` | `assets/icons/socketable-5147.png` | missing | 1 | 1 | 1 | `socketable-5147`; source `5147` — Legacy of Blackbraid (socketing; implemented; supported; current) |
+| `socketable-5148` | `assets/icons/socketable-5148.png` | missing | 1 | 1 | 1 | `socketable-5148`; source `5148` — Legacy of Edyrns Tusks (socketing; implemented; supported; current) |
+| `socketable-5149` | `assets/icons/socketable-5149.png` | missing | 1 | 1 | 1 | `socketable-5149`; source `5149` — Legacy of Kingsguard (socketing; implemented; supported; current) |
+| `socketable-5150` | `assets/icons/socketable-5150.png` | missing | 1 | 1 | 1 | `socketable-5150`; source `5150` — Legacy of Bristleboar (socketing; implemented; supported; current) |
+| `socketable-5151` | `assets/icons/socketable-5151.png` | missing | 1 | 1 | 1 | `socketable-5151`; source `5151` — Legacy of Foxshade (socketing; implemented; supported; current) |
+| `socketable-5152` | `assets/icons/socketable-5152.png` | missing | 1 | 1 | 1 | `socketable-5152`; source `5152` — Legacy of Ashrend (socketing; implemented; supported; current) |
+| `socketable-5153` | `assets/icons/socketable-5153.png` | missing | 1 | 1 | 1 | `socketable-5153`; source `5153` — Legacy of Briskwrap (socketing; implemented; supported; current) |
+| `socketable-5154` | `assets/icons/socketable-5154.png` | missing | 1 | 1 | 1 | `socketable-5154`; source `5154` — Legacy of The Unleashed (socketing; implemented; supported; current) |
+| `socketable-5155` | `assets/icons/socketable-5155.png` | missing | 1 | 1 | 1 | `socketable-5155`; source `5155` — Legacy of Horns of Bynden (socketing; implemented; supported; current) |
+| `socketable-5156` | `assets/icons/socketable-5156.png` | missing | 1 | 1 | 1 | `socketable-5156`; source `5156` — Legacy of Wings of Caelyn (socketing; implemented; supported; current) |
+| `socketable-5157` | `assets/icons/socketable-5157.png` | missing | 1 | 1 | 1 | `socketable-5157`; source `5157` — Legacy of Ezomyte Peak (socketing; implemented; supported; current) |
+| `socketable-5158` | `assets/icons/socketable-5158.png` | missing | 1 | 1 | 1 | `socketable-5158`; source `5158` — Legacy of Deidbell (socketing; implemented; supported; current) |
+| `socketable-5159` | `assets/icons/socketable-5159.png` | missing | 1 | 1 | 1 | `socketable-5159`; source `5159` — Legacy of Elevore (socketing; implemented; supported; current) |
+| `socketable-5160` | `assets/icons/socketable-5160.png` | missing | 1 | 1 | 1 | `socketable-5160`; source `5160` — Legacy of Starkonja's Head (socketing; implemented; supported; current) |
+| `socketable-5161` | `assets/icons/socketable-5161.png` | missing | 1 | 1 | 1 | `socketable-5161`; source `5161` — Legacy of Crown of Thorns (socketing; implemented; supported; current) |
+| `socketable-5162` | `assets/icons/socketable-5162.png` | missing | 1 | 1 | 1 | `socketable-5162`; source `5162` — Legacy of Greymake (socketing; implemented; supported; current) |
+| `socketable-5163` | `assets/icons/socketable-5163.png` | missing | 1 | 1 | 1 | `socketable-5163`; source `5163` — Legacy of Erian's Cobble (socketing; implemented; supported; current) |
+| `socketable-5164` | `assets/icons/socketable-5164.png` | missing | 1 | 1 | 1 | `socketable-5164`; source `5164` — Legacy of The Smiling Knight (socketing; implemented; supported; current) |
+| `socketable-5165` | `assets/icons/socketable-5165.png` | missing | 1 | 1 | 1 | `socketable-5165`; source `5165` — Legacy of The Vile Knight (socketing; implemented; supported; current) |
+| `socketable-5166` | `assets/icons/socketable-5166.png` | missing | 1 | 1 | 1 | `socketable-5166`; source `5166` — Legacy of Northpaw (socketing; implemented; supported; current) |
+| `socketable-5167` | `assets/icons/socketable-5167.png` | missing | 1 | 1 | 1 | `socketable-5167`; source `5167` — Legacy of Candlemaker (socketing; implemented; supported; current) |
+| `socketable-5168` | `assets/icons/socketable-5168.png` | missing | 1 | 1 | 1 | `socketable-5168`; source `5168` — Legacy of Deathblow (socketing; implemented; supported; current) |
+| `socketable-5169` | `assets/icons/socketable-5169.png` | missing | 1 | 1 | 1 | `socketable-5169`; source `5169` — Legacy of Legionstride (socketing; implemented; supported; current) |
+| `socketable-5170` | `assets/icons/socketable-5170.png` | missing | 1 | 1 | 1 | `socketable-5170`; source `5170` — Legacy of Trampletoe (socketing; implemented; supported; current) |
+| `socketable-5171` | `assets/icons/socketable-5171.png` | missing | 1 | 1 | 1 | `socketable-5171`; source `5171` — Legacy of Briarpatch (socketing; implemented; supported; current) |
+| `socketable-5172` | `assets/icons/socketable-5172.png` | missing | 1 | 1 | 1 | `socketable-5172`; source `5172` — Legacy of Bushwhack (socketing; implemented; supported; current) |
+| `socketable-5173` | `assets/icons/socketable-5173.png` | missing | 1 | 1 | 1 | `socketable-5173`; source `5173` — Legacy of Wanderlust (socketing; implemented; supported; current) |
+| `socketable-5174` | `assets/icons/socketable-5174.png` | missing | 1 | 1 | 1 | `socketable-5174`; source `5174` — Legacy of The Knight-errant (socketing; implemented; supported; current) |
+| `socketable-5175` | `assets/icons/socketable-5175.png` | missing | 1 | 1 | 1 | `socketable-5175`; source `5175` — Legacy of Obern's Bastion (socketing; implemented; supported; current) |
+| `socketable-5176` | `assets/icons/socketable-5176.png` | missing | 1 | 1 | 1 | `socketable-5176`; source `5176` — Legacy of Dionadair (socketing; implemented; supported; current) |
+| `socketable-5177` | `assets/icons/socketable-5177.png` | missing | 1 | 1 | 1 | `socketable-5177`; source `5177` — Legacy of Wulfsbane (socketing; implemented; supported; current) |
+| `socketable-5178` | `assets/icons/socketable-5178.png` | missing | 1 | 1 | 1 | `socketable-5178`; source `5178` — Legacy of Chernobog's Pillar (socketing; implemented; supported; current) |
+| `socketable-5179` | `assets/icons/socketable-5179.png` | missing | 1 | 1 | 1 | `socketable-5179`; source `5179` — Legacy of Alkem Eira (socketing; implemented; supported; current) |
+| `socketable-5180` | `assets/icons/socketable-5180.png` | missing | 1 | 1 | 1 | `socketable-5180`; source `5180` — Legacy of Oaksworn (socketing; implemented; supported; current) |
+| `socketable-5181` | `assets/icons/socketable-5181.png` | missing | 1 | 1 | 1 | `socketable-5181`; source `5181` — Legacy of Dunkelhalt (socketing; implemented; supported; current) |
+| `socketable-5182` | `assets/icons/socketable-5182.png` | missing | 1 | 1 | 1 | `socketable-5182`; source `5182` — Legacy of Rondel de Ezo (socketing; implemented; supported; current) |
+| `socketable-5183` | `assets/icons/socketable-5183.png` | missing | 1 | 1 | 1 | `socketable-5183`; source `5183` — Legacy of Brynhand's Mark (socketing; implemented; supported; current) |
+| `socketable-5184` | `assets/icons/socketable-5184.png` | missing | 1 | 1 | 1 | `socketable-5184`; source `5184` — Legacy of Trenchtimbre (socketing; implemented; supported; current) |
+| `socketable-5185` | `assets/icons/socketable-5185.png` | missing | 1 | 1 | 1 | `socketable-5185`; source `5185` — Legacy of Mjölner (socketing; implemented; supported; current) |
+| `socketable-5186` | `assets/icons/socketable-5186.png` | missing | 1 | 1 | 1 | `socketable-5186`; source `5186` — Legacy of Twisted Empyrean (socketing; implemented; supported; current) |
+| `socketable-5187` | `assets/icons/socketable-5187.png` | missing | 1 | 1 | 1 | `socketable-5187`; source `5187` — Legacy of Hoghunt (socketing; implemented; supported; current) |
+| `socketable-5188` | `assets/icons/socketable-5188.png` | missing | 1 | 1 | 1 | `socketable-5188`; source `5188` — Legacy of Hrimnor's Hymn (socketing; implemented; supported; current) |
+| `socketable-5189` | `assets/icons/socketable-5189.png` | missing | 1 | 1 | 1 | `socketable-5189`; source `5189` — Legacy of Brain Rattler (socketing; implemented; supported; current) |
+| `socketable-5190` | `assets/icons/socketable-5190.png` | missing | 1 | 1 | 1 | `socketable-5190`; source `5190` — Legacy of Lifesprig (socketing; implemented; supported; current) |
+| `socketable-5191` | `assets/icons/socketable-5191.png` | missing | 1 | 1 | 1 | `socketable-5191`; source `5191` — Legacy of Duality (socketing; implemented; supported; current) |
+| `socketable-5192` | `assets/icons/socketable-5192.png` | missing | 1 | 1 | 1 | `socketable-5192`; source `5192` — Legacy of Tyranny's Grip (socketing; implemented; supported; current) |
+| `socketable-5193` | `assets/icons/socketable-5193.png` | missing | 1 | 1 | 1 | `socketable-5193`; source `5193` — Legacy of The Sentry (socketing; implemented; supported; current) |
+| `socketable-5194` | `assets/icons/socketable-5194.png` | missing | 1 | 1 | 1 | `socketable-5194`; source `5194` — Legacy of Adonia's Ego (socketing; implemented; supported; current) |
+| `socketable-5195` | `assets/icons/socketable-5195.png` | missing | 1 | 1 | 1 | `socketable-5195`; source `5195` — Legacy of Cursecarver (socketing; implemented; supported; current) |
+| `socketable-5196` | `assets/icons/socketable-5196.png` | missing | 1 | 1 | 1 | `socketable-5196`; source `5196` — Legacy of Dusk Vigil (socketing; implemented; supported; current) |
+| `socketable-5197` | `assets/icons/socketable-5197.png` | missing | 1 | 1 | 1 | `socketable-5197`; source `5197` — Legacy of The Blood Thorn (socketing; implemented; supported; current) |
+| `socketable-5198` | `assets/icons/socketable-5198.png` | missing | 1 | 1 | 1 | `socketable-5198`; source `5198` — Legacy of Quill Rain (socketing; implemented; supported; current) |
+| `socketable-5199` | `assets/icons/socketable-5199.png` | missing | 1 | 1 | 1 | `socketable-5199`; source `5199` — Legacy of Ironbound (socketing; implemented; supported; current) |
+| `socketable-5200` | `assets/icons/socketable-5200.png` | missing | 1 | 1 | 0 | `socketable-5200`; source `5200` — Legacy of Amor Mandragora (socketing; blocked_missing_data; current) |
+| `socketable-5201` | `assets/icons/socketable-5201.png` | missing | 1 | 1 | 0 | `socketable-5201`; source `5201` — Legacy of Spiteful Floret (socketing; blocked_missing_data; current) |
+| `socketable-5202` | `assets/icons/socketable-5202.png` | missing | 1 | 1 | 1 | `socketable-5202`; source `5202` — Legacy of Svalinn (socketing; implemented; supported; current) |
+| `socketable-5203` | `assets/icons/socketable-5203.png` | missing | 1 | 1 | 1 | `socketable-5203`; source `5203` — Legacy of Keeper of the Arc (socketing; implemented; supported; current) |
+| `socketable-5204` | `assets/icons/socketable-5204.png` | missing | 1 | 1 | 1 | `socketable-5204`; source `5204` — Legacy of Olrovasara (socketing; implemented; supported; current) |
+| `socketable-5205` | `assets/icons/socketable-5205.png` | missing | 1 | 1 | 1 | `socketable-5205`; source `5205` — Legacy of A Worthy Foe (socketing; implemented; supported; current) |
+| `socketable-5206` | `assets/icons/socketable-5206.png` | missing | 1 | 1 | 1 | `socketable-5206`; source `5206` — Legacy of Serle's Grit (socketing; implemented; supported; current) |
+| `socketable-5207` | `assets/icons/socketable-5207.png` | missing | 1 | 1 | 1 | `socketable-5207`; source `5207` — Legacy of Runeseeker's Call (socketing; implemented; supported; current) |
+| `socketable-5208` | `assets/icons/socketable-5208.png` | missing | 1 | 1 | 1 | `socketable-5208`; source `5208` — Legacy of Facebreaker (socketing; implemented; supported; current) |
+| `socketable-624` | `assets/icons/socketable-624.png` | missing | 1 | 1 | 1 | `socketable-624`; source `624` — Desert Rune (socketing; implemented; supported; current) |
+| `socketable-625` | `assets/icons/socketable-625.png` | missing | 1 | 1 | 1 | `socketable-625`; source `625` — Glacial Rune (socketing; implemented; supported; current) |
+| `socketable-626` | `assets/icons/socketable-626.png` | missing | 1 | 1 | 1 | `socketable-626`; source `626` — Storm Rune (socketing; implemented; supported; current) |
+| `socketable-627` | `assets/icons/socketable-627.png` | missing | 1 | 1 | 1 | `socketable-627`; source `627` — Iron Rune (socketing; implemented; supported; current) |
+| `socketable-628` | `assets/icons/socketable-628.png` | missing | 1 | 1 | 1 | `socketable-628`; source `628` — Body Rune (socketing; implemented; supported; current) |
+| `socketable-629` | `assets/icons/socketable-629.png` | missing | 1 | 1 | 1 | `socketable-629`; source `629` — Mind Rune (socketing; implemented; supported; current) |
+| `socketable-630` | `assets/icons/socketable-630.png` | missing | 1 | 1 | 1 | `socketable-630`; source `630` — Rebirth Rune (socketing; implemented; supported; current) |
+| `socketable-631` | `assets/icons/socketable-631.png` | missing | 1 | 1 | 1 | `socketable-631`; source `631` — Inspiration Rune (socketing; implemented; supported; current) |
+| `socketable-632` | `assets/icons/socketable-632.png` | missing | 1 | 1 | 1 | `socketable-632`; source `632` — Stone Rune (socketing; implemented; supported; current) |
+| `socketable-633` | `assets/icons/socketable-633.png` | missing | 1 | 1 | 1 | `socketable-633`; source `633` — Vision Rune (socketing; implemented; supported; current) |
+| `socketable-634` | `assets/icons/socketable-634.png` | missing | 1 | 1 | 1 | `socketable-634`; source `634` — Lesser Desert Rune (socketing; implemented; supported; current) |
+| `socketable-635` | `assets/icons/socketable-635.png` | missing | 1 | 1 | 1 | `socketable-635`; source `635` — Lesser Glacial Rune (socketing; implemented; supported; current) |
+| `socketable-636` | `assets/icons/socketable-636.png` | missing | 1 | 1 | 1 | `socketable-636`; source `636` — Lesser Storm Rune (socketing; implemented; supported; current) |
+| `socketable-637` | `assets/icons/socketable-637.png` | missing | 1 | 1 | 1 | `socketable-637`; source `637` — Lesser Iron Rune (socketing; implemented; supported; current) |
+| `socketable-638` | `assets/icons/socketable-638.png` | missing | 1 | 1 | 1 | `socketable-638`; source `638` — Lesser Body Rune (socketing; implemented; supported; current) |
+| `socketable-639` | `assets/icons/socketable-639.png` | missing | 1 | 1 | 1 | `socketable-639`; source `639` — Lesser Mind Rune (socketing; implemented; supported; current) |
+| `socketable-640` | `assets/icons/socketable-640.png` | missing | 1 | 1 | 1 | `socketable-640`; source `640` — Lesser Rebirth Rune (socketing; implemented; supported; current) |
+| `socketable-641` | `assets/icons/socketable-641.png` | missing | 1 | 1 | 1 | `socketable-641`; source `641` — Lesser Inspiration Rune (socketing; implemented; supported; current) |
+| `socketable-642` | `assets/icons/socketable-642.png` | missing | 1 | 1 | 1 | `socketable-642`; source `642` — Lesser Stone Rune (socketing; implemented; supported; current) |
+| `socketable-643` | `assets/icons/socketable-643.png` | missing | 1 | 1 | 1 | `socketable-643`; source `643` — Lesser Vision Rune (socketing; implemented; supported; current) |
+| `socketable-644` | `assets/icons/socketable-644.png` | missing | 1 | 1 | 1 | `socketable-644`; source `644` — Greater Desert Rune (socketing; implemented; supported; current) |
+| `socketable-645` | `assets/icons/socketable-645.png` | missing | 1 | 1 | 1 | `socketable-645`; source `645` — Greater Glacial Rune (socketing; implemented; supported; current) |
+| `socketable-646` | `assets/icons/socketable-646.png` | missing | 1 | 1 | 1 | `socketable-646`; source `646` — Greater Storm Rune (socketing; implemented; supported; current) |
+| `socketable-647` | `assets/icons/socketable-647.png` | missing | 1 | 1 | 1 | `socketable-647`; source `647` — Greater Iron Rune (socketing; implemented; supported; current) |
+| `socketable-648` | `assets/icons/socketable-648.png` | missing | 1 | 1 | 1 | `socketable-648`; source `648` — Greater Body Rune (socketing; implemented; supported; current) |
+| `socketable-649` | `assets/icons/socketable-649.png` | missing | 1 | 1 | 1 | `socketable-649`; source `649` — Greater Mind Rune (socketing; implemented; supported; current) |
+| `socketable-650` | `assets/icons/socketable-650.png` | missing | 1 | 1 | 1 | `socketable-650`; source `650` — Greater Rebirth Rune (socketing; implemented; supported; current) |
+| `socketable-651` | `assets/icons/socketable-651.png` | missing | 1 | 1 | 1 | `socketable-651`; source `651` — Greater Inspiration Rune (socketing; implemented; supported; current) |
+| `socketable-652` | `assets/icons/socketable-652.png` | missing | 1 | 1 | 1 | `socketable-652`; source `652` — Greater Stone Rune (socketing; implemented; supported; current) |
+| `socketable-653` | `assets/icons/socketable-653.png` | missing | 1 | 1 | 1 | `socketable-653`; source `653` — Greater Vision Rune (socketing; implemented; supported; current) |
+| `socketable-654` | `assets/icons/socketable-654.png` | missing | 1 | 1 | 1 | `socketable-654`; source `654` — Perfect Desert Rune (socketing; implemented; supported; current) |
+| `socketable-655` | `assets/icons/socketable-655.png` | missing | 1 | 1 | 1 | `socketable-655`; source `655` — Perfect Glacial Rune (socketing; implemented; supported; current) |
+| `socketable-656` | `assets/icons/socketable-656.png` | missing | 1 | 1 | 1 | `socketable-656`; source `656` — Perfect Storm Rune (socketing; implemented; supported; current) |
+| `socketable-657` | `assets/icons/socketable-657.png` | missing | 1 | 1 | 1 | `socketable-657`; source `657` — Perfect Iron Rune (socketing; implemented; supported; current) |
+| `socketable-658` | `assets/icons/socketable-658.png` | missing | 1 | 1 | 1 | `socketable-658`; source `658` — Perfect Body Rune (socketing; implemented; supported; current) |
+| `socketable-659` | `assets/icons/socketable-659.png` | missing | 1 | 1 | 1 | `socketable-659`; source `659` — Perfect Mind Rune (socketing; implemented; supported; current) |
+| `socketable-660` | `assets/icons/socketable-660.png` | missing | 1 | 1 | 1 | `socketable-660`; source `660` — Perfect Rebirth Rune (socketing; implemented; supported; current) |
+| `socketable-661` | `assets/icons/socketable-661.png` | missing | 1 | 1 | 1 | `socketable-661`; source `661` — Perfect Inspiration Rune (socketing; implemented; supported; current) |
+| `socketable-662` | `assets/icons/socketable-662.png` | missing | 1 | 1 | 1 | `socketable-662`; source `662` — Perfect Stone Rune (socketing; implemented; supported; current) |
+| `socketable-663` | `assets/icons/socketable-663.png` | missing | 1 | 1 | 1 | `socketable-663`; source `663` — Perfect Vision Rune (socketing; implemented; supported; current) |
+| `socketable-664` | `assets/icons/socketable-664.png` | missing | 1 | 1 | 1 | `socketable-664`; source `664` — Lesser Robust Rune (socketing; implemented; supported; current) |
+| `socketable-665` | `assets/icons/socketable-665.png` | missing | 1 | 1 | 1 | `socketable-665`; source `665` — Robust Rune (socketing; implemented; supported; current) |
+| `socketable-666` | `assets/icons/socketable-666.png` | missing | 1 | 1 | 1 | `socketable-666`; source `666` — Greater Robust Rune (socketing; implemented; supported; current) |
+| `socketable-667` | `assets/icons/socketable-667.png` | missing | 1 | 1 | 1 | `socketable-667`; source `667` — Perfect Robust Rune (socketing; implemented; supported; current) |
+| `socketable-668` | `assets/icons/socketable-668.png` | missing | 1 | 1 | 1 | `socketable-668`; source `668` — Lesser Adept Rune (socketing; implemented; supported; current) |
+| `socketable-669` | `assets/icons/socketable-669.png` | missing | 1 | 1 | 1 | `socketable-669`; source `669` — Adept Rune (socketing; implemented; supported; current) |
+| `socketable-670` | `assets/icons/socketable-670.png` | missing | 1 | 1 | 1 | `socketable-670`; source `670` — Greater Adept Rune (socketing; implemented; supported; current) |
+| `socketable-671` | `assets/icons/socketable-671.png` | missing | 1 | 1 | 1 | `socketable-671`; source `671` — Perfect Adept Rune (socketing; implemented; supported; current) |
+| `socketable-672` | `assets/icons/socketable-672.png` | missing | 1 | 1 | 1 | `socketable-672`; source `672` — Lesser Resolve Rune (socketing; implemented; supported; current) |
+| `socketable-673` | `assets/icons/socketable-673.png` | missing | 1 | 1 | 1 | `socketable-673`; source `673` — Resolve Rune (socketing; implemented; supported; current) |
+| `socketable-674` | `assets/icons/socketable-674.png` | missing | 1 | 1 | 1 | `socketable-674`; source `674` — Greater Resolve Rune (socketing; implemented; supported; current) |
+| `socketable-675` | `assets/icons/socketable-675.png` | missing | 1 | 1 | 1 | `socketable-675`; source `675` — Perfect Resolve Rune (socketing; implemented; supported; current) |
+| `socketable-676` | `assets/icons/socketable-676.png` | missing | 1 | 1 | 1 | `socketable-676`; source `676` — Lesser Tempered Rune (socketing; implemented; supported; current) |
+| `socketable-677` | `assets/icons/socketable-677.png` | missing | 1 | 1 | 1 | `socketable-677`; source `677` — Tempered Rune (socketing; implemented; supported; current) |
+| `socketable-678` | `assets/icons/socketable-678.png` | missing | 1 | 1 | 1 | `socketable-678`; source `678` — Greater Tempered Rune (socketing; implemented; supported; current) |
+| `socketable-679` | `assets/icons/socketable-679.png` | missing | 1 | 1 | 1 | `socketable-679`; source `679` — Greater Rune of Leadership (socketing; implemented; supported; current) |
+| `socketable-680` | `assets/icons/socketable-680.png` | missing | 1 | 1 | 1 | `socketable-680`; source `680` — Greater Rune of Tithing (socketing; implemented; supported; current) |
+| `socketable-681` | `assets/icons/socketable-681.png` | missing | 1 | 1 | 1 | `socketable-681`; source `681` — Greater Rune of Alacrity (socketing; implemented; supported; current) |
+| `socketable-682` | `assets/icons/socketable-682.png` | missing | 1 | 1 | 1 | `socketable-682`; source `682` — Greater Rune of Nobility (socketing; implemented; supported; current) |
+| `socketable-683` | `assets/icons/socketable-683.png` | missing | 1 | 1 | 1 | `socketable-683`; source `683` — Hedgewitch Assandra's Rune of Wisdom (socketing; implemented; supported; current) |
+| `socketable-684` | `assets/icons/socketable-684.png` | missing | 1 | 1 | 1 | `socketable-684`; source `684` — Saqawal's Rune of the Sky (socketing; implemented; supported; current) |
+| `socketable-685` | `assets/icons/socketable-685.png` | missing | 1 | 1 | 1 | `socketable-685`; source `685` — Fenumus' Rune of Agony (socketing; implemented; supported; current) |
+| `socketable-686` | `assets/icons/socketable-686.png` | missing | 1 | 1 | 1 | `socketable-686`; source `686` — Farrul's Rune of Grace (socketing; implemented; supported; current) |
+| `socketable-687` | `assets/icons/socketable-687.png` | missing | 1 | 1 | 1 | `socketable-687`; source `687` — Farrul's Rune of the Chase (socketing; implemented; supported; current) |
+| `socketable-688` | `assets/icons/socketable-688.png` | missing | 1 | 1 | 1 | `socketable-688`; source `688` — Craiceann's Rune of Warding (socketing; implemented; supported; current) |
+| `socketable-689` | `assets/icons/socketable-689.png` | missing | 1 | 1 | 1 | `socketable-689`; source `689` — Saqawal's Rune of Memory (socketing; implemented; supported; current) |
+| `socketable-690` | `assets/icons/socketable-690.png` | missing | 1 | 1 | 1 | `socketable-690`; source `690` — Saqawal's Rune of Erosion (socketing; implemented; supported; current) |
+| `socketable-691` | `assets/icons/socketable-691.png` | missing | 1 | 1 | 1 | `socketable-691`; source `691` — Farrul's Rune of the Hunt (socketing; implemented; supported; current) |
+| `socketable-692` | `assets/icons/socketable-692.png` | missing | 1 | 1 | 1 | `socketable-692`; source `692` — Craiceann's Rune of Recovery (socketing; implemented; supported; current) |
+| `socketable-693` | `assets/icons/socketable-693.png` | missing | 1 | 1 | 1 | `socketable-693`; source `693` — Courtesan Mannan's Rune of Cruelty (socketing; implemented; supported; current) |
+| `socketable-694` | `assets/icons/socketable-694.png` | missing | 1 | 1 | 1 | `socketable-694`; source `694` — Thane Grannell's Rune of Mastery (socketing; implemented; supported; current) |
+| `socketable-695` | `assets/icons/socketable-695.png` | missing | 1 | 1 | 1 | `socketable-695`; source `695` — Fenumus' Rune of Spinning (socketing; implemented; supported; current) |
+| `socketable-696` | `assets/icons/socketable-696.png` | missing | 1 | 1 | 1 | `socketable-696`; source `696` — Countess Seske's Rune of Archery (socketing; implemented; supported; current) |
+| `socketable-697` | `assets/icons/socketable-697.png` | missing | 1 | 1 | 1 | `socketable-697`; source `697` — Thane Girt's Rune of Wildness (socketing; implemented; supported; current) |
+| `socketable-698` | `assets/icons/socketable-698.png` | missing | 1 | 1 | 1 | `socketable-698`; source `698` — Fenumus' Rune of Draining (socketing; implemented; supported; current) |
+| `socketable-699` | `assets/icons/socketable-699.png` | missing | 1 | 1 | 1 | `socketable-699`; source `699` — Thane Myrk's Rune of Summer (socketing; implemented; supported; current) |
+| `socketable-700` | `assets/icons/socketable-700.png` | missing | 1 | 1 | 1 | `socketable-700`; source `700` — Lady Hestra's Rune of Winter (socketing; implemented; supported; current) |
+| `socketable-701` | `assets/icons/socketable-701.png` | missing | 1 | 1 | 1 | `socketable-701`; source `701` — Thane Leld's Rune of Spring (socketing; implemented; supported; current) |
+| `socketable-702` | `assets/icons/socketable-702.png` | missing | 1 | 1 | 1 | `socketable-702`; source `702` — The Greatwolf's Rune of Claws (socketing; implemented; supported; current) |
+| `socketable-703` | `assets/icons/socketable-703.png` | missing | 1 | 1 | 1 | `socketable-703`; source `703` — The Greatwolf's Rune of Willpower (socketing; implemented; supported; current) |
+| `socketable-704` | `assets/icons/socketable-704.png` | missing | 1 | 1 | 1 | `socketable-704`; source `704` — Masterwork Rune (socketing; implemented; supported; current) |
+| `socketable-705` | `assets/icons/socketable-705.png` | missing | 1 | 1 | 1 | `socketable-705`; source `705` — Idol of Sirrius (socketing; implemented; supported; current) |
+| `socketable-706` | `assets/icons/socketable-706.png` | missing | 1 | 1 | 1 | `socketable-706`; source `706` — Idol of Thruldana (socketing; implemented; supported; current) |
+| `socketable-707` | `assets/icons/socketable-707.png` | missing | 1 | 1 | 1 | `socketable-707`; source `707` — Idol of Grold (socketing; implemented; supported; current) |
+| `socketable-708` | `assets/icons/socketable-708.png` | missing | 1 | 1 | 1 | `socketable-708`; source `708` — Idol of Eeshta (socketing; implemented; supported; current) |
+| `socketable-709` | `assets/icons/socketable-709.png` | missing | 1 | 1 | 1 | `socketable-709`; source `709` — Idol of Egrin (socketing; implemented; supported; current) |
+| `socketable-710` | `assets/icons/socketable-710.png` | missing | 1 | 1 | 1 | `socketable-710`; source `710` — Idol of Maxarius (socketing; implemented; supported; current) |
+| `socketable-711` | `assets/icons/socketable-711.png` | missing | 1 | 1 | 1 | `socketable-711`; source `711` — Idol of Ralakesh (socketing; implemented; supported; current) |
+| `socketable-712` | `assets/icons/socketable-712.png` | missing | 1 | 1 | 1 | `socketable-712`; source `712` — Idol of Greust (socketing; implemented; supported; current) |
+| `socketable-713` | `assets/icons/socketable-713.png` | missing | 1 | 1 | 1 | `socketable-713`; source `713` — Idol of Yeena (socketing; implemented; supported; current) |
+| `socketable-714` | `assets/icons/socketable-714.png` | missing | 1 | 1 | 1 | `socketable-714`; source `714` — Idol of Eramir (socketing; implemented; supported; current) |
+| `socketable-715` | `assets/icons/socketable-715.png` | missing | 1 | 1 | 1 | `socketable-715`; source `715` — Idol of Oak (socketing; implemented; supported; current) |
+| `socketable-716` | `assets/icons/socketable-716.png` | missing | 1 | 1 | 1 | `socketable-716`; source `716` — Idol of Alira (socketing; implemented; supported; current) |
+| `socketable-717` | `assets/icons/socketable-717.png` | missing | 1 | 1 | 1 | `socketable-717`; source `717` — Idol of Kraityn (socketing; implemented; supported; current) |
+| `socketable-718` | `assets/icons/socketable-718.png` | missing | 1 | 1 | 1 | `socketable-718`; source `718` — Idol of Silk (socketing; implemented; supported; current) |
+| `socketable-719` | `assets/icons/socketable-719.png` | missing | 1 | 1 | 1 | `socketable-719`; source `719` — Idol of the Sycophant (socketing; implemented; supported; current) |
+| `socketable-720` | `assets/icons/socketable-720.png` | missing | 1 | 1 | 1 | `socketable-720`; source `720` — Idol of the Martyr (socketing; implemented; supported; current) |
+| `socketable-721` | `assets/icons/socketable-721.png` | missing | 1 | 1 | 1 | `socketable-721`; source `721` — Idol of the Pharisee (socketing; implemented; supported; current) |
+| `socketable-722` | `assets/icons/socketable-722.png` | missing | 1 | 1 | 1 | `socketable-722`; source `722` — Panther Idol (socketing; implemented; supported; current) |
+| `socketable-723` | `assets/icons/socketable-723.png` | missing | 1 | 1 | 1 | `socketable-723`; source `723` — Hawk Idol (socketing; implemented; supported; current) |
+| `socketable-724` | `assets/icons/socketable-724.png` | missing | 1 | 1 | 1 | `socketable-724`; source `724` — Stoat Idol (socketing; implemented; supported; current) |
+| `socketable-725` | `assets/icons/socketable-725.png` | missing | 1 | 1 | 1 | `socketable-725`; source `725` — Hayoxi's Soul Core of Heatproofing (socketing; implemented; supported; current) |
+| `socketable-726` | `assets/icons/socketable-726.png` | missing | 1 | 1 | 1 | `socketable-726`; source `726` — Zalatl's Soul Core of Insulation (socketing; implemented; supported; current) |
+| `socketable-727` | `assets/icons/socketable-727.png` | missing | 1 | 1 | 1 | `socketable-727`; source `727` — Topotante's Soul Core of Dampening (socketing; implemented; supported; current) |
+| `socketable-728` | `assets/icons/socketable-728.png` | missing | 1 | 1 | 1 | `socketable-728`; source `728` — Atmohua's Soul Core of Retreat (socketing; implemented; supported; current) |
+| `socketable-729` | `assets/icons/socketable-729.png` | missing | 1 | 1 | 1 | `socketable-729`; source `729` — Quipolatl's Soul Core of Flow (socketing; implemented; supported; current) |
+| `socketable-730` | `assets/icons/socketable-730.png` | missing | 1 | 1 | 1 | `socketable-730`; source `730` — Tzamoto's Soul Core of Ferocity (socketing; implemented; supported; current) |
+| `socketable-731` | `assets/icons/socketable-731.png` | missing | 1 | 1 | 1 | `socketable-731`; source `731` — Uromoti's Soul Core of Attenuation (socketing; implemented; supported; current) |
+| `socketable-732` | `assets/icons/socketable-732.png` | missing | 1 | 1 | 1 | `socketable-732`; source `732` — Opiloti's Soul Core of Assault (socketing; implemented; supported; current) |
+| `socketable-733` | `assets/icons/socketable-733.png` | missing | 1 | 1 | 1 | `socketable-733`; source `733` — Guatelitzi's Soul Core of Endurance (socketing; implemented; supported; current) |
+| `socketable-734` | `assets/icons/socketable-734.png` | missing | 1 | 1 | 1 | `socketable-734`; source `734` — Xopec's Soul Core of Power (socketing; implemented; supported; current) |
+| `socketable-735` | `assets/icons/socketable-735.png` | missing | 1 | 1 | 1 | `socketable-735`; source `735` — Estazunti's Soul Core of Convalescence (socketing; implemented; supported; current) |
+| `socketable-736` | `assets/icons/socketable-736.png` | missing | 1 | 1 | 1 | `socketable-736`; source `736` — Tacati's Soul Core of Affliction (socketing; implemented; supported; current) |
+| `socketable-737` | `assets/icons/socketable-737.png` | missing | 1 | 1 | 1 | `socketable-737`; source `737` — Cholotl's Soul Core of War (socketing; implemented; supported; current) |
+| `socketable-738` | `assets/icons/socketable-738.png` | missing | 1 | 1 | 1 | `socketable-738`; source `738` — Citaqualotl's Soul Core of Foulness (socketing; implemented; supported; current) |
+| `socketable-739` | `assets/icons/socketable-739.png` | missing | 1 | 1 | 1 | `socketable-739`; source `739` — Xipocado's Soul Core of Dominion (socketing; implemented; supported; current) |
+| `socketable-740` | `assets/icons/socketable-740.png` | missing | 1 | 1 | 1 | `socketable-740`; source `740` — Soul Core of Tacati (socketing; implemented; supported; current) |
+| `socketable-741` | `assets/icons/socketable-741.png` | missing | 1 | 1 | 1 | `socketable-741`; source `741` — Soul Core of Opiloti (socketing; implemented; supported; current) |
+| `socketable-742` | `assets/icons/socketable-742.png` | missing | 1 | 1 | 1 | `socketable-742`; source `742` — Soul Core of Jiquani (socketing; implemented; supported; current) |
+| `socketable-743` | `assets/icons/socketable-743.png` | missing | 1 | 1 | 1 | `socketable-743`; source `743` — Soul Core of Zalatl (socketing; implemented; supported; current) |
+| `socketable-744` | `assets/icons/socketable-744.png` | missing | 1 | 1 | 1 | `socketable-744`; source `744` — Soul Core of Citaqualotl (socketing; implemented; supported; current) |
+| `socketable-745` | `assets/icons/socketable-745.png` | missing | 1 | 1 | 1 | `socketable-745`; source `745` — Soul Core of Puhuarte (socketing; implemented; supported; current) |
+| `socketable-746` | `assets/icons/socketable-746.png` | missing | 1 | 1 | 1 | `socketable-746`; source `746` — Soul Core of Tzamoto (socketing; implemented; supported; current) |
+| `socketable-747` | `assets/icons/socketable-747.png` | missing | 1 | 1 | 1 | `socketable-747`; source `747` — Soul Core of Xopec (socketing; implemented; supported; current) |
+| `socketable-748` | `assets/icons/socketable-748.png` | missing | 1 | 1 | 1 | `socketable-748`; source `748` — Soul Core of Azcapa (socketing; implemented; supported; current) |
+| `socketable-749` | `assets/icons/socketable-749.png` | missing | 1 | 1 | 1 | `socketable-749`; source `749` — Soul Core of Topotante (socketing; implemented; supported; current) |
+| `socketable-750` | `assets/icons/socketable-750.png` | missing | 1 | 1 | 1 | `socketable-750`; source `750` — Soul Core of Quipolatl (socketing; implemented; supported; current) |
+| `socketable-751` | `assets/icons/socketable-751.png` | missing | 1 | 1 | 1 | `socketable-751`; source `751` — Soul Core of Ticaba (socketing; implemented; supported; current) |
+| `socketable-752` | `assets/icons/socketable-752.png` | missing | 1 | 1 | 1 | `socketable-752`; source `752` — Soul Core of Atmohua (socketing; implemented; supported; current) |
+| `socketable-753` | `assets/icons/socketable-753.png` | missing | 1 | 1 | 1 | `socketable-753`; source `753` — Soul Core of Cholotl (socketing; implemented; supported; current) |
+| `socketable-754` | `assets/icons/socketable-754.png` | missing | 1 | 1 | 1 | `socketable-754`; source `754` — Soul Core of Zantipi (socketing; implemented; supported; current) |
+| `socketable-755` | `assets/icons/socketable-755.png` | missing | 1 | 1 | 1 | `socketable-755`; source `755` — Snake Idol (socketing; implemented; supported; current) |
+| `socketable-756` | `assets/icons/socketable-756.png` | missing | 1 | 1 | 1 | `socketable-756`; source `756` — Primate Idol (socketing; implemented; supported; current) |
+| `socketable-757` | `assets/icons/socketable-757.png` | missing | 1 | 1 | 1 | `socketable-757`; source `757` — Owl Idol (socketing; implemented; supported; current) |
+| `socketable-758` | `assets/icons/socketable-758.png` | missing | 1 | 1 | 1 | `socketable-758`; source `758` — Cat Idol (socketing; implemented; supported; current) |
+| `socketable-759` | `assets/icons/socketable-759.png` | missing | 1 | 1 | 1 | `socketable-759`; source `759` — Wolf Idol (socketing; implemented; supported; current) |
+| `socketable-760` | `assets/icons/socketable-760.png` | missing | 1 | 1 | 1 | `socketable-760`; source `760` — Stag Idol (socketing; implemented; supported; current) |
+| `socketable-761` | `assets/icons/socketable-761.png` | missing | 1 | 1 | 1 | `socketable-761`; source `761` — Boar Idol (socketing; implemented; supported; current) |
+| `socketable-762` | `assets/icons/socketable-762.png` | missing | 1 | 1 | 1 | `socketable-762`; source `762` — Bear Idol (socketing; implemented; supported; current) |
+| `socketable-763` | `assets/icons/socketable-763.png` | missing | 1 | 1 | 1 | `socketable-763`; source `763` — Ox Idol (socketing; implemented; supported; current) |
+| `socketable-764` | `assets/icons/socketable-764.png` | missing | 1 | 1 | 1 | `socketable-764`; source `764` — Rabbit Idol (socketing; implemented; supported; current) |
+| `socketable-765` | `assets/icons/socketable-765.png` | missing | 1 | 1 | 1 | `socketable-765`; source `765` — Fox Idol (socketing; implemented; supported; current) |
+| `socketable-766` | `assets/icons/socketable-766.png` | missing | 1 | 1 | 1 | `socketable-766`; source `766` — Amanamu's Gaze (socketing; implemented; supported; current) |
+| `socketable-767` | `assets/icons/socketable-767.png` | missing | 1 | 1 | 1 | `socketable-767`; source `767` — Tecrod's Gaze (socketing; implemented; supported; current) |
+| `socketable-768` | `assets/icons/socketable-768.png` | missing | 1 | 1 | 1 | `socketable-768`; source `768` — Kurgal's Gaze (socketing; implemented; supported; current) |
+| `socketable-769` | `assets/icons/socketable-769.png` | missing | 1 | 1 | 1 | `socketable-769`; source `769` — Ulaman's Gaze (socketing; implemented; supported; current) |
+| `socketable-770` | `assets/icons/socketable-770.png` | missing | 1 | 1 | 1 | `socketable-770`; source `770` — Guatelitzi's Thesis (socketing; implemented; supported; current) |
+| `socketable-771` | `assets/icons/socketable-771.png` | missing | 1 | 1 | 1 | `socketable-771`; source `771` — Citaqualotl's Thesis (socketing; implemented; supported; current) |
+| `socketable-772` | `assets/icons/socketable-772.png` | missing | 1 | 1 | 1 | `socketable-772`; source `772` — Jiquani's Thesis (socketing; implemented; supported; current) |
+| `socketable-773` | `assets/icons/socketable-773.png` | missing | 1 | 1 | 1 | `socketable-773`; source `773` — Quipolatl's Thesis (socketing; implemented; supported; current) |
+| `socketable-774` | `assets/icons/socketable-774.png` | missing | 1 | 1 | 1 | `socketable-774`; source `774` — Emergent Vigour (socketing; implemented; supported; current) |
+| `socketable-775` | `assets/icons/socketable-775.png` | missing | 1 | 1 | 1 | `socketable-775`; source `775` — Emergent Possibility (socketing; implemented; supported; current) |
+| `socketable-776` | `assets/icons/socketable-776.png` | missing | 1 | 1 | 1 | `socketable-776`; source `776` — Emergent Protection (socketing; implemented; supported; current) |
+| `socketable-777` | `assets/icons/socketable-777.png` | missing | 1 | 1 | 1 | `socketable-777`; source `777` — Emergent Instinct (socketing; implemented; supported; current) |
+| `socketable-778` | `assets/icons/socketable-778.png` | missing | 1 | 1 | 1 | `socketable-778`; source `778` — Carved Cunning (socketing; implemented; supported; current) |
+| `socketable-779` | `assets/icons/socketable-779.png` | missing | 1 | 1 | 1 | `socketable-779`; source `779` — Carved Majesty (socketing; implemented; supported; current) |
+| `socketable-780` | `assets/icons/socketable-780.png` | missing | 1 | 1 | 1 | `socketable-780`; source `780` — Carved Mischief (socketing; implemented; supported; current) |
+| `socketable-781` | `assets/icons/socketable-781.png` | missing | 1 | 1 | 1 | `socketable-781`; source `781` — Carved Tenacity (socketing; implemented; supported; current) |
+| `socketable-782` | `assets/icons/socketable-782.png` | missing | 1 | 1 | 1 | `socketable-782`; source `782` — Raven-Touched Shard (socketing; implemented; supported; current) |
 | `source-item-0` | `assets/icons/source-item-0.png` | missing | 1 | 1 | 0 | `source-item:0`; source `0` — Blacksmith's Whetstone (quality; blocked_missing_data; current) |
 | `source-item-1` | `assets/icons/source-item-1.png` | missing | 1 | 1 | 0 | `source-item:1`; source `1` — Arcanist's Etcher (quality; blocked_missing_data; current) |
-| `source-item-100` | `assets/icons/source-item-100.png` | missing | 1 | 1 | 0 | `source-item:100`; source `100` — Essence of the Mind (essences; blocked_missing_data; current) |
-| `source-item-101` | `assets/icons/source-item-101.png` | missing | 1 | 1 | 0 | `source-item:101`; source `101` — Essence of Enhancement (essences; blocked_missing_data; current) |
-| `source-item-102` | `assets/icons/source-item-102.png` | missing | 1 | 1 | 0 | `source-item:102`; source `102` — Essence of Abrasion (essences; blocked_missing_data; current) |
-| `source-item-103` | `assets/icons/source-item-103.png` | missing | 1 | 1 | 0 | `source-item:103`; source `103` — Essence of Flames (essences; blocked_missing_data; current) |
-| `source-item-104` | `assets/icons/source-item-104.png` | missing | 1 | 1 | 0 | `source-item:104`; source `104` — Essence of Ice (essences; blocked_missing_data; current) |
-| `source-item-105` | `assets/icons/source-item-105.png` | missing | 1 | 1 | 0 | `source-item:105`; source `105` — Essence of Electricity (essences; blocked_missing_data; current) |
-| `source-item-106` | `assets/icons/source-item-106.png` | missing | 1 | 1 | 0 | `source-item:106`; source `106` — Essence of Ruin (essences; blocked_missing_data; current) |
-| `source-item-107` | `assets/icons/source-item-107.png` | missing | 1 | 1 | 0 | `source-item:107`; source `107` — Essence of Battle (essences; blocked_missing_data; current) |
-| `source-item-108` | `assets/icons/source-item-108.png` | missing | 1 | 1 | 0 | `source-item:108`; source `108` — Essence of Sorcery (essences; blocked_missing_data; current) |
-| `source-item-109` | `assets/icons/source-item-109.png` | missing | 1 | 1 | 0 | `source-item:109`; source `109` — Essence of Haste (essences; blocked_missing_data; current) |
 | `source-item-1093` | `assets/icons/source-item-1093.png` | missing | 1 | 1 | 0 | `source-item:1093`; source `1093` — Diluted Liquid Ire (delirium; blocked_missing_data; current) |
 | `source-item-1094` | `assets/icons/source-item-1094.png` | missing | 1 | 1 | 0 | `source-item:1094`; source `1094` — Diluted Liquid Guilt (delirium; blocked_missing_data; current) |
 | `source-item-1095` | `assets/icons/source-item-1095.png` | missing | 1 | 1 | 0 | `source-item:1095`; source `1095` — Diluted Liquid Greed (delirium; blocked_missing_data; current) |
@@ -1854,7 +2215,6 @@ All known definitions are grouped by their shared `iconId`. Definition entries i
 | `source-item-1097` | `assets/icons/source-item-1097.png` | missing | 1 | 1 | 0 | `source-item:1097`; source `1097` — Liquid Envy (delirium; blocked_missing_data; current) |
 | `source-item-1098` | `assets/icons/source-item-1098.png` | missing | 1 | 1 | 0 | `source-item:1098`; source `1098` — Liquid Disgust (delirium; blocked_missing_data; current) |
 | `source-item-1099` | `assets/icons/source-item-1099.png` | missing | 1 | 1 | 0 | `source-item:1099`; source `1099` — Liquid Despair (delirium; blocked_missing_data; current) |
-| `source-item-110` | `assets/icons/source-item-110.png` | missing | 1 | 1 | 0 | `source-item:110`; source `110` — Essence of the Infinite (essences; blocked_missing_data; current) |
 | `source-item-1100` | `assets/icons/source-item-1100.png` | missing | 1 | 1 | 0 | `source-item:1100`; source `1100` — Concentrated Liquid Fear (delirium; blocked_missing_data; current) |
 | `source-item-1101` | `assets/icons/source-item-1101.png` | missing | 1 | 1 | 0 | `source-item:1101`; source `1101` — Concentrated Liquid Suffering (delirium; blocked_missing_data; current) |
 | `source-item-1102` | `assets/icons/source-item-1102.png` | missing | 1 | 1 | 0 | `source-item:1102`; source `1102` — Concentrated Liquid Isolation (delirium; blocked_missing_data; current) |
@@ -1865,7 +2225,6 @@ All known definitions are grouped by their shared `iconId`. Definition entries i
 | `source-item-1107` | `assets/icons/source-item-1107.png` | missing | 1 | 1 | 0 | `source-item:1107`; source `1107` — Ancient Liquid Envy (delirium; blocked_missing_data; current) |
 | `source-item-1108` | `assets/icons/source-item-1108.png` | missing | 1 | 1 | 0 | `source-item:1108`; source `1108` — Ancient Liquid Disgust (delirium; blocked_missing_data; current) |
 | `source-item-1109` | `assets/icons/source-item-1109.png` | missing | 1 | 1 | 0 | `source-item:1109`; source `1109` — Ancient Liquid Despair (delirium; blocked_missing_data; current) |
-| `source-item-111` | `assets/icons/source-item-111.png` | missing | 1 | 1 | 0 | `source-item:111`; source `111` — Greater Essence of the Body (essences; blocked_missing_data; current) |
 | `source-item-1110` | `assets/icons/source-item-1110.png` | missing | 1 | 1 | 0 | `source-item:1110`; source `1110` — Ancient Concentrated Liquid Fear (delirium; blocked_missing_data; current) |
 | `source-item-1111` | `assets/icons/source-item-1111.png` | missing | 1 | 1 | 0 | `source-item:1111`; source `1111` — Ancient Concentrated Liquid Suffering (delirium; blocked_missing_data; current) |
 | `source-item-1112` | `assets/icons/source-item-1112.png` | missing | 1 | 1 | 0 | `source-item:1112`; source `1112` — Ancient Concentrated Liquid Isolation (delirium; blocked_missing_data; current) |
@@ -1875,66 +2234,11 @@ All known definitions are grouped by their shared `iconId`. Definition entries i
 | `source-item-1116` | `assets/icons/source-item-1116.png` | missing | 1 | 1 | 0 | `source-item:1116`; source `1116` — Ancient Potent Liquid Melancholy (delirium; blocked_missing_data; current) |
 | `source-item-1117` | `assets/icons/source-item-1117.png` | missing | 1 | 1 | 0 | `source-item:1117`; source `1117` — Ancient Potent Liquid Ferocity (delirium; blocked_missing_data; current) |
 | `source-item-1118` | `assets/icons/source-item-1118.png` | missing | 1 | 1 | 0 | `source-item:1118`; source `1118` — Ancient Potent Liquid Contempt (delirium; blocked_missing_data; current) |
-| `source-item-112` | `assets/icons/source-item-112.png` | missing | 1 | 1 | 0 | `source-item:112`; source `112` — Greater Essence of the Mind (essences; blocked_missing_data; current) |
-| `source-item-113` | `assets/icons/source-item-113.png` | missing | 1 | 1 | 0 | `source-item:113`; source `113` — Greater Essence of Enhancement (essences; blocked_missing_data; current) |
-| `source-item-114` | `assets/icons/source-item-114.png` | missing | 1 | 1 | 0 | `source-item:114`; source `114` — Greater Essence of Abrasion (essences; blocked_missing_data; current) |
-| `source-item-115` | `assets/icons/source-item-115.png` | missing | 1 | 1 | 0 | `source-item:115`; source `115` — Greater Essence of Flames (essences; blocked_missing_data; current) |
-| `source-item-116` | `assets/icons/source-item-116.png` | missing | 1 | 1 | 0 | `source-item:116`; source `116` — Greater Essence of Ice (essences; blocked_missing_data; current) |
-| `source-item-117` | `assets/icons/source-item-117.png` | missing | 1 | 1 | 0 | `source-item:117`; source `117` — Greater Essence of Electricity (essences; blocked_missing_data; current) |
-| `source-item-118` | `assets/icons/source-item-118.png` | missing | 1 | 1 | 0 | `source-item:118`; source `118` — Greater Essence of Ruin (essences; blocked_missing_data; current) |
-| `source-item-119` | `assets/icons/source-item-119.png` | missing | 1 | 1 | 0 | `source-item:119`; source `119` — Greater Essence of Battle (essences; blocked_missing_data; current) |
-| `source-item-120` | `assets/icons/source-item-120.png` | missing | 1 | 1 | 0 | `source-item:120`; source `120` — Greater Essence of Sorcery (essences; blocked_missing_data; current) |
-| `source-item-121` | `assets/icons/source-item-121.png` | missing | 1 | 1 | 0 | `source-item:121`; source `121` — Greater Essence of Haste (essences; blocked_missing_data; current) |
-| `source-item-122` | `assets/icons/source-item-122.png` | missing | 1 | 1 | 0 | `source-item:122`; source `122` — Greater Essence of the Infinite (essences; blocked_missing_data; current) |
-| `source-item-123` | `assets/icons/source-item-123.png` | missing | 1 | 1 | 0 | `source-item:123`; source `123` — Perfect Essence of the Body (essences; blocked_missing_data; current) |
-| `source-item-124` | `assets/icons/source-item-124.png` | missing | 1 | 1 | 0 | `source-item:124`; source `124` — Perfect Essence of the Mind (essences; blocked_missing_data; current) |
-| `source-item-125` | `assets/icons/source-item-125.png` | missing | 1 | 1 | 0 | `source-item:125`; source `125` — Perfect Essence of Enhancement (essences; blocked_missing_data; current) |
-| `source-item-126` | `assets/icons/source-item-126.png` | missing | 1 | 1 | 0 | `source-item:126`; source `126` — Perfect Essence of Abrasion (essences; blocked_missing_data; current) |
-| `source-item-127` | `assets/icons/source-item-127.png` | missing | 1 | 1 | 0 | `source-item:127`; source `127` — Perfect Essence of Flames (essences; blocked_missing_data; current) |
-| `source-item-128` | `assets/icons/source-item-128.png` | missing | 1 | 1 | 0 | `source-item:128`; source `128` — Perfect Essence of Ice (essences; blocked_missing_data; current) |
-| `source-item-129` | `assets/icons/source-item-129.png` | missing | 1 | 1 | 0 | `source-item:129`; source `129` — Perfect Essence of Electricity (essences; blocked_missing_data; current) |
-| `source-item-130` | `assets/icons/source-item-130.png` | missing | 1 | 1 | 0 | `source-item:130`; source `130` — Perfect Essence of Ruin (essences; blocked_missing_data; current) |
-| `source-item-131` | `assets/icons/source-item-131.png` | missing | 1 | 1 | 0 | `source-item:131`; source `131` — Perfect Essence of Battle (essences; blocked_missing_data; current) |
-| `source-item-132` | `assets/icons/source-item-132.png` | missing | 1 | 1 | 0 | `source-item:132`; source `132` — Perfect Essence of Sorcery (essences; blocked_missing_data; current) |
-| `source-item-133` | `assets/icons/source-item-133.png` | missing | 1 | 1 | 0 | `source-item:133`; source `133` — Perfect Essence of Haste (essences; blocked_missing_data; current) |
-| `source-item-134` | `assets/icons/source-item-134.png` | missing | 1 | 1 | 0 | `source-item:134`; source `134` — Perfect Essence of the Infinite (essences; blocked_missing_data; current) |
-| `source-item-135` | `assets/icons/source-item-135.png` | missing | 1 | 1 | 0 | `source-item:135`; source `135` — Lesser Essence of Seeking (essences; blocked_missing_data; current) |
-| `source-item-136` | `assets/icons/source-item-136.png` | missing | 1 | 1 | 0 | `source-item:136`; source `136` — Essence of Seeking (essences; blocked_missing_data; current) |
-| `source-item-137` | `assets/icons/source-item-137.png` | missing | 1 | 1 | 0 | `source-item:137`; source `137` — Greater Essence of Seeking (essences; blocked_missing_data; current) |
-| `source-item-138` | `assets/icons/source-item-138.png` | missing | 1 | 1 | 0 | `source-item:138`; source `138` — Perfect Essence of Seeking (essences; blocked_missing_data; current) |
-| `source-item-139` | `assets/icons/source-item-139.png` | missing | 1 | 1 | 0 | `source-item:139`; source `139` — Essence of Hysteria (essences; blocked_missing_data; current) |
-| `source-item-140` | `assets/icons/source-item-140.png` | missing | 1 | 1 | 0 | `source-item:140`; source `140` — Essence of Delirium (essences; blocked_missing_data; current) |
-| `source-item-141` | `assets/icons/source-item-141.png` | missing | 1 | 1 | 0 | `source-item:141`; source `141` — Essence of Horror (essences; blocked_missing_data; current) |
-| `source-item-142` | `assets/icons/source-item-142.png` | missing | 1 | 1 | 0 | `source-item:142`; source `142` — Essence of Insanity (essences; blocked_missing_data; current) |
 | `source-item-1442` | `assets/icons/source-item-1442.png` | missing | 1 | 1 | 0 | `source-item:1442`; source `1442` — Aldur's Saga (ritual; blocked_missing_data; current) |
 | `source-item-1443` | `assets/icons/source-item-1443.png` | missing | 1 | 1 | 0 | `source-item:1443`; source `1443` — Medved's Saga (ritual; blocked_missing_data; current) |
 | `source-item-1444` | `assets/icons/source-item-1444.png` | missing | 1 | 1 | 0 | `source-item:1444`; source `1444` — Vorana's Saga (ritual; blocked_missing_data; current) |
 | `source-item-1445` | `assets/icons/source-item-1445.png` | missing | 1 | 1 | 0 | `source-item:1445`; source `1445` — Uhtred's Saga (ritual; blocked_missing_data; current) |
 | `source-item-1446` | `assets/icons/source-item-1446.png` | missing | 1 | 1 | 0 | `source-item:1446`; source `1446` — Olroth's Saga (ritual; blocked_missing_data; current) |
-| `source-item-145` | `assets/icons/source-item-145.png` | missing | 1 | 1 | 0 | `source-item:145`; source `145` — Lesser Essence of Insulation (essences; blocked_missing_data; current) |
-| `source-item-146` | `assets/icons/source-item-146.png` | missing | 1 | 1 | 0 | `source-item:146`; source `146` — Essence of Insulation (essences; blocked_missing_data; current) |
-| `source-item-147` | `assets/icons/source-item-147.png` | missing | 1 | 1 | 0 | `source-item:147`; source `147` — Greater Essence of Insulation (essences; blocked_missing_data; current) |
-| `source-item-148` | `assets/icons/source-item-148.png` | missing | 1 | 1 | 0 | `source-item:148`; source `148` — Perfect Essence of Insulation (essences; blocked_missing_data; current) |
-| `source-item-149` | `assets/icons/source-item-149.png` | missing | 1 | 1 | 0 | `source-item:149`; source `149` — Lesser Essence of Thawing (essences; blocked_missing_data; current) |
-| `source-item-150` | `assets/icons/source-item-150.png` | missing | 1 | 1 | 0 | `source-item:150`; source `150` — Essence of Thawing (essences; blocked_missing_data; current) |
-| `source-item-151` | `assets/icons/source-item-151.png` | missing | 1 | 1 | 0 | `source-item:151`; source `151` — Greater Essence of Thawing (essences; blocked_missing_data; current) |
-| `source-item-152` | `assets/icons/source-item-152.png` | missing | 1 | 1 | 0 | `source-item:152`; source `152` — Perfect Essence of Thawing (essences; blocked_missing_data; current) |
-| `source-item-153` | `assets/icons/source-item-153.png` | missing | 1 | 1 | 0 | `source-item:153`; source `153` — Lesser Essence of Grounding (essences; blocked_missing_data; current) |
-| `source-item-154` | `assets/icons/source-item-154.png` | missing | 1 | 1 | 0 | `source-item:154`; source `154` — Essence of Grounding (essences; blocked_missing_data; current) |
-| `source-item-155` | `assets/icons/source-item-155.png` | missing | 1 | 1 | 0 | `source-item:155`; source `155` — Greater Essence of Grounding (essences; blocked_missing_data; current) |
-| `source-item-156` | `assets/icons/source-item-156.png` | missing | 1 | 1 | 0 | `source-item:156`; source `156` — Perfect Essence of Grounding (essences; blocked_missing_data; current) |
-| `source-item-157` | `assets/icons/source-item-157.png` | missing | 1 | 1 | 0 | `source-item:157`; source `157` — Lesser Essence of Alacrity (essences; blocked_missing_data; current) |
-| `source-item-158` | `assets/icons/source-item-158.png` | missing | 1 | 1 | 0 | `source-item:158`; source `158` — Essence of Alacrity (essences; blocked_missing_data; current) |
-| `source-item-159` | `assets/icons/source-item-159.png` | missing | 1 | 1 | 0 | `source-item:159`; source `159` — Greater Essence of Alacrity (essences; blocked_missing_data; current) |
-| `source-item-160` | `assets/icons/source-item-160.png` | missing | 1 | 1 | 0 | `source-item:160`; source `160` — Perfect Essence of Alacrity (essences; blocked_missing_data; current) |
-| `source-item-161` | `assets/icons/source-item-161.png` | missing | 1 | 1 | 0 | `source-item:161`; source `161` — Lesser Essence of Opulence (essences; blocked_missing_data; current) |
-| `source-item-162` | `assets/icons/source-item-162.png` | missing | 1 | 1 | 0 | `source-item:162`; source `162` — Essence of Opulence (essences; blocked_missing_data; current) |
-| `source-item-163` | `assets/icons/source-item-163.png` | missing | 1 | 1 | 0 | `source-item:163`; source `163` — Greater Essence of Opulence (essences; blocked_missing_data; current) |
-| `source-item-164` | `assets/icons/source-item-164.png` | missing | 1 | 1 | 0 | `source-item:164`; source `164` — Perfect Essence of Opulence (essences; blocked_missing_data; current) |
-| `source-item-165` | `assets/icons/source-item-165.png` | missing | 1 | 1 | 0 | `source-item:165`; source `165` — Lesser Essence of Command (essences; blocked_missing_data; current) |
-| `source-item-166` | `assets/icons/source-item-166.png` | missing | 1 | 1 | 0 | `source-item:166`; source `166` — Essence of Command (essences; blocked_missing_data; current) |
-| `source-item-167` | `assets/icons/source-item-167.png` | missing | 1 | 1 | 0 | `source-item:167`; source `167` — Greater Essence of Command (essences; blocked_missing_data; current) |
-| `source-item-168` | `assets/icons/source-item-168.png` | missing | 1 | 1 | 0 | `source-item:168`; source `168` — Perfect Essence of Command (essences; blocked_missing_data; current) |
 | `source-item-2191` | `assets/icons/source-item-2191.png` | missing | 1 | 1 | 0 | `source-item:2191`; source `2191` — Alloy Crossbow (runeforging; non_item_currency; current) |
 | `source-item-277` | `assets/icons/source-item-277.png` | missing | 1 | 1 | 0 | `source-item:277`; source `277` — Flesh Catalyst (breach; blocked_missing_data; current) |
 | `source-item-278` | `assets/icons/source-item-278.png` | missing | 1 | 1 | 0 | `source-item:278`; source `278` — Neural Catalyst (breach; blocked_missing_data; current) |
@@ -1963,7 +2267,6 @@ All known definitions are grouped by their shared `iconId`. Definition entries i
 | `source-item-300` | `assets/icons/source-item-300.png` | missing | 1 | 1 | 0 | `source-item:300`; source `300` — Refined Skittering Catalyst (breach; blocked_missing_data; current) |
 | `source-item-301` | `assets/icons/source-item-301.png` | missing | 1 | 1 | 0 | `source-item:301`; source `301` — Refined Adaptive Catalyst (breach; blocked_missing_data; current) |
 | `source-item-302` | `assets/icons/source-item-302.png` | missing | 1 | 1 | 0 | `source-item:302`; source `302` — Refined Necrotic Catalyst (breach; blocked_missing_data; current) |
-| `source-item-35` | `assets/icons/source-item-35.png` | missing | 1 | 1 | 0 | `source-item:35`; source `35` — Artificer's Orb (socketing; blocked_missing_data; current) |
 | `source-item-4402` | `assets/icons/source-item-4402.png` | missing | 1 | 1 | 0 | `source-item:4402`; source `4402` — Elemental Conflux (runeforging; non_item_currency; current) |
 | `source-item-4422` | `assets/icons/source-item-4422.png` | missing | 1 | 0 | 0 | `source-item:4422`; source `4422` — Omen of Corruption (ritual; deprecated_for_target_version) |
 | `source-item-4433` | `assets/icons/source-item-4433.png` | missing | 1 | 1 | 0 | `source-item:4433`; source `4433` — Omen of Homogenising Exaltation (ritual; blocked_missing_data; current) |
@@ -1978,9 +2281,6 @@ All known definitions are grouped by their shared `iconId`. Definition entries i
 | `source-item-4448` | `assets/icons/source-item-4448.png` | missing | 1 | 1 | 0 | `source-item:4448`; source `4448` — Omen of Catalysing Exaltation (ritual; blocked_missing_data; current) |
 | `source-item-4453` | `assets/icons/source-item-4453.png` | missing | 1 | 1 | 0 | `source-item:4453`; source `4453` — Omen of Putrefaction (ritual; blocked_missing_data; current) |
 | `source-item-4479` | `assets/icons/source-item-4479.png` | missing | 1 | 1 | 0 | `source-item:4479`; source `4479` — Sacrifice (corruption; non_item_currency; current) |
-| `source-item-4857` | `assets/icons/source-item-4857.png` | missing | 1 | 1 | 0 | `source-item:4857`; source `4857` — Ancient Jawbone (abyss; blocked_missing_data; current) |
-| `source-item-4860` | `assets/icons/source-item-4860.png` | missing | 1 | 1 | 0 | `source-item:4860`; source `4860` — Ancient Rib (abyss; blocked_missing_data; current) |
-| `source-item-4863` | `assets/icons/source-item-4863.png` | missing | 1 | 1 | 0 | `source-item:4863`; source `4863` — Ancient Collarbone (abyss; blocked_missing_data; current) |
 | `source-item-4865` | `assets/icons/source-item-4865.png` | missing | 1 | 1 | 0 | `source-item:4865`; source `4865` — Preserved Vertebrae (abyss; blocked_missing_data; current) |
 | `source-item-4866` | `assets/icons/source-item-4866.png` | missing | 1 | 1 | 0 | `source-item:4866`; source `4866` — Altered Collarbone (breach; blocked_missing_data; current) |
 | `source-item-5049` | `assets/icons/source-item-5049.png` | missing | 1 | 1 | 0 | `source-item:5049`; source `5049` — Runic Alloy (runeforging; blocked_missing_data; current) |
@@ -2000,61 +2300,6 @@ All known definitions are grouped by their shared `iconId`. Definition entries i
 | `source-item-5068` | `assets/icons/source-item-5068.png` | missing | 1 | 1 | 0 | `source-item:5068`; source `5068` — Chilling Flux (runeforging; blocked_missing_data; current) |
 | `source-item-5069` | `assets/icons/source-item-5069.png` | missing | 1 | 1 | 0 | `source-item:5069`; source `5069` — Crackling Flux (runeforging; blocked_missing_data; current) |
 | `source-item-5070` | `assets/icons/source-item-5070.png` | missing | 1 | 1 | 0 | `source-item:5070`; source `5070` — Void Flux (runeforging; blocked_missing_data; current) |
-| `source-item-5072` | `assets/icons/source-item-5072.png` | missing | 1 | 1 | 0 | `source-item:5072`; source `5072` — Lesser Ward Rune (socketing; blocked_missing_data; current) |
-| `source-item-5073` | `assets/icons/source-item-5073.png` | missing | 1 | 1 | 0 | `source-item:5073`; source `5073` — Ward Rune (socketing; blocked_missing_data; current) |
-| `source-item-5074` | `assets/icons/source-item-5074.png` | missing | 1 | 1 | 0 | `source-item:5074`; source `5074` — Greater Ward Rune (socketing; blocked_missing_data; current) |
-| `source-item-5075` | `assets/icons/source-item-5075.png` | missing | 1 | 1 | 0 | `source-item:5075`; source `5075` — Perfect Ward Rune (socketing; blocked_missing_data; current) |
-| `source-item-5076` | `assets/icons/source-item-5076.png` | missing | 1 | 1 | 0 | `source-item:5076`; source `5076` — Lesser Charging Rune (socketing; blocked_missing_data; current) |
-| `source-item-5077` | `assets/icons/source-item-5077.png` | missing | 1 | 1 | 0 | `source-item:5077`; source `5077` — Charging Rune (socketing; blocked_missing_data; current) |
-| `source-item-5078` | `assets/icons/source-item-5078.png` | missing | 1 | 1 | 0 | `source-item:5078`; source `5078` — Greater Charging Rune (socketing; blocked_missing_data; current) |
-| `source-item-5079` | `assets/icons/source-item-5079.png` | missing | 1 | 1 | 0 | `source-item:5079`; source `5079` — Perfect Charging Rune (socketing; blocked_missing_data; current) |
-| `source-item-5080` | `assets/icons/source-item-5080.png` | missing | 1 | 1 | 0 | `source-item:5080`; source `5080` — Warding Rune of Reinforcement (socketing; blocked_missing_data; current) |
-| `source-item-5081` | `assets/icons/source-item-5081.png` | missing | 1 | 1 | 0 | `source-item:5081`; source `5081` — Warding Rune of Protection (socketing; blocked_missing_data; current) |
-| `source-item-5082` | `assets/icons/source-item-5082.png` | missing | 1 | 1 | 0 | `source-item:5082`; source `5082` — Warding Rune of Disintegration (socketing; blocked_missing_data; current) |
-| `source-item-5083` | `assets/icons/source-item-5083.png` | missing | 1 | 1 | 0 | `source-item:5083`; source `5083` — Warding Rune of Desperation (socketing; blocked_missing_data; current) |
-| `source-item-5084` | `assets/icons/source-item-5084.png` | missing | 1 | 1 | 0 | `source-item:5084`; source `5084` — Warding Rune of Symbiosis (socketing; blocked_missing_data; current) |
-| `source-item-5085` | `assets/icons/source-item-5085.png` | missing | 1 | 1 | 0 | `source-item:5085`; source `5085` — Warding Rune of Courage (socketing; blocked_missing_data; current) |
-| `source-item-5086` | `assets/icons/source-item-5086.png` | missing | 1 | 1 | 0 | `source-item:5086`; source `5086` — Warding Rune of Stability (socketing; blocked_missing_data; current) |
-| `source-item-5087` | `assets/icons/source-item-5087.png` | missing | 1 | 1 | 0 | `source-item:5087`; source `5087` — Warding Rune of Glancing (socketing; blocked_missing_data; current) |
-| `source-item-5088` | `assets/icons/source-item-5088.png` | missing | 1 | 1 | 0 | `source-item:5088`; source `5088` — Warding Rune of Heart (socketing; blocked_missing_data; current) |
-| `source-item-5089` | `assets/icons/source-item-5089.png` | missing | 1 | 1 | 0 | `source-item:5089`; source `5089` — Warding Rune of Nourishment (socketing; blocked_missing_data; current) |
-| `source-item-5090` | `assets/icons/source-item-5090.png` | missing | 1 | 1 | 0 | `source-item:5090`; source `5090` — Warding Rune of Annihilation (socketing; blocked_missing_data; current) |
-| `source-item-5091` | `assets/icons/source-item-5091.png` | missing | 1 | 1 | 0 | `source-item:5091`; source `5091` — Warding Rune of Armature (socketing; blocked_missing_data; current) |
-| `source-item-5092` | `assets/icons/source-item-5092.png` | missing | 1 | 1 | 0 | `source-item:5092`; source `5092` — Warding Rune of Obsession (socketing; blocked_missing_data; current) |
-| `source-item-5093` | `assets/icons/source-item-5093.png` | missing | 1 | 1 | 0 | `source-item:5093`; source `5093` — Warding Rune of Equinox (socketing; blocked_missing_data; current) |
-| `source-item-5094` | `assets/icons/source-item-5094.png` | missing | 1 | 1 | 0 | `source-item:5094`; source `5094` — Warding Rune of Salvaging (socketing; blocked_missing_data; current) |
-| `source-item-5095` | `assets/icons/source-item-5095.png` | missing | 1 | 1 | 0 | `source-item:5095`; source `5095` — Warding Rune of Bodyguards (socketing; blocked_missing_data; current) |
-| `source-item-5096` | `assets/icons/source-item-5096.png` | missing | 1 | 1 | 0 | `source-item:5096`; source `5096` — Warding Rune of Hollowing (socketing; blocked_missing_data; current) |
-| `source-item-5097` | `assets/icons/source-item-5097.png` | missing | 1 | 1 | 0 | `source-item:5097`; source `5097` — Passion of Aldur (socketing; blocked_missing_data; current) |
-| `source-item-5098` | `assets/icons/source-item-5098.png` | missing | 1 | 1 | 0 | `source-item:5098`; source `5098` — Breath of Aldur (socketing; blocked_missing_data; current) |
-| `source-item-5099` | `assets/icons/source-item-5099.png` | missing | 1 | 1 | 0 | `source-item:5099`; source `5099` — Ire of Aldur (socketing; blocked_missing_data; current) |
-| `source-item-5100` | `assets/icons/source-item-5100.png` | missing | 1 | 1 | 0 | `source-item:5100`; source `5100` — Betrayal of Aldur (socketing; blocked_missing_data; current) |
-| `source-item-5101` | `assets/icons/source-item-5101.png` | missing | 1 | 1 | 0 | `source-item:5101`; source `5101` — Ancient Rune of Splinters (socketing; blocked_missing_data; current) |
-| `source-item-5102` | `assets/icons/source-item-5102.png` | missing | 1 | 1 | 0 | `source-item:5102`; source `5102` — Ancient Rune of Dueling (socketing; blocked_missing_data; current) |
-| `source-item-5103` | `assets/icons/source-item-5103.png` | missing | 1 | 1 | 0 | `source-item:5103`; source `5103` — Ancient Rune of the Titan (socketing; blocked_missing_data; current) |
-| `source-item-5104` | `assets/icons/source-item-5104.png` | missing | 1 | 1 | 0 | `source-item:5104`; source `5104` — Ancient Rune of Shattering (socketing; blocked_missing_data; current) |
-| `source-item-5105` | `assets/icons/source-item-5105.png` | missing | 1 | 1 | 0 | `source-item:5105`; source `5105` — Ancient Rune of Prowess (socketing; blocked_missing_data; current) |
-| `source-item-5106` | `assets/icons/source-item-5106.png` | missing | 1 | 1 | 0 | `source-item:5106`; source `5106` — Ancient Rune of Control (socketing; blocked_missing_data; current) |
-| `source-item-5107` | `assets/icons/source-item-5107.png` | missing | 1 | 1 | 0 | `source-item:5107`; source `5107` — Ancient Rune of Discovery (socketing; blocked_missing_data; current) |
-| `source-item-5108` | `assets/icons/source-item-5108.png` | missing | 1 | 1 | 0 | `source-item:5108`; source `5108` — Ancient Rune of Decay (socketing; blocked_missing_data; current) |
-| `source-item-5109` | `assets/icons/source-item-5109.png` | missing | 1 | 1 | 0 | `source-item:5109`; source `5109` — Ancient Rune of Witchcraft (socketing; blocked_missing_data; current) |
-| `source-item-5110` | `assets/icons/source-item-5110.png` | missing | 1 | 1 | 0 | `source-item:5110`; source `5110` — Ancient Rune of the Horde (socketing; blocked_missing_data; current) |
-| `source-item-5111` | `assets/icons/source-item-5111.png` | missing | 1 | 1 | 0 | `source-item:5111`; source `5111` — Ancient Rune of Animosity (socketing; blocked_missing_data; current) |
-| `source-item-5112` | `assets/icons/source-item-5112.png` | missing | 1 | 1 | 0 | `source-item:5112`; source `5112` — Ancient Rune of Detonation (socketing; blocked_missing_data; current) |
-| `source-item-5113` | `assets/icons/source-item-5113.png` | missing | 1 | 1 | 0 | `source-item:5113`; source `5113` — Ancient Rune of Retaliation (socketing; blocked_missing_data; current) |
-| `source-item-5114` | `assets/icons/source-item-5114.png` | missing | 1 | 1 | 0 | `source-item:5114`; source `5114` — Rune of Vitality (socketing; blocked_missing_data; current) |
-| `source-item-5115` | `assets/icons/source-item-5115.png` | missing | 1 | 1 | 0 | `source-item:5115`; source `5115` — Rune of the Hunt (socketing; blocked_missing_data; current) |
-| `source-item-5116` | `assets/icons/source-item-5116.png` | missing | 1 | 1 | 0 | `source-item:5116`; source `5116` — Rune of Acrobatics (socketing; blocked_missing_data; current) |
-| `source-item-5117` | `assets/icons/source-item-5117.png` | missing | 1 | 1 | 0 | `source-item:5117`; source `5117` — Rune of Culmination (socketing; blocked_missing_data; current) |
-| `source-item-5118` | `assets/icons/source-item-5118.png` | missing | 1 | 1 | 0 | `source-item:5118`; source `5118` — Rune of Renown (socketing; blocked_missing_data; current) |
-| `source-item-5119` | `assets/icons/source-item-5119.png` | missing | 1 | 1 | 0 | `source-item:5119`; source `5119` — Rune of Accumulation (socketing; blocked_missing_data; current) |
-| `source-item-5120` | `assets/icons/source-item-5120.png` | missing | 1 | 1 | 0 | `source-item:5120`; source `5120` — Rune of Foundations (socketing; blocked_missing_data; current) |
-| `source-item-5121` | `assets/icons/source-item-5121.png` | missing | 1 | 1 | 0 | `source-item:5121`; source `5121` — Rune of the Prism (socketing; blocked_missing_data; current) |
-| `source-item-5122` | `assets/icons/source-item-5122.png` | missing | 1 | 1 | 0 | `source-item:5122`; source `5122` — Rune of the Blossom (socketing; blocked_missing_data; current) |
-| `source-item-5123` | `assets/icons/source-item-5123.png` | missing | 1 | 1 | 0 | `source-item:5123`; source `5123` — Rune of Consistency (socketing; blocked_missing_data; current) |
-| `source-item-5124` | `assets/icons/source-item-5124.png` | missing | 1 | 1 | 0 | `source-item:5124`; source `5124` — Rune of Reach (socketing; blocked_missing_data; current) |
-| `source-item-5125` | `assets/icons/source-item-5125.png` | missing | 1 | 1 | 0 | `source-item:5125`; source `5125` — Rune of Vital Flame (socketing; blocked_missing_data; current) |
-| `source-item-5126` | `assets/icons/source-item-5126.png` | missing | 1 | 1 | 0 | `source-item:5126`; source `5126` — Rune of Confrontation (socketing; blocked_missing_data; current) |
 | `source-item-5127` | `assets/icons/source-item-5127.png` | missing | 1 | 0 | 0 | `source-item:5127`; source `5127` — [DNT-Unused] Rune of Wild Ferocity (socketing; deprecated_for_target_version) |
 | `source-item-5128` | `assets/icons/source-item-5128.png` | missing | 1 | 0 | 0 | `source-item:5128`; source `5128` — [DNT-Unused] Rune of Partnership (socketing; deprecated_for_target_version) |
 | `source-item-5129` | `assets/icons/source-item-5129.png` | missing | 1 | 0 | 0 | `source-item:5129`; source `5129` — [DNT-Unused] Rune of Reverberation (socketing; deprecated_for_target_version) |
@@ -2063,258 +2308,13 @@ All known definitions are grouped by their shared `iconId`. Definition entries i
 | `source-item-5132` | `assets/icons/source-item-5132.png` | missing | 1 | 0 | 0 | `source-item:5132`; source `5132` — [DNT-Unused] Rune of Chance (socketing; deprecated_for_target_version) |
 | `source-item-5133` | `assets/icons/source-item-5133.png` | missing | 1 | 0 | 0 | `source-item:5133`; source `5133` — [DNT-Unused] Rune of Confidence (socketing; deprecated_for_target_version) |
 | `source-item-5134` | `assets/icons/source-item-5134.png` | missing | 1 | 0 | 0 | `source-item:5134`; source `5134` — [DNT-Unused] Rune of Duplication (socketing; deprecated_for_target_version) |
-| `source-item-5136` | `assets/icons/source-item-5136.png` | missing | 1 | 1 | 0 | `source-item:5136`; source `5136` — Serle's Triumph (socketing; blocked_missing_data; current) |
-| `source-item-5137` | `assets/icons/source-item-5137.png` | missing | 1 | 1 | 0 | `source-item:5137`; source `5137` — Cadigan's Epiphany (socketing; blocked_missing_data; current) |
-| `source-item-5138` | `assets/icons/source-item-5138.png` | missing | 1 | 1 | 0 | `source-item:5138`; source `5138` — Astrid's Creativity (socketing; blocked_missing_data; current) |
-| `source-item-5139` | `assets/icons/source-item-5139.png` | missing | 1 | 1 | 0 | `source-item:5139`; source `5139` — Uhtred's Sidereus (socketing; blocked_missing_data; current) |
-| `source-item-5140` | `assets/icons/source-item-5140.png` | missing | 1 | 1 | 0 | `source-item:5140`; source `5140` — Kolr's Hunt (socketing; blocked_missing_data; current) |
-| `source-item-5141` | `assets/icons/source-item-5141.png` | missing | 1 | 1 | 0 | `source-item:5141`; source `5141` — Vorana's Carnage (socketing; blocked_missing_data; current) |
-| `source-item-5142` | `assets/icons/source-item-5142.png` | missing | 1 | 1 | 0 | `source-item:5142`; source `5142` — Thrud's Might (socketing; blocked_missing_data; current) |
-| `source-item-5143` | `assets/icons/source-item-5143.png` | missing | 1 | 1 | 0 | `source-item:5143`; source `5143` — Medved's Tending (socketing; blocked_missing_data; current) |
-| `source-item-5144` | `assets/icons/source-item-5144.png` | missing | 1 | 1 | 0 | `source-item:5144`; source `5144` — Katla's Gloom (socketing; blocked_missing_data; current) |
-| `source-item-5145` | `assets/icons/source-item-5145.png` | missing | 1 | 1 | 0 | `source-item:5145`; source `5145` — Aldur's Legacy (socketing; blocked_missing_data; current) |
-| `source-item-5146` | `assets/icons/source-item-5146.png` | missing | 1 | 1 | 0 | `source-item:5146`; source `5146` — Legacy of Bramblejack (socketing; blocked_missing_data; current) |
-| `source-item-5147` | `assets/icons/source-item-5147.png` | missing | 1 | 1 | 0 | `source-item:5147`; source `5147` — Legacy of Blackbraid (socketing; blocked_missing_data; current) |
-| `source-item-5148` | `assets/icons/source-item-5148.png` | missing | 1 | 1 | 0 | `source-item:5148`; source `5148` — Legacy of Edyrns Tusks (socketing; blocked_missing_data; current) |
-| `source-item-5149` | `assets/icons/source-item-5149.png` | missing | 1 | 1 | 0 | `source-item:5149`; source `5149` — Legacy of Kingsguard (socketing; blocked_missing_data; current) |
-| `source-item-5150` | `assets/icons/source-item-5150.png` | missing | 1 | 1 | 0 | `source-item:5150`; source `5150` — Legacy of Bristleboar (socketing; blocked_missing_data; current) |
-| `source-item-5151` | `assets/icons/source-item-5151.png` | missing | 1 | 1 | 0 | `source-item:5151`; source `5151` — Legacy of Foxshade (socketing; blocked_missing_data; current) |
-| `source-item-5152` | `assets/icons/source-item-5152.png` | missing | 1 | 1 | 0 | `source-item:5152`; source `5152` — Legacy of Ashrend (socketing; blocked_missing_data; current) |
-| `source-item-5153` | `assets/icons/source-item-5153.png` | missing | 1 | 1 | 0 | `source-item:5153`; source `5153` — Legacy of Briskwrap (socketing; blocked_missing_data; current) |
-| `source-item-5154` | `assets/icons/source-item-5154.png` | missing | 1 | 1 | 0 | `source-item:5154`; source `5154` — Legacy of The Unleashed (socketing; blocked_missing_data; current) |
-| `source-item-5155` | `assets/icons/source-item-5155.png` | missing | 1 | 1 | 0 | `source-item:5155`; source `5155` — Legacy of Horns of Bynden (socketing; blocked_missing_data; current) |
-| `source-item-5156` | `assets/icons/source-item-5156.png` | missing | 1 | 1 | 0 | `source-item:5156`; source `5156` — Legacy of Wings of Caelyn (socketing; blocked_missing_data; current) |
-| `source-item-5157` | `assets/icons/source-item-5157.png` | missing | 1 | 1 | 0 | `source-item:5157`; source `5157` — Legacy of Ezomyte Peak (socketing; blocked_missing_data; current) |
-| `source-item-5158` | `assets/icons/source-item-5158.png` | missing | 1 | 1 | 0 | `source-item:5158`; source `5158` — Legacy of Deidbell (socketing; blocked_missing_data; current) |
-| `source-item-5159` | `assets/icons/source-item-5159.png` | missing | 1 | 1 | 0 | `source-item:5159`; source `5159` — Legacy of Elevore (socketing; blocked_missing_data; current) |
-| `source-item-5160` | `assets/icons/source-item-5160.png` | missing | 1 | 1 | 0 | `source-item:5160`; source `5160` — Legacy of Starkonja's Head (socketing; blocked_missing_data; current) |
-| `source-item-5161` | `assets/icons/source-item-5161.png` | missing | 1 | 1 | 0 | `source-item:5161`; source `5161` — Legacy of Crown of Thorns (socketing; blocked_missing_data; current) |
-| `source-item-5162` | `assets/icons/source-item-5162.png` | missing | 1 | 1 | 0 | `source-item:5162`; source `5162` — Legacy of Greymake (socketing; blocked_missing_data; current) |
-| `source-item-5163` | `assets/icons/source-item-5163.png` | missing | 1 | 1 | 0 | `source-item:5163`; source `5163` — Legacy of Erian's Cobble (socketing; blocked_missing_data; current) |
-| `source-item-5164` | `assets/icons/source-item-5164.png` | missing | 1 | 1 | 0 | `source-item:5164`; source `5164` — Legacy of The Smiling Knight (socketing; blocked_missing_data; current) |
-| `source-item-5165` | `assets/icons/source-item-5165.png` | missing | 1 | 1 | 0 | `source-item:5165`; source `5165` — Legacy of The Vile Knight (socketing; blocked_missing_data; current) |
-| `source-item-5166` | `assets/icons/source-item-5166.png` | missing | 1 | 1 | 0 | `source-item:5166`; source `5166` — Legacy of Northpaw (socketing; blocked_missing_data; current) |
-| `source-item-5167` | `assets/icons/source-item-5167.png` | missing | 1 | 1 | 0 | `source-item:5167`; source `5167` — Legacy of Candlemaker (socketing; blocked_missing_data; current) |
-| `source-item-5168` | `assets/icons/source-item-5168.png` | missing | 1 | 1 | 0 | `source-item:5168`; source `5168` — Legacy of Deathblow (socketing; blocked_missing_data; current) |
-| `source-item-5169` | `assets/icons/source-item-5169.png` | missing | 1 | 1 | 0 | `source-item:5169`; source `5169` — Legacy of Legionstride (socketing; blocked_missing_data; current) |
-| `source-item-5170` | `assets/icons/source-item-5170.png` | missing | 1 | 1 | 0 | `source-item:5170`; source `5170` — Legacy of Trampletoe (socketing; blocked_missing_data; current) |
-| `source-item-5171` | `assets/icons/source-item-5171.png` | missing | 1 | 1 | 0 | `source-item:5171`; source `5171` — Legacy of Briarpatch (socketing; blocked_missing_data; current) |
-| `source-item-5172` | `assets/icons/source-item-5172.png` | missing | 1 | 1 | 0 | `source-item:5172`; source `5172` — Legacy of Bushwhack (socketing; blocked_missing_data; current) |
-| `source-item-5173` | `assets/icons/source-item-5173.png` | missing | 1 | 1 | 0 | `source-item:5173`; source `5173` — Legacy of Wanderlust (socketing; blocked_missing_data; current) |
-| `source-item-5174` | `assets/icons/source-item-5174.png` | missing | 1 | 1 | 0 | `source-item:5174`; source `5174` — Legacy of The Knight-errant (socketing; blocked_missing_data; current) |
-| `source-item-5175` | `assets/icons/source-item-5175.png` | missing | 1 | 1 | 0 | `source-item:5175`; source `5175` — Legacy of Obern's Bastion (socketing; blocked_missing_data; current) |
-| `source-item-5176` | `assets/icons/source-item-5176.png` | missing | 1 | 1 | 0 | `source-item:5176`; source `5176` — Legacy of Dionadair (socketing; blocked_missing_data; current) |
-| `source-item-5177` | `assets/icons/source-item-5177.png` | missing | 1 | 1 | 0 | `source-item:5177`; source `5177` — Legacy of Wulfsbane (socketing; blocked_missing_data; current) |
-| `source-item-5178` | `assets/icons/source-item-5178.png` | missing | 1 | 1 | 0 | `source-item:5178`; source `5178` — Legacy of Chernobog's Pillar (socketing; blocked_missing_data; current) |
-| `source-item-5179` | `assets/icons/source-item-5179.png` | missing | 1 | 1 | 0 | `source-item:5179`; source `5179` — Legacy of Alkem Eira (socketing; blocked_missing_data; current) |
-| `source-item-5180` | `assets/icons/source-item-5180.png` | missing | 1 | 1 | 0 | `source-item:5180`; source `5180` — Legacy of Oaksworn (socketing; blocked_missing_data; current) |
-| `source-item-5181` | `assets/icons/source-item-5181.png` | missing | 1 | 1 | 0 | `source-item:5181`; source `5181` — Legacy of Dunkelhalt (socketing; blocked_missing_data; current) |
-| `source-item-5182` | `assets/icons/source-item-5182.png` | missing | 1 | 1 | 0 | `source-item:5182`; source `5182` — Legacy of Rondel de Ezo (socketing; blocked_missing_data; current) |
-| `source-item-5183` | `assets/icons/source-item-5183.png` | missing | 1 | 1 | 0 | `source-item:5183`; source `5183` — Legacy of Brynhand's Mark (socketing; blocked_missing_data; current) |
-| `source-item-5184` | `assets/icons/source-item-5184.png` | missing | 1 | 1 | 0 | `source-item:5184`; source `5184` — Legacy of Trenchtimbre (socketing; blocked_missing_data; current) |
-| `source-item-5185` | `assets/icons/source-item-5185.png` | missing | 1 | 1 | 0 | `source-item:5185`; source `5185` — Legacy of Mjölner (socketing; blocked_missing_data; current) |
-| `source-item-5186` | `assets/icons/source-item-5186.png` | missing | 1 | 1 | 0 | `source-item:5186`; source `5186` — Legacy of Twisted Empyrean (socketing; blocked_missing_data; current) |
-| `source-item-5187` | `assets/icons/source-item-5187.png` | missing | 1 | 1 | 0 | `source-item:5187`; source `5187` — Legacy of Hoghunt (socketing; blocked_missing_data; current) |
-| `source-item-5188` | `assets/icons/source-item-5188.png` | missing | 1 | 1 | 0 | `source-item:5188`; source `5188` — Legacy of Hrimnor's Hymn (socketing; blocked_missing_data; current) |
-| `source-item-5189` | `assets/icons/source-item-5189.png` | missing | 1 | 1 | 0 | `source-item:5189`; source `5189` — Legacy of Brain Rattler (socketing; blocked_missing_data; current) |
-| `source-item-5190` | `assets/icons/source-item-5190.png` | missing | 1 | 1 | 0 | `source-item:5190`; source `5190` — Legacy of Lifesprig (socketing; blocked_missing_data; current) |
-| `source-item-5191` | `assets/icons/source-item-5191.png` | missing | 1 | 1 | 0 | `source-item:5191`; source `5191` — Legacy of Duality (socketing; blocked_missing_data; current) |
-| `source-item-5192` | `assets/icons/source-item-5192.png` | missing | 1 | 1 | 0 | `source-item:5192`; source `5192` — Legacy of Tyranny's Grip (socketing; blocked_missing_data; current) |
-| `source-item-5193` | `assets/icons/source-item-5193.png` | missing | 1 | 1 | 0 | `source-item:5193`; source `5193` — Legacy of The Sentry (socketing; blocked_missing_data; current) |
-| `source-item-5194` | `assets/icons/source-item-5194.png` | missing | 1 | 1 | 0 | `source-item:5194`; source `5194` — Legacy of Adonia's Ego (socketing; blocked_missing_data; current) |
-| `source-item-5195` | `assets/icons/source-item-5195.png` | missing | 1 | 1 | 0 | `source-item:5195`; source `5195` — Legacy of Cursecarver (socketing; blocked_missing_data; current) |
-| `source-item-5196` | `assets/icons/source-item-5196.png` | missing | 1 | 1 | 0 | `source-item:5196`; source `5196` — Legacy of Dusk Vigil (socketing; blocked_missing_data; current) |
-| `source-item-5197` | `assets/icons/source-item-5197.png` | missing | 1 | 1 | 0 | `source-item:5197`; source `5197` — Legacy of The Blood Thorn (socketing; blocked_missing_data; current) |
-| `source-item-5198` | `assets/icons/source-item-5198.png` | missing | 1 | 1 | 0 | `source-item:5198`; source `5198` — Legacy of Quill Rain (socketing; blocked_missing_data; current) |
-| `source-item-5199` | `assets/icons/source-item-5199.png` | missing | 1 | 1 | 0 | `source-item:5199`; source `5199` — Legacy of Ironbound (socketing; blocked_missing_data; current) |
-| `source-item-5200` | `assets/icons/source-item-5200.png` | missing | 1 | 1 | 0 | `source-item:5200`; source `5200` — Legacy of Amor Mandragora (socketing; blocked_missing_data; current) |
-| `source-item-5201` | `assets/icons/source-item-5201.png` | missing | 1 | 1 | 0 | `source-item:5201`; source `5201` — Legacy of Spiteful Floret (socketing; blocked_missing_data; current) |
-| `source-item-5202` | `assets/icons/source-item-5202.png` | missing | 1 | 1 | 0 | `source-item:5202`; source `5202` — Legacy of Svalinn (socketing; blocked_missing_data; current) |
-| `source-item-5203` | `assets/icons/source-item-5203.png` | missing | 1 | 1 | 0 | `source-item:5203`; source `5203` — Legacy of Keeper of the Arc (socketing; blocked_missing_data; current) |
-| `source-item-5204` | `assets/icons/source-item-5204.png` | missing | 1 | 1 | 0 | `source-item:5204`; source `5204` — Legacy of Olrovasara (socketing; blocked_missing_data; current) |
-| `source-item-5205` | `assets/icons/source-item-5205.png` | missing | 1 | 1 | 0 | `source-item:5205`; source `5205` — Legacy of A Worthy Foe (socketing; blocked_missing_data; current) |
-| `source-item-5206` | `assets/icons/source-item-5206.png` | missing | 1 | 1 | 0 | `source-item:5206`; source `5206` — Legacy of Serle's Grit (socketing; blocked_missing_data; current) |
-| `source-item-5207` | `assets/icons/source-item-5207.png` | missing | 1 | 1 | 0 | `source-item:5207`; source `5207` — Legacy of Runeseeker's Call (socketing; blocked_missing_data; current) |
-| `source-item-5208` | `assets/icons/source-item-5208.png` | missing | 1 | 1 | 0 | `source-item:5208`; source `5208` — Legacy of Facebreaker (socketing; blocked_missing_data; current) |
 | `source-item-54` | `assets/icons/source-item-54.png` | missing | 1 | 1 | 0 | `source-item:54`; source `54` — Architect's Orb (corruption; blocked_missing_data; current) |
 | `source-item-57` | `assets/icons/source-item-57.png` | missing | 1 | 1 | 0 | `source-item:57`; source `57` — Ancient Infuser (corruption; blocked_missing_data; current) |
 | `source-item-6` | `assets/icons/source-item-6.png` | missing | 1 | 1 | 0 | `source-item:6`; source `6` — Armourer's Scrap (quality; blocked_missing_data; current) |
-| `source-item-624` | `assets/icons/source-item-624.png` | missing | 1 | 1 | 0 | `source-item:624`; source `624` — Desert Rune (socketing; blocked_missing_data; current) |
-| `source-item-625` | `assets/icons/source-item-625.png` | missing | 1 | 1 | 0 | `source-item:625`; source `625` — Glacial Rune (socketing; blocked_missing_data; current) |
-| `source-item-626` | `assets/icons/source-item-626.png` | missing | 1 | 1 | 0 | `source-item:626`; source `626` — Storm Rune (socketing; blocked_missing_data; current) |
-| `source-item-627` | `assets/icons/source-item-627.png` | missing | 1 | 1 | 0 | `source-item:627`; source `627` — Iron Rune (socketing; blocked_missing_data; current) |
-| `source-item-628` | `assets/icons/source-item-628.png` | missing | 1 | 1 | 0 | `source-item:628`; source `628` — Body Rune (socketing; blocked_missing_data; current) |
-| `source-item-629` | `assets/icons/source-item-629.png` | missing | 1 | 1 | 0 | `source-item:629`; source `629` — Mind Rune (socketing; blocked_missing_data; current) |
-| `source-item-630` | `assets/icons/source-item-630.png` | missing | 1 | 1 | 0 | `source-item:630`; source `630` — Rebirth Rune (socketing; blocked_missing_data; current) |
-| `source-item-631` | `assets/icons/source-item-631.png` | missing | 1 | 1 | 0 | `source-item:631`; source `631` — Inspiration Rune (socketing; blocked_missing_data; current) |
-| `source-item-632` | `assets/icons/source-item-632.png` | missing | 1 | 1 | 0 | `source-item:632`; source `632` — Stone Rune (socketing; blocked_missing_data; current) |
-| `source-item-633` | `assets/icons/source-item-633.png` | missing | 1 | 1 | 0 | `source-item:633`; source `633` — Vision Rune (socketing; blocked_missing_data; current) |
-| `source-item-634` | `assets/icons/source-item-634.png` | missing | 1 | 1 | 0 | `source-item:634`; source `634` — Lesser Desert Rune (socketing; blocked_missing_data; current) |
-| `source-item-635` | `assets/icons/source-item-635.png` | missing | 1 | 1 | 0 | `source-item:635`; source `635` — Lesser Glacial Rune (socketing; blocked_missing_data; current) |
-| `source-item-636` | `assets/icons/source-item-636.png` | missing | 1 | 1 | 0 | `source-item:636`; source `636` — Lesser Storm Rune (socketing; blocked_missing_data; current) |
-| `source-item-637` | `assets/icons/source-item-637.png` | missing | 1 | 1 | 0 | `source-item:637`; source `637` — Lesser Iron Rune (socketing; blocked_missing_data; current) |
-| `source-item-638` | `assets/icons/source-item-638.png` | missing | 1 | 1 | 0 | `source-item:638`; source `638` — Lesser Body Rune (socketing; blocked_missing_data; current) |
-| `source-item-639` | `assets/icons/source-item-639.png` | missing | 1 | 1 | 0 | `source-item:639`; source `639` — Lesser Mind Rune (socketing; blocked_missing_data; current) |
-| `source-item-640` | `assets/icons/source-item-640.png` | missing | 1 | 1 | 0 | `source-item:640`; source `640` — Lesser Rebirth Rune (socketing; blocked_missing_data; current) |
-| `source-item-641` | `assets/icons/source-item-641.png` | missing | 1 | 1 | 0 | `source-item:641`; source `641` — Lesser Inspiration Rune (socketing; blocked_missing_data; current) |
-| `source-item-642` | `assets/icons/source-item-642.png` | missing | 1 | 1 | 0 | `source-item:642`; source `642` — Lesser Stone Rune (socketing; blocked_missing_data; current) |
-| `source-item-643` | `assets/icons/source-item-643.png` | missing | 1 | 1 | 0 | `source-item:643`; source `643` — Lesser Vision Rune (socketing; blocked_missing_data; current) |
-| `source-item-644` | `assets/icons/source-item-644.png` | missing | 1 | 1 | 0 | `source-item:644`; source `644` — Greater Desert Rune (socketing; blocked_missing_data; current) |
-| `source-item-645` | `assets/icons/source-item-645.png` | missing | 1 | 1 | 0 | `source-item:645`; source `645` — Greater Glacial Rune (socketing; blocked_missing_data; current) |
-| `source-item-646` | `assets/icons/source-item-646.png` | missing | 1 | 1 | 0 | `source-item:646`; source `646` — Greater Storm Rune (socketing; blocked_missing_data; current) |
-| `source-item-647` | `assets/icons/source-item-647.png` | missing | 1 | 1 | 0 | `source-item:647`; source `647` — Greater Iron Rune (socketing; blocked_missing_data; current) |
-| `source-item-648` | `assets/icons/source-item-648.png` | missing | 1 | 1 | 0 | `source-item:648`; source `648` — Greater Body Rune (socketing; blocked_missing_data; current) |
-| `source-item-649` | `assets/icons/source-item-649.png` | missing | 1 | 1 | 0 | `source-item:649`; source `649` — Greater Mind Rune (socketing; blocked_missing_data; current) |
 | `source-item-65` | `assets/icons/source-item-65.png` | missing | 1 | 1 | 0 | `source-item:65`; source `65` — Vaal Armourer's Infuser (quality; blocked_missing_data; current) |
-| `source-item-650` | `assets/icons/source-item-650.png` | missing | 1 | 1 | 0 | `source-item:650`; source `650` — Greater Rebirth Rune (socketing; blocked_missing_data; current) |
-| `source-item-651` | `assets/icons/source-item-651.png` | missing | 1 | 1 | 0 | `source-item:651`; source `651` — Greater Inspiration Rune (socketing; blocked_missing_data; current) |
-| `source-item-652` | `assets/icons/source-item-652.png` | missing | 1 | 1 | 0 | `source-item:652`; source `652` — Greater Stone Rune (socketing; blocked_missing_data; current) |
-| `source-item-653` | `assets/icons/source-item-653.png` | missing | 1 | 1 | 0 | `source-item:653`; source `653` — Greater Vision Rune (socketing; blocked_missing_data; current) |
-| `source-item-654` | `assets/icons/source-item-654.png` | missing | 1 | 1 | 0 | `source-item:654`; source `654` — Perfect Desert Rune (socketing; blocked_missing_data; current) |
-| `source-item-655` | `assets/icons/source-item-655.png` | missing | 1 | 1 | 0 | `source-item:655`; source `655` — Perfect Glacial Rune (socketing; blocked_missing_data; current) |
-| `source-item-656` | `assets/icons/source-item-656.png` | missing | 1 | 1 | 0 | `source-item:656`; source `656` — Perfect Storm Rune (socketing; blocked_missing_data; current) |
-| `source-item-657` | `assets/icons/source-item-657.png` | missing | 1 | 1 | 0 | `source-item:657`; source `657` — Perfect Iron Rune (socketing; blocked_missing_data; current) |
-| `source-item-658` | `assets/icons/source-item-658.png` | missing | 1 | 1 | 0 | `source-item:658`; source `658` — Perfect Body Rune (socketing; blocked_missing_data; current) |
-| `source-item-659` | `assets/icons/source-item-659.png` | missing | 1 | 1 | 0 | `source-item:659`; source `659` — Perfect Mind Rune (socketing; blocked_missing_data; current) |
 | `source-item-66` | `assets/icons/source-item-66.png` | missing | 1 | 1 | 0 | `source-item:66`; source `66` — Vaal Blacksmith's Infuser (quality; blocked_missing_data; current) |
-| `source-item-660` | `assets/icons/source-item-660.png` | missing | 1 | 1 | 0 | `source-item:660`; source `660` — Perfect Rebirth Rune (socketing; blocked_missing_data; current) |
-| `source-item-661` | `assets/icons/source-item-661.png` | missing | 1 | 1 | 0 | `source-item:661`; source `661` — Perfect Inspiration Rune (socketing; blocked_missing_data; current) |
-| `source-item-662` | `assets/icons/source-item-662.png` | missing | 1 | 1 | 0 | `source-item:662`; source `662` — Perfect Stone Rune (socketing; blocked_missing_data; current) |
-| `source-item-663` | `assets/icons/source-item-663.png` | missing | 1 | 1 | 0 | `source-item:663`; source `663` — Perfect Vision Rune (socketing; blocked_missing_data; current) |
-| `source-item-664` | `assets/icons/source-item-664.png` | missing | 1 | 1 | 0 | `source-item:664`; source `664` — Lesser Robust Rune (socketing; blocked_missing_data; current) |
-| `source-item-665` | `assets/icons/source-item-665.png` | missing | 1 | 1 | 0 | `source-item:665`; source `665` — Robust Rune (socketing; blocked_missing_data; current) |
-| `source-item-666` | `assets/icons/source-item-666.png` | missing | 1 | 1 | 0 | `source-item:666`; source `666` — Greater Robust Rune (socketing; blocked_missing_data; current) |
-| `source-item-667` | `assets/icons/source-item-667.png` | missing | 1 | 1 | 0 | `source-item:667`; source `667` — Perfect Robust Rune (socketing; blocked_missing_data; current) |
-| `source-item-668` | `assets/icons/source-item-668.png` | missing | 1 | 1 | 0 | `source-item:668`; source `668` — Lesser Adept Rune (socketing; blocked_missing_data; current) |
-| `source-item-669` | `assets/icons/source-item-669.png` | missing | 1 | 1 | 0 | `source-item:669`; source `669` — Adept Rune (socketing; blocked_missing_data; current) |
 | `source-item-67` | `assets/icons/source-item-67.png` | missing | 1 | 1 | 0 | `source-item:67`; source `67` — Vaal Arcanist's Infuser (quality; blocked_missing_data; current) |
-| `source-item-670` | `assets/icons/source-item-670.png` | missing | 1 | 1 | 0 | `source-item:670`; source `670` — Greater Adept Rune (socketing; blocked_missing_data; current) |
-| `source-item-671` | `assets/icons/source-item-671.png` | missing | 1 | 1 | 0 | `source-item:671`; source `671` — Perfect Adept Rune (socketing; blocked_missing_data; current) |
-| `source-item-672` | `assets/icons/source-item-672.png` | missing | 1 | 1 | 0 | `source-item:672`; source `672` — Lesser Resolve Rune (socketing; blocked_missing_data; current) |
-| `source-item-673` | `assets/icons/source-item-673.png` | missing | 1 | 1 | 0 | `source-item:673`; source `673` — Resolve Rune (socketing; blocked_missing_data; current) |
-| `source-item-674` | `assets/icons/source-item-674.png` | missing | 1 | 1 | 0 | `source-item:674`; source `674` — Greater Resolve Rune (socketing; blocked_missing_data; current) |
-| `source-item-675` | `assets/icons/source-item-675.png` | missing | 1 | 1 | 0 | `source-item:675`; source `675` — Perfect Resolve Rune (socketing; blocked_missing_data; current) |
-| `source-item-676` | `assets/icons/source-item-676.png` | missing | 1 | 1 | 0 | `source-item:676`; source `676` — Lesser Tempered Rune (socketing; blocked_missing_data; current) |
-| `source-item-677` | `assets/icons/source-item-677.png` | missing | 1 | 1 | 0 | `source-item:677`; source `677` — Tempered Rune (socketing; blocked_missing_data; current) |
-| `source-item-678` | `assets/icons/source-item-678.png` | missing | 1 | 1 | 0 | `source-item:678`; source `678` — Greater Tempered Rune (socketing; blocked_missing_data; current) |
-| `source-item-679` | `assets/icons/source-item-679.png` | missing | 1 | 1 | 0 | `source-item:679`; source `679` — Greater Rune of Leadership (socketing; blocked_missing_data; current) |
 | `source-item-68` | `assets/icons/source-item-68.png` | missing | 1 | 1 | 0 | `source-item:68`; source `68` — Vaal Catalysing Infuser (quality; blocked_missing_data; current) |
-| `source-item-680` | `assets/icons/source-item-680.png` | missing | 1 | 1 | 0 | `source-item:680`; source `680` — Greater Rune of Tithing (socketing; blocked_missing_data; current) |
-| `source-item-681` | `assets/icons/source-item-681.png` | missing | 1 | 1 | 0 | `source-item:681`; source `681` — Greater Rune of Alacrity (socketing; blocked_missing_data; current) |
-| `source-item-682` | `assets/icons/source-item-682.png` | missing | 1 | 1 | 0 | `source-item:682`; source `682` — Greater Rune of Nobility (socketing; blocked_missing_data; current) |
-| `source-item-683` | `assets/icons/source-item-683.png` | missing | 1 | 1 | 0 | `source-item:683`; source `683` — Hedgewitch Assandra's Rune of Wisdom (socketing; blocked_missing_data; current) |
-| `source-item-684` | `assets/icons/source-item-684.png` | missing | 1 | 1 | 0 | `source-item:684`; source `684` — Saqawal's Rune of the Sky (socketing; blocked_missing_data; current) |
-| `source-item-685` | `assets/icons/source-item-685.png` | missing | 1 | 1 | 0 | `source-item:685`; source `685` — Fenumus' Rune of Agony (socketing; blocked_missing_data; current) |
-| `source-item-686` | `assets/icons/source-item-686.png` | missing | 1 | 1 | 0 | `source-item:686`; source `686` — Farrul's Rune of Grace (socketing; blocked_missing_data; current) |
-| `source-item-687` | `assets/icons/source-item-687.png` | missing | 1 | 1 | 0 | `source-item:687`; source `687` — Farrul's Rune of the Chase (socketing; blocked_missing_data; current) |
-| `source-item-688` | `assets/icons/source-item-688.png` | missing | 1 | 1 | 0 | `source-item:688`; source `688` — Craiceann's Rune of Warding (socketing; blocked_missing_data; current) |
-| `source-item-689` | `assets/icons/source-item-689.png` | missing | 1 | 1 | 0 | `source-item:689`; source `689` — Saqawal's Rune of Memory (socketing; blocked_missing_data; current) |
-| `source-item-690` | `assets/icons/source-item-690.png` | missing | 1 | 1 | 0 | `source-item:690`; source `690` — Saqawal's Rune of Erosion (socketing; blocked_missing_data; current) |
-| `source-item-691` | `assets/icons/source-item-691.png` | missing | 1 | 1 | 0 | `source-item:691`; source `691` — Farrul's Rune of the Hunt (socketing; blocked_missing_data; current) |
-| `source-item-692` | `assets/icons/source-item-692.png` | missing | 1 | 1 | 0 | `source-item:692`; source `692` — Craiceann's Rune of Recovery (socketing; blocked_missing_data; current) |
-| `source-item-693` | `assets/icons/source-item-693.png` | missing | 1 | 1 | 0 | `source-item:693`; source `693` — Courtesan Mannan's Rune of Cruelty (socketing; blocked_missing_data; current) |
-| `source-item-694` | `assets/icons/source-item-694.png` | missing | 1 | 1 | 0 | `source-item:694`; source `694` — Thane Grannell's Rune of Mastery (socketing; blocked_missing_data; current) |
-| `source-item-695` | `assets/icons/source-item-695.png` | missing | 1 | 1 | 0 | `source-item:695`; source `695` — Fenumus' Rune of Spinning (socketing; blocked_missing_data; current) |
-| `source-item-696` | `assets/icons/source-item-696.png` | missing | 1 | 1 | 0 | `source-item:696`; source `696` — Countess Seske's Rune of Archery (socketing; blocked_missing_data; current) |
-| `source-item-697` | `assets/icons/source-item-697.png` | missing | 1 | 1 | 0 | `source-item:697`; source `697` — Thane Girt's Rune of Wildness (socketing; blocked_missing_data; current) |
-| `source-item-698` | `assets/icons/source-item-698.png` | missing | 1 | 1 | 0 | `source-item:698`; source `698` — Fenumus' Rune of Draining (socketing; blocked_missing_data; current) |
-| `source-item-699` | `assets/icons/source-item-699.png` | missing | 1 | 1 | 0 | `source-item:699`; source `699` — Thane Myrk's Rune of Summer (socketing; blocked_missing_data; current) |
-| `source-item-700` | `assets/icons/source-item-700.png` | missing | 1 | 1 | 0 | `source-item:700`; source `700` — Lady Hestra's Rune of Winter (socketing; blocked_missing_data; current) |
-| `source-item-701` | `assets/icons/source-item-701.png` | missing | 1 | 1 | 0 | `source-item:701`; source `701` — Thane Leld's Rune of Spring (socketing; blocked_missing_data; current) |
-| `source-item-702` | `assets/icons/source-item-702.png` | missing | 1 | 1 | 0 | `source-item:702`; source `702` — The Greatwolf's Rune of Claws (socketing; blocked_missing_data; current) |
-| `source-item-703` | `assets/icons/source-item-703.png` | missing | 1 | 1 | 0 | `source-item:703`; source `703` — The Greatwolf's Rune of Willpower (socketing; blocked_missing_data; current) |
-| `source-item-704` | `assets/icons/source-item-704.png` | missing | 1 | 1 | 0 | `source-item:704`; source `704` — Masterwork Rune (socketing; blocked_missing_data; current) |
-| `source-item-705` | `assets/icons/source-item-705.png` | missing | 1 | 1 | 0 | `source-item:705`; source `705` — Idol of Sirrius (socketing; blocked_missing_data; current) |
-| `source-item-706` | `assets/icons/source-item-706.png` | missing | 1 | 1 | 0 | `source-item:706`; source `706` — Idol of Thruldana (socketing; blocked_missing_data; current) |
-| `source-item-707` | `assets/icons/source-item-707.png` | missing | 1 | 1 | 0 | `source-item:707`; source `707` — Idol of Grold (socketing; blocked_missing_data; current) |
-| `source-item-708` | `assets/icons/source-item-708.png` | missing | 1 | 1 | 0 | `source-item:708`; source `708` — Idol of Eeshta (socketing; blocked_missing_data; current) |
-| `source-item-709` | `assets/icons/source-item-709.png` | missing | 1 | 1 | 0 | `source-item:709`; source `709` — Idol of Egrin (socketing; blocked_missing_data; current) |
-| `source-item-710` | `assets/icons/source-item-710.png` | missing | 1 | 1 | 0 | `source-item:710`; source `710` — Idol of Maxarius (socketing; blocked_missing_data; current) |
-| `source-item-711` | `assets/icons/source-item-711.png` | missing | 1 | 1 | 0 | `source-item:711`; source `711` — Idol of Ralakesh (socketing; blocked_missing_data; current) |
-| `source-item-712` | `assets/icons/source-item-712.png` | missing | 1 | 1 | 0 | `source-item:712`; source `712` — Idol of Greust (socketing; blocked_missing_data; current) |
-| `source-item-713` | `assets/icons/source-item-713.png` | missing | 1 | 1 | 0 | `source-item:713`; source `713` — Idol of Yeena (socketing; blocked_missing_data; current) |
-| `source-item-714` | `assets/icons/source-item-714.png` | missing | 1 | 1 | 0 | `source-item:714`; source `714` — Idol of Eramir (socketing; blocked_missing_data; current) |
-| `source-item-715` | `assets/icons/source-item-715.png` | missing | 1 | 1 | 0 | `source-item:715`; source `715` — Idol of Oak (socketing; blocked_missing_data; current) |
-| `source-item-716` | `assets/icons/source-item-716.png` | missing | 1 | 1 | 0 | `source-item:716`; source `716` — Idol of Alira (socketing; blocked_missing_data; current) |
-| `source-item-717` | `assets/icons/source-item-717.png` | missing | 1 | 1 | 0 | `source-item:717`; source `717` — Idol of Kraityn (socketing; blocked_missing_data; current) |
-| `source-item-718` | `assets/icons/source-item-718.png` | missing | 1 | 1 | 0 | `source-item:718`; source `718` — Idol of Silk (socketing; blocked_missing_data; current) |
-| `source-item-719` | `assets/icons/source-item-719.png` | missing | 1 | 1 | 0 | `source-item:719`; source `719` — Idol of the Sycophant (socketing; blocked_missing_data; current) |
-| `source-item-720` | `assets/icons/source-item-720.png` | missing | 1 | 1 | 0 | `source-item:720`; source `720` — Idol of the Martyr (socketing; blocked_missing_data; current) |
-| `source-item-721` | `assets/icons/source-item-721.png` | missing | 1 | 1 | 0 | `source-item:721`; source `721` — Idol of the Pharisee (socketing; blocked_missing_data; current) |
-| `source-item-722` | `assets/icons/source-item-722.png` | missing | 1 | 1 | 0 | `source-item:722`; source `722` — Panther Idol (socketing; blocked_missing_data; current) |
-| `source-item-723` | `assets/icons/source-item-723.png` | missing | 1 | 1 | 0 | `source-item:723`; source `723` — Hawk Idol (socketing; blocked_missing_data; current) |
-| `source-item-724` | `assets/icons/source-item-724.png` | missing | 1 | 1 | 0 | `source-item:724`; source `724` — Stoat Idol (socketing; blocked_missing_data; current) |
-| `source-item-725` | `assets/icons/source-item-725.png` | missing | 1 | 1 | 0 | `source-item:725`; source `725` — Hayoxi's Soul Core of Heatproofing (socketing; blocked_missing_data; current) |
-| `source-item-726` | `assets/icons/source-item-726.png` | missing | 1 | 1 | 0 | `source-item:726`; source `726` — Zalatl's Soul Core of Insulation (socketing; blocked_missing_data; current) |
-| `source-item-727` | `assets/icons/source-item-727.png` | missing | 1 | 1 | 0 | `source-item:727`; source `727` — Topotante's Soul Core of Dampening (socketing; blocked_missing_data; current) |
-| `source-item-728` | `assets/icons/source-item-728.png` | missing | 1 | 1 | 0 | `source-item:728`; source `728` — Atmohua's Soul Core of Retreat (socketing; blocked_missing_data; current) |
-| `source-item-729` | `assets/icons/source-item-729.png` | missing | 1 | 1 | 0 | `source-item:729`; source `729` — Quipolatl's Soul Core of Flow (socketing; blocked_missing_data; current) |
-| `source-item-730` | `assets/icons/source-item-730.png` | missing | 1 | 1 | 0 | `source-item:730`; source `730` — Tzamoto's Soul Core of Ferocity (socketing; blocked_missing_data; current) |
-| `source-item-731` | `assets/icons/source-item-731.png` | missing | 1 | 1 | 0 | `source-item:731`; source `731` — Uromoti's Soul Core of Attenuation (socketing; blocked_missing_data; current) |
-| `source-item-732` | `assets/icons/source-item-732.png` | missing | 1 | 1 | 0 | `source-item:732`; source `732` — Opiloti's Soul Core of Assault (socketing; blocked_missing_data; current) |
-| `source-item-733` | `assets/icons/source-item-733.png` | missing | 1 | 1 | 0 | `source-item:733`; source `733` — Guatelitzi's Soul Core of Endurance (socketing; blocked_missing_data; current) |
-| `source-item-734` | `assets/icons/source-item-734.png` | missing | 1 | 1 | 0 | `source-item:734`; source `734` — Xopec's Soul Core of Power (socketing; blocked_missing_data; current) |
-| `source-item-735` | `assets/icons/source-item-735.png` | missing | 1 | 1 | 0 | `source-item:735`; source `735` — Estazunti's Soul Core of Convalescence (socketing; blocked_missing_data; current) |
-| `source-item-736` | `assets/icons/source-item-736.png` | missing | 1 | 1 | 0 | `source-item:736`; source `736` — Tacati's Soul Core of Affliction (socketing; blocked_missing_data; current) |
-| `source-item-737` | `assets/icons/source-item-737.png` | missing | 1 | 1 | 0 | `source-item:737`; source `737` — Cholotl's Soul Core of War (socketing; blocked_missing_data; current) |
-| `source-item-738` | `assets/icons/source-item-738.png` | missing | 1 | 1 | 0 | `source-item:738`; source `738` — Citaqualotl's Soul Core of Foulness (socketing; blocked_missing_data; current) |
-| `source-item-739` | `assets/icons/source-item-739.png` | missing | 1 | 1 | 0 | `source-item:739`; source `739` — Xipocado's Soul Core of Dominion (socketing; blocked_missing_data; current) |
-| `source-item-740` | `assets/icons/source-item-740.png` | missing | 1 | 1 | 0 | `source-item:740`; source `740` — Soul Core of Tacati (socketing; blocked_missing_data; current) |
-| `source-item-741` | `assets/icons/source-item-741.png` | missing | 1 | 1 | 0 | `source-item:741`; source `741` — Soul Core of Opiloti (socketing; blocked_missing_data; current) |
-| `source-item-742` | `assets/icons/source-item-742.png` | missing | 1 | 1 | 0 | `source-item:742`; source `742` — Soul Core of Jiquani (socketing; blocked_missing_data; current) |
-| `source-item-743` | `assets/icons/source-item-743.png` | missing | 1 | 1 | 0 | `source-item:743`; source `743` — Soul Core of Zalatl (socketing; blocked_missing_data; current) |
-| `source-item-744` | `assets/icons/source-item-744.png` | missing | 1 | 1 | 0 | `source-item:744`; source `744` — Soul Core of Citaqualotl (socketing; blocked_missing_data; current) |
-| `source-item-745` | `assets/icons/source-item-745.png` | missing | 1 | 1 | 0 | `source-item:745`; source `745` — Soul Core of Puhuarte (socketing; blocked_missing_data; current) |
-| `source-item-746` | `assets/icons/source-item-746.png` | missing | 1 | 1 | 0 | `source-item:746`; source `746` — Soul Core of Tzamoto (socketing; blocked_missing_data; current) |
-| `source-item-747` | `assets/icons/source-item-747.png` | missing | 1 | 1 | 0 | `source-item:747`; source `747` — Soul Core of Xopec (socketing; blocked_missing_data; current) |
-| `source-item-748` | `assets/icons/source-item-748.png` | missing | 1 | 1 | 0 | `source-item:748`; source `748` — Soul Core of Azcapa (socketing; blocked_missing_data; current) |
-| `source-item-749` | `assets/icons/source-item-749.png` | missing | 1 | 1 | 0 | `source-item:749`; source `749` — Soul Core of Topotante (socketing; blocked_missing_data; current) |
-| `source-item-750` | `assets/icons/source-item-750.png` | missing | 1 | 1 | 0 | `source-item:750`; source `750` — Soul Core of Quipolatl (socketing; blocked_missing_data; current) |
-| `source-item-751` | `assets/icons/source-item-751.png` | missing | 1 | 1 | 0 | `source-item:751`; source `751` — Soul Core of Ticaba (socketing; blocked_missing_data; current) |
-| `source-item-752` | `assets/icons/source-item-752.png` | missing | 1 | 1 | 0 | `source-item:752`; source `752` — Soul Core of Atmohua (socketing; blocked_missing_data; current) |
-| `source-item-753` | `assets/icons/source-item-753.png` | missing | 1 | 1 | 0 | `source-item:753`; source `753` — Soul Core of Cholotl (socketing; blocked_missing_data; current) |
-| `source-item-754` | `assets/icons/source-item-754.png` | missing | 1 | 1 | 0 | `source-item:754`; source `754` — Soul Core of Zantipi (socketing; blocked_missing_data; current) |
-| `source-item-755` | `assets/icons/source-item-755.png` | missing | 1 | 1 | 0 | `source-item:755`; source `755` — Snake Idol (socketing; blocked_missing_data; current) |
-| `source-item-756` | `assets/icons/source-item-756.png` | missing | 1 | 1 | 0 | `source-item:756`; source `756` — Primate Idol (socketing; blocked_missing_data; current) |
-| `source-item-757` | `assets/icons/source-item-757.png` | missing | 1 | 1 | 0 | `source-item:757`; source `757` — Owl Idol (socketing; blocked_missing_data; current) |
-| `source-item-758` | `assets/icons/source-item-758.png` | missing | 1 | 1 | 0 | `source-item:758`; source `758` — Cat Idol (socketing; blocked_missing_data; current) |
-| `source-item-759` | `assets/icons/source-item-759.png` | missing | 1 | 1 | 0 | `source-item:759`; source `759` — Wolf Idol (socketing; blocked_missing_data; current) |
-| `source-item-760` | `assets/icons/source-item-760.png` | missing | 1 | 1 | 0 | `source-item:760`; source `760` — Stag Idol (socketing; blocked_missing_data; current) |
-| `source-item-761` | `assets/icons/source-item-761.png` | missing | 1 | 1 | 0 | `source-item:761`; source `761` — Boar Idol (socketing; blocked_missing_data; current) |
-| `source-item-762` | `assets/icons/source-item-762.png` | missing | 1 | 1 | 0 | `source-item:762`; source `762` — Bear Idol (socketing; blocked_missing_data; current) |
-| `source-item-763` | `assets/icons/source-item-763.png` | missing | 1 | 1 | 0 | `source-item:763`; source `763` — Ox Idol (socketing; blocked_missing_data; current) |
-| `source-item-764` | `assets/icons/source-item-764.png` | missing | 1 | 1 | 0 | `source-item:764`; source `764` — Rabbit Idol (socketing; blocked_missing_data; current) |
-| `source-item-765` | `assets/icons/source-item-765.png` | missing | 1 | 1 | 0 | `source-item:765`; source `765` — Fox Idol (socketing; blocked_missing_data; current) |
-| `source-item-766` | `assets/icons/source-item-766.png` | missing | 1 | 1 | 0 | `source-item:766`; source `766` — Amanamu's Gaze (socketing; blocked_missing_data; current) |
-| `source-item-767` | `assets/icons/source-item-767.png` | missing | 1 | 1 | 0 | `source-item:767`; source `767` — Tecrod's Gaze (socketing; blocked_missing_data; current) |
-| `source-item-768` | `assets/icons/source-item-768.png` | missing | 1 | 1 | 0 | `source-item:768`; source `768` — Kurgal's Gaze (socketing; blocked_missing_data; current) |
-| `source-item-769` | `assets/icons/source-item-769.png` | missing | 1 | 1 | 0 | `source-item:769`; source `769` — Ulaman's Gaze (socketing; blocked_missing_data; current) |
-| `source-item-770` | `assets/icons/source-item-770.png` | missing | 1 | 1 | 0 | `source-item:770`; source `770` — Guatelitzi's Thesis (socketing; blocked_missing_data; current) |
-| `source-item-771` | `assets/icons/source-item-771.png` | missing | 1 | 1 | 0 | `source-item:771`; source `771` — Citaqualotl's Thesis (socketing; blocked_missing_data; current) |
-| `source-item-772` | `assets/icons/source-item-772.png` | missing | 1 | 1 | 0 | `source-item:772`; source `772` — Jiquani's Thesis (socketing; blocked_missing_data; current) |
-| `source-item-773` | `assets/icons/source-item-773.png` | missing | 1 | 1 | 0 | `source-item:773`; source `773` — Quipolatl's Thesis (socketing; blocked_missing_data; current) |
-| `source-item-774` | `assets/icons/source-item-774.png` | missing | 1 | 1 | 0 | `source-item:774`; source `774` — Emergent Vigour (socketing; blocked_missing_data; current) |
-| `source-item-775` | `assets/icons/source-item-775.png` | missing | 1 | 1 | 0 | `source-item:775`; source `775` — Emergent Possibility (socketing; blocked_missing_data; current) |
-| `source-item-776` | `assets/icons/source-item-776.png` | missing | 1 | 1 | 0 | `source-item:776`; source `776` — Emergent Protection (socketing; blocked_missing_data; current) |
-| `source-item-777` | `assets/icons/source-item-777.png` | missing | 1 | 1 | 0 | `source-item:777`; source `777` — Emergent Instinct (socketing; blocked_missing_data; current) |
-| `source-item-778` | `assets/icons/source-item-778.png` | missing | 1 | 1 | 0 | `source-item:778`; source `778` — Carved Cunning (socketing; blocked_missing_data; current) |
-| `source-item-779` | `assets/icons/source-item-779.png` | missing | 1 | 1 | 0 | `source-item:779`; source `779` — Carved Majesty (socketing; blocked_missing_data; current) |
-| `source-item-780` | `assets/icons/source-item-780.png` | missing | 1 | 1 | 0 | `source-item:780`; source `780` — Carved Mischief (socketing; blocked_missing_data; current) |
-| `source-item-781` | `assets/icons/source-item-781.png` | missing | 1 | 1 | 0 | `source-item:781`; source `781` — Carved Tenacity (socketing; blocked_missing_data; current) |
-| `source-item-782` | `assets/icons/source-item-782.png` | missing | 1 | 1 | 0 | `source-item:782`; source `782` — Raven-Touched Shard (socketing; blocked_missing_data; current) |
-| `source-item-87` | `assets/icons/source-item-87.png` | missing | 1 | 1 | 0 | `source-item:87`; source `87` — Lesser Essence of the Body (essences; blocked_missing_data; current) |
-| `source-item-88` | `assets/icons/source-item-88.png` | missing | 1 | 1 | 0 | `source-item:88`; source `88` — Lesser Essence of the Mind (essences; blocked_missing_data; current) |
-| `source-item-89` | `assets/icons/source-item-89.png` | missing | 1 | 1 | 0 | `source-item:89`; source `89` — Lesser Essence of Enhancement (essences; blocked_missing_data; current) |
-| `source-item-90` | `assets/icons/source-item-90.png` | missing | 1 | 1 | 0 | `source-item:90`; source `90` — Lesser Essence of Abrasion (essences; blocked_missing_data; current) |
-| `source-item-91` | `assets/icons/source-item-91.png` | missing | 1 | 1 | 0 | `source-item:91`; source `91` — Lesser Essence of Flames (essences; blocked_missing_data; current) |
-| `source-item-92` | `assets/icons/source-item-92.png` | missing | 1 | 1 | 0 | `source-item:92`; source `92` — Lesser Essence of Ice (essences; blocked_missing_data; current) |
-| `source-item-93` | `assets/icons/source-item-93.png` | missing | 1 | 1 | 0 | `source-item:93`; source `93` — Lesser Essence of Electricity (essences; blocked_missing_data; current) |
-| `source-item-94` | `assets/icons/source-item-94.png` | missing | 1 | 1 | 0 | `source-item:94`; source `94` — Lesser Essence of Ruin (essences; blocked_missing_data; current) |
-| `source-item-95` | `assets/icons/source-item-95.png` | missing | 1 | 1 | 0 | `source-item:95`; source `95` — Lesser Essence of Battle (essences; blocked_missing_data; current) |
-| `source-item-96` | `assets/icons/source-item-96.png` | missing | 1 | 1 | 0 | `source-item:96`; source `96` — Lesser Essence of Sorcery (essences; blocked_missing_data; current) |
-| `source-item-97` | `assets/icons/source-item-97.png` | missing | 1 | 1 | 0 | `source-item:97`; source `97` — Lesser Essence of Haste (essences; blocked_missing_data; current) |
-| `source-item-98` | `assets/icons/source-item-98.png` | missing | 1 | 1 | 0 | `source-item:98`; source `98` — Lesser Essence of the Infinite (essences; blocked_missing_data; current) |
-| `source-item-99` | `assets/icons/source-item-99.png` | missing | 1 | 1 | 0 | `source-item:99`; source `99` — Essence of the Body (essences; blocked_missing_data; current) |
 | `sovereign` | `assets/icons/sovereign.png` | missing | 1 | 1 | 0 | `omen-sovereign`; source `4450` — Omen of the Sovereign (ritual; blocked_missing_data; current) |
 | `transmutation` | `assets/icons/transmutation.png` | existing | 3 | 3 | 3 | `greater-transmutation`; source `14` — Greater Orb of Transmutation (currency; implemented; supported; current)<br>`perfect-transmutation`; source `15` — Perfect Orb of Transmutation (currency; implemented; supported; current)<br>`transmutation`; source `13` — Orb of Transmutation (currency; implemented; supported; current) |
 | `vaal` | `assets/icons/vaal.png` | existing | 1 | 1 | 0 | `vaal`; source `52` — Vaal Orb (corruption; probability_unverified; current) |

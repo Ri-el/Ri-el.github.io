@@ -180,6 +180,15 @@ class CraftingEngine {
         'Two Hand Mace', 'Quiver', 'Sceptre', 'Warstaff', 'Crossbow', 'Talisman',
       ],
     },
+    ancient_jawbone: {
+      name: 'Ancient Jawbone', reveal: 3, minModLevel: 40,
+      targetDescription: 'a weapon or Quiver base',
+      validItemClasses: [
+        'Claw', 'Dagger', 'Wand', 'One Hand Sword', 'One Hand Axe', 'One Hand Mace',
+        'Spear', 'Flail', 'Bow', 'Staff', 'Two Hand Sword', 'Two Hand Axe',
+        'Two Hand Mace', 'Quiver', 'Sceptre', 'Warstaff', 'Crossbow', 'Talisman',
+      ],
+    },
     gnawed_rib: {
       name: 'Gnawed Rib', reveal: 3, maxItemLevel: 64, targetDescription: 'an Armour base',
       validItemClasses: ['Gloves', 'Boots', 'Body Armour', 'Helmet', 'Shield', 'Buckler', 'Focus'],
@@ -188,12 +197,21 @@ class CraftingEngine {
       name: 'Preserved Rib', reveal: 3, targetDescription: 'an Armour base',
       validItemClasses: ['Gloves', 'Boots', 'Body Armour', 'Helmet', 'Shield', 'Buckler', 'Focus'],
     },
+    ancient_rib: {
+      name: 'Ancient Rib', reveal: 3, minModLevel: 40, targetDescription: 'an Armour base',
+      validItemClasses: ['Gloves', 'Boots', 'Body Armour', 'Helmet', 'Shield', 'Buckler', 'Focus'],
+    },
     gnawed_collarbone: {
       name: 'Gnawed Collarbone', reveal: 3, maxItemLevel: 64, targetDescription: 'an Amulet, Ring, or Belt base',
       validItemClasses: ['Amulet', 'Ring', 'Belt'],
     },
     preserved_collarbone: {
       name: 'Preserved Collarbone', reveal: 3, targetDescription: 'an Amulet, Ring, or Belt base',
+      validItemClasses: ['Amulet', 'Ring', 'Belt'],
+    },
+    ancient_collarbone: {
+      name: 'Ancient Collarbone', reveal: 3, minModLevel: 40,
+      targetDescription: 'an Amulet, Ring, or Belt base',
       validItemClasses: ['Amulet', 'Ring', 'Belt'],
     },
   };
@@ -257,9 +275,26 @@ class CraftingEngine {
     this._vaalCorruptedPool = typeData.vaalCorruptedMods || [];
 
     // Desecrated (Abyssal) mod pools for this base, if any.
-    const desData = desecratedData?.bases?.[baseType] ?? desecratedData?.jewelTypes?.[baseType] ?? null;
-    this._desecratedPrefixes = (desData?.prefixes || []).slice();
-    this._desecratedSuffixes = (desData?.suffixes || []).slice();
+    const desecratedPoolKind = desecratedData?.bases?.[baseType]
+      ? 'bases'
+      : desecratedData?.jewelTypes?.[baseType] ? 'jewelTypes' : null;
+    const desData = desecratedPoolKind ? desecratedData[desecratedPoolKind][baseType] : null;
+    const levelMetadata = desecratedPoolKind
+      ? desecratedData?.modifierLevelDefaults?.[desecratedPoolKind]
+      : null;
+    const rawDesecratedLevel = typeof levelMetadata === 'object'
+      ? levelMetadata?.requiredItemLevel
+      : levelMetadata;
+    const defaultDesecratedLevel = rawDesecratedLevel == null ? null : Number(rawDesecratedLevel);
+    const withDesecratedLevel = record => {
+      const copy = { ...record };
+      if (copy.ilvlReq == null && Number.isFinite(defaultDesecratedLevel)) {
+        copy.ilvlReq = defaultDesecratedLevel;
+      }
+      return copy;
+    };
+    this._desecratedPrefixes = (desData?.prefixes || []).map(withDesecratedLevel);
+    this._desecratedSuffixes = (desData?.suffixes || []).map(withDesecratedLevel);
     this._bones = desecratedData?.bones || {};
     this._pendingDesecration = null;
 
@@ -2151,12 +2186,35 @@ class CraftingEngine {
     return avail[this._randomInt(0, avail.length - 1)] || 'prefix';
   }
 
+  _filterDesecratedByMinModifierLevel(candidates, minModLevel = 0) {
+    if (!(minModLevel > 0)) return candidates;
+    const levelOf = candidate => Number(candidate?.ilvlReq ?? candidate?.requiredItemLevel);
+    const byGroup = new Map();
+    for (const candidate of candidates || []) {
+      if (!byGroup.has(candidate.modGroup)) byGroup.set(candidate.modGroup, []);
+      byGroup.get(candidate.modGroup).push(candidate);
+    }
+    const filtered = [];
+    for (const groupCandidates of byGroup.values()) {
+      const withKnownLevel = groupCandidates.filter(candidate => Number.isFinite(levelOf(candidate)));
+      if (!withKnownLevel.length) continue;
+      const aboveFloor = withKnownLevel.filter(candidate => levelOf(candidate) >= minModLevel);
+      if (aboveFloor.length) {
+        filtered.push(...aboveFloor);
+        continue;
+      }
+      const highestEligibleLevel = Math.max(...withKnownLevel.map(levelOf));
+      filtered.push(...withKnownLevel.filter(candidate => levelOf(candidate) === highestEligibleLevel));
+    }
+    return filtered;
+  }
+
   _rollDesecratedOptions(side, count = 3, { desecratedOnly = false, minModLevel = 0 } = {}) {
     const existing = this._existingGroups();
 
     // Desecrated (Abyssal) candidates for this side.
     const desPool = side === 'prefix' ? this._desecratedPrefixes : this._desecratedSuffixes;
-    const desCandidates = (desPool || [])
+    const desCandidates = this._filterDesecratedByMinModifierLevel(desPool || [], minModLevel)
       .filter(c => Number.isFinite(Number(c.weight)) && Number(c.weight) > 0)
       .map(c => ({
         kind: 'desecrated',
@@ -2169,12 +2227,7 @@ class CraftingEngine {
     // regular orbs roll from — so the Well of Souls also surfaces ordinary
     // prefixes/suffixes, not just Desecrated mods.
     const normPool = side === 'prefix' ? this._prefixCandidates : this._suffixCandidates;
-    const normCandidates = desecratedOnly ? [] : (normPool || [])
-      // Ancient bone guarantees a minimum modifier level: filter the ordinary
-      // affixes surfaced at the Well of Souls to those whose required level
-      // meets the floor. (Desecrated jewel mods carry no level yet, so they
-      // are intentionally left ungated — per-base modifier levels land later.)
-      .filter(c => minModLevel <= 0 || (c.tier.ilvlReq || 0) >= minModLevel)
+    const normCandidates = desecratedOnly ? [] : this._filterByMinModifierLevel(normPool || [], minModLevel)
       .filter(c => Number.isFinite(Number(c.weight)) && Number(c.weight) > 0)
       .map(c => ({
         kind: 'normal',
@@ -2304,6 +2357,7 @@ class CraftingEngine {
         modGroup: c.modGroup,
         tier: c.tier || 'D',
         tierName: c.name || 'Desecrated',
+        ilvlReq: c.ilvlReq ?? c.requiredItemLevel,
         lines,
         displayText: lines.map(l => l.text).join('\n'),
         fractured: false,
@@ -2321,6 +2375,7 @@ class CraftingEngine {
       modGroup: c.modGroup,
       tier: c.tier || 'D',
       tierName: c.name || 'Desecrated',
+      ilvlReq: c.ilvlReq ?? c.requiredItemLevel,
       modLine: c.modLine,
       displayText,
       value,

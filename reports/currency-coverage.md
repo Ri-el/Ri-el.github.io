@@ -6,10 +6,10 @@ This report is generated from `data/crafting/currency-index.json`. Classificatio
 
 | Classification | Source inventory | Runtime registry |
 |---|---:|---:|
-| implemented | 411 | 412 |
+| implemented | 414 | 415 |
 | conditional | 0 | 0 |
 | non_item_currency | 3 | 0 |
-| blocked_missing_data | 106 | 6 |
+| blocked_missing_data | 103 | 6 |
 | probability_unverified | 1 | 1 |
 | intentionally_out_of_scope | 0 | 0 |
 | deprecated_for_target_version | 9 | 0 |
@@ -17,7 +17,7 @@ This report is generated from `data/crafting/currency-index.json`. Classificatio
 - Total source inventory entries: **530**
 - Authoritative registry definitions: **531**
 - Visible workbench definitions: **522**
-- Existing runtime definitions preserved: **419**
+- Existing runtime definitions preserved: **422**
 - Unclassified entries: **0**
 
 ## Disabled existing registry entries
@@ -34,3 +34,7 @@ This report is generated from `data/crafting/currency-index.json`. Classificatio
 - `hinekora` — Hinekora's Lock
 
 A missing normalized identity does not disable an already verified handler; it is recorded so future source imports can reconcile the stable item ID.
+
+## Supplied PoE2DB catalogue cross-check
+
+The attached focused ModsView catalogue has **60/60** metadata-keyed Currency/Omen records represented in this registry. The broader autocomplete asset has **71** search-only labels absent from the normalized inventory (59 Stackable Currency and 12 Omen records); none occurs in the focused modifier-crafting catalogue, and autocomplete alone does not encode enough identity or mechanics to promote them. See `reports/poe2db-data-sources.md` for the complete list and evidence boundary.

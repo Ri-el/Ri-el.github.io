@@ -5,7 +5,7 @@ Full parity claimed: **No**
 
 ## Current implementation-status audit
 
-The current 531-definition registry has **412 executable definitions**: 97 verified and 315 explicitly inferred. The remaining records are 107 blocked, nine deprecated for the target version, and three non-equipment records. Exact per-definition evidence, assumptions, fixtures, and blockers are generated in `reports/crafting-implementation-status.md` and `.json`.
+The current 531-definition registry has **415 executable definitions**: 97 verified and 318 explicitly inferred. The remaining records are 104 blocked, nine deprecated for the target version, and three non-equipment records. Exact per-definition evidence, assumptions, fixtures, and blockers are generated in `reports/crafting-implementation-status.md` and `.json`.
 
 | Category | Known | Verified | Inferred | Blocked | Deprecated | Non-equipment |
 |---|---:|---:|---:|---:|---:|---:|
@@ -14,7 +14,7 @@ The current 531-definition registry has **412 executable definitions**: 97 verif
 | Socketing / Augments | 296 | 0 | 285 | 3 | 8 | 0 |
 | Ritual / Omens | 38 | 18 | 0 | 19 | 1 | 0 |
 | Essences | 80 | 57 | 23 | 0 | 0 | 0 |
-| Abyss | 12 | 2 | 6 | 4 | 0 | 0 |
+| Abyss | 12 | 2 | 9 | 1 | 0 | 0 |
 | Breach / Genesis | 28 | 0 | 1 | 27 | 0 | 0 |
 | Delirium / Instilling | 26 | 0 | 0 | 26 | 0 | 0 |
 | Runeforging | 19 | 0 | 0 | 17 | 0 | 2 |
@@ -36,9 +36,9 @@ Item state exposes deterministic typed slots, atomic malformed-state validation,
 
 All **80 retained regular, Greater, and Perfect Essence definitions** now execute with exact normalized class-specific modifier IDs, groups, ranges, and rarity gates. The 57 Magic-to-Rare transitions are source-backed and verified; 23 Rare remove/add transitions are explicitly inferred and use atomic rollback. Essence of the Breach likewise executes on Amulets and Rings with its exact retained modifier while its Rare replacement rule remains labelled inferred.
 
-Preserved Cranium and the four Desecration-direction/selection Omens remain **Jewel-only**. The six Gnawed/Preserved Jawbone, Rib, and Collarbone transitions now reuse the existing Well flow with their exact retained direction, replacement count, reroll count, and item-class restrictions, labelled inferred. Ancient Bones remain blocked because their minimum modifier-level rule cannot be enforced against the retained Desecrated records, and Preserved Vertebrae remains blocked without a Waystone model. Essence of the Abyss rejects Jewel, Flask, and Charm targets. Omen of Light accepts any eligible Desecrated modifier, including an unrevealed Well placeholder, excludes fractured protection, and is consumed exactly once on successful guarded Annulment, including Hinekora foresight. Ordinary Chaos can remove revealed or unrevealed Desecrated modifiers and rolls pending Well state back atomically on failure.
+Preserved Cranium and the four Desecration-direction/selection Omens remain **Jewel-only**. All nine Gnawed, Preserved, and Ancient Jawbone, Rib, and Collarbone transitions reuse the existing Well flow with their retained direction, replacement count, reroll count, and item-class restrictions, labelled inferred. Ancient variants enforce Minimum Modifier Level 40 across ordinary and Desecrated choices; all 193 equipment Desecrated records in the 0.5.4-targeted normalized export require level 65. Preserved Vertebrae remains blocked without a Waystone model. Essence of the Abyss rejects Jewel, Flask, and Charm targets. Omen of Light accepts any eligible Desecrated modifier, including an unrevealed Well placeholder, excludes fractured protection, and is consumed exactly once on successful guarded Annulment, including Hinekora foresight. Ordinary Chaos can remove revealed or unrevealed Desecrated modifiers and rolls pending Well state back atomically on failure.
 
-The checked-in Desecrated pool is explicitly a PoE2 **0.3** jewel pool and lacks a complete target **0.5.4** Well-of-Souls weighting/localization procedure. Its option selection therefore remains a limited compatibility path, not a full parity claim. Echoes consumption timing is likewise retained as an explicit verification blocker because the source identifies the reroll action but not the exact consumption event.
+The checked-in Desecrated display templates originate from a PoE2 **0.3** pool and still lack a complete target **0.5.4** Well-of-Souls weighting/localization procedure. Required modifier levels are now reconciled from the normalized 0.5.4-targeted export, but option selection remains a limited compatibility path rather than a full parity claim.
 
 ## Task 04 core and quality checkpoint
 

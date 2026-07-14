@@ -76,7 +76,7 @@ if (targets.length === 0) {
       assert(startup.modBaseCount > 0, `${target}: MOD_BASES did not initialize`);
       assert(startup.runtimeDataPresent, `${target}: runtime data did not initialize`);
       assert(startup.currencyIndexPresent, `${target}: currency index did not initialize`);
-      assert.equal(startup.craftRegistryLength, 412, `${target}: available runtime registry length`);
+      assert.equal(startup.craftRegistryLength, 415, `${target}: available runtime registry length`);
       assert.equal(startup.craftTabsLength, 10, `${target}: tab length`);
       assert(startup.craftForgePresent && startup.normalizedCounts, `${target}: CraftForge bridge/indexes unavailable`);
       assert.equal(startup.toast, '', `${target}: startup toast`);
@@ -586,16 +586,16 @@ if (targets.length === 0) {
         `${target}: Abyssal Echoes is unavailable before a qualifying Desecration`);
       await page.locator('[data-craft-id="omen-abyssal-echoes"]').click();
       await page.evaluate(() => window.CraftForge.setCraftTab('abyss'));
-      assert.equal(await page.locator('[data-craft-id="preserved-collarbone"]').getAttribute('aria-disabled'), 'false',
-        `${target}: Preserved Collarbone is unavailable on a qualifying Amulet`);
-      await page.locator('[data-craft-id="preserved-collarbone"]').click();
+      assert.equal(await page.locator('[data-craft-id="ancient-collarbone"]').getAttribute('aria-disabled'), 'false',
+        `${target}: Ancient Collarbone is unavailable on a qualifying Amulet`);
+      await page.locator('[data-craft-id="ancient-collarbone"]').click();
       await page.evaluate(() => window.CraftForge.setCraftTab('currency'));
       await page.evaluate(() => window.CraftForge.setCraftTab('abyss'));
-      assert(await page.locator('[data-craft-id="preserved-collarbone"]').evaluate(button => button.classList.contains('armed')),
-        `${target}: inferred Bone arm state was lost after tab rerender`);
+      assert(await page.locator('[data-craft-id="ancient-collarbone"]').evaluate(button => button.classList.contains('armed')),
+        `${target}: Ancient Bone arm state was lost after tab rerender`);
       await page.locator('#jewel-tooltip').click();
-      assert(await page.locator('#reveal-panel').isVisible(), `${target}: Preserved Collarbone did not start Desecration`);
-      assert.equal(await page.locator('#mod-list .unrevealed-mod').count(), 1, `${target}: inferred Bone did not place one unrevealed modifier`);
+      assert(await page.locator('#reveal-panel').isVisible(), `${target}: Ancient Collarbone did not start Desecration`);
+      assert.equal(await page.locator('#mod-list .unrevealed-mod').count(), 1, `${target}: Ancient Bone did not place one unrevealed modifier`);
 
       await page.locator('#reveal-btn').click();
       assert(await page.locator('#well-modal').isVisible(), `${target}: Reveal did not open the Well`);
@@ -718,7 +718,7 @@ if (targets.length === 0) {
           }
           return { names, urls };
         });
-        assert(offlineCache.names.includes('poe2-craft-registry-v9'), `${target}: updated service-worker cache missing`);
+        assert(offlineCache.names.includes('poe2-craft-registry-v10'), `${target}: updated service-worker cache missing`);
         assert(offlineCache.urls.some(url => url.endsWith('/data/crafting/known-items.data.js')),
           `${target}: lazy known-items catalog missing from offline cache`);
         page.removeAllListeners('console');

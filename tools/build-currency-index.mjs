@@ -306,9 +306,6 @@ function fallbackBlocker(entry, category) {
   }
   const identity = `${entry.displayName || ''} ${entry.metadataKey || ''}`;
   const classifications = new Set(entry.sourceClassifications || []);
-  if (/^Ancient (?:Jawbone|Rib|Collarbone)$/i.test(entry.displayName)) {
-    return `Mechanic blocked because ${entry.displayName} requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete.`;
-  }
   if (/Vertebra/i.test(identity)) {
     return `Mechanic blocked because ${entry.displayName} targets Waystones and the simulator has no verified Waystone item-state or modifier-pool model.`;
   }
@@ -956,10 +953,10 @@ function expandRegistryDefinitions(expansion, context) {
       accentColor: isOmen ? '#d4af5a' : '#5fd38a',
       cssClasses: isOmen ? ['abyss-btn', 'craft-omen-btn'] : ['abyss-btn', 'bone-btn'],
       description: isBone
-        ? `${compact.description} Inferred assumption: Gnawed and Preserved family variants use the same three-option Well of Souls reveal flow as Preserved Cranium.`
+        ? `${compact.description} Inferred assumption: equipment Abyssal Bone variants use the same three-option Well of Souls reveal flow as Preserved Cranium.`
         : compact.description,
       assumption: isBone
-        ? 'Gnawed and Preserved family variants share Preserved Cranium\'s three-option Well of Souls reveal flow.'
+        ? 'Equipment Abyssal Bone variants share Preserved Cranium\'s three-option Well of Souls reveal flow.'
         : null,
       actionType: isOmen ? 'omen' : 'specialized',
       activation: isOmen ? 'toggle_omen' : 'arm',
@@ -995,6 +992,7 @@ function expandRegistryDefinitions(expansion, context) {
         method ? `data/normalized/crafting-items.json#method:${method.methodId}` : null,
         isOmen ? 'https://poe2db.tw/us/Omen' : 'https://poe2db.tw/us/Abyss',
         'data/crafting/registry-expansion.json',
+        ...(compact.sourceEvidence || []),
       ]),
       implementationStatus: 'implemented',
       verificationStatus,
@@ -1131,7 +1129,9 @@ function coverageMarkdown(index) {
     `- Unclassified entries: **${index.counts.unclassified}**\n\n` +
     `## Disabled existing registry entries\n\n${blockedRuntime || '- None.'}\n\n` +
     `## Runtime identities missing from normalized item names\n\n${missingRuntimeSources}\n\n` +
-    `A missing normalized identity does not disable an already verified handler; it is recorded so future source imports can reconcile the stable item ID.\n`;
+    `A missing normalized identity does not disable an already verified handler; it is recorded so future source imports can reconcile the stable item ID.\n\n` +
+    `## Supplied PoE2DB catalogue cross-check\n\n` +
+    `The attached focused ModsView catalogue has **60/60** metadata-keyed Currency/Omen records represented in this registry. The broader autocomplete asset has **71** search-only labels absent from the normalized inventory (59 Stackable Currency and 12 Omen records); none occurs in the focused modifier-crafting catalogue, and autocomplete alone does not encode enough identity or mechanics to promote them. See \`reports/poe2db-data-sources.md\` for the complete list and evidence boundary.\n`;
 }
 
 export function writeCurrencyIndex(index = buildCurrencyIndex()) {

@@ -3,7 +3,7 @@
   "targetGameVersion": "0.5.4",
   "generatedFrom": {
     "path": "data/crafting/currency-index.json",
-    "sha256": "a91827160f83f9f55b8a5e2587eaef7d42fbe653cc741a9ed41647d890758521"
+    "sha256": "d7cefa0a2f558b99b6b607dfec76150c0c5838391daa015460815376aced04b2"
   },
   "statusTaxonomy": [
     "verified",
@@ -144,8 +144,8 @@
     "abyss": {
       "known": 12,
       "implemented": 2,
-      "inferred": 6,
-      "blocked": 4,
+      "inferred": 9,
+      "blocked": 1,
       "deprecated": 0,
       "nonEquipment": 0,
       "catalogueOnly": 0
@@ -265,7 +265,7 @@
       },
       {
         "handler": "executeCraftOperation -> startDesecrationFlow",
-        "count": 7
+        "count": 10
       },
       {
         "handler": "executeCraftOperation -> toggleCraftOmen",
@@ -282,7 +282,7 @@
       "socketing": 3,
       "ritual": 19,
       "essences": 0,
-      "abyss": 4,
+      "abyss": 1,
       "breach": 27,
       "delirium": 26,
       "runeforging": 17,
@@ -292,26 +292,12 @@
       "80 regular, Greater, and Perfect Essence definitions with exact normalized class-to-modifier mappings",
       "Essence of the Breach with its retained Amulet/Ring forced prefix identity",
       "Artificer's Orb using the retained concrete-base socket count as an explicitly inferred cap",
+      "Nine equipment Abyssal Bones, with the Ancient level-40 modifier floor reconciled from normalized Desecrated modifier levels",
       "287 non-deprecated Runes, Soul Cores, Idols, Abyssal Eyes, and Congealed Mist records with exact retained effects and limit codes"
     ],
     "implementedFromPoE2DB": [],
-    "poe2dbDisposition": "The supplied autocomplete and ModsView assets aided route/schema discovery only; the empty HAR did not verify a mechanics JSON endpoint, so no runtime or build dependency was added.",
+    "poe2dbDisposition": "The supplied autocomplete and ModsView assets were used for catalogue completeness and corroborated Ancient Jawbone and Ancient Collarbone discovery. Checked-in normalized method and modifier-level data remained authoritative; the bundle Rib mismatch could not override it, and the empty HAR did not verify a mechanics JSON endpoint. No runtime or build dependency was added.",
     "genuinelyAmbiguous": [
-      {
-        "category": "abyss",
-        "count": 1,
-        "blocker": "Mechanic blocked because Ancient Collarbone requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete."
-      },
-      {
-        "category": "abyss",
-        "count": 1,
-        "blocker": "Mechanic blocked because Ancient Jawbone requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete."
-      },
-      {
-        "category": "abyss",
-        "count": 1,
-        "blocker": "Mechanic blocked because Ancient Rib requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete."
-      },
       {
         "category": "abyss",
         "count": 1,
@@ -17734,6 +17720,56 @@
       "supported": true
     },
     {
+      "craftId": "ancient-jawbone",
+      "category": "abyss",
+      "displayName": "Ancient Jawbone",
+      "sourceItemId": 4857,
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
+      "evidenceSource": [
+        "data/normalized/crafting-items.json#item:4857",
+        "data/normalized/crafting-items.json#method:42",
+        "https://poe2db.tw/us/Abyss",
+        "data/crafting/registry-expansion.json",
+        "data/normalized/modifiers.json#desecrated-requiredItemLevel",
+        "reports/poe2db-data-sources.md#hard-coded-bundle-catalogue",
+        "data/crafting/currency-index.json#source-item:4857"
+      ],
+      "supportedItemClasses": [
+        "Claw",
+        "Dagger",
+        "Wand",
+        "One Hand Sword",
+        "One Hand Axe",
+        "One Hand Mace",
+        "Spear",
+        "Flail",
+        "Bow",
+        "Staff",
+        "Two Hand Sword",
+        "Two Hand Axe",
+        "Two Hand Mace",
+        "Quiver",
+        "Sceptre",
+        "Warstaff",
+        "Crossbow",
+        "Talisman"
+      ],
+      "rarityRestrictions": "Rare",
+      "engineHandler": "CraftingEngine.startDesecration",
+      "engineAction": "ancient_jawbone",
+      "uiHandler": "executeCraftOperation -> startDesecrationFlow",
+      "testCoverage": [
+        "validation:expanded-abyss-bones"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
+      "targetGameVersion": "0.5.4",
+      "visible": true,
+      "supported": true
+    },
+    {
       "craftId": "gnawed-rib",
       "category": "abyss",
       "displayName": "Gnawed Rib",
@@ -17797,6 +17833,45 @@
       "rarityRestrictions": "Rare",
       "engineHandler": "CraftingEngine.startDesecration",
       "engineAction": "preserved_rib",
+      "uiHandler": "executeCraftOperation -> startDesecrationFlow",
+      "testCoverage": [
+        "validation:expanded-abyss-bones"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
+      "targetGameVersion": "0.5.4",
+      "visible": true,
+      "supported": true
+    },
+    {
+      "craftId": "ancient-rib",
+      "category": "abyss",
+      "displayName": "Ancient Rib",
+      "sourceItemId": 4860,
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
+      "evidenceSource": [
+        "data/normalized/crafting-items.json#item:4860",
+        "data/normalized/crafting-items.json#method:43",
+        "https://poe2db.tw/us/Abyss",
+        "data/crafting/registry-expansion.json",
+        "data/normalized/modifiers.json#desecrated-requiredItemLevel",
+        "reports/poe2db-data-sources.md#hard-coded-bundle-catalogue",
+        "data/crafting/currency-index.json#source-item:4860"
+      ],
+      "supportedItemClasses": [
+        "Gloves",
+        "Boots",
+        "Body Armour",
+        "Helmet",
+        "Shield",
+        "Buckler",
+        "Focus"
+      ],
+      "rarityRestrictions": "Rare",
+      "engineHandler": "CraftingEngine.startDesecration",
+      "engineAction": "ancient_rib",
       "uiHandler": "executeCraftOperation -> startDesecrationFlow",
       "testCoverage": [
         "validation:expanded-abyss-bones"
@@ -17874,76 +17949,39 @@
       "supported": true
     },
     {
-      "craftId": "source-item:4857",
-      "category": "abyss",
-      "displayName": "Ancient Jawbone",
-      "sourceItemId": 4857,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
-      "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:4857",
-        "data/normalized/crafting-items.json#item:4857"
-      ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Ancient Jawbone requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Ancient Jawbone requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete?",
-      "targetGameVersion": "0.5.4",
-      "visible": true,
-      "supported": false
-    },
-    {
-      "craftId": "source-item:4860",
-      "category": "abyss",
-      "displayName": "Ancient Rib",
-      "sourceItemId": 4860,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
-      "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:4860",
-        "data/normalized/crafting-items.json#item:4860"
-      ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Ancient Rib requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Ancient Rib requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete?",
-      "targetGameVersion": "0.5.4",
-      "visible": true,
-      "supported": false
-    },
-    {
-      "craftId": "source-item:4863",
+      "craftId": "ancient-collarbone",
       "category": "abyss",
       "displayName": "Ancient Collarbone",
       "sourceItemId": 4863,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:4863",
-        "data/normalized/crafting-items.json#item:4863"
+        "data/normalized/crafting-items.json#item:4863",
+        "data/normalized/crafting-items.json#method:41",
+        "https://poe2db.tw/us/Abyss",
+        "data/crafting/registry-expansion.json",
+        "data/normalized/modifiers.json#desecrated-requiredItemLevel",
+        "reports/poe2db-data-sources.md#hard-coded-bundle-catalogue",
+        "data/crafting/currency-index.json#source-item:4863"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Ancient Collarbone requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Ancient Collarbone requires modifier level 40 or higher, but all 680 retained Desecrated modifier records lack modifier-level metadata; enforcing the rule only on ordinary reveal candidates would be incomplete?",
+      "supportedItemClasses": [
+        "Amulet",
+        "Ring",
+        "Belt"
+      ],
+      "rarityRestrictions": "Rare",
+      "engineHandler": "CraftingEngine.startDesecration",
+      "engineAction": "ancient_collarbone",
+      "uiHandler": "executeCraftOperation -> startDesecrationFlow",
+      "testCoverage": [
+        "validation:expanded-abyss-bones"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
       "craftId": "source-item:4865",
