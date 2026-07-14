@@ -73,10 +73,11 @@ if (targets.length === 0) {
         normalizedCounts: window.CraftForge?.getNormalizedIndexCounts?.() ?? null,
         toast: document.getElementById('error-toast')?.textContent || '',
       }));
+      assert.deepEqual(runtimeErrors, [], `${target}: startup browser errors`);
       assert(startup.modBaseCount > 0, `${target}: MOD_BASES did not initialize`);
       assert(startup.runtimeDataPresent, `${target}: runtime data did not initialize`);
       assert(startup.currencyIndexPresent, `${target}: currency index did not initialize`);
-      assert.equal(startup.craftRegistryLength, 415, `${target}: available runtime registry length`);
+      assert.equal(startup.craftRegistryLength, 455, `${target}: available runtime registry length`);
       assert.equal(startup.craftTabsLength, 10, `${target}: tab length`);
       assert(startup.craftForgePresent && startup.normalizedCounts, `${target}: CraftForge bridge/indexes unavailable`);
       assert.equal(startup.toast, '', `${target}: startup toast`);
@@ -718,7 +719,7 @@ if (targets.length === 0) {
           }
           return { names, urls };
         });
-        assert(offlineCache.names.includes('poe2-craft-registry-v12'), `${target}: updated service-worker cache missing`);
+        assert(offlineCache.names.includes('poe2-craft-registry-v13'), `${target}: updated service-worker cache missing`);
         assert(offlineCache.urls.some(url => url.endsWith('/data/crafting/known-items.data.js')),
           `${target}: lazy known-items catalog missing from offline cache`);
         page.removeAllListeners('console');

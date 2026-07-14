@@ -3081,6 +3081,13 @@ function omenDisabledReason(definition, item) {
     if (item.rarity === 'normal') return 'Requires a Magic or Rare item for the next Orb of Annulment.';
     return removable.length >= 2 ? '' : 'Omen of Greater Annulment requires two removable modifiers.';
   }
+  if (omen === 'catalysing_exaltation') {
+    if (item.rarity !== 'rare') return 'Requires a Rare item for the next Exalted Orb.';
+    if (!rareLimits) return `${item.baseName} cannot have Rare modifiers.`;
+    const catalyst = engine.validateCatalysingExaltation();
+    if (!catalyst.success) return catalyst.error;
+    return engine.getEligibleModifierCount('rare') ? '' : 'No eligible open Rare affix is available.';
+  }
 
   if (item.rarity !== 'rare') return 'Requires a Rare item.';
   if (omen.includes('sinistral') && !removableItemMods(item, 'prefix').length) return 'Requires a removable Prefix.';
@@ -3221,14 +3228,6 @@ function renderItemArt(item) {
     delete aura.dataset.baseItemId;
     return;
   }
-  if (omen === 'catalysing_exaltation') {
-    if (item.rarity !== 'rare') return 'Requires a Rare item for the next Exalted Orb.';
-    if (!rareLimits) return `${item.baseName} cannot have Rare modifiers.`;
-    const catalyst = engine.validateCatalysingExaltation();
-    if (!catalyst.success) return catalyst.error;
-    return engine.getEligibleModifierCount('rare') ? '' : 'No eligible open Rare affix is available.';
-  }
-
   const assetKey = String(baseItemId);
   if (image.dataset.baseItemId === assetKey) return;
 

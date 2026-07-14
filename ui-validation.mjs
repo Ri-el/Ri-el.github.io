@@ -451,6 +451,25 @@ check('Catalysing Exaltation variants share one sealed deterministic Omen path',
   /if \(omen\) craftOptions\.omen = omen/.test(app) &&
   /foreseenSeals\[currency\] \|\| computeForesight\(currency\)/.test(commitForesightSource) &&
   /engine\.loadItem\(seal\.afterItem, seal\.afterPending\)/.test(commitForesightSource));
+const omenDisabledReasonStart = app.indexOf('function omenDisabledReason(');
+const omenDisabledReasonEnd = omenDisabledReasonStart >= 0
+  ? app.indexOf('\nfunction ', omenDisabledReasonStart + 10)
+  : -1;
+const omenDisabledReasonSource = omenDisabledReasonStart >= 0
+  ? app.slice(omenDisabledReasonStart, omenDisabledReasonEnd >= 0 ? omenDisabledReasonEnd : app.length)
+  : '';
+const renderItemArtStart = app.indexOf('function renderItemArt(');
+const renderItemArtEnd = renderItemArtStart >= 0
+  ? app.indexOf('\nfunction ', renderItemArtStart + 10)
+  : -1;
+const renderItemArtSource = renderItemArtStart >= 0
+  ? app.slice(renderItemArtStart, renderItemArtEnd >= 0 ? renderItemArtEnd : app.length)
+  : '';
+check('Catalysing Exaltation eligibility stays in the Omen validator and cannot break item rendering',
+  /omen === 'catalysing_exaltation'[\s\S]*?validateCatalysingExaltation\(\)/.test(omenDisabledReasonSource) &&
+  !/\bomen\b|\brareLimits\b|validateCatalysingExaltation/.test(renderItemArtSource) &&
+  /startup browser errors/.test(browserSmoke) &&
+  /craftRegistryLength, 455/.test(browserSmoke));
 check('foresight rollback preserves pending Desecration state',
   /function computeForesight\(currency\)[\s\S]*?const snapshotPending = engine\.getPendingDesecration\(\)[\s\S]*?engine\.loadItem\(snapshot, snapshotPending\)/.test(app) &&
   /function computeDesecrationForesight\(bone\)[\s\S]*?const snapshotPending = engine\.getPendingDesecration\(\)[\s\S]*?engine\.loadItem\(snapshot, snapshotPending\)/.test(app));
@@ -822,7 +841,7 @@ check('Absent Amulet art is installed at its numeric base ID path',
   fs.existsSync(new URL('./assets/item-bases/2563.png', import.meta.url)));
 check('runtime selector, socket stylesheet, and performance data are versioned in the offline shell',
   /header-fix\.css\?v=20/.test(select) &&
-  /CACHE_NAME = 'poe2-craft-registry-v12'/.test(serviceWorker) &&
+  /CACHE_NAME = 'poe2-craft-registry-v13'/.test(serviceWorker) &&
   serviceWorker.includes("'./header-fix.css?v=20'") &&
   serviceWorker.includes("'./data/crafting/known-items.data.js'"));
 check('Absent Amulet art is available in the versioned offline application shell',
