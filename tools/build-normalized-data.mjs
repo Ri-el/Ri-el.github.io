@@ -203,10 +203,10 @@ export function buildRuntimeData(
 
   // Mechanics are projected separately from the audit payload so the classic
   // file:// runtime gets stable IDs and exact source ranges without parsing the
-  // complete normalized modifier/crafting exports. Essence types 0-4 are the
-  // retained PoE2 Essence families; type 5 is the separately audited Alloy
-  // family and remains outside this implementation slice.
-  const runtimeEssences = (essences.essences || []).filter(essence => Number(essence.type) <= 4);
+  // complete normalized modifier/crafting exports. Types 0-4 are Essences and
+  // type 5 is the Alloy family. They share the source's guaranteed-modifier
+  // shape and the runtime's atomic remove/add implementation.
+  const runtimeEssences = (essences.essences || []).filter(essence => Number(essence.type) <= 5);
   const essenceModifierIds = new Set(runtimeEssences
     .flatMap(essence => essence.guaranteedModifiersByItemClass || [])
     .flatMap(mapping => mapping.modifierIds || []));
@@ -235,6 +235,25 @@ export function buildRuntimeData(
       guaranteedModifiersByItemClass: essence.guaranteedModifiersByItemClass || [],
     },
   ]));
+
+  const catalystsByItemId = Object.fromEntries((craftingItems.items || [])
+    .filter(item => (item.classifications || []).includes('catalyst'))
+    .map(item => {
+      const tags = (item.tags || []).map(tag => tag.key).filter(Boolean);
+      const refined = tags.includes('jewel_catalyst');
+      const familyTag = tags.find(tag => tag.endsWith('_catalyst') &&
+        tag !== 'catalyst' && tag !== 'jewel_catalyst');
+      if (!familyTag) throw new Error(`Catalyst ${item.id} has no retained family tag.`);
+      return [String(item.id), {
+        itemId: item.id,
+        displayName: item.displayName,
+        metadataKey: item.metadataKey,
+        refined,
+        qualityType: familyTag,
+        modifierTag: familyTag.replace(/_catalyst$/, ''),
+        targetItemClasses: refined ? ['Jewel'] : ['Amulet', 'Ring'],
+      }];
+    }));
 
   const socketableTypeNames = (craftingItems.socketableTypes || []).map(type => type.id);
   const socketableItemClasses = buildSocketableItemClassMap(craftingItems, essences);
@@ -290,6 +309,7 @@ export function buildRuntimeData(
       essenceTypes: essenceTypeNames,
       essencesByItemId,
       essenceModifiersById: essenceModifiers,
+      catalystsByItemId,
       socketableTypes: socketableTypeNames,
       socketableItemClasses,
       socketableLimits: craftingItems.socketableLimits || [],

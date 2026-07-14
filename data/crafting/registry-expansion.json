@@ -16,14 +16,32 @@
       "id": "poe2db-abyss-0.5.4",
       "type": "reliable_public_item_text",
       "url": "https://poe2db.tw/us/Abyss"
+    },
+    {
+      "id": "poe2db-catalysts-0.5.4",
+      "type": "reliable_public_item_text",
+      "url": "https://poe2db.tw/us/Catalysts"
+    },
+    {
+      "id": "poe2db-alloys-0.5.4",
+      "type": "reliable_public_item_text",
+      "url": "https://poe2db.tw/us/Alloy"
+    },
+    {
+      "id": "poe2db-catalysing-exaltation-0.5.4",
+      "type": "reliable_public_item_text",
+      "url": "https://poe2db.tw/us/Omen_of_Catalysing_Exaltation"
     }
   ],
   "generatedFamilies": [
     {
       "kind": "essences",
-      "includedTypes": [0, 1, 2, 3, 4],
+      "includedTypes": [0, 1, 2, 3, 4, 5],
       "excludedSourceItemIds": [143, 144],
       "sourceHandler": "poe2_essence"
+    },
+    {
+      "kind": "catalysts"
     },
     {
       "kind": "artificer",
@@ -37,6 +55,21 @@
     }
   ],
   "definitions": [
+    {
+      "craftId": "omen-catalysing-exaltation",
+      "sourceItemId": 4448,
+      "kind": "crafting_omen",
+      "omenId": "catalysing_exaltation",
+      "triggerCraftId": "exalted",
+      "displayOrder": 175,
+      "iconFallback": "CatE",
+      "description": "Makes the next Exalted, Greater Exalted, or Perfect Exalted Orb consume all Catalyst Quality and multiply weights of modifiers carrying its matching tag; verified multipliers are 5x at 20% and 7.5x at 40%.",
+      "confidence": "inferred",
+      "sourceEvidence": [
+        "https://poe2db.tw/us/Omen_of_Catalysing_Exaltation",
+        "https://www.poe2wiki.net/wiki/Omen_of_Catalysing_Exaltation"
+      ]
+    },
     {
       "craftId": "omen-sinistral-alchemy",
       "sourceItemId": 4418,

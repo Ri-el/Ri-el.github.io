@@ -803,6 +803,8 @@ const CRAFT_VALIDATORS = Object.freeze({
   currencyDisabledReason: (definition, item) => currencyDisabledReason(definition.engineAction, item),
   boneDisabledReason: (definition, item) => boneDisabledReason(definition, item),
   essenceDisabledReason: (definition, item) => essenceDisabledReason(definition, item),
+  alloyDisabledReason: (definition, item) => alloyDisabledReason(definition, item),
+  catalystDisabledReason: (definition, item) => catalystDisabledReason(definition, item),
   socketDisabledReason: (definition, item) => socketDisabledReason(definition, item),
   omenDisabledReason: (definition, item) => omenDisabledReason(definition, item),
   unsupportedReason: definition => definition.unsupportedReason,
@@ -1748,6 +1750,8 @@ function applyCurrencyToEngine(currency, eng = engine) {
       case 'applyEssenceOfAbyss':
       case 'applyEssenceOfBreach': return eng[definition.handler]();
       case 'applyEssence': return eng[definition.handler](definition.operationOptions?.essenceItemId);
+      case 'applyAlloy': return eng[definition.handler](definition.operationOptions?.alloyItemId);
+      case 'applyCatalyst': return eng[definition.handler](definition.operationOptions?.catalystItemId);
       case 'applyArtificerOrb': return eng[definition.handler]();
       case 'applySocketable': return eng[definition.handler](definition.operationOptions?.socketableItemId);
       default: return { success: false, error: 'Registered crafting handler is unavailable.' };
@@ -2981,6 +2985,20 @@ function essenceDisabledReason(definition, item) {
   return '';
 }
 
+function catalystDisabledReason(definition) {
+  const itemId = definition?.operationOptions?.catalystItemId;
+  if (itemId == null) return UNSUPPORTED_REASON;
+  const result = engine.validateCatalyst(itemId);
+  return result.success ? '' : result.error;
+}
+
+function alloyDisabledReason(definition) {
+  const itemId = definition?.operationOptions?.alloyItemId;
+  if (itemId == null) return UNSUPPORTED_REASON;
+  const result = engine.validateAlloy(itemId);
+  return result.success ? '' : result.error;
+}
+
 function socketDisabledReason(definition) {
   if (definition?.handler === 'applyArtificerOrb') {
     const result = engine.validateArtificerOrb();
@@ -3133,7 +3151,9 @@ function renderQualityDetails(item) {
     return;
   }
 
-  const type = typeof quality.type === 'string' && quality.type.trim() ? quality.type.trim() : 'normal';
+  const type = typeof quality.source?.modifierTag === 'string'
+    ? `${capitalize(quality.source.modifierTag)} Modifiers`
+    : typeof quality.type === 'string' && quality.type.trim() ? quality.type.trim() : 'normal';
   const cap = Number(quality.cap);
   const capText = quality.cap != null && Number.isFinite(cap) ? ` / ${cap}%` : '';
   const line = document.createElement('div');
@@ -3200,6 +3220,13 @@ function renderItemArt(item) {
     delete image.dataset.baseItemId;
     delete aura.dataset.baseItemId;
     return;
+  }
+  if (omen === 'catalysing_exaltation') {
+    if (item.rarity !== 'rare') return 'Requires a Rare item for the next Exalted Orb.';
+    if (!rareLimits) return `${item.baseName} cannot have Rare modifiers.`;
+    const catalyst = engine.validateCatalysingExaltation();
+    if (!catalyst.success) return catalyst.error;
+    return engine.getEligibleModifierCount('rare') ? '' : 'No eligible open Rare affix is available.';
   }
 
   const assetKey = String(baseItemId);
@@ -3303,8 +3330,8 @@ function renderItem(actionResult = null, overrideItem = null) {
   renderSocketDetails(item);
 
   const allMods = [
-    ...item.prefixes.map(m => ({ ...m, type: 'prefix' })),
-    ...item.suffixes.map(m => ({ ...m, type: 'suffix' })),
+    ...item.prefixes.map(m => ({ ...CraftingEngine.catalystAdjustedModifier(m, item.quality), type: 'prefix' })),
+    ...item.suffixes.map(m => ({ ...CraftingEngine.catalystAdjustedModifier(m, item.quality), type: 'suffix' })),
   ];
 
   if (allMods.length === 0) {

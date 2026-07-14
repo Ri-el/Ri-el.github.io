@@ -6,10 +6,10 @@ This report is generated from `data/crafting/currency-index.json`. Classificatio
 
 | Classification | Source inventory | Runtime registry |
 |---|---:|---:|
-| implemented | 414 | 415 |
+| implemented | 454 | 455 |
 | conditional | 0 | 0 |
 | non_item_currency | 3 | 0 |
-| blocked_missing_data | 103 | 6 |
+| blocked_missing_data | 63 | 6 |
 | probability_unverified | 1 | 1 |
 | intentionally_out_of_scope | 0 | 0 |
 | deprecated_for_target_version | 9 | 0 |
@@ -17,7 +17,7 @@ This report is generated from `data/crafting/currency-index.json`. Classificatio
 - Total source inventory entries: **530**
 - Authoritative registry definitions: **531**
 - Visible workbench definitions: **522**
-- Existing runtime definitions preserved: **422**
+- Existing runtime definitions preserved: **462**
 - Unclassified entries: **0**
 
 ## Disabled existing registry entries

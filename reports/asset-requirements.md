@@ -20,11 +20,11 @@ Regenerate with `node tools/build-asset-requirements.mjs` and verify with `node 
 | Mapped concrete-base assets | 1759 | 1 | 1758 |
 | Known craft-icon assets | 521 | 11 | 510 |
 | Current craft-icon assets | 512 | 11 | 501 |
-| Supported craft-icon assets | 405 | 10 | 395 |
+| Supported craft-icon assets | 445 | 10 | 435 |
 
 - Simulator pools: **65**
 - Mapped concrete bases: **1759** (1757 selectable; 2 unselectable)
-- Craft definitions: **531 known**, **522 current**, **415 supported**, **522 visible**
+- Craft definitions: **531 known**, **522 current**, **455 supported**, **522 visible**
 
 ## Concrete-base assets
 
@@ -1801,6 +1801,19 @@ All known definitions are grouped by their shared `iconId`. Definition entries i
 | `abyss-essence` | `assets/icons/abyss-essence.png` | missing | 1 | 1 | 1 | `essence-abyss`; source `143` — Essence of the Abyss (abyss; implemented; supported; current) |
 | `abyssal-echoes` | `assets/icons/abyssal-echoes.png` | missing | 1 | 1 | 1 | `omen-abyssal-echoes`; source `4449` — Omen of Abyssal Echoes (ritual; implemented; supported; current) |
 | `alchemy` | `assets/icons/alchemy.png` | existing | 1 | 1 | 1 | `alchemy`; source `9` — Orb of Alchemy (currency; implemented; supported; current) |
+| `alloy-5049` | `assets/icons/alloy-5049.png` | missing | 1 | 1 | 1 | `alloy-5049`; source `5049` — Runic Alloy (runeforging; implemented; supported; current) |
+| `alloy-5050` | `assets/icons/alloy-5050.png` | missing | 1 | 1 | 1 | `alloy-5050`; source `5050` — Adaptive Alloy (runeforging; implemented; supported; current) |
+| `alloy-5051` | `assets/icons/alloy-5051.png` | missing | 1 | 1 | 1 | `alloy-5051`; source `5051` — Protective Alloy (runeforging; implemented; supported; current) |
+| `alloy-5052` | `assets/icons/alloy-5052.png` | missing | 1 | 1 | 1 | `alloy-5052`; source `5052` — Expansive Alloy (runeforging; implemented; supported; current) |
+| `alloy-5053` | `assets/icons/alloy-5053.png` | missing | 1 | 1 | 1 | `alloy-5053`; source `5053` — Swift Alloy (runeforging; implemented; supported; current) |
+| `alloy-5054` | `assets/icons/alloy-5054.png` | missing | 1 | 1 | 1 | `alloy-5054`; source `5054` — Cyclonic Alloy (runeforging; implemented; supported; current) |
+| `alloy-5055` | `assets/icons/alloy-5055.png` | missing | 1 | 1 | 1 | `alloy-5055`; source `5055` — Prismatic Alloy (runeforging; implemented; supported; current) |
+| `alloy-5056` | `assets/icons/alloy-5056.png` | missing | 1 | 1 | 1 | `alloy-5056`; source `5056` — Mystic Alloy (runeforging; implemented; supported; current) |
+| `alloy-5057` | `assets/icons/alloy-5057.png` | missing | 1 | 1 | 1 | `alloy-5057`; source `5057` — Sovereign Alloy (runeforging; implemented; supported; current) |
+| `alloy-5058` | `assets/icons/alloy-5058.png` | missing | 1 | 1 | 1 | `alloy-5058`; source `5058` — Celestial Alloy (runeforging; implemented; supported; current) |
+| `alloy-5059` | `assets/icons/alloy-5059.png` | missing | 1 | 1 | 1 | `alloy-5059`; source `5059` — Transcendent Alloy (runeforging; implemented; supported; current) |
+| `alloy-5060` | `assets/icons/alloy-5060.png` | missing | 1 | 1 | 1 | `alloy-5060`; source `5060` — The Runebinder's Alloy (runeforging; implemented; supported; current) |
+| `alloy-5061` | `assets/icons/alloy-5061.png` | missing | 1 | 1 | 1 | `alloy-5061`; source `5061` — The Runefather's Alloy (runeforging; implemented; supported; current) |
 | `ancient-collarbone` | `assets/icons/ancient-collarbone.png` | missing | 1 | 1 | 1 | `ancient-collarbone`; source `4863` — Ancient Collarbone (abyss; implemented; supported; current) |
 | `ancient-jawbone` | `assets/icons/ancient-jawbone.png` | missing | 1 | 1 | 1 | `ancient-jawbone`; source `4857` — Ancient Jawbone (abyss; implemented; supported; current) |
 | `ancient-rib` | `assets/icons/ancient-rib.png` | missing | 1 | 1 | 1 | `ancient-rib`; source `4860` — Ancient Rib (abyss; implemented; supported; current) |
@@ -1809,6 +1822,32 @@ All known definitions are grouped by their shared `iconId`. Definition entries i
 | `augmentation` | `assets/icons/augmentation.png` | existing | 3 | 3 | 3 | `augmentation`; source `24` — Orb of Augmentation (currency; implemented; supported; current)<br>`greater-augmentation`; source `25` — Greater Orb of Augmentation (currency; implemented; supported; current)<br>`perfect-augmentation`; source `26` — Perfect Orb of Augmentation (currency; implemented; supported; current) |
 | `blackblooded` | `assets/icons/blackblooded.png` | missing | 1 | 1 | 0 | `omen-blackblooded`; source `4452` — Omen of the Blackblooded (ritual; blocked_missing_data; current) |
 | `breach-essence` | `assets/icons/breach-essence.png` | missing | 1 | 1 | 1 | `essence-breach`; source `144` — Essence of the Breach (breach; implemented; supported; current) |
+| `catalyst-277` | `assets/icons/catalyst-277.png` | missing | 1 | 1 | 1 | `catalyst-277`; source `277` — Flesh Catalyst (breach; implemented; supported; current) |
+| `catalyst-278` | `assets/icons/catalyst-278.png` | missing | 1 | 1 | 1 | `catalyst-278`; source `278` — Neural Catalyst (breach; implemented; supported; current) |
+| `catalyst-279` | `assets/icons/catalyst-279.png` | missing | 1 | 1 | 1 | `catalyst-279`; source `279` — Carapace Catalyst (breach; implemented; supported; current) |
+| `catalyst-280` | `assets/icons/catalyst-280.png` | missing | 1 | 1 | 1 | `catalyst-280`; source `280` — Uul-Netol's Catalyst (breach; implemented; supported; current) |
+| `catalyst-281` | `assets/icons/catalyst-281.png` | missing | 1 | 1 | 1 | `catalyst-281`; source `281` — Xoph's Catalyst (breach; implemented; supported; current) |
+| `catalyst-282` | `assets/icons/catalyst-282.png` | missing | 1 | 1 | 1 | `catalyst-282`; source `282` — Tul's Catalyst (breach; implemented; supported; current) |
+| `catalyst-283` | `assets/icons/catalyst-283.png` | missing | 1 | 1 | 1 | `catalyst-283`; source `283` — Esh's Catalyst (breach; implemented; supported; current) |
+| `catalyst-284` | `assets/icons/catalyst-284.png` | missing | 1 | 1 | 1 | `catalyst-284`; source `284` — Chayula's Catalyst (breach; implemented; supported; current) |
+| `catalyst-285` | `assets/icons/catalyst-285.png` | missing | 1 | 1 | 1 | `catalyst-285`; source `285` — Reaver Catalyst (breach; implemented; supported; current) |
+| `catalyst-286` | `assets/icons/catalyst-286.png` | missing | 1 | 1 | 1 | `catalyst-286`; source `286` — Sibilant Catalyst (breach; implemented; supported; current) |
+| `catalyst-287` | `assets/icons/catalyst-287.png` | missing | 1 | 1 | 1 | `catalyst-287`; source `287` — Skittering Catalyst (breach; implemented; supported; current) |
+| `catalyst-288` | `assets/icons/catalyst-288.png` | missing | 1 | 1 | 1 | `catalyst-288`; source `288` — Adaptive Catalyst (breach; implemented; supported; current) |
+| `catalyst-289` | `assets/icons/catalyst-289.png` | missing | 1 | 1 | 1 | `catalyst-289`; source `289` — Necrotic Catalyst (breach; implemented; supported; current) |
+| `catalyst-290` | `assets/icons/catalyst-290.png` | missing | 1 | 1 | 1 | `catalyst-290`; source `290` — Refined Flesh Catalyst (breach; implemented; supported; current) |
+| `catalyst-291` | `assets/icons/catalyst-291.png` | missing | 1 | 1 | 1 | `catalyst-291`; source `291` — Refined Neural Catalyst (breach; implemented; supported; current) |
+| `catalyst-292` | `assets/icons/catalyst-292.png` | missing | 1 | 1 | 1 | `catalyst-292`; source `292` — Refined Carapace Catalyst (breach; implemented; supported; current) |
+| `catalyst-293` | `assets/icons/catalyst-293.png` | missing | 1 | 1 | 1 | `catalyst-293`; source `293` — Refined Uul-Netol's Catalyst (breach; implemented; supported; current) |
+| `catalyst-294` | `assets/icons/catalyst-294.png` | missing | 1 | 1 | 1 | `catalyst-294`; source `294` — Refined Xoph's Catalyst (breach; implemented; supported; current) |
+| `catalyst-295` | `assets/icons/catalyst-295.png` | missing | 1 | 1 | 1 | `catalyst-295`; source `295` — Refined Tul's Catalyst (breach; implemented; supported; current) |
+| `catalyst-296` | `assets/icons/catalyst-296.png` | missing | 1 | 1 | 1 | `catalyst-296`; source `296` — Refined Esh's Catalyst (breach; implemented; supported; current) |
+| `catalyst-297` | `assets/icons/catalyst-297.png` | missing | 1 | 1 | 1 | `catalyst-297`; source `297` — Refined Chayula's Catalyst (breach; implemented; supported; current) |
+| `catalyst-298` | `assets/icons/catalyst-298.png` | missing | 1 | 1 | 1 | `catalyst-298`; source `298` — Refined Reaver Catalyst (breach; implemented; supported; current) |
+| `catalyst-299` | `assets/icons/catalyst-299.png` | missing | 1 | 1 | 1 | `catalyst-299`; source `299` — Refined Sibilant Catalyst (breach; implemented; supported; current) |
+| `catalyst-300` | `assets/icons/catalyst-300.png` | missing | 1 | 1 | 1 | `catalyst-300`; source `300` — Refined Skittering Catalyst (breach; implemented; supported; current) |
+| `catalyst-301` | `assets/icons/catalyst-301.png` | missing | 1 | 1 | 1 | `catalyst-301`; source `301` — Refined Adaptive Catalyst (breach; implemented; supported; current) |
+| `catalyst-302` | `assets/icons/catalyst-302.png` | missing | 1 | 1 | 1 | `catalyst-302`; source `302` — Refined Necrotic Catalyst (breach; implemented; supported; current) |
 | `chaos` | `assets/icons/chaos.png` | existing | 3 | 3 | 3 | `chaos`; source `3` — Chaos Orb (currency; implemented; supported; current)<br>`greater-chaos`; source `4` — Greater Chaos Orb (currency; implemented; supported; current)<br>`perfect-chaos`; source `5` — Perfect Chaos Orb (currency; implemented; supported; current) |
 | `cranium` | `assets/icons/cranium.png` | missing | 1 | 1 | 1 | `preserved-cranium`; source `4864` — Preserved Cranium (abyss; implemented; supported; current) |
 | `dextral-annulment` | `assets/icons/dextral-annulment.png` | missing | 1 | 1 | 1 | `omen-dextral-annulment`; source `4428` — Omen of Dextral Annulment (ritual; implemented; supported; current) |
@@ -1903,6 +1942,7 @@ All known definitions are grouped by their shared `iconId`. Definition entries i
 | `hinekora` | `assets/icons/hinekora.png` | existing | 1 | 1 | 1 | `hinekora` — Hinekora's Lock (currency; implemented; supported; current) |
 | `liege` | `assets/icons/liege.png` | missing | 1 | 1 | 0 | `omen-liege`; source `4451` — Omen of the Liege (ritual; blocked_missing_data; current) |
 | `light` | `assets/icons/light.png` | missing | 1 | 1 | 1 | `omen-light`; source `4454` — Omen of Light (ritual; implemented; supported; current) |
+| `omen-catalysing-exaltation` | `assets/icons/omen-catalysing-exaltation.png` | missing | 1 | 1 | 1 | `omen-catalysing-exaltation`; source `4448` — Omen of Catalysing Exaltation (ritual; implemented; supported; current) |
 | `omen-dextral-alchemy` | `assets/icons/omen-dextral-alchemy.png` | missing | 1 | 1 | 1 | `omen-dextral-alchemy`; source `4419` — Omen of Dextral Alchemy (ritual; implemented; supported; current) |
 | `omen-dextral-coronation` | `assets/icons/omen-dextral-coronation.png` | missing | 1 | 1 | 1 | `omen-dextral-coronation`; source `4421` — Omen of Dextral Coronation (ritual; implemented; supported; current) |
 | `omen-dextral-exaltation` | `assets/icons/omen-dextral-exaltation.png` | missing | 1 | 1 | 1 | `omen-dextral-exaltation`; source `4425` — Omen of Dextral Exaltation (ritual; implemented; supported; current) |
@@ -2240,33 +2280,7 @@ All known definitions are grouped by their shared `iconId`. Definition entries i
 | `source-item-1445` | `assets/icons/source-item-1445.png` | missing | 1 | 1 | 0 | `source-item:1445`; source `1445` — Uhtred's Saga (ritual; blocked_missing_data; current) |
 | `source-item-1446` | `assets/icons/source-item-1446.png` | missing | 1 | 1 | 0 | `source-item:1446`; source `1446` — Olroth's Saga (ritual; blocked_missing_data; current) |
 | `source-item-2191` | `assets/icons/source-item-2191.png` | missing | 1 | 1 | 0 | `source-item:2191`; source `2191` — Alloy Crossbow (runeforging; non_item_currency; current) |
-| `source-item-277` | `assets/icons/source-item-277.png` | missing | 1 | 1 | 0 | `source-item:277`; source `277` — Flesh Catalyst (breach; blocked_missing_data; current) |
-| `source-item-278` | `assets/icons/source-item-278.png` | missing | 1 | 1 | 0 | `source-item:278`; source `278` — Neural Catalyst (breach; blocked_missing_data; current) |
-| `source-item-279` | `assets/icons/source-item-279.png` | missing | 1 | 1 | 0 | `source-item:279`; source `279` — Carapace Catalyst (breach; blocked_missing_data; current) |
 | `source-item-28` | `assets/icons/source-item-28.png` | missing | 1 | 1 | 0 | `source-item:28`; source `28` — Glassblower's Bauble (quality; blocked_missing_data; current) |
-| `source-item-280` | `assets/icons/source-item-280.png` | missing | 1 | 1 | 0 | `source-item:280`; source `280` — Uul-Netol's Catalyst (breach; blocked_missing_data; current) |
-| `source-item-281` | `assets/icons/source-item-281.png` | missing | 1 | 1 | 0 | `source-item:281`; source `281` — Xoph's Catalyst (breach; blocked_missing_data; current) |
-| `source-item-282` | `assets/icons/source-item-282.png` | missing | 1 | 1 | 0 | `source-item:282`; source `282` — Tul's Catalyst (breach; blocked_missing_data; current) |
-| `source-item-283` | `assets/icons/source-item-283.png` | missing | 1 | 1 | 0 | `source-item:283`; source `283` — Esh's Catalyst (breach; blocked_missing_data; current) |
-| `source-item-284` | `assets/icons/source-item-284.png` | missing | 1 | 1 | 0 | `source-item:284`; source `284` — Chayula's Catalyst (breach; blocked_missing_data; current) |
-| `source-item-285` | `assets/icons/source-item-285.png` | missing | 1 | 1 | 0 | `source-item:285`; source `285` — Reaver Catalyst (breach; blocked_missing_data; current) |
-| `source-item-286` | `assets/icons/source-item-286.png` | missing | 1 | 1 | 0 | `source-item:286`; source `286` — Sibilant Catalyst (breach; blocked_missing_data; current) |
-| `source-item-287` | `assets/icons/source-item-287.png` | missing | 1 | 1 | 0 | `source-item:287`; source `287` — Skittering Catalyst (breach; blocked_missing_data; current) |
-| `source-item-288` | `assets/icons/source-item-288.png` | missing | 1 | 1 | 0 | `source-item:288`; source `288` — Adaptive Catalyst (breach; blocked_missing_data; current) |
-| `source-item-289` | `assets/icons/source-item-289.png` | missing | 1 | 1 | 0 | `source-item:289`; source `289` — Necrotic Catalyst (breach; blocked_missing_data; current) |
-| `source-item-290` | `assets/icons/source-item-290.png` | missing | 1 | 1 | 0 | `source-item:290`; source `290` — Refined Flesh Catalyst (breach; blocked_missing_data; current) |
-| `source-item-291` | `assets/icons/source-item-291.png` | missing | 1 | 1 | 0 | `source-item:291`; source `291` — Refined Neural Catalyst (breach; blocked_missing_data; current) |
-| `source-item-292` | `assets/icons/source-item-292.png` | missing | 1 | 1 | 0 | `source-item:292`; source `292` — Refined Carapace Catalyst (breach; blocked_missing_data; current) |
-| `source-item-293` | `assets/icons/source-item-293.png` | missing | 1 | 1 | 0 | `source-item:293`; source `293` — Refined Uul-Netol's Catalyst (breach; blocked_missing_data; current) |
-| `source-item-294` | `assets/icons/source-item-294.png` | missing | 1 | 1 | 0 | `source-item:294`; source `294` — Refined Xoph's Catalyst (breach; blocked_missing_data; current) |
-| `source-item-295` | `assets/icons/source-item-295.png` | missing | 1 | 1 | 0 | `source-item:295`; source `295` — Refined Tul's Catalyst (breach; blocked_missing_data; current) |
-| `source-item-296` | `assets/icons/source-item-296.png` | missing | 1 | 1 | 0 | `source-item:296`; source `296` — Refined Esh's Catalyst (breach; blocked_missing_data; current) |
-| `source-item-297` | `assets/icons/source-item-297.png` | missing | 1 | 1 | 0 | `source-item:297`; source `297` — Refined Chayula's Catalyst (breach; blocked_missing_data; current) |
-| `source-item-298` | `assets/icons/source-item-298.png` | missing | 1 | 1 | 0 | `source-item:298`; source `298` — Refined Reaver Catalyst (breach; blocked_missing_data; current) |
-| `source-item-299` | `assets/icons/source-item-299.png` | missing | 1 | 1 | 0 | `source-item:299`; source `299` — Refined Sibilant Catalyst (breach; blocked_missing_data; current) |
-| `source-item-300` | `assets/icons/source-item-300.png` | missing | 1 | 1 | 0 | `source-item:300`; source `300` — Refined Skittering Catalyst (breach; blocked_missing_data; current) |
-| `source-item-301` | `assets/icons/source-item-301.png` | missing | 1 | 1 | 0 | `source-item:301`; source `301` — Refined Adaptive Catalyst (breach; blocked_missing_data; current) |
-| `source-item-302` | `assets/icons/source-item-302.png` | missing | 1 | 1 | 0 | `source-item:302`; source `302` — Refined Necrotic Catalyst (breach; blocked_missing_data; current) |
 | `source-item-4402` | `assets/icons/source-item-4402.png` | missing | 1 | 1 | 0 | `source-item:4402`; source `4402` — Elemental Conflux (runeforging; non_item_currency; current) |
 | `source-item-4422` | `assets/icons/source-item-4422.png` | missing | 1 | 0 | 0 | `source-item:4422`; source `4422` — Omen of Corruption (ritual; deprecated_for_target_version) |
 | `source-item-4433` | `assets/icons/source-item-4433.png` | missing | 1 | 1 | 0 | `source-item:4433`; source `4433` — Omen of Homogenising Exaltation (ritual; blocked_missing_data; current) |
@@ -2278,24 +2292,10 @@ All known definitions are grouped by their shared `iconId`. Definition entries i
 | `source-item-4442` | `assets/icons/source-item-4442.png` | missing | 1 | 1 | 0 | `source-item:4442`; source `4442` — Omen of Chaotic Effectiveness (ritual; blocked_missing_data; current) |
 | `source-item-4446` | `assets/icons/source-item-4446.png` | missing | 1 | 1 | 0 | `source-item:4446`; source `4446` — Omen of Dextral Crystallisation (ritual; blocked_missing_data; current) |
 | `source-item-4447` | `assets/icons/source-item-4447.png` | missing | 1 | 1 | 0 | `source-item:4447`; source `4447` — Omen of Sinistral Crystallisation (ritual; blocked_missing_data; current) |
-| `source-item-4448` | `assets/icons/source-item-4448.png` | missing | 1 | 1 | 0 | `source-item:4448`; source `4448` — Omen of Catalysing Exaltation (ritual; blocked_missing_data; current) |
 | `source-item-4453` | `assets/icons/source-item-4453.png` | missing | 1 | 1 | 0 | `source-item:4453`; source `4453` — Omen of Putrefaction (ritual; blocked_missing_data; current) |
 | `source-item-4479` | `assets/icons/source-item-4479.png` | missing | 1 | 1 | 0 | `source-item:4479`; source `4479` — Sacrifice (corruption; non_item_currency; current) |
 | `source-item-4865` | `assets/icons/source-item-4865.png` | missing | 1 | 1 | 0 | `source-item:4865`; source `4865` — Preserved Vertebrae (abyss; blocked_missing_data; current) |
 | `source-item-4866` | `assets/icons/source-item-4866.png` | missing | 1 | 1 | 0 | `source-item:4866`; source `4866` — Altered Collarbone (breach; blocked_missing_data; current) |
-| `source-item-5049` | `assets/icons/source-item-5049.png` | missing | 1 | 1 | 0 | `source-item:5049`; source `5049` — Runic Alloy (runeforging; blocked_missing_data; current) |
-| `source-item-5050` | `assets/icons/source-item-5050.png` | missing | 1 | 1 | 0 | `source-item:5050`; source `5050` — Adaptive Alloy (runeforging; blocked_missing_data; current) |
-| `source-item-5051` | `assets/icons/source-item-5051.png` | missing | 1 | 1 | 0 | `source-item:5051`; source `5051` — Protective Alloy (runeforging; blocked_missing_data; current) |
-| `source-item-5052` | `assets/icons/source-item-5052.png` | missing | 1 | 1 | 0 | `source-item:5052`; source `5052` — Expansive Alloy (runeforging; blocked_missing_data; current) |
-| `source-item-5053` | `assets/icons/source-item-5053.png` | missing | 1 | 1 | 0 | `source-item:5053`; source `5053` — Swift Alloy (runeforging; blocked_missing_data; current) |
-| `source-item-5054` | `assets/icons/source-item-5054.png` | missing | 1 | 1 | 0 | `source-item:5054`; source `5054` — Cyclonic Alloy (runeforging; blocked_missing_data; current) |
-| `source-item-5055` | `assets/icons/source-item-5055.png` | missing | 1 | 1 | 0 | `source-item:5055`; source `5055` — Prismatic Alloy (runeforging; blocked_missing_data; current) |
-| `source-item-5056` | `assets/icons/source-item-5056.png` | missing | 1 | 1 | 0 | `source-item:5056`; source `5056` — Mystic Alloy (runeforging; blocked_missing_data; current) |
-| `source-item-5057` | `assets/icons/source-item-5057.png` | missing | 1 | 1 | 0 | `source-item:5057`; source `5057` — Sovereign Alloy (runeforging; blocked_missing_data; current) |
-| `source-item-5058` | `assets/icons/source-item-5058.png` | missing | 1 | 1 | 0 | `source-item:5058`; source `5058` — Celestial Alloy (runeforging; blocked_missing_data; current) |
-| `source-item-5059` | `assets/icons/source-item-5059.png` | missing | 1 | 1 | 0 | `source-item:5059`; source `5059` — Transcendent Alloy (runeforging; blocked_missing_data; current) |
-| `source-item-5060` | `assets/icons/source-item-5060.png` | missing | 1 | 1 | 0 | `source-item:5060`; source `5060` — The Runebinder's Alloy (runeforging; blocked_missing_data; current) |
-| `source-item-5061` | `assets/icons/source-item-5061.png` | missing | 1 | 1 | 0 | `source-item:5061`; source `5061` — The Runefather's Alloy (runeforging; blocked_missing_data; current) |
 | `source-item-5067` | `assets/icons/source-item-5067.png` | missing | 1 | 1 | 0 | `source-item:5067`; source `5067` — Blazing Flux (runeforging; blocked_missing_data; current) |
 | `source-item-5068` | `assets/icons/source-item-5068.png` | missing | 1 | 1 | 0 | `source-item:5068`; source `5068` — Chilling Flux (runeforging; blocked_missing_data; current) |
 | `source-item-5069` | `assets/icons/source-item-5069.png` | missing | 1 | 1 | 0 | `source-item:5069`; source `5069` — Crackling Flux (runeforging; blocked_missing_data; current) |

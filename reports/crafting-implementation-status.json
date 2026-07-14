@@ -3,7 +3,7 @@
   "targetGameVersion": "0.5.4",
   "generatedFrom": {
     "path": "data/crafting/currency-index.json",
-    "sha256": "d7cefa0a2f558b99b6b607dfec76150c0c5838391daa015460815376aced04b2"
+    "sha256": "0d4ceed0a1a490789918f5ec7bca002dcce3dff0895f9dc8621e35a090f8dc66"
   },
   "statusTaxonomy": [
     "verified",
@@ -126,8 +126,8 @@
     "ritual": {
       "known": 38,
       "implemented": 18,
-      "inferred": 0,
-      "blocked": 19,
+      "inferred": 1,
+      "blocked": 18,
       "deprecated": 1,
       "nonEquipment": 0,
       "catalogueOnly": 0
@@ -153,8 +153,8 @@
     "breach": {
       "known": 28,
       "implemented": 0,
-      "inferred": 1,
-      "blocked": 27,
+      "inferred": 27,
+      "blocked": 1,
       "deprecated": 0,
       "nonEquipment": 0,
       "catalogueOnly": 0
@@ -171,8 +171,8 @@
     "runeforging": {
       "known": 19,
       "implemented": 0,
-      "inferred": 0,
-      "blocked": 17,
+      "inferred": 13,
+      "blocked": 4,
       "deprecated": 0,
       "nonEquipment": 2,
       "catalogueOnly": 0
@@ -198,10 +198,6 @@
         "label": "Delirium / Instilling"
       },
       {
-        "category": "runeforging",
-        "label": "Runeforging"
-      },
-      {
         "category": "corruption",
         "label": "Corruption / Sacrifice"
       }
@@ -210,6 +206,10 @@
       {
         "handler": "executeCraftOperation -> applyAlchemy",
         "count": 1
+      },
+      {
+        "handler": "executeCraftOperation -> applyAlloy",
+        "count": 13
       },
       {
         "handler": "executeCraftOperation -> applyAnnulment",
@@ -222,6 +222,10 @@
       {
         "handler": "executeCraftOperation -> applyAugmentation",
         "count": 3
+      },
+      {
+        "handler": "executeCraftOperation -> applyCatalyst",
+        "count": 26
       },
       {
         "handler": "executeCraftOperation -> applyChaos",
@@ -269,7 +273,7 @@
       },
       {
         "handler": "executeCraftOperation -> toggleCraftOmen",
-        "count": 14
+        "count": 15
       },
       {
         "handler": "executeCraftOperation -> toggleOmen",
@@ -280,12 +284,12 @@
       "currency": 0,
       "quality": 8,
       "socketing": 3,
-      "ritual": 19,
+      "ritual": 18,
       "essences": 0,
       "abyss": 1,
-      "breach": 27,
+      "breach": 1,
       "delirium": 26,
-      "runeforging": 17,
+      "runeforging": 4,
       "corruption": 3
     },
     "implementedDirectlyFromRetainedData": [
@@ -306,137 +310,7 @@
       {
         "category": "breach",
         "count": 1,
-        "blocker": "Mechanic blocked because Adaptive Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Carapace Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Chayula's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Esh's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Flesh Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Necrotic Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Neural Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Reaver Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Refined Adaptive Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Refined Carapace Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Refined Chayula's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Refined Esh's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Refined Flesh Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Refined Necrotic Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Refined Neural Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Refined Reaver Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Refined Sibilant Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Refined Skittering Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Refined Tul's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Refined Uul-Netol's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Refined Xoph's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Sibilant Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Skittering Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
         "blocker": "Mechanic blocked because the retained text for Altered Collarbone describes a chance for an otherworldly outcome without encoding its probability or complete outcome pool."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Tul's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Uul-Netol's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
-      },
-      {
-        "category": "breach",
-        "count": 1,
-        "blocker": "Mechanic blocked because Xoph's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4."
       },
       {
         "category": "corruption",
@@ -641,11 +515,6 @@
       {
         "category": "ritual",
         "count": 1,
-        "blocker": "Mechanic blocked because its exact triggering operation, applicability, and consumption behavior for Omen of Catalysing Exaltation is not verified for target version 0.5.4."
-      },
-      {
-        "category": "ritual",
-        "count": 1,
         "blocker": "Mechanic blocked because its exact triggering operation, applicability, and consumption behavior for Omen of Chaotic Effectiveness is not verified for target version 0.5.4."
       },
       {
@@ -721,26 +590,6 @@
       {
         "category": "runeforging",
         "count": 1,
-        "blocker": "Mechanic blocked because Adaptive Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts."
-      },
-      {
-        "category": "runeforging",
-        "count": 1,
-        "blocker": "Mechanic blocked because Celestial Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts."
-      },
-      {
-        "category": "runeforging",
-        "count": 1,
-        "blocker": "Mechanic blocked because Cyclonic Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts."
-      },
-      {
-        "category": "runeforging",
-        "count": 1,
-        "blocker": "Mechanic blocked because Expansive Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts."
-      },
-      {
-        "category": "runeforging",
-        "count": 1,
         "blocker": "Mechanic blocked because its exact Expedition or Runeforging applicability and mutation for Blazing Flux is not verified for target version 0.5.4."
       },
       {
@@ -757,51 +606,6 @@
         "category": "runeforging",
         "count": 1,
         "blocker": "Mechanic blocked because its exact Expedition or Runeforging applicability and mutation for Void Flux is not verified for target version 0.5.4."
-      },
-      {
-        "category": "runeforging",
-        "count": 1,
-        "blocker": "Mechanic blocked because Mystic Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts."
-      },
-      {
-        "category": "runeforging",
-        "count": 1,
-        "blocker": "Mechanic blocked because Prismatic Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts."
-      },
-      {
-        "category": "runeforging",
-        "count": 1,
-        "blocker": "Mechanic blocked because Protective Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts."
-      },
-      {
-        "category": "runeforging",
-        "count": 1,
-        "blocker": "Mechanic blocked because Runic Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts."
-      },
-      {
-        "category": "runeforging",
-        "count": 1,
-        "blocker": "Mechanic blocked because Sovereign Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts."
-      },
-      {
-        "category": "runeforging",
-        "count": 1,
-        "blocker": "Mechanic blocked because Swift Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts."
-      },
-      {
-        "category": "runeforging",
-        "count": 1,
-        "blocker": "Mechanic blocked because The Runebinder's Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts."
-      },
-      {
-        "category": "runeforging",
-        "count": 1,
-        "blocker": "Mechanic blocked because The Runefather's Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts."
-      },
-      {
-        "category": "runeforging",
-        "count": 1,
-        "blocker": "Mechanic blocked because Transcendent Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts."
       },
       {
         "category": "socketing",
@@ -13763,6 +13567,41 @@
       "supported": true
     },
     {
+      "craftId": "omen-catalysing-exaltation",
+      "category": "ritual",
+      "displayName": "Omen of Catalysing Exaltation",
+      "sourceItemId": 4448,
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
+      "evidenceSource": [
+        "data/normalized/crafting-items.json#item:4448",
+        "https://poe2db.tw/us/Omen",
+        "data/crafting/registry-expansion.json",
+        "https://poe2db.tw/us/Omen_of_Catalysing_Exaltation",
+        "https://www.poe2wiki.net/wiki/Omen_of_Catalysing_Exaltation",
+        "data/crafting/currency-index.json#source-item:4448"
+      ],
+      "supportedItemClasses": [
+        "Amulet",
+        "Jewel",
+        "Ring"
+      ],
+      "rarityRestrictions": "Determined by triggering craft: exalted",
+      "engineHandler": "Triggered through exalted",
+      "engineAction": null,
+      "uiHandler": "executeCraftOperation -> toggleCraftOmen",
+      "testCoverage": [
+        "validation:catalysing-exaltation",
+        "ui:catalysing-exaltation-foresight"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
+      "targetGameVersion": "0.5.4",
+      "visible": true,
+      "supported": true
+    },
+    {
       "craftId": "omen-greater-exaltation",
       "category": "ritual",
       "displayName": "Omen of Greater Exaltation",
@@ -14230,30 +14069,6 @@
       "testCoverage": [],
       "blocker": "Mechanic blocked because its exact triggering operation, applicability, and consumption behavior for Omen of Sinistral Crystallisation is not verified for target version 0.5.4.",
       "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: its exact triggering operation, applicability, and consumption behavior for Omen of Sinistral Crystallisation is not verified for target version 0.5.4?",
-      "targetGameVersion": "0.5.4",
-      "visible": true,
-      "supported": false
-    },
-    {
-      "craftId": "source-item:4448",
-      "category": "ritual",
-      "displayName": "Omen of Catalysing Exaltation",
-      "sourceItemId": 4448,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
-      "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:4448",
-        "data/normalized/crafting-items.json#item:4448"
-      ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because its exact triggering operation, applicability, and consumption behavior for Omen of Catalysing Exaltation is not verified for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: its exact triggering operation, applicability, and consumption behavior for Omen of Catalysing Exaltation is not verified for target version 0.5.4?",
       "targetGameVersion": "0.5.4",
       "visible": true,
       "supported": false
@@ -18040,628 +17855,901 @@
       "supported": true
     },
     {
-      "craftId": "source-item:277",
+      "craftId": "catalyst-277",
       "category": "breach",
       "displayName": "Flesh Catalyst",
       "sourceItemId": 277,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:277",
-        "data/normalized/crafting-items.json#item:277"
+        "data/normalized/crafting-items.json#item:277",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:277"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Flesh Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Flesh Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Amulet",
+        "Ring"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:277",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:278",
+      "craftId": "catalyst-278",
       "category": "breach",
       "displayName": "Neural Catalyst",
       "sourceItemId": 278,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:278",
-        "data/normalized/crafting-items.json#item:278"
+        "data/normalized/crafting-items.json#item:278",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:278"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Neural Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Neural Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Amulet",
+        "Ring"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:278",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:279",
+      "craftId": "catalyst-279",
       "category": "breach",
       "displayName": "Carapace Catalyst",
       "sourceItemId": 279,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:279",
-        "data/normalized/crafting-items.json#item:279"
+        "data/normalized/crafting-items.json#item:279",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:279"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Carapace Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Carapace Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Amulet",
+        "Ring"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:279",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:280",
+      "craftId": "catalyst-280",
       "category": "breach",
       "displayName": "Uul-Netol's Catalyst",
       "sourceItemId": 280,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:280",
-        "data/normalized/crafting-items.json#item:280"
+        "data/normalized/crafting-items.json#item:280",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:280"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Uul-Netol's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Uul-Netol's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Amulet",
+        "Ring"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:280",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:281",
+      "craftId": "catalyst-281",
       "category": "breach",
       "displayName": "Xoph's Catalyst",
       "sourceItemId": 281,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:281",
-        "data/normalized/crafting-items.json#item:281"
+        "data/normalized/crafting-items.json#item:281",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:281"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Xoph's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Xoph's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Amulet",
+        "Ring"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:281",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:282",
+      "craftId": "catalyst-282",
       "category": "breach",
       "displayName": "Tul's Catalyst",
       "sourceItemId": 282,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:282",
-        "data/normalized/crafting-items.json#item:282"
+        "data/normalized/crafting-items.json#item:282",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:282"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Tul's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Tul's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Amulet",
+        "Ring"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:282",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:283",
+      "craftId": "catalyst-283",
       "category": "breach",
       "displayName": "Esh's Catalyst",
       "sourceItemId": 283,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:283",
-        "data/normalized/crafting-items.json#item:283"
+        "data/normalized/crafting-items.json#item:283",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:283"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Esh's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Esh's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Amulet",
+        "Ring"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:283",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:284",
+      "craftId": "catalyst-284",
       "category": "breach",
       "displayName": "Chayula's Catalyst",
       "sourceItemId": 284,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:284",
-        "data/normalized/crafting-items.json#item:284"
+        "data/normalized/crafting-items.json#item:284",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:284"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Chayula's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Chayula's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Amulet",
+        "Ring"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:284",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:285",
+      "craftId": "catalyst-285",
       "category": "breach",
       "displayName": "Reaver Catalyst",
       "sourceItemId": 285,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:285",
-        "data/normalized/crafting-items.json#item:285"
+        "data/normalized/crafting-items.json#item:285",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:285"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Reaver Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Reaver Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Amulet",
+        "Ring"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:285",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:286",
+      "craftId": "catalyst-286",
       "category": "breach",
       "displayName": "Sibilant Catalyst",
       "sourceItemId": 286,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:286",
-        "data/normalized/crafting-items.json#item:286"
+        "data/normalized/crafting-items.json#item:286",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:286"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Sibilant Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Sibilant Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Amulet",
+        "Ring"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:286",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:287",
+      "craftId": "catalyst-287",
       "category": "breach",
       "displayName": "Skittering Catalyst",
       "sourceItemId": 287,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:287",
-        "data/normalized/crafting-items.json#item:287"
+        "data/normalized/crafting-items.json#item:287",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:287"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Skittering Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Skittering Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Amulet",
+        "Ring"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:287",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:288",
+      "craftId": "catalyst-288",
       "category": "breach",
       "displayName": "Adaptive Catalyst",
       "sourceItemId": 288,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:288",
-        "data/normalized/crafting-items.json#item:288"
+        "data/normalized/crafting-items.json#item:288",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:288"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Adaptive Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Adaptive Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Amulet",
+        "Ring"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:288",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:289",
+      "craftId": "catalyst-289",
       "category": "breach",
       "displayName": "Necrotic Catalyst",
       "sourceItemId": 289,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:289",
-        "data/normalized/crafting-items.json#item:289"
+        "data/normalized/crafting-items.json#item:289",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:289"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Necrotic Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Necrotic Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Amulet",
+        "Ring"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:289",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:290",
+      "craftId": "catalyst-290",
       "category": "breach",
       "displayName": "Refined Flesh Catalyst",
       "sourceItemId": 290,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:290",
-        "data/normalized/crafting-items.json#item:290"
+        "data/normalized/crafting-items.json#item:290",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Refined_Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:290"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Refined Flesh Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Refined Flesh Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Jewel"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:290",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:291",
+      "craftId": "catalyst-291",
       "category": "breach",
       "displayName": "Refined Neural Catalyst",
       "sourceItemId": 291,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:291",
-        "data/normalized/crafting-items.json#item:291"
+        "data/normalized/crafting-items.json#item:291",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Refined_Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:291"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Refined Neural Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Refined Neural Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Jewel"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:291",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:292",
+      "craftId": "catalyst-292",
       "category": "breach",
       "displayName": "Refined Carapace Catalyst",
       "sourceItemId": 292,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:292",
-        "data/normalized/crafting-items.json#item:292"
+        "data/normalized/crafting-items.json#item:292",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Refined_Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:292"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Refined Carapace Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Refined Carapace Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Jewel"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:292",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:293",
+      "craftId": "catalyst-293",
       "category": "breach",
       "displayName": "Refined Uul-Netol's Catalyst",
       "sourceItemId": 293,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:293",
-        "data/normalized/crafting-items.json#item:293"
+        "data/normalized/crafting-items.json#item:293",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Refined_Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:293"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Refined Uul-Netol's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Refined Uul-Netol's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Jewel"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:293",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:294",
+      "craftId": "catalyst-294",
       "category": "breach",
       "displayName": "Refined Xoph's Catalyst",
       "sourceItemId": 294,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:294",
-        "data/normalized/crafting-items.json#item:294"
+        "data/normalized/crafting-items.json#item:294",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Refined_Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:294"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Refined Xoph's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Refined Xoph's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Jewel"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:294",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:295",
+      "craftId": "catalyst-295",
       "category": "breach",
       "displayName": "Refined Tul's Catalyst",
       "sourceItemId": 295,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:295",
-        "data/normalized/crafting-items.json#item:295"
+        "data/normalized/crafting-items.json#item:295",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Refined_Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:295"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Refined Tul's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Refined Tul's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Jewel"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:295",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:296",
+      "craftId": "catalyst-296",
       "category": "breach",
       "displayName": "Refined Esh's Catalyst",
       "sourceItemId": 296,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:296",
-        "data/normalized/crafting-items.json#item:296"
+        "data/normalized/crafting-items.json#item:296",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Refined_Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:296"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Refined Esh's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Refined Esh's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Jewel"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:296",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:297",
+      "craftId": "catalyst-297",
       "category": "breach",
       "displayName": "Refined Chayula's Catalyst",
       "sourceItemId": 297,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:297",
-        "data/normalized/crafting-items.json#item:297"
+        "data/normalized/crafting-items.json#item:297",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Refined_Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:297"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Refined Chayula's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Refined Chayula's Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Jewel"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:297",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:298",
+      "craftId": "catalyst-298",
       "category": "breach",
       "displayName": "Refined Reaver Catalyst",
       "sourceItemId": 298,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:298",
-        "data/normalized/crafting-items.json#item:298"
+        "data/normalized/crafting-items.json#item:298",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Refined_Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:298"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Refined Reaver Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Refined Reaver Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Jewel"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:298",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:299",
+      "craftId": "catalyst-299",
       "category": "breach",
       "displayName": "Refined Sibilant Catalyst",
       "sourceItemId": 299,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:299",
-        "data/normalized/crafting-items.json#item:299"
+        "data/normalized/crafting-items.json#item:299",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Refined_Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:299"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Refined Sibilant Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Refined Sibilant Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Jewel"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:299",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:300",
+      "craftId": "catalyst-300",
       "category": "breach",
       "displayName": "Refined Skittering Catalyst",
       "sourceItemId": 300,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:300",
-        "data/normalized/crafting-items.json#item:300"
+        "data/normalized/crafting-items.json#item:300",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Refined_Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:300"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Refined Skittering Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Refined Skittering Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Jewel"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:300",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:301",
+      "craftId": "catalyst-301",
       "category": "breach",
       "displayName": "Refined Adaptive Catalyst",
       "sourceItemId": 301,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:301",
-        "data/normalized/crafting-items.json#item:301"
+        "data/normalized/crafting-items.json#item:301",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Refined_Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:301"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Refined Adaptive Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Refined Adaptive Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Jewel"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:301",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
-      "craftId": "source-item:302",
+      "craftId": "catalyst-302",
       "category": "breach",
       "displayName": "Refined Necrotic Catalyst",
       "sourceItemId": 302,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
       "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:302",
-        "data/normalized/crafting-items.json#item:302"
+        "data/normalized/crafting-items.json#item:302",
+        "https://poe2db.tw/us/Catalysts",
+        "https://poe2db.tw/us/Refined_Flesh_Catalyst",
+        "https://poe2db.tw/us/Quality",
+        "https://www.pathofexile.com/forum/view-thread/3531661",
+        "https://www.poewiki.net/wiki/Quality",
+        "data/crafting/currency-index.json#source-item:302"
       ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Refined Necrotic Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Refined Necrotic Catalyst's jewellery quality family is retained, but the exact per-use increment, cap interaction, and modifier-tag scaling rules are not encoded for target version 0.5.4?",
+      "supportedItemClasses": [
+        "Jewel"
+      ],
+      "rarityRestrictions": "No additional rarity restriction encoded",
+      "engineHandler": "CraftingEngine.applyCatalyst",
+      "engineAction": "catalyst:302",
+      "uiHandler": "executeCraftOperation -> applyCatalyst",
+      "testCoverage": [
+        "validation:catalysts",
+        "ui:implemented-catalyst-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": false
+      "supported": true
     },
     {
       "craftId": "source-item:4866",
@@ -19312,6 +19400,580 @@
       "supported": false
     },
     {
+      "craftId": "alloy-5049",
+      "category": "runeforging",
+      "displayName": "Runic Alloy",
+      "sourceItemId": 5049,
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
+      "evidenceSource": [
+        "data/normalized/crafting-items.json#item:5049",
+        "data/normalized/essences.json#essence:82",
+        "data/normalized/modifiers.json#essence-modifiers",
+        "https://poe2db.tw/us/Alloy",
+        "https://poe2db.tw/us/Runic_Alloy",
+        "https://www.pathofexile.com/forum/view-thread/3932540",
+        "data/crafting/registry-expansion.json",
+        "data/crafting/currency-index.json#source-item:5049"
+      ],
+      "supportedItemClasses": [
+        "Amulet",
+        "Belt",
+        "Ring"
+      ],
+      "rarityRestrictions": "Rare",
+      "engineHandler": "CraftingEngine.applyAlloy",
+      "engineAction": "alloy:5049",
+      "uiHandler": "executeCraftOperation -> applyAlloy",
+      "testCoverage": [
+        "validation:normalized-alloy-transitions",
+        "ui:implemented-alloy-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
+      "targetGameVersion": "0.5.4",
+      "visible": true,
+      "supported": true
+    },
+    {
+      "craftId": "alloy-5050",
+      "category": "runeforging",
+      "displayName": "Adaptive Alloy",
+      "sourceItemId": 5050,
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
+      "evidenceSource": [
+        "data/normalized/crafting-items.json#item:5050",
+        "data/normalized/essences.json#essence:83",
+        "data/normalized/modifiers.json#essence-modifiers",
+        "https://poe2db.tw/us/Alloy",
+        "https://poe2db.tw/us/Adaptive_Alloy",
+        "https://www.pathofexile.com/forum/view-thread/3932540",
+        "data/crafting/registry-expansion.json",
+        "data/crafting/currency-index.json#source-item:5050"
+      ],
+      "supportedItemClasses": [
+        "Gloves",
+        "Sceptre",
+        "Staff",
+        "Wand"
+      ],
+      "rarityRestrictions": "Rare",
+      "engineHandler": "CraftingEngine.applyAlloy",
+      "engineAction": "alloy:5050",
+      "uiHandler": "executeCraftOperation -> applyAlloy",
+      "testCoverage": [
+        "validation:normalized-alloy-transitions",
+        "ui:implemented-alloy-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
+      "targetGameVersion": "0.5.4",
+      "visible": true,
+      "supported": true
+    },
+    {
+      "craftId": "alloy-5051",
+      "category": "runeforging",
+      "displayName": "Protective Alloy",
+      "sourceItemId": 5051,
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
+      "evidenceSource": [
+        "data/normalized/crafting-items.json#item:5051",
+        "data/normalized/essences.json#essence:84",
+        "data/normalized/modifiers.json#essence-modifiers",
+        "https://poe2db.tw/us/Alloy",
+        "https://poe2db.tw/us/Protective_Alloy",
+        "https://www.pathofexile.com/forum/view-thread/3932540",
+        "data/crafting/registry-expansion.json",
+        "data/crafting/currency-index.json#source-item:5051"
+      ],
+      "supportedItemClasses": [
+        "Belt",
+        "Bow",
+        "Buckler",
+        "Crossbow",
+        "Dagger",
+        "Flail",
+        "One Hand Axe",
+        "One Hand Mace",
+        "One Hand Sword",
+        "Sceptre",
+        "Shield",
+        "Spear",
+        "Staff",
+        "Talisman",
+        "Two Hand Axe",
+        "Two Hand Mace",
+        "Two Hand Sword",
+        "Wand",
+        "Warstaff"
+      ],
+      "rarityRestrictions": "Rare",
+      "engineHandler": "CraftingEngine.applyAlloy",
+      "engineAction": "alloy:5051",
+      "uiHandler": "executeCraftOperation -> applyAlloy",
+      "testCoverage": [
+        "validation:normalized-alloy-transitions",
+        "ui:implemented-alloy-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
+      "targetGameVersion": "0.5.4",
+      "visible": true,
+      "supported": true
+    },
+    {
+      "craftId": "alloy-5052",
+      "category": "runeforging",
+      "displayName": "Expansive Alloy",
+      "sourceItemId": 5052,
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
+      "evidenceSource": [
+        "data/normalized/crafting-items.json#item:5052",
+        "data/normalized/essences.json#essence:85",
+        "data/normalized/modifiers.json#essence-modifiers",
+        "https://poe2db.tw/us/Alloy",
+        "https://poe2db.tw/us/Expansive_Alloy",
+        "https://www.pathofexile.com/forum/view-thread/3932540",
+        "data/crafting/registry-expansion.json",
+        "data/crafting/currency-index.json#source-item:5052"
+      ],
+      "supportedItemClasses": [
+        "Body Armour",
+        "Boots",
+        "Gloves",
+        "Helmet"
+      ],
+      "rarityRestrictions": "Rare",
+      "engineHandler": "CraftingEngine.applyAlloy",
+      "engineAction": "alloy:5052",
+      "uiHandler": "executeCraftOperation -> applyAlloy",
+      "testCoverage": [
+        "validation:normalized-alloy-transitions",
+        "ui:implemented-alloy-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
+      "targetGameVersion": "0.5.4",
+      "visible": true,
+      "supported": true
+    },
+    {
+      "craftId": "alloy-5053",
+      "category": "runeforging",
+      "displayName": "Swift Alloy",
+      "sourceItemId": 5053,
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
+      "evidenceSource": [
+        "data/normalized/crafting-items.json#item:5053",
+        "data/normalized/essences.json#essence:86",
+        "data/normalized/modifiers.json#essence-modifiers",
+        "https://poe2db.tw/us/Alloy",
+        "https://poe2db.tw/us/Swift_Alloy",
+        "https://www.pathofexile.com/forum/view-thread/3932540",
+        "data/crafting/registry-expansion.json",
+        "data/crafting/currency-index.json#source-item:5053"
+      ],
+      "supportedItemClasses": [
+        "Belt",
+        "Buckler",
+        "Focus",
+        "Gloves",
+        "Ring",
+        "Shield"
+      ],
+      "rarityRestrictions": "Rare",
+      "engineHandler": "CraftingEngine.applyAlloy",
+      "engineAction": "alloy:5053",
+      "uiHandler": "executeCraftOperation -> applyAlloy",
+      "testCoverage": [
+        "validation:normalized-alloy-transitions",
+        "ui:implemented-alloy-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
+      "targetGameVersion": "0.5.4",
+      "visible": true,
+      "supported": true
+    },
+    {
+      "craftId": "alloy-5054",
+      "category": "runeforging",
+      "displayName": "Cyclonic Alloy",
+      "sourceItemId": 5054,
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
+      "evidenceSource": [
+        "data/normalized/crafting-items.json#item:5054",
+        "data/normalized/essences.json#essence:87",
+        "data/normalized/modifiers.json#essence-modifiers",
+        "https://poe2db.tw/us/Alloy",
+        "https://poe2db.tw/us/Cyclonic_Alloy",
+        "https://www.pathofexile.com/forum/view-thread/3932540",
+        "data/crafting/registry-expansion.json",
+        "data/crafting/currency-index.json#source-item:5054"
+      ],
+      "supportedItemClasses": [
+        "Body Armour",
+        "Boots",
+        "Gloves",
+        "Helmet"
+      ],
+      "rarityRestrictions": "Rare",
+      "engineHandler": "CraftingEngine.applyAlloy",
+      "engineAction": "alloy:5054",
+      "uiHandler": "executeCraftOperation -> applyAlloy",
+      "testCoverage": [
+        "validation:normalized-alloy-transitions",
+        "ui:implemented-alloy-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
+      "targetGameVersion": "0.5.4",
+      "visible": true,
+      "supported": true
+    },
+    {
+      "craftId": "alloy-5055",
+      "category": "runeforging",
+      "displayName": "Prismatic Alloy",
+      "sourceItemId": 5055,
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
+      "evidenceSource": [
+        "data/normalized/crafting-items.json#item:5055",
+        "data/normalized/essences.json#essence:88",
+        "data/normalized/modifiers.json#essence-modifiers",
+        "https://poe2db.tw/us/Alloy",
+        "https://poe2db.tw/us/Prismatic_Alloy",
+        "https://www.pathofexile.com/forum/view-thread/3932540",
+        "data/crafting/registry-expansion.json",
+        "data/crafting/currency-index.json#source-item:5055"
+      ],
+      "supportedItemClasses": [
+        "Bow",
+        "Crossbow",
+        "Dagger",
+        "Flail",
+        "Focus",
+        "Gloves",
+        "One Hand Axe",
+        "One Hand Mace",
+        "One Hand Sword",
+        "Sceptre",
+        "Spear",
+        "Staff",
+        "Talisman",
+        "Two Hand Axe",
+        "Two Hand Mace",
+        "Two Hand Sword",
+        "Wand",
+        "Warstaff"
+      ],
+      "rarityRestrictions": "Rare",
+      "engineHandler": "CraftingEngine.applyAlloy",
+      "engineAction": "alloy:5055",
+      "uiHandler": "executeCraftOperation -> applyAlloy",
+      "testCoverage": [
+        "validation:normalized-alloy-transitions",
+        "ui:implemented-alloy-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
+      "targetGameVersion": "0.5.4",
+      "visible": true,
+      "supported": true
+    },
+    {
+      "craftId": "alloy-5056",
+      "category": "runeforging",
+      "displayName": "Mystic Alloy",
+      "sourceItemId": 5056,
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
+      "evidenceSource": [
+        "data/normalized/crafting-items.json#item:5056",
+        "data/normalized/essences.json#essence:89",
+        "data/normalized/modifiers.json#essence-modifiers",
+        "https://poe2db.tw/us/Alloy",
+        "https://poe2db.tw/us/Mystic_Alloy",
+        "https://www.pathofexile.com/forum/view-thread/3932540",
+        "data/crafting/registry-expansion.json",
+        "data/crafting/currency-index.json#source-item:5056"
+      ],
+      "supportedItemClasses": [
+        "Boots",
+        "Gloves",
+        "Helmet",
+        "Quiver",
+        "Sceptre",
+        "Staff",
+        "Wand"
+      ],
+      "rarityRestrictions": "Rare",
+      "engineHandler": "CraftingEngine.applyAlloy",
+      "engineAction": "alloy:5056",
+      "uiHandler": "executeCraftOperation -> applyAlloy",
+      "testCoverage": [
+        "validation:normalized-alloy-transitions",
+        "ui:implemented-alloy-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
+      "targetGameVersion": "0.5.4",
+      "visible": true,
+      "supported": true
+    },
+    {
+      "craftId": "alloy-5057",
+      "category": "runeforging",
+      "displayName": "Sovereign Alloy",
+      "sourceItemId": 5057,
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
+      "evidenceSource": [
+        "data/normalized/crafting-items.json#item:5057",
+        "data/normalized/essences.json#essence:90",
+        "data/normalized/modifiers.json#essence-modifiers",
+        "https://poe2db.tw/us/Alloy",
+        "https://poe2db.tw/us/Sovereign_Alloy",
+        "https://www.pathofexile.com/forum/view-thread/3932540",
+        "data/crafting/registry-expansion.json",
+        "data/crafting/currency-index.json#source-item:5057"
+      ],
+      "supportedItemClasses": [
+        "Amulet",
+        "Belt",
+        "Body Armour",
+        "Boots",
+        "Bow",
+        "Buckler",
+        "Crossbow",
+        "Dagger",
+        "Flail",
+        "Focus",
+        "Gloves",
+        "Helmet",
+        "One Hand Axe",
+        "One Hand Mace",
+        "One Hand Sword",
+        "Ring",
+        "Sceptre",
+        "Shield",
+        "Spear",
+        "Staff",
+        "Talisman",
+        "Two Hand Axe",
+        "Two Hand Mace",
+        "Two Hand Sword",
+        "Wand",
+        "Warstaff"
+      ],
+      "rarityRestrictions": "Rare",
+      "engineHandler": "CraftingEngine.applyAlloy",
+      "engineAction": "alloy:5057",
+      "uiHandler": "executeCraftOperation -> applyAlloy",
+      "testCoverage": [
+        "validation:normalized-alloy-transitions",
+        "ui:implemented-alloy-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
+      "targetGameVersion": "0.5.4",
+      "visible": true,
+      "supported": true
+    },
+    {
+      "craftId": "alloy-5058",
+      "category": "runeforging",
+      "displayName": "Celestial Alloy",
+      "sourceItemId": 5058,
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
+      "evidenceSource": [
+        "data/normalized/crafting-items.json#item:5058",
+        "data/normalized/essences.json#essence:91",
+        "data/normalized/modifiers.json#essence-modifiers",
+        "https://poe2db.tw/us/Alloy",
+        "https://poe2db.tw/us/Celestial_Alloy",
+        "https://www.pathofexile.com/forum/view-thread/3932540",
+        "data/crafting/registry-expansion.json",
+        "data/crafting/currency-index.json#source-item:5058"
+      ],
+      "supportedItemClasses": [
+        "Bow",
+        "Crossbow",
+        "Dagger",
+        "Flail",
+        "One Hand Axe",
+        "One Hand Mace",
+        "One Hand Sword",
+        "Spear",
+        "Staff",
+        "Talisman",
+        "Two Hand Axe",
+        "Two Hand Mace",
+        "Two Hand Sword",
+        "Wand",
+        "Warstaff"
+      ],
+      "rarityRestrictions": "Rare",
+      "engineHandler": "CraftingEngine.applyAlloy",
+      "engineAction": "alloy:5058",
+      "uiHandler": "executeCraftOperation -> applyAlloy",
+      "testCoverage": [
+        "validation:normalized-alloy-transitions",
+        "ui:implemented-alloy-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
+      "targetGameVersion": "0.5.4",
+      "visible": true,
+      "supported": true
+    },
+    {
+      "craftId": "alloy-5059",
+      "category": "runeforging",
+      "displayName": "Transcendent Alloy",
+      "sourceItemId": 5059,
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
+      "evidenceSource": [
+        "data/normalized/crafting-items.json#item:5059",
+        "data/normalized/essences.json#essence:92",
+        "data/normalized/modifiers.json#essence-modifiers",
+        "https://poe2db.tw/us/Alloy",
+        "https://poe2db.tw/us/Transcendent_Alloy",
+        "https://www.pathofexile.com/forum/view-thread/3932540",
+        "data/crafting/registry-expansion.json",
+        "data/crafting/currency-index.json#source-item:5059"
+      ],
+      "supportedItemClasses": [
+        "Bow",
+        "Crossbow",
+        "Dagger",
+        "Flail",
+        "Focus",
+        "One Hand Axe",
+        "One Hand Mace",
+        "One Hand Sword",
+        "Spear",
+        "Staff",
+        "Talisman",
+        "Two Hand Axe",
+        "Two Hand Mace",
+        "Two Hand Sword",
+        "Wand",
+        "Warstaff"
+      ],
+      "rarityRestrictions": "Rare",
+      "engineHandler": "CraftingEngine.applyAlloy",
+      "engineAction": "alloy:5059",
+      "uiHandler": "executeCraftOperation -> applyAlloy",
+      "testCoverage": [
+        "validation:normalized-alloy-transitions",
+        "ui:implemented-alloy-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
+      "targetGameVersion": "0.5.4",
+      "visible": true,
+      "supported": true
+    },
+    {
+      "craftId": "alloy-5060",
+      "category": "runeforging",
+      "displayName": "The Runebinder's Alloy",
+      "sourceItemId": 5060,
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
+      "evidenceSource": [
+        "data/normalized/crafting-items.json#item:5060",
+        "data/normalized/essences.json#essence:93",
+        "data/normalized/modifiers.json#essence-modifiers",
+        "https://poe2db.tw/us/Alloy",
+        "https://poe2db.tw/us/The_Runebinders_Alloy",
+        "https://www.pathofexile.com/forum/view-thread/3932540",
+        "data/crafting/registry-expansion.json",
+        "data/crafting/currency-index.json#source-item:5060"
+      ],
+      "supportedItemClasses": [
+        "Bow",
+        "Crossbow",
+        "Sceptre",
+        "Staff",
+        "Wand"
+      ],
+      "rarityRestrictions": "Rare",
+      "engineHandler": "CraftingEngine.applyAlloy",
+      "engineAction": "alloy:5060",
+      "uiHandler": "executeCraftOperation -> applyAlloy",
+      "testCoverage": [
+        "validation:normalized-alloy-transitions",
+        "ui:implemented-alloy-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
+      "targetGameVersion": "0.5.4",
+      "visible": true,
+      "supported": true
+    },
+    {
+      "craftId": "alloy-5061",
+      "category": "runeforging",
+      "displayName": "The Runefather's Alloy",
+      "sourceItemId": 5061,
+      "implementationStatus": "inferred",
+      "registryImplementationStatus": "implemented",
+      "confidence": "inferred",
+      "evidenceSource": [
+        "data/normalized/crafting-items.json#item:5061",
+        "data/normalized/essences.json#essence:94",
+        "data/normalized/modifiers.json#essence-modifiers",
+        "https://poe2db.tw/us/Alloy",
+        "https://poe2db.tw/us/The_Runefathers_Alloy",
+        "https://www.pathofexile.com/forum/view-thread/3932540",
+        "data/crafting/registry-expansion.json",
+        "data/crafting/currency-index.json#source-item:5061"
+      ],
+      "supportedItemClasses": [
+        "One Hand Mace",
+        "Spear",
+        "Talisman",
+        "Two Hand Mace",
+        "Warstaff"
+      ],
+      "rarityRestrictions": "Rare",
+      "engineHandler": "CraftingEngine.applyAlloy",
+      "engineAction": "alloy:5061",
+      "uiHandler": "executeCraftOperation -> applyAlloy",
+      "testCoverage": [
+        "validation:normalized-alloy-transitions",
+        "ui:implemented-alloy-registry-dispatch"
+      ],
+      "blocker": null,
+      "exactUnresolvedQuestion": null,
+      "targetGameVersion": "0.5.4",
+      "visible": true,
+      "supported": true
+    },
+    {
       "craftId": "source-item:2191",
       "category": "runeforging",
       "displayName": "Alloy Crossbow",
@@ -19355,318 +20017,6 @@
       "testCoverage": [],
       "blocker": "Elemental Conflux is retained for source-audit completeness but is an Elemental Conflux skill gem, not a crafting currency or workbench operation.",
       "exactUnresolvedQuestion": null,
-      "targetGameVersion": "0.5.4",
-      "visible": true,
-      "supported": false
-    },
-    {
-      "craftId": "source-item:5049",
-      "category": "runeforging",
-      "displayName": "Runic Alloy",
-      "sourceItemId": 5049,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
-      "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:5049",
-        "data/normalized/crafting-items.json#item:5049"
-      ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Runic Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Runic Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts?",
-      "targetGameVersion": "0.5.4",
-      "visible": true,
-      "supported": false
-    },
-    {
-      "craftId": "source-item:5050",
-      "category": "runeforging",
-      "displayName": "Adaptive Alloy",
-      "sourceItemId": 5050,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
-      "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:5050",
-        "data/normalized/crafting-items.json#item:5050"
-      ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Adaptive Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Adaptive Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts?",
-      "targetGameVersion": "0.5.4",
-      "visible": true,
-      "supported": false
-    },
-    {
-      "craftId": "source-item:5051",
-      "category": "runeforging",
-      "displayName": "Protective Alloy",
-      "sourceItemId": 5051,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
-      "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:5051",
-        "data/normalized/crafting-items.json#item:5051"
-      ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Protective Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Protective Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts?",
-      "targetGameVersion": "0.5.4",
-      "visible": true,
-      "supported": false
-    },
-    {
-      "craftId": "source-item:5052",
-      "category": "runeforging",
-      "displayName": "Expansive Alloy",
-      "sourceItemId": 5052,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
-      "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:5052",
-        "data/normalized/crafting-items.json#item:5052"
-      ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Expansive Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Expansive Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts?",
-      "targetGameVersion": "0.5.4",
-      "visible": true,
-      "supported": false
-    },
-    {
-      "craftId": "source-item:5053",
-      "category": "runeforging",
-      "displayName": "Swift Alloy",
-      "sourceItemId": 5053,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
-      "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:5053",
-        "data/normalized/crafting-items.json#item:5053"
-      ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Swift Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Swift Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts?",
-      "targetGameVersion": "0.5.4",
-      "visible": true,
-      "supported": false
-    },
-    {
-      "craftId": "source-item:5054",
-      "category": "runeforging",
-      "displayName": "Cyclonic Alloy",
-      "sourceItemId": 5054,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
-      "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:5054",
-        "data/normalized/crafting-items.json#item:5054"
-      ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Cyclonic Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Cyclonic Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts?",
-      "targetGameVersion": "0.5.4",
-      "visible": true,
-      "supported": false
-    },
-    {
-      "craftId": "source-item:5055",
-      "category": "runeforging",
-      "displayName": "Prismatic Alloy",
-      "sourceItemId": 5055,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
-      "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:5055",
-        "data/normalized/crafting-items.json#item:5055"
-      ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Prismatic Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Prismatic Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts?",
-      "targetGameVersion": "0.5.4",
-      "visible": true,
-      "supported": false
-    },
-    {
-      "craftId": "source-item:5056",
-      "category": "runeforging",
-      "displayName": "Mystic Alloy",
-      "sourceItemId": 5056,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
-      "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:5056",
-        "data/normalized/crafting-items.json#item:5056"
-      ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Mystic Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Mystic Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts?",
-      "targetGameVersion": "0.5.4",
-      "visible": true,
-      "supported": false
-    },
-    {
-      "craftId": "source-item:5057",
-      "category": "runeforging",
-      "displayName": "Sovereign Alloy",
-      "sourceItemId": 5057,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
-      "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:5057",
-        "data/normalized/crafting-items.json#item:5057"
-      ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Sovereign Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Sovereign Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts?",
-      "targetGameVersion": "0.5.4",
-      "visible": true,
-      "supported": false
-    },
-    {
-      "craftId": "source-item:5058",
-      "category": "runeforging",
-      "displayName": "Celestial Alloy",
-      "sourceItemId": 5058,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
-      "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:5058",
-        "data/normalized/crafting-items.json#item:5058"
-      ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Celestial Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Celestial Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts?",
-      "targetGameVersion": "0.5.4",
-      "visible": true,
-      "supported": false
-    },
-    {
-      "craftId": "source-item:5059",
-      "category": "runeforging",
-      "displayName": "Transcendent Alloy",
-      "sourceItemId": 5059,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
-      "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:5059",
-        "data/normalized/crafting-items.json#item:5059"
-      ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because Transcendent Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: Transcendent Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts?",
-      "targetGameVersion": "0.5.4",
-      "visible": true,
-      "supported": false
-    },
-    {
-      "craftId": "source-item:5060",
-      "category": "runeforging",
-      "displayName": "The Runebinder's Alloy",
-      "sourceItemId": 5060,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
-      "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:5060",
-        "data/normalized/crafting-items.json#item:5060"
-      ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because The Runebinder's Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: The Runebinder's Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts?",
-      "targetGameVersion": "0.5.4",
-      "visible": true,
-      "supported": false
-    },
-    {
-      "craftId": "source-item:5061",
-      "category": "runeforging",
-      "displayName": "The Runefather's Alloy",
-      "sourceItemId": 5061,
-      "implementationStatus": "blocked",
-      "registryImplementationStatus": "blocked_missing_data",
-      "confidence": "blocked",
-      "evidenceSource": [
-        "data/crafting/currency-index.json#source-item:5061",
-        "data/normalized/crafting-items.json#item:5061"
-      ],
-      "supportedItemClasses": [],
-      "rarityRestrictions": "Unresolved; see blocker",
-      "engineHandler": null,
-      "engineAction": null,
-      "uiHandler": null,
-      "testCoverage": [],
-      "blocker": "Mechanic blocked because The Runefather's Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts.",
-      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: The Runefather's Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts?",
       "targetGameVersion": "0.5.4",
       "visible": true,
       "supported": false

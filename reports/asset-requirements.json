@@ -28,7 +28,7 @@
     "craftDefinitions": {
       "known": 531,
       "current": 522,
-      "supported": 415,
+      "supported": 455,
       "visible": 522
     },
     "craftIcons": {
@@ -43,9 +43,9 @@
         "missing": 501
       },
       "supported": {
-        "required": 405,
+        "required": 445,
         "existing": 10,
-        "missing": 395
+        "missing": 435
       },
       "visible": {
         "required": 512,
@@ -51252,6 +51252,539 @@
       ]
     },
     {
+      "iconId": "alloy-5049",
+      "assetPath": "assets/icons/alloy-5049.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "runeforging"
+      ],
+      "tabs": [
+        "runeforging"
+      ],
+      "fallbacks": [
+        "RA"
+      ],
+      "accentColors": [
+        "#8bb7a0"
+      ],
+      "definitions": [
+        {
+          "craftId": "alloy-5049",
+          "id": "alloy-5049",
+          "sourceItemId": 5049,
+          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy1",
+          "displayName": "Runic Alloy",
+          "category": "runeforging",
+          "tab": "runeforging",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_alloy_item_text_with_inferred_atomic_conflict_boundary",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "alloy-5050",
+      "assetPath": "assets/icons/alloy-5050.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "runeforging"
+      ],
+      "tabs": [
+        "runeforging"
+      ],
+      "fallbacks": [
+        "AA"
+      ],
+      "accentColors": [
+        "#8bb7a0"
+      ],
+      "definitions": [
+        {
+          "craftId": "alloy-5050",
+          "id": "alloy-5050",
+          "sourceItemId": 5050,
+          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy2",
+          "displayName": "Adaptive Alloy",
+          "category": "runeforging",
+          "tab": "runeforging",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_alloy_item_text_with_inferred_atomic_conflict_boundary",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "alloy-5051",
+      "assetPath": "assets/icons/alloy-5051.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "runeforging"
+      ],
+      "tabs": [
+        "runeforging"
+      ],
+      "fallbacks": [
+        "PA"
+      ],
+      "accentColors": [
+        "#8bb7a0"
+      ],
+      "definitions": [
+        {
+          "craftId": "alloy-5051",
+          "id": "alloy-5051",
+          "sourceItemId": 5051,
+          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy3",
+          "displayName": "Protective Alloy",
+          "category": "runeforging",
+          "tab": "runeforging",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_alloy_item_text_with_inferred_atomic_conflict_boundary",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "alloy-5052",
+      "assetPath": "assets/icons/alloy-5052.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "runeforging"
+      ],
+      "tabs": [
+        "runeforging"
+      ],
+      "fallbacks": [
+        "EA"
+      ],
+      "accentColors": [
+        "#8bb7a0"
+      ],
+      "definitions": [
+        {
+          "craftId": "alloy-5052",
+          "id": "alloy-5052",
+          "sourceItemId": 5052,
+          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy4",
+          "displayName": "Expansive Alloy",
+          "category": "runeforging",
+          "tab": "runeforging",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_alloy_item_text_with_inferred_atomic_conflict_boundary",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "alloy-5053",
+      "assetPath": "assets/icons/alloy-5053.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "runeforging"
+      ],
+      "tabs": [
+        "runeforging"
+      ],
+      "fallbacks": [
+        "SA"
+      ],
+      "accentColors": [
+        "#8bb7a0"
+      ],
+      "definitions": [
+        {
+          "craftId": "alloy-5053",
+          "id": "alloy-5053",
+          "sourceItemId": 5053,
+          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy5",
+          "displayName": "Swift Alloy",
+          "category": "runeforging",
+          "tab": "runeforging",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_alloy_item_text_with_inferred_atomic_conflict_boundary",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "alloy-5054",
+      "assetPath": "assets/icons/alloy-5054.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "runeforging"
+      ],
+      "tabs": [
+        "runeforging"
+      ],
+      "fallbacks": [
+        "CA"
+      ],
+      "accentColors": [
+        "#8bb7a0"
+      ],
+      "definitions": [
+        {
+          "craftId": "alloy-5054",
+          "id": "alloy-5054",
+          "sourceItemId": 5054,
+          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy6",
+          "displayName": "Cyclonic Alloy",
+          "category": "runeforging",
+          "tab": "runeforging",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_alloy_item_text_with_inferred_atomic_conflict_boundary",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "alloy-5055",
+      "assetPath": "assets/icons/alloy-5055.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "runeforging"
+      ],
+      "tabs": [
+        "runeforging"
+      ],
+      "fallbacks": [
+        "PA"
+      ],
+      "accentColors": [
+        "#8bb7a0"
+      ],
+      "definitions": [
+        {
+          "craftId": "alloy-5055",
+          "id": "alloy-5055",
+          "sourceItemId": 5055,
+          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy7",
+          "displayName": "Prismatic Alloy",
+          "category": "runeforging",
+          "tab": "runeforging",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_alloy_item_text_with_inferred_atomic_conflict_boundary",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "alloy-5056",
+      "assetPath": "assets/icons/alloy-5056.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "runeforging"
+      ],
+      "tabs": [
+        "runeforging"
+      ],
+      "fallbacks": [
+        "MA"
+      ],
+      "accentColors": [
+        "#8bb7a0"
+      ],
+      "definitions": [
+        {
+          "craftId": "alloy-5056",
+          "id": "alloy-5056",
+          "sourceItemId": 5056,
+          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy8",
+          "displayName": "Mystic Alloy",
+          "category": "runeforging",
+          "tab": "runeforging",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_alloy_item_text_with_inferred_atomic_conflict_boundary",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "alloy-5057",
+      "assetPath": "assets/icons/alloy-5057.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "runeforging"
+      ],
+      "tabs": [
+        "runeforging"
+      ],
+      "fallbacks": [
+        "SA"
+      ],
+      "accentColors": [
+        "#8bb7a0"
+      ],
+      "definitions": [
+        {
+          "craftId": "alloy-5057",
+          "id": "alloy-5057",
+          "sourceItemId": 5057,
+          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy9",
+          "displayName": "Sovereign Alloy",
+          "category": "runeforging",
+          "tab": "runeforging",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_alloy_item_text_with_inferred_atomic_conflict_boundary",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "alloy-5058",
+      "assetPath": "assets/icons/alloy-5058.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "runeforging"
+      ],
+      "tabs": [
+        "runeforging"
+      ],
+      "fallbacks": [
+        "CA"
+      ],
+      "accentColors": [
+        "#8bb7a0"
+      ],
+      "definitions": [
+        {
+          "craftId": "alloy-5058",
+          "id": "alloy-5058",
+          "sourceItemId": 5058,
+          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy10",
+          "displayName": "Celestial Alloy",
+          "category": "runeforging",
+          "tab": "runeforging",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_alloy_item_text_with_inferred_atomic_conflict_boundary",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "alloy-5059",
+      "assetPath": "assets/icons/alloy-5059.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "runeforging"
+      ],
+      "tabs": [
+        "runeforging"
+      ],
+      "fallbacks": [
+        "TA"
+      ],
+      "accentColors": [
+        "#8bb7a0"
+      ],
+      "definitions": [
+        {
+          "craftId": "alloy-5059",
+          "id": "alloy-5059",
+          "sourceItemId": 5059,
+          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy11",
+          "displayName": "Transcendent Alloy",
+          "category": "runeforging",
+          "tab": "runeforging",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_alloy_item_text_with_inferred_atomic_conflict_boundary",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "alloy-5060",
+      "assetPath": "assets/icons/alloy-5060.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "runeforging"
+      ],
+      "tabs": [
+        "runeforging"
+      ],
+      "fallbacks": [
+        "TRsA"
+      ],
+      "accentColors": [
+        "#8bb7a0"
+      ],
+      "definitions": [
+        {
+          "craftId": "alloy-5060",
+          "id": "alloy-5060",
+          "sourceItemId": 5060,
+          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy12",
+          "displayName": "The Runebinder's Alloy",
+          "category": "runeforging",
+          "tab": "runeforging",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_alloy_item_text_with_inferred_atomic_conflict_boundary",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "alloy-5061",
+      "assetPath": "assets/icons/alloy-5061.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "runeforging"
+      ],
+      "tabs": [
+        "runeforging"
+      ],
+      "fallbacks": [
+        "TRsA"
+      ],
+      "accentColors": [
+        "#8bb7a0"
+      ],
+      "definitions": [
+        {
+          "craftId": "alloy-5061",
+          "id": "alloy-5061",
+          "sourceItemId": 5061,
+          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy13",
+          "displayName": "The Runefather's Alloy",
+          "category": "runeforging",
+          "tab": "runeforging",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_alloy_item_text_with_inferred_atomic_conflict_boundary",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
       "iconId": "ancient-collarbone",
       "assetPath": "assets/icons/ancient-collarbone.png",
       "assetStatus": "missing",
@@ -51605,6 +52138,1072 @@
           "tab": "breach",
           "implementationStatus": "implemented",
           "verificationStatus": "inferred_atomic_transition_from_normalized_method",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-277",
+      "assetPath": "assets/icons/catalyst-277.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "FC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-277",
+          "id": "catalyst-277",
+          "sourceItemId": 277,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityLife",
+          "displayName": "Flesh Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-278",
+      "assetPath": "assets/icons/catalyst-278.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "NC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-278",
+          "id": "catalyst-278",
+          "sourceItemId": 278,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityMana",
+          "displayName": "Neural Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-279",
+      "assetPath": "assets/icons/catalyst-279.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "CC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-279",
+          "id": "catalyst-279",
+          "sourceItemId": 279,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityDefences",
+          "displayName": "Carapace Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-280",
+      "assetPath": "assets/icons/catalyst-280.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "UNsC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-280",
+          "id": "catalyst-280",
+          "sourceItemId": 280,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityPhysical",
+          "displayName": "Uul-Netol's Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-281",
+      "assetPath": "assets/icons/catalyst-281.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "XsC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-281",
+          "id": "catalyst-281",
+          "sourceItemId": 281,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityFire",
+          "displayName": "Xoph's Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-282",
+      "assetPath": "assets/icons/catalyst-282.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "TsC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-282",
+          "id": "catalyst-282",
+          "sourceItemId": 282,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityCold",
+          "displayName": "Tul's Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-283",
+      "assetPath": "assets/icons/catalyst-283.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "EsC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-283",
+          "id": "catalyst-283",
+          "sourceItemId": 283,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityLightning",
+          "displayName": "Esh's Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-284",
+      "assetPath": "assets/icons/catalyst-284.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "CsC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-284",
+          "id": "catalyst-284",
+          "sourceItemId": 284,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityChaos",
+          "displayName": "Chayula's Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-285",
+      "assetPath": "assets/icons/catalyst-285.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "RC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-285",
+          "id": "catalyst-285",
+          "sourceItemId": 285,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityAttack",
+          "displayName": "Reaver Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-286",
+      "assetPath": "assets/icons/catalyst-286.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "SC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-286",
+          "id": "catalyst-286",
+          "sourceItemId": 286,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityCaster",
+          "displayName": "Sibilant Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-287",
+      "assetPath": "assets/icons/catalyst-287.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "SC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-287",
+          "id": "catalyst-287",
+          "sourceItemId": 287,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualitySpeed",
+          "displayName": "Skittering Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-288",
+      "assetPath": "assets/icons/catalyst-288.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "AC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-288",
+          "id": "catalyst-288",
+          "sourceItemId": 288,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityAttribute",
+          "displayName": "Adaptive Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-289",
+      "assetPath": "assets/icons/catalyst-289.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "NC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-289",
+          "id": "catalyst-289",
+          "sourceItemId": 289,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityMinion",
+          "displayName": "Necrotic Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-290",
+      "assetPath": "assets/icons/catalyst-290.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "RFC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-290",
+          "id": "catalyst-290",
+          "sourceItemId": 290,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityLife",
+          "displayName": "Refined Flesh Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-291",
+      "assetPath": "assets/icons/catalyst-291.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "RNC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-291",
+          "id": "catalyst-291",
+          "sourceItemId": 291,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityMana",
+          "displayName": "Refined Neural Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-292",
+      "assetPath": "assets/icons/catalyst-292.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "RCC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-292",
+          "id": "catalyst-292",
+          "sourceItemId": 292,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityDefences",
+          "displayName": "Refined Carapace Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-293",
+      "assetPath": "assets/icons/catalyst-293.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "RUNs"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-293",
+          "id": "catalyst-293",
+          "sourceItemId": 293,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityPhysical",
+          "displayName": "Refined Uul-Netol's Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-294",
+      "assetPath": "assets/icons/catalyst-294.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "RXsC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-294",
+          "id": "catalyst-294",
+          "sourceItemId": 294,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityFire",
+          "displayName": "Refined Xoph's Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-295",
+      "assetPath": "assets/icons/catalyst-295.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "RTsC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-295",
+          "id": "catalyst-295",
+          "sourceItemId": 295,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityCold",
+          "displayName": "Refined Tul's Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-296",
+      "assetPath": "assets/icons/catalyst-296.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "REsC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-296",
+          "id": "catalyst-296",
+          "sourceItemId": 296,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityLightning",
+          "displayName": "Refined Esh's Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-297",
+      "assetPath": "assets/icons/catalyst-297.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "RCsC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-297",
+          "id": "catalyst-297",
+          "sourceItemId": 297,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityChaos",
+          "displayName": "Refined Chayula's Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-298",
+      "assetPath": "assets/icons/catalyst-298.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "RRC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-298",
+          "id": "catalyst-298",
+          "sourceItemId": 298,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityAttack",
+          "displayName": "Refined Reaver Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-299",
+      "assetPath": "assets/icons/catalyst-299.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "RSC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-299",
+          "id": "catalyst-299",
+          "sourceItemId": 299,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityCaster",
+          "displayName": "Refined Sibilant Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-300",
+      "assetPath": "assets/icons/catalyst-300.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "RSC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-300",
+          "id": "catalyst-300",
+          "sourceItemId": 300,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualitySpeed",
+          "displayName": "Refined Skittering Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-301",
+      "assetPath": "assets/icons/catalyst-301.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "RAC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-301",
+          "id": "catalyst-301",
+          "sourceItemId": 301,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityAttribute",
+          "displayName": "Refined Adaptive Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "catalyst-302",
+      "assetPath": "assets/icons/catalyst-302.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "breach"
+      ],
+      "tabs": [
+        "breach"
+      ],
+      "fallbacks": [
+        "RNC"
+      ],
+      "accentColors": [
+        "#c0506f"
+      ],
+      "definitions": [
+        {
+          "craftId": "catalyst-302",
+          "id": "catalyst-302",
+          "sourceItemId": 302,
+          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityMinion",
+          "displayName": "Refined Necrotic Catalyst",
+          "category": "breach",
+          "tab": "breach",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_item_text_with_inferred_increment_curve",
           "sourceIdentityStatus": "normalized_exact",
           "supported": true,
           "visible": true,
@@ -55527,6 +57126,47 @@
           "tab": "ritual",
           "implementationStatus": "implemented",
           "verificationStatus": "runtime_behavior_regression_tested",
+          "sourceIdentityStatus": "normalized_exact",
+          "supported": true,
+          "visible": true,
+          "current": true,
+          "targetGameVersion": "0.5.4"
+        }
+      ]
+    },
+    {
+      "iconId": "omen-catalysing-exaltation",
+      "assetPath": "assets/icons/omen-catalysing-exaltation.png",
+      "assetStatus": "missing",
+      "definitionCounts": {
+        "known": 1,
+        "current": 1,
+        "supported": 1,
+        "visible": 1
+      },
+      "categories": [
+        "ritual"
+      ],
+      "tabs": [
+        "ritual"
+      ],
+      "fallbacks": [
+        "CatE"
+      ],
+      "accentColors": [
+        "#d4af5a"
+      ],
+      "definitions": [
+        {
+          "craftId": "omen-catalysing-exaltation",
+          "id": "omen-catalysing-exaltation",
+          "sourceItemId": 4448,
+          "metadataKey": "Metadata/Items/Currency/OmenOnExaltConsumeQuality",
+          "displayName": "Omen of Catalysing Exaltation",
+          "category": "ritual",
+          "tab": "ritual",
+          "implementationStatus": "implemented",
+          "verificationStatus": "verified_weight_endpoints_with_inferred_interpolation",
           "sourceIdentityStatus": "normalized_exact",
           "supported": true,
           "visible": true,
@@ -69387,129 +71027,6 @@
       ]
     },
     {
-      "iconId": "source-item-277",
-      "assetPath": "assets/icons/source-item-277.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "FC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:277",
-          "id": "source-item:277",
-          "sourceItemId": 277,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityLife",
-          "displayName": "Flesh Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-278",
-      "assetPath": "assets/icons/source-item-278.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "NC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:278",
-          "id": "source-item:278",
-          "sourceItemId": 278,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityMana",
-          "displayName": "Neural Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-279",
-      "assetPath": "assets/icons/source-item-279.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "CC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:279",
-          "id": "source-item:279",
-          "sourceItemId": 279,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityDefences",
-          "displayName": "Carapace Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
       "iconId": "source-item-28",
       "assetPath": "assets/icons/source-item-28.png",
       "assetStatus": "missing",
@@ -69540,949 +71057,6 @@
           "displayName": "Glassblower's Bauble",
           "category": "quality",
           "tab": "quality",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-280",
-      "assetPath": "assets/icons/source-item-280.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "UNsC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:280",
-          "id": "source-item:280",
-          "sourceItemId": 280,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityPhysical",
-          "displayName": "Uul-Netol's Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-281",
-      "assetPath": "assets/icons/source-item-281.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "XsC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:281",
-          "id": "source-item:281",
-          "sourceItemId": 281,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityFire",
-          "displayName": "Xoph's Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-282",
-      "assetPath": "assets/icons/source-item-282.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "TsC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:282",
-          "id": "source-item:282",
-          "sourceItemId": 282,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityCold",
-          "displayName": "Tul's Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-283",
-      "assetPath": "assets/icons/source-item-283.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "EsC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:283",
-          "id": "source-item:283",
-          "sourceItemId": 283,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityLightning",
-          "displayName": "Esh's Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-284",
-      "assetPath": "assets/icons/source-item-284.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "CsC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:284",
-          "id": "source-item:284",
-          "sourceItemId": 284,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityChaos",
-          "displayName": "Chayula's Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-285",
-      "assetPath": "assets/icons/source-item-285.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "RC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:285",
-          "id": "source-item:285",
-          "sourceItemId": 285,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityAttack",
-          "displayName": "Reaver Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-286",
-      "assetPath": "assets/icons/source-item-286.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "SC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:286",
-          "id": "source-item:286",
-          "sourceItemId": 286,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityCaster",
-          "displayName": "Sibilant Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-287",
-      "assetPath": "assets/icons/source-item-287.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "SC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:287",
-          "id": "source-item:287",
-          "sourceItemId": 287,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualitySpeed",
-          "displayName": "Skittering Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-288",
-      "assetPath": "assets/icons/source-item-288.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "AC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:288",
-          "id": "source-item:288",
-          "sourceItemId": 288,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityAttribute",
-          "displayName": "Adaptive Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-289",
-      "assetPath": "assets/icons/source-item-289.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "NC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:289",
-          "id": "source-item:289",
-          "sourceItemId": 289,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelleryQualityMinion",
-          "displayName": "Necrotic Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-290",
-      "assetPath": "assets/icons/source-item-290.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "RFC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:290",
-          "id": "source-item:290",
-          "sourceItemId": 290,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityLife",
-          "displayName": "Refined Flesh Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-291",
-      "assetPath": "assets/icons/source-item-291.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "RNC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:291",
-          "id": "source-item:291",
-          "sourceItemId": 291,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityMana",
-          "displayName": "Refined Neural Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-292",
-      "assetPath": "assets/icons/source-item-292.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "RCC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:292",
-          "id": "source-item:292",
-          "sourceItemId": 292,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityDefences",
-          "displayName": "Refined Carapace Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-293",
-      "assetPath": "assets/icons/source-item-293.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "RUNs"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:293",
-          "id": "source-item:293",
-          "sourceItemId": 293,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityPhysical",
-          "displayName": "Refined Uul-Netol's Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-294",
-      "assetPath": "assets/icons/source-item-294.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "RXsC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:294",
-          "id": "source-item:294",
-          "sourceItemId": 294,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityFire",
-          "displayName": "Refined Xoph's Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-295",
-      "assetPath": "assets/icons/source-item-295.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "RTsC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:295",
-          "id": "source-item:295",
-          "sourceItemId": 295,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityCold",
-          "displayName": "Refined Tul's Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-296",
-      "assetPath": "assets/icons/source-item-296.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "REsC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:296",
-          "id": "source-item:296",
-          "sourceItemId": 296,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityLightning",
-          "displayName": "Refined Esh's Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-297",
-      "assetPath": "assets/icons/source-item-297.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "RCsC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:297",
-          "id": "source-item:297",
-          "sourceItemId": 297,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityChaos",
-          "displayName": "Refined Chayula's Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-298",
-      "assetPath": "assets/icons/source-item-298.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "RRC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:298",
-          "id": "source-item:298",
-          "sourceItemId": 298,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityAttack",
-          "displayName": "Refined Reaver Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-299",
-      "assetPath": "assets/icons/source-item-299.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "RSC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:299",
-          "id": "source-item:299",
-          "sourceItemId": 299,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityCaster",
-          "displayName": "Refined Sibilant Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-300",
-      "assetPath": "assets/icons/source-item-300.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "RSC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:300",
-          "id": "source-item:300",
-          "sourceItemId": 300,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualitySpeed",
-          "displayName": "Refined Skittering Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-301",
-      "assetPath": "assets/icons/source-item-301.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "RAC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:301",
-          "id": "source-item:301",
-          "sourceItemId": 301,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityAttribute",
-          "displayName": "Refined Adaptive Catalyst",
-          "category": "breach",
-          "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-302",
-      "assetPath": "assets/icons/source-item-302.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "breach"
-      ],
-      "tabs": [
-        "breach"
-      ],
-      "fallbacks": [
-        "RNC"
-      ],
-      "accentColors": [
-        "#c0506f"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:302",
-          "id": "source-item:302",
-          "sourceItemId": 302,
-          "metadataKey": "Metadata/Items/Currency/CurrencyJewelQualityMinion",
-          "displayName": "Refined Necrotic Catalyst",
-          "category": "breach",
-          "tab": "breach",
           "implementationStatus": "blocked_missing_data",
           "verificationStatus": "not_verified",
           "sourceIdentityStatus": "normalized_exact",
@@ -70945,47 +71519,6 @@
       ]
     },
     {
-      "iconId": "source-item-4448",
-      "assetPath": "assets/icons/source-item-4448.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "ritual"
-      ],
-      "tabs": [
-        "ritual"
-      ],
-      "fallbacks": [
-        "OoCE"
-      ],
-      "accentColors": [
-        "#d4af5a"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:4448",
-          "id": "source-item:4448",
-          "sourceItemId": 4448,
-          "metadataKey": "Metadata/Items/Currency/OmenOnExaltConsumeQuality",
-          "displayName": "Omen of Catalysing Exaltation",
-          "category": "ritual",
-          "tab": "ritual",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
       "iconId": "source-item-4453",
       "assetPath": "assets/icons/source-item-4453.png",
       "assetStatus": "missing",
@@ -71139,539 +71672,6 @@
           "displayName": "Altered Collarbone",
           "category": "breach",
           "tab": "breach",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-5049",
-      "assetPath": "assets/icons/source-item-5049.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "runeforging"
-      ],
-      "tabs": [
-        "runeforging"
-      ],
-      "fallbacks": [
-        "RA"
-      ],
-      "accentColors": [
-        "#8bb7a0"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:5049",
-          "id": "source-item:5049",
-          "sourceItemId": 5049,
-          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy1",
-          "displayName": "Runic Alloy",
-          "category": "runeforging",
-          "tab": "runeforging",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-5050",
-      "assetPath": "assets/icons/source-item-5050.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "runeforging"
-      ],
-      "tabs": [
-        "runeforging"
-      ],
-      "fallbacks": [
-        "AA"
-      ],
-      "accentColors": [
-        "#8bb7a0"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:5050",
-          "id": "source-item:5050",
-          "sourceItemId": 5050,
-          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy2",
-          "displayName": "Adaptive Alloy",
-          "category": "runeforging",
-          "tab": "runeforging",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-5051",
-      "assetPath": "assets/icons/source-item-5051.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "runeforging"
-      ],
-      "tabs": [
-        "runeforging"
-      ],
-      "fallbacks": [
-        "PA"
-      ],
-      "accentColors": [
-        "#8bb7a0"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:5051",
-          "id": "source-item:5051",
-          "sourceItemId": 5051,
-          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy3",
-          "displayName": "Protective Alloy",
-          "category": "runeforging",
-          "tab": "runeforging",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-5052",
-      "assetPath": "assets/icons/source-item-5052.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "runeforging"
-      ],
-      "tabs": [
-        "runeforging"
-      ],
-      "fallbacks": [
-        "EA"
-      ],
-      "accentColors": [
-        "#8bb7a0"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:5052",
-          "id": "source-item:5052",
-          "sourceItemId": 5052,
-          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy4",
-          "displayName": "Expansive Alloy",
-          "category": "runeforging",
-          "tab": "runeforging",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-5053",
-      "assetPath": "assets/icons/source-item-5053.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "runeforging"
-      ],
-      "tabs": [
-        "runeforging"
-      ],
-      "fallbacks": [
-        "SA"
-      ],
-      "accentColors": [
-        "#8bb7a0"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:5053",
-          "id": "source-item:5053",
-          "sourceItemId": 5053,
-          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy5",
-          "displayName": "Swift Alloy",
-          "category": "runeforging",
-          "tab": "runeforging",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-5054",
-      "assetPath": "assets/icons/source-item-5054.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "runeforging"
-      ],
-      "tabs": [
-        "runeforging"
-      ],
-      "fallbacks": [
-        "CA"
-      ],
-      "accentColors": [
-        "#8bb7a0"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:5054",
-          "id": "source-item:5054",
-          "sourceItemId": 5054,
-          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy6",
-          "displayName": "Cyclonic Alloy",
-          "category": "runeforging",
-          "tab": "runeforging",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-5055",
-      "assetPath": "assets/icons/source-item-5055.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "runeforging"
-      ],
-      "tabs": [
-        "runeforging"
-      ],
-      "fallbacks": [
-        "PA"
-      ],
-      "accentColors": [
-        "#8bb7a0"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:5055",
-          "id": "source-item:5055",
-          "sourceItemId": 5055,
-          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy7",
-          "displayName": "Prismatic Alloy",
-          "category": "runeforging",
-          "tab": "runeforging",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-5056",
-      "assetPath": "assets/icons/source-item-5056.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "runeforging"
-      ],
-      "tabs": [
-        "runeforging"
-      ],
-      "fallbacks": [
-        "MA"
-      ],
-      "accentColors": [
-        "#8bb7a0"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:5056",
-          "id": "source-item:5056",
-          "sourceItemId": 5056,
-          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy8",
-          "displayName": "Mystic Alloy",
-          "category": "runeforging",
-          "tab": "runeforging",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-5057",
-      "assetPath": "assets/icons/source-item-5057.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "runeforging"
-      ],
-      "tabs": [
-        "runeforging"
-      ],
-      "fallbacks": [
-        "SA"
-      ],
-      "accentColors": [
-        "#8bb7a0"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:5057",
-          "id": "source-item:5057",
-          "sourceItemId": 5057,
-          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy9",
-          "displayName": "Sovereign Alloy",
-          "category": "runeforging",
-          "tab": "runeforging",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-5058",
-      "assetPath": "assets/icons/source-item-5058.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "runeforging"
-      ],
-      "tabs": [
-        "runeforging"
-      ],
-      "fallbacks": [
-        "CA"
-      ],
-      "accentColors": [
-        "#8bb7a0"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:5058",
-          "id": "source-item:5058",
-          "sourceItemId": 5058,
-          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy10",
-          "displayName": "Celestial Alloy",
-          "category": "runeforging",
-          "tab": "runeforging",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-5059",
-      "assetPath": "assets/icons/source-item-5059.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "runeforging"
-      ],
-      "tabs": [
-        "runeforging"
-      ],
-      "fallbacks": [
-        "TA"
-      ],
-      "accentColors": [
-        "#8bb7a0"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:5059",
-          "id": "source-item:5059",
-          "sourceItemId": 5059,
-          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy11",
-          "displayName": "Transcendent Alloy",
-          "category": "runeforging",
-          "tab": "runeforging",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-5060",
-      "assetPath": "assets/icons/source-item-5060.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "runeforging"
-      ],
-      "tabs": [
-        "runeforging"
-      ],
-      "fallbacks": [
-        "TRsA"
-      ],
-      "accentColors": [
-        "#8bb7a0"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:5060",
-          "id": "source-item:5060",
-          "sourceItemId": 5060,
-          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy12",
-          "displayName": "The Runebinder's Alloy",
-          "category": "runeforging",
-          "tab": "runeforging",
-          "implementationStatus": "blocked_missing_data",
-          "verificationStatus": "not_verified",
-          "sourceIdentityStatus": "normalized_exact",
-          "supported": false,
-          "visible": true,
-          "current": true,
-          "targetGameVersion": "0.5.4"
-        }
-      ]
-    },
-    {
-      "iconId": "source-item-5061",
-      "assetPath": "assets/icons/source-item-5061.png",
-      "assetStatus": "missing",
-      "definitionCounts": {
-        "known": 1,
-        "current": 1,
-        "supported": 0,
-        "visible": 1
-      },
-      "categories": [
-        "runeforging"
-      ],
-      "tabs": [
-        "runeforging"
-      ],
-      "fallbacks": [
-        "TRsA"
-      ],
-      "accentColors": [
-        "#8bb7a0"
-      ],
-      "definitions": [
-        {
-          "craftId": "source-item:5061",
-          "id": "source-item:5061",
-          "sourceItemId": 5061,
-          "metadataKey": "Metadata/Items/Currency/CurrencyVerisiumAlloy13",
-          "displayName": "The Runefather's Alloy",
-          "category": "runeforging",
-          "tab": "runeforging",
           "implementationStatus": "blocked_missing_data",
           "verificationStatus": "not_verified",
           "sourceIdentityStatus": "normalized_exact",

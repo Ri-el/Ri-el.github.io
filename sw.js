@@ -9,7 +9,7 @@
 //  - On activate we delete every older cache automatically.
 //  - skipWaiting + clients.claim means a new worker takes over instantly.
 
-const CACHE_NAME = 'poe2-craft-registry-v10';
+const CACHE_NAME = 'poe2-craft-registry-v12';
 
 const APP_SHELL = [
   './',

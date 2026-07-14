@@ -147,15 +147,15 @@ check('crafting inventory classifies every retained source item exactly once',
 const visibleCraftDefinitions = craftRegistry.filter(definition => definition.visible === true);
 const craftIds = visibleCraftDefinitions.map(definition => definition.craftId);
 check('authoritative registry audits 531 definitions and exposes all non-deprecated known items',
-  currencyIndex.counts.runtimeDefinitions === 422 &&
-  Object.keys(currencyIndex.runtimeRegistry).length === 422 &&
+  currencyIndex.counts.runtimeDefinitions === 462 &&
+  Object.keys(currencyIndex.runtimeRegistry).length === 462 &&
   craftRegistry.length === 531 && visibleCraftDefinitions.length === 522 &&
   craftIds.length === new Set(craftIds).size &&
   craftIds.every(id => currencyIndex.runtimeRegistry[id] ||
     craftRegistry.find(definition => definition.craftId === id)?.sourceItemId != null));
-check('startup browser registry contains all 415 available definitions',
+check('startup browser registry contains all 455 available definitions',
   currencyBrowserSource.startsWith(currencyBrowserPrefix) &&
-  currencyBrowserIndex.craftRegistry.length === 415 &&
+  currencyBrowserIndex.craftRegistry.length === 455 &&
   currencyBrowserIndex.craftRegistry.every(definition => definition.supported === true));
 check('lazy browser registry contains every retained definition',
   knownBrowserSource.startsWith(knownBrowserPrefix) &&
@@ -184,6 +184,27 @@ check('implemented Essence definitions are available with exact source identitie
     ['magic_to_rare_add', 'rare_remove_add'].includes(definition.operationOptions?.transition)) &&
   implementedEssences.filter(definition => definition.confidence === 'verified').length === 57 &&
   implementedEssences.filter(definition => definition.confidence === 'inferred').length === 23);
+const implementedCatalysts = craftRegistry.filter(definition => definition.handler === 'applyCatalyst');
+check('all 26 Catalysts and Refined Catalysts are available with exact tag and target metadata',
+  implementedCatalysts.length === 26 &&
+  implementedCatalysts.every(definition => definition.supported && definition.visible &&
+    definition.tab === 'breach' &&
+    definition.disabledReasonHandler === 'catalystDisabledReason' &&
+    Number(definition.operationOptions?.catalystItemId) === Number(definition.sourceItemId) &&
+    /_catalyst$/.test(definition.operationOptions?.qualityType) &&
+    typeof definition.operationOptions?.modifierTag === 'string'));
+const implementedAlloys = craftRegistry.filter(definition => definition.handler === 'applyAlloy');
+check('all 13 Alloys are available with atomic class-specific registry dispatch',
+  implementedAlloys.length === 13 &&
+  implementedAlloys.every(definition => definition.supported && definition.visible &&
+    definition.tab === 'runeforging' && definition.disabledReasonHandler === 'alloyDisabledReason' &&
+    definition.operationOptions?.transition === 'rare_remove_add' &&
+    Number(definition.operationOptions?.alloyItemId) === Number(definition.sourceItemId)));
+const catalysingOmen = craftRegistry.find(definition => definition.craftId === 'omen-catalysing-exaltation');
+check('Omen of Catalysing Exaltation is available and triggers the Exalted currency family',
+  catalysingOmen?.supported && catalysingOmen.visible && catalysingOmen.tab === 'ritual' &&
+  catalysingOmen.omenInteraction?.omenId === 'catalysing_exaltation' &&
+  catalysingOmen.omenInteraction?.triggerCraftId === 'exalted');
 const abyssDefinitions = craftRegistry.filter(definition => definition.category === 'abyss');
 const ancientBones = abyssDefinitions.filter(definition => /^ancient-(?:jawbone|rib|collarbone)$/.test(definition.craftId));
 check('all equipment Abyssal Bones are available and Ancient variants enforce level 40',
@@ -399,8 +420,10 @@ check('central operation pipeline prevalidates before snapshot and mutation disp
 check('central operation pipeline records history and consumes Omens only after success',
   /result\.success[\s\S]*?pushUndo\(/.test(executeCraftSource) &&
   /result\.success[\s\S]*?consumeCraftOmen\(/.test(executeCraftSource));
-check('implemented Essence and socket dispatch forwards each definition exact normalized item ID',
+check('implemented Essence, Catalyst, Alloy, and socket dispatch forwards exact normalized item IDs',
   /case 'applyEssence': return eng\[definition\.handler\]\(definition\.operationOptions\?\.essenceItemId\)/.test(app) &&
+  /case 'applyAlloy': return eng\[definition\.handler\]\(definition\.operationOptions\?\.alloyItemId\)/.test(app) &&
+  /case 'applyCatalyst': return eng\[definition\.handler\]\(definition\.operationOptions\?\.catalystItemId\)/.test(app) &&
   /case 'applyArtificerOrb': return eng\[definition\.handler\]\(\)/.test(app) &&
   /case 'applySocketable': return eng\[definition\.handler\]\(definition\.operationOptions\?\.socketableItemId\)/.test(app) &&
   /engine\.recordCurrencyUse\(definition\.craftId\)/.test(executeCraftSource));
@@ -423,6 +446,11 @@ check('Essence of the Abyss uses the Hinekora foresight commit path',
   /engine\.getItem\(\)\.hinekoraLocked && FORESEEABLE\.has\(currency\)[\s\S]*?commitForesight\(currency\)/.test(executeCraftSource));
 check('foresight commit preserves undo and consumes Hinekora lock',
   /const before = snapshotState\(engine\.getItem\(\)\);[\s\S]*?engine\.loadItem\(seal\.afterItem, seal\.afterPending\);[\s\S]*?engine\.recordCurrencyUse\(craftIdForAction\(currency\)\);[\s\S]*?engine\.clearHinekoraLock\(\);[\s\S]*?pushUndo\(before\)/.test(commitForesightSource));
+check('Catalysing Exaltation variants share one sealed deterministic Omen path',
+  /const variant = ORB_VARIANTS\[currency\][\s\S]*?const baseCurrency = variant \? variant\.base : currency[\s\S]*?CRAFT_OMENS\[selectedCraftOmen\]\.currency === baseCurrency/.test(app) &&
+  /if \(omen\) craftOptions\.omen = omen/.test(app) &&
+  /foreseenSeals\[currency\] \|\| computeForesight\(currency\)/.test(commitForesightSource) &&
+  /engine\.loadItem\(seal\.afterItem, seal\.afterPending\)/.test(commitForesightSource));
 check('foresight rollback preserves pending Desecration state',
   /function computeForesight\(currency\)[\s\S]*?const snapshotPending = engine\.getPendingDesecration\(\)[\s\S]*?engine\.loadItem\(snapshot, snapshotPending\)/.test(app) &&
   /function computeDesecrationForesight\(bone\)[\s\S]*?const snapshotPending = engine\.getPendingDesecration\(\)[\s\S]*?engine\.loadItem\(snapshot, snapshotPending\)/.test(app));
@@ -694,6 +722,9 @@ check('tooltip renders structured quality without mixing it into explicit modifi
   /id="quality-list"[^>]*hidden/.test(html) &&
   /function renderQualityDetails\(item\)[\s\S]*?quality\.type[\s\S]*?quality\.cap/.test(app) &&
   /renderConcreteBaseDetails\(item\);[\s\S]*?renderQualityDetails\(item\);/.test(app));
+check('tooltip derives Catalyst-scaled modifier text without mutating saved rolls',
+  /CraftingEngine\.catalystAdjustedModifier\(m, item\.quality\)/.test(app) &&
+  /static catalystAdjustedModifier\(modifier, quality\)/.test(fs.readFileSync(new URL('./crafting.js', import.meta.url), 'utf8')));
 check('tooltip renders socket state in a dedicated section',
   /id="socket-list"[^>]*hidden/.test(html) &&
   /function renderSocketDetails\(item\)[\s\S]*?socket-line/.test(app) &&
@@ -791,7 +822,7 @@ check('Absent Amulet art is installed at its numeric base ID path',
   fs.existsSync(new URL('./assets/item-bases/2563.png', import.meta.url)));
 check('runtime selector, socket stylesheet, and performance data are versioned in the offline shell',
   /header-fix\.css\?v=20/.test(select) &&
-  /CACHE_NAME = 'poe2-craft-registry-v10'/.test(serviceWorker) &&
+  /CACHE_NAME = 'poe2-craft-registry-v12'/.test(serviceWorker) &&
   serviceWorker.includes("'./header-fix.css?v=20'") &&
   serviceWorker.includes("'./data/crafting/known-items.data.js'"));
 check('Absent Amulet art is available in the versioned offline application shell',

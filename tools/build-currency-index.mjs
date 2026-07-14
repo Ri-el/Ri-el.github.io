@@ -726,23 +726,26 @@ function socketableItemClasses(socketable, bases, itemClassNames) {
 
 function generatedEssenceDefinition(essence, item) {
   const type = Number(essence.type);
+  const alloy = type === 5;
   const rareReplacement = type >= 3;
   const confidence = rareReplacement ? 'inferred' : 'verified';
   const validItemClasses = unique((essence.guaranteedModifiersByItemClass || [])
     .map(mapping => mapping.itemClass)).sort();
   return {
-    craftId: `essence-${essence.itemId}`,
+    craftId: `${alloy ? 'alloy' : 'essence'}-${essence.itemId}`,
     sourceItemId: essence.itemId,
     metadataKey: item.metadataKey,
     displayName: item.displayName,
-    category: 'essences',
+    category: alloy ? 'runeforging' : 'essences',
     equipmentRelevance: 'equipment_runtime',
     displayOrder: 100 + type * 100 + Number(essence.id),
-    iconId: `essence-${essence.itemId}`,
+    iconId: `${alloy ? 'alloy' : 'essence'}-${essence.itemId}`,
     iconFallback: fallbackIconText(item.displayName),
-    accentColor: TAB_ACCENTS.essences,
+    accentColor: alloy ? TAB_ACCENTS.runeforging : TAB_ACCENTS.essences,
     cssClasses: ['essence-btn'],
-    description: rareReplacement
+    description: alloy
+      ? 'Removes one random removable explicit modifier from a Rare item and adds this Alloy\'s exact class-specific guaranteed crafted modifier.'
+      : rareReplacement
       ? 'Inferred atomic transition: removes one eligible explicit modifier from a Rare item and adds the exact normalized guaranteed modifier for its concrete item class.'
       : 'Upgrades a Magic item to Rare and adds the exact normalized guaranteed modifier for its concrete item class.',
     assumption: rareReplacement
@@ -750,11 +753,11 @@ function generatedEssenceDefinition(essence, item) {
       : null,
     actionType: 'direct',
     activation: 'arm',
-    engineAction: `essence:${essence.itemId}`,
-    applicabilityPredicate: 'essenceDisabledReason',
-    disabledReasonHandler: 'essenceDisabledReason',
+    engineAction: `${alloy ? 'alloy' : 'essence'}:${essence.itemId}`,
+    applicabilityPredicate: alloy ? 'alloyDisabledReason' : 'essenceDisabledReason',
+    disabledReasonHandler: alloy ? 'alloyDisabledReason' : 'essenceDisabledReason',
     disabledReason: '',
-    handler: 'applyEssence',
+    handler: alloy ? 'applyAlloy' : 'applyEssence',
     sourceHandler: 'poe2_essence',
     triggeringAction: null,
     omenInteraction: { omenId: null, exclusiveGroup: null, consumeOn: 'successful_operation', triggerCraftId: null },
@@ -764,7 +767,7 @@ function generatedEssenceDefinition(essence, item) {
     qualityRestriction: 'none',
     socketRestriction: 'none',
     operationOptions: {
-      essenceItemId: essence.itemId,
+      ...(alloy ? { alloyItemId: essence.itemId } : { essenceItemId: essence.itemId }),
       essenceType: type,
       requiredRarity: rareReplacement ? 'rare' : 'magic',
       transition: rareReplacement ? 'rare_remove_add' : 'magic_to_rare_add',
@@ -773,19 +776,87 @@ function generatedEssenceDefinition(essence, item) {
       `data/normalized/crafting-items.json#item:${essence.itemId}`,
       `data/normalized/essences.json#essence:${essence.id}`,
       'data/normalized/modifiers.json#essence-modifiers',
-      'data/normalized/crafting-items.json#method:34',
+      ...(alloy ? [
+        'https://poe2db.tw/us/Alloy',
+        `https://poe2db.tw/us/${item.displayName.replaceAll("'", '').replaceAll(' ', '_')}`,
+        'https://www.pathofexile.com/forum/view-thread/3932540',
+      ] : ['data/normalized/crafting-items.json#method:34']),
       'data/crafting/registry-expansion.json',
     ],
     implementationStatus: 'implemented',
-    verificationStatus: rareReplacement
+    verificationStatus: alloy
+      ? 'verified_alloy_item_text_with_inferred_atomic_conflict_boundary'
+      : rareReplacement
       ? 'inferred_atomic_transition_from_normalized_method'
       : 'verified_normalized_magic_to_rare_transition',
     confidence,
     blocker: null,
     testFixtureIds: [
-      'validation:normalized-essence-transitions',
-      'ui:implemented-essence-registry-dispatch',
+      alloy ? 'validation:normalized-alloy-transitions' : 'validation:normalized-essence-transitions',
+      alloy ? 'ui:implemented-alloy-registry-dispatch' : 'ui:implemented-essence-registry-dispatch',
     ],
+    supported: true,
+    visible: true,
+  };
+}
+
+function generatedCatalystDefinition(item) {
+  const tags = (item.tags || []).map(tag => tag.key || tag).filter(Boolean);
+  const refined = tags.includes('jewel_catalyst');
+  const qualityType = tags.find(tag => /_catalyst$/.test(tag) &&
+    tag !== 'catalyst' && tag !== 'jewel_catalyst');
+  assert(qualityType, `Catalyst ${item.id} has no family tag.`);
+  const modifierTag = qualityType.replace(/_catalyst$/, '');
+  return {
+    craftId: `catalyst-${item.id}`,
+    sourceItemId: item.id,
+    metadataKey: item.metadataKey,
+    displayName: item.displayName,
+    category: 'breach',
+    equipmentRelevance: 'equipment_runtime',
+    displayOrder: 200 + Number(item.id),
+    iconId: `catalyst-${item.id}`,
+    iconFallback: fallbackIconText(item.displayName),
+    accentColor: TAB_ACCENTS.breach,
+    cssClasses: ['currency-btn', 'catalyst-btn'],
+    description: `${refined ? 'Adds or replaces' : 'Adds or replaces'} ${modifierTag} Catalyst Quality on ${refined ? 'a Jewel' : 'a Ring or Amulet'}; matching modifier magnitudes scale by 1% per quality point.`,
+    assumption: 'Per-use quantity uses the shared item-level quality curve with stochastic rounding; the curve is inferred from the common post-3.25 quality system.',
+    actionType: 'direct',
+    activation: 'arm',
+    engineAction: `catalyst:${item.id}`,
+    applicabilityPredicate: 'catalystDisabledReason',
+    disabledReasonHandler: 'catalystDisabledReason',
+    disabledReason: '',
+    handler: 'applyCatalyst',
+    sourceHandler: null,
+    triggeringAction: null,
+    omenInteraction: { omenId: null, exclusiveGroup: null, consumeOn: 'successful_operation', triggerCraftId: null },
+    corruptionRestriction: 'blocked_if_corrupted_or_sanctified_or_mirrored',
+    validItemClasses: refined ? ['Jewel'] : ['Amulet', 'Ring'],
+    validItemTags: [modifierTag],
+    qualityRestriction: 'replaces_other_catalyst_quality_type',
+    socketRestriction: 'none',
+    operationOptions: {
+      catalystItemId: item.id,
+      refined,
+      qualityType,
+      modifierTag,
+      maximumQuality: '20_plus_local_maximum_quality',
+      incrementModel: 'inferred_shared_item_level_quality_curve',
+    },
+    sourceEvidence: [
+      `data/normalized/crafting-items.json#item:${item.id}`,
+      'https://poe2db.tw/us/Catalysts',
+      refined ? 'https://poe2db.tw/us/Refined_Flesh_Catalyst' : 'https://poe2db.tw/us/Flesh_Catalyst',
+      'https://poe2db.tw/us/Quality',
+      'https://www.pathofexile.com/forum/view-thread/3531661',
+      'https://www.poewiki.net/wiki/Quality',
+    ],
+    implementationStatus: 'implemented',
+    verificationStatus: 'verified_item_text_with_inferred_increment_curve',
+    confidence: 'inferred',
+    blocker: null,
+    testFixtureIds: ['validation:catalysts', 'ui:implemented-catalyst-registry-dispatch'],
     supported: true,
     visible: true,
   };
@@ -932,14 +1003,17 @@ function expandRegistryDefinitions(expansion, context) {
     const sourceMethods = methodByItemId.get(String(compact.sourceItemId)) || [];
     const isOmen = compact.kind === 'crafting_omen';
     const isBone = compact.kind === 'abyss_bone';
+    const isCatalysingOmen = compact.omenId === 'catalysing_exaltation';
     assert(isOmen || isBone, `Expansion ${compact.craftId} has unknown kind ${compact.kind}.`);
     const method = sourceMethods[0] || null;
     if (isBone) assert(method, `Abyss Bone ${compact.craftId} has no retained method record.`);
     const maxItemLevel = method?.properties?.find(property => property.key === 'max_item_level')?.value ?? null;
     const minModifierLevel = method?.properties?.find(property => property.key === 'min_mod_level')?.value ?? null;
-    const verificationStatus = compact.confidence === 'verified'
-      ? 'verified_exact_item_text'
-      : 'inferred_shared_desecration_transition';
+    const verificationStatus = isCatalysingOmen
+      ? 'verified_weight_endpoints_with_inferred_interpolation'
+      : compact.confidence === 'verified'
+        ? 'verified_exact_item_text'
+        : 'inferred_shared_desecration_transition';
     return {
       craftId: compact.craftId,
       sourceItemId: compact.sourceItemId,
@@ -974,12 +1048,22 @@ function expandRegistryDefinitions(expansion, context) {
         triggerCraftId: isOmen ? compact.triggerCraftId : null,
       },
       corruptionRestriction: 'blocked_if_corrupted_or_sanctified',
-      validItemClasses: isBone ? BONE_ITEM_CLASSES[compact.boneFamily] : [],
+      validItemClasses: isBone
+        ? BONE_ITEM_CLASSES[compact.boneFamily]
+        : isCatalysingOmen ? ['Amulet', 'Jewel', 'Ring'] : [],
       validItemTags: [],
-      qualityRestriction: 'none',
+      qualityRestriction: isCatalysingOmen ? 'requires_positive_catalyst_quality' : 'none',
       socketRestriction: 'none',
       operationOptions: isOmen
-        ? { omenId: compact.omenId }
+        ? {
+            omenId: compact.omenId,
+            ...(isCatalysingOmen ? {
+              consumes: 'all_catalyst_quality_on_success',
+              weightingScope: 'matching_modifier_tags',
+              verifiedMultipliers: { '20': 5, '40': 7.5 },
+              interpolation: 'inferred_piecewise_linear',
+            } : {}),
+          }
         : {
             boneId: compact.boneId,
             boneFamily: compact.boneFamily,
@@ -999,7 +1083,9 @@ function expandRegistryDefinitions(expansion, context) {
       confidence: compact.confidence,
       blocker: null,
       testFixtureIds: isOmen
-        ? ['validation:expanded-crafting-omens']
+        ? isCatalysingOmen
+          ? ['validation:catalysing-exaltation', 'ui:catalysing-exaltation-foresight']
+          : ['validation:expanded-crafting-omens']
         : ['validation:expanded-abyss-bones'],
       supported: true,
       visible: true,
@@ -1008,6 +1094,16 @@ function expandRegistryDefinitions(expansion, context) {
 
   const generatedFamilies = expansion.generatedFamilies || [];
   for (const family of generatedFamilies) {
+    if (family.kind === 'catalysts') {
+      for (const item of craftingItems.filter(record =>
+        (record.classifications || []).includes('catalyst'))) {
+        const definition = generatedCatalystDefinition(item);
+        assert(!craftIds.has(definition.craftId), `Duplicate expansion craft ID ${definition.craftId}.`);
+        craftIds.add(definition.craftId);
+        definitions.push(definition);
+      }
+      continue;
+    }
     if (family.kind === 'essences') {
       const includedTypes = new Set((family.includedTypes || []).map(Number));
       const excluded = new Set((family.excludedSourceItemIds || []).map(Number));

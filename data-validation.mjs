@@ -768,7 +768,7 @@ check('registry tabs expose every supported mechanics definition and quality aud
   craftRegistry.every(definition => registryTabIds.has(definition.tab)) &&
   craftRegistry.filter(definition => definition.supported).length ===
     craftRegistry.filter(definition => definition.implementationStatus === 'implemented').length &&
-  craftRegistry.filter(definition => definition.supported).length === 415 &&
+  craftRegistry.filter(definition => definition.supported).length === 455 &&
   craftRegistry.filter(definition => definition.supported).every(definition => definition.visible) &&
   visibleCraftDefinitions.filter(definition => definition.category === 'quality').length === 8);
 check('registry implementation classifications are exclusive after Task 07 audit surfacing',
@@ -859,13 +859,15 @@ const task07ExcludedSourceIds = [2191, 4402, 4479];
 const task07SpecializedEntries = currencyIndex.entries.filter(entry => task07ExpeditionSourceIds.concat(task07SpecializedSourceIds, task07ThesisSourceIds).includes(Number(entry.sourceItemId)));
 const task07InfuserDefinitions = craftRegistry.filter(definition => [65, 66, 67, 68].includes(Number(definition.sourceItemId)));
 const task07ThesisDefinitions = craftRegistry.filter(definition => task07ThesisSourceIds.includes(Number(definition.sourceItemId)));
-check('Task 07 Expedition, Delirium, and specialized corruption definitions remain blocked',
+check('Task 07 promotes all 13 evidenced Alloys while retaining unresolved specialized blockers',
   task07Definitions.length === 49 &&
   task07Definitions.filter(definition => definition.category === 'runeforging').length === 19 &&
   task07Definitions.filter(definition => definition.category === 'delirium').length === 26 &&
   task07Definitions.filter(definition => definition.category === 'corruption').length === 4 &&
-  task07Definitions.filter(definition => definition.supported).length === 0 &&
-  task07Definitions.filter(definition => definition.craftId !== 'vaal').every(definition => definition.handler == null && definition.engineAction == null) &&
+  task07Definitions.filter(definition => definition.supported).length === 13 &&
+  task07Definitions.filter(definition => definition.handler === 'applyAlloy').length === 13 &&
+  task07Definitions.filter(definition => !definition.supported && definition.craftId !== 'vaal')
+    .every(definition => definition.handler == null && definition.engineAction == null) &&
   task07Definitions.every(definition => definition.visible) &&
   task07Definitions.find(definition => definition.craftId === 'vaal')?.implementationStatus === 'probability_unverified');
 check('specialized source identities retain blockers while exact socketable effects use generic insertion',
@@ -1233,8 +1235,9 @@ check('runtime mechanics projection retains exact Essence and socketable records
   runtimeMechanics.socketCapacity?.defaultSockets === 0 &&
   runtimeMechanics.socketCapacity?.confidence === 'inferred' &&
   Object.keys(runtimeMechanics.essencesByItemId || {}).length ===
-    actual.essences.essences.filter(essence => Number(essence.type) <= 4).length &&
-  Object.keys(runtimeMechanics.essenceModifiersById || {}).length === 152 &&
+    actual.essences.essences.filter(essence => Number(essence.type) <= 5).length &&
+  Object.keys(runtimeMechanics.essenceModifiersById || {}).length === 200 &&
+  Object.keys(runtimeMechanics.catalystsByItemId || {}).length === 26 &&
   runtimeMechanics.essencesByItemId?.['99']?.transition === 'magic_to_rare_add' &&
   runtimeMechanics.essencesByItemId?.['125']?.transition === 'rare_remove_add' &&
   runtimeMechanics.essenceModifiersById?.['83']?.modifierGroup === 'IncreasedLife' &&

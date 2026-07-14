@@ -2,7 +2,7 @@
 
 Target game version: **0.5.4**.
 
-This note records only what can be established from the supplied files and checked-in provenance. No network request was made, no PoE2DB runtime dependency was added, and none of the supplied third-party files was copied into the repository.
+This note records the supplied-file audit plus the read-only network verification authorised on 2026-07-14. No PoE2DB runtime dependency was added, and none of the supplied third-party files was copied into the repository.
 
 ## Supplied artifact audit
 
@@ -24,6 +24,10 @@ The bundle and HAR remain external research inputs. Their hashes are recorded so
 | `?s=Data%5CBaseItemTypes%2F<metadata-key>` | Confirmed request route emitted by the bundle; response not captured | Unverified hover response, likely an HTML fragment | Base-item identity and rendered item text are the intended payload, but exact fields cannot be claimed without a response | Currency, Omen, and other base-item hover records | Metadata key is URL-encoded; no explicit version parameter was found | `metadataKey`, retained item descriptions, item-class applicability | Build-time corroboration only after response verification |
 | `https://cdn.poe2db.tw/image/<Art path>` | Confirmed absolute URL construction in bundle | Image binary, usually WebP by referenced paths | Artwork path only | Currency/Omen/base artwork | PoE2 host selected by the same host check | Optional local artwork provenance, not mechanics | No runtime dependency; not needed for this slice |
 | Checked-in provenance routes `/us/Crafting`, `/us/Omen`, and `/us/Abyss` | Repository provenance; not verified by the empty HAR | HTML pages | Human-readable item text and category membership | Crafting currency, Omens, Abyss | Locale in path; target-version content still needs capture-level verification | Evidence references in the crafting registry | Build-time/manual verification only |
+| `/us/Catalysts`, `/us/Flesh_Catalyst`, and `/us/Refined_Flesh_Catalyst` | Confirmed live pages | Structured HTML item cards and tables | Metadata ID, tags, stack size, target class, affected modifier family, replacement text | All 13 ordinary and 13 Refined Catalysts | Current live `us` locale; checked against target 0.5.4 records | `craftingMechanics.catalystsByItemId`, generated Breach registry records | Build-time evidence only |
+| `/us/Alloy` and `/us/<Alloy_Name>` (for example `/us/Runic_Alloy`) | Confirmed live pages | Structured HTML item cards and class/modifier tables | Exact class applicability, affix side, required level, localized modifier lines and ranges | All 13 Alloys | Current live `us` locale; 0.5.0 introduction cross-checked with official notes | normalized Essence type 5, runtime guaranteed-modifier records, Runeforging registry | Build-time evidence only |
+| `/us/Omen_of_Catalysing_Exaltation` | Confirmed live page | Structured HTML item card and metadata table | Metadata ID, Exalted trigger text, all-quality consumption text, consume-when-triggered text | Omen source item 4448 | Current live `us` locale; no 0.5.4 patch-note override found | Ritual Omen definition and weighted Exalted operation | Build-time evidence only |
+| `/us/Quality` | Confirmed live reference page | Structured HTML mechanics tables | Default quality maximum and Catalyst quality families | Catalyst cap/scaling corroboration | Current live `us` locale | Catalyst cap and display behavior | Build-time evidence only |
 
 ### Structured `ModsView` page payload
 
@@ -56,11 +60,21 @@ The broader autocomplete asset is a search catalogue, not a crafting-mechanics c
 
 None of those 71 search-only labels appears in the focused ModsView modifier-crafting catalogue. The autocomplete records provide only `label`, slug-like `value`, `desc`, and CSS `class`; they do not provide a source item ID, metadata key, item mutation, target class, rarity gate, trigger, failure behavior, or probability. They are therefore recorded as import candidates rather than fabricated workbench definitions. A future normalized source refresh or non-empty response capture is required to decide which are equipment crafts, Skill Gem operations, encounter resources, fragments, or other non-workbench items.
 
+### Alloy, Catalyst, and Catalysing Omen recheck
+
+These records are present in the authoritative catalogue and are now executable in **Available** mode:
+
+- All 13 Alloys (source item IDs 5049–5061) use their normalized type-5 class mappings, stable modifier IDs, ranges, affix sides, and modifier groups. Current PoE2DB class tables provide the missing localization. The runtime performs one atomic random removable-explicit replacement, excludes fractured modifiers, rejects existing group conflicts, and consumes the registered currency only after success. A socket or Runeforging state is not required by the item text.
+- All 26 Catalysts (source item IDs 277–302) use the retained ordinary/Refined distinction and exact family tag. Ordinary Catalysts target Rings/Amulets; Refined Catalysts target Jewels. A different family replaces the previous quality type, matching tagged modifier values scale by 1% per quality point with truncation, and the cap is 20 plus fixed local maximum-quality modifiers. The per-use item-level curve and stochastic rounding remain explicitly classified as an inference from GGG's common quality rework and current published formula rather than an unpublished PoE2DB equation.
+- Omen of Catalysing Exaltation (source item 4448) triggers from ordinary, Greater, and Perfect Exalted Orbs. A successful slam consumes all Catalyst quality and the armed Omen; failures are atomic. Matching candidate modifier tags receive the verified 5× multiplier at 20 quality and 7.5× at 40 quality, while modifier groups continue to govern conflicts only. Values between those tested points use a visibly inferred interpolation. Hinekora previews seal and commit the same weighted result.
+
+The supplied in-game screenshot verifies the localization of normalized stat `local_maximum_quality_+` as `+20% to Maximum Quality`. The engine now preserves the stable source stat ID while rendering that exact player-facing line for Essence of the Breach instead of `local_maximum_quality: +20`.
+
 ## Endpoint conclusion
 
-The only confirmed JSON response is the autocomplete asset, and it contains search metadata rather than crafting mechanics. The `ModsView` bundle proves that a rich structured modifier payload exists at page-render time, but it does not reveal a standalone JSON endpoint. Because the HAR is empty, claiming an XHR/fetch URL, response schema, game-version parameter, or filter parameter would be invention.
+The only confirmed standalone JSON response is the autocomplete asset, and it contains search metadata rather than crafting mechanics. The `ModsView` bundle proves that a rich structured modifier payload exists at page-render time, but it does not reveal a standalone JSON endpoint. Current item pages expose useful server-rendered structured item and class/modifier tables; they are the reliable extraction surface used for this slice. Because the HAR is empty, claiming an additional XHR/fetch URL, response schema, game-version parameter, or filter parameter would still be invention.
 
-The highest-value next capture is therefore the complete `Modifiers` document response and any Fetch/XHR requests made while changing base item, modifier pool, and item level. A replacement HAR should be exported with response content after enabling Preserve log and reloading the page. It should include Document and Fetch/XHR entries, not just request names. Until then, the safe integration plan is:
+The highest-value next capture remains the complete `Modifiers` document response and any Fetch/XHR requests made while changing base item, modifier pool, and item level. A replacement HAR should be exported with response content after enabling Preserve log and reloading the page. It should include Document and Fetch/XHR entries, not just request names. The integration boundary remains:
 
 1. keep checked-in normalized data authoritative;
 2. use PoE2DB routes only in development-time provenance checks;

@@ -718,7 +718,7 @@ if (targets.length === 0) {
           }
           return { names, urls };
         });
-        assert(offlineCache.names.includes('poe2-craft-registry-v10'), `${target}: updated service-worker cache missing`);
+        assert(offlineCache.names.includes('poe2-craft-registry-v12'), `${target}: updated service-worker cache missing`);
         assert(offlineCache.urls.some(url => url.endsWith('/data/crafting/known-items.data.js')),
           `${target}: lazy known-items catalog missing from offline cache`);
         page.removeAllListeners('console');

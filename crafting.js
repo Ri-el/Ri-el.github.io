@@ -31,6 +31,66 @@ class CraftingEngine {
 
   static MAGIC_ONLY_BASE_TYPES = new Set(['life_flasks', 'mana_flasks', 'charms']);
 
+  // Exact player-facing text that has been verified independently of the
+  // normalized export's internal stat identifiers. Keep this deliberately
+  // narrow: unknown source stats continue to display their stable IDs rather
+  // than receiving invented localization.
+  static NORMALIZED_STAT_TEMPLATES = {
+    'local_maximum_quality_+': '+{0}% to Maximum Quality',
+    'base_maximum_ward': '+{0} to maximum Runic Ward',
+    'ward_regeneration_rate_+%': '{0}% increased Runic Ward Regeneration Rate',
+    'maximum_ward_+%': '{0}% increased maximum Runic Ward',
+    'recover_X_ward_on_block': 'Recover {0} Runic Ward when you Block',
+    'non_skill_base_all_damage_%_to_gain_as_fire_while_missing_ward': 'Gain {0}% of Damage as Extra Fire Damage while you are missing Runic Ward',
+    'surpassing_chance_%_to_gain_1_puppeteer_stack_on_using_command_skill': '{0}% Surpassing Chance to gain a Puppet Master stack whenever you use a Command Skill',
+    'attack_speed_+%_while_missing_ward': '{0}% increased Attack Speed while missing Runic Ward',
+    'recover_X_ward_on_charm_use': 'Recover {0} Runic Ward when a Charm is used',
+    'local_ward_+%': '{0}% increased Runic Ward',
+    'remnant_pickup_range_+%': 'Remnants can be collected from {0}% further away',
+    'presence_area_+%': '{0}% increased Presence Area of Effect',
+    'base_mana_cost_efficiency_+%': '{0}% increased Mana Cost Efficiency',
+    'temporary_minion_limit_+': 'Temporary Minion Skills have +{0} to Limit of Minions summoned',
+    'base_cast_speed_+%': '{0}% increased Cast Speed',
+    'attack_speed_+%': '{0}% increased Attack Speed',
+    'generate_x_charges_for_any_flask_per_minute': 'Flasks gain {0} charges per Second',
+    'summon_totem_cast_speed_+%': '{0}% increased Totem Placement speed',
+    'base_slow_potency_+%': '{0}% reduced Slowing Potency of Debuffs on You',
+    'skill_effect_duration_+%': '{0}% increased Skill Effect Duration',
+    'damaging_ailment_duration_+%': '{0}% increased Duration of Damaging Ailments on Enemies',
+    'archon_duration_+%': '{0}% increased Archon Buff duration',
+    'reduce_enemy_elemental_resistance_%': 'Damage Penetrates {0}% Elemental Resistances',
+    'ailment_effect_+%': '{0}% increased Magnitude of Ailments you inflict',
+    'exposure_effect_+%': '{0}% increased Exposure Effect',
+    'minion_base_damaging_ailment_effect_+%': 'Minions have {0}% increased Magnitude of Damaging Ailments',
+    'spell_area_of_effect_+%': 'Spell Skills have {0}% increased Area of Effect',
+    'attack_area_of_effect_+%': '{0}% increased Area of Effect for Attacks',
+    'base_spirit_from_equipment': '+{0} to Spirit',
+    'local_additional_attack_chain_chance_%': '{0}% chance to Chain an additional time',
+    'additional_maximum_infusion_stacks': '+{0} to maximum number of Elemental Infusions',
+    'local_socketed_items_effect_+%': '{0}% increased effect of Socketed Augment Items',
+    'heist_enchantment_resistance_mod_effect_+%': '{0}% increased Explicit Resistance Modifier magnitudes',
+    'base_maximum_mana': '+{0} to maximum Mana',
+    'spell_skill_gem_level_+': '+{0} to Level of all Spell Skills',
+    'accuracy_rating': '+{0} to Accuracy Rating',
+    'local_attack_speed_+%': '{0}% increased Attack Speed',
+    'non_skill_base_elemental_damage_%_to_gain_as_cold': 'Gain {0}% of Elemental Damage as Extra Cold Damage',
+    'base_all_attributes': '+{0} to all Attributes',
+    'local_physical_damage_+%': '{0}% increased Physical Damage',
+    'chance_%_to_gain_archon_of_nature_on_overgrowing_plant': '{0}% chance to gain Nature\'s Archon when your Plants Overgrow',
+    'elemental_skill_limit_+': '+{0} to Limit for Elemental Skills',
+    'chance_to_retain_40%_of_glory_on_use_%': '{0}% chance for Skills to retain 40% of Glory on use',
+    'bell_hit_limit': 'Tempest Bells are destroyed after an additional {0} Hits',
+    'max_puppet_master_stacks_+': '+{0} maximum stacks of Puppet Master',
+    'local_weapon_range_+': '+{0} to Weapon Range',
+    'additional_ballista_totems_allowed': '+{0} to maximum number of Summoned Ballista Totems',
+    'lightning_damage_can_ignite': 'Lightning Damage from Hits also Contributes to Flammability and Ignite Magnitudes',
+    'mark_effect_+%': '{0}% increased Effect of your Mark Skills',
+  };
+
+  static NORMALIZED_MODIFIER_STAT_ORDER = {
+    15458: ['local_physical_damage_+%', 'base_all_attributes'],
+  };
+
   // Runtime fallback for file:// use. A caller may inject the attributed rules
   // from data/crafting/quality-rules.json at development/test time; the browser
   // never fetches that JSON. This copy keeps state migration self-contained but
@@ -241,6 +301,7 @@ class CraftingEngine {
     this._mechanicsData = mechanicsData || globalMechanics || {};
     this._essencesByItemId = this._mechanicsData.essencesByItemId || {};
     this._essenceModifiersById = this._mechanicsData.essenceModifiersById || {};
+    this._catalystsByItemId = this._mechanicsData.catalystsByItemId || {};
     this._socketablesByItemId = this._mechanicsData.socketablesByItemId || {};
     this._socketableItemClasses = this._mechanicsData.socketableItemClasses || {};
     this._socketableLimits = this._mechanicsData.socketableLimits || [];
@@ -635,6 +696,150 @@ class CraftingEngine {
     return item.quality;
   }
 
+  static catalystAdjustedModifier(modifier, quality) {
+    const copy = structuredClone(modifier);
+    const amount = Math.max(0, Number(quality?.amount) || 0);
+    const familyTag = typeof quality?.source?.modifierTag === 'string'
+      ? quality.source.modifierTag
+      : String(quality?.type || '').replace(/_catalyst$/, '');
+    if (!amount || !familyTag || !(copy.modifierTags || []).includes(familyTag)) return copy;
+
+    const scale = value => value == null || !Number.isFinite(Number(value))
+      ? value
+      : Math.trunc(Number(value) * (1 + amount / 100));
+    const renderLine = line => {
+      const adjusted = structuredClone(line);
+      if (Array.isArray(adjusted.values)) {
+        adjusted.values = adjusted.values.map(scale);
+        let text = adjusted.modLine || adjusted.text || '';
+        adjusted.values.forEach((value, index) => { text = text.replaceAll(`{${index}}`, value); });
+        adjusted.value = adjusted.values[0];
+        adjusted.text = text;
+      } else if (adjusted.value != null) {
+        adjusted.value = scale(adjusted.value);
+        adjusted.text = adjusted.modLine?.includes('{0}')
+          ? adjusted.modLine.replaceAll('{0}', adjusted.value)
+          : adjusted.text;
+      }
+      return adjusted;
+    };
+
+    if (Array.isArray(copy.lines) && copy.lines.length) {
+      copy.lines = copy.lines.map(renderLine);
+      copy.displayText = copy.lines.map(line => line.text).join('\n');
+    } else if (copy.value != null) {
+      copy.value = scale(copy.value);
+      if (copy.modLine?.includes('{0}')) copy.displayText = copy.modLine.replaceAll('{0}', copy.value);
+    }
+    copy.catalystAdjusted = true;
+    copy.catalystBaseQuality = amount;
+    return copy;
+  }
+
+  _maximumCatalystQuality() {
+    let maximum = Number(this._qualityRules?.defaultMaximumQuality) || 20;
+    const addStat = stat => {
+      if (stat?.id !== 'local_maximum_quality_+' && stat?.sourceStatId !== 'local_maximum_quality_+') return;
+      const range = Array.isArray(stat.range) ? stat.range : [];
+      const raw = stat.value != null ? stat.value : range[0];
+      const value = Number(raw);
+      if (Number.isFinite(value)) maximum += value;
+    };
+    for (const implicit of this._item.implicits || []) {
+      for (const stat of implicit.stats || []) addStat(stat);
+    }
+    for (const { mod } of this._allModEntries()) {
+      for (const line of mod.lines || []) addStat(line);
+    }
+    return Math.max(0, maximum);
+  }
+
+  _expectedItemLevelQualityIncrement(itemLevel = this._item.ilvl) {
+    const level = Math.max(0, Number(itemLevel) || 0);
+    return Math.max(1, Math.min(20, 30 * Math.exp(-level / 30) - 0.3));
+  }
+
+  validateCatalyst(itemId) {
+    const rule = this._mechanicsRecord(this._catalystsByItemId, itemId);
+    if (!rule) return this._fail(`Unknown normalized Catalyst: ${String(itemId)}.`);
+    const immutable = this._checkCorrupted();
+    if (immutable) return immutable;
+    if (!(rule.targetItemClasses || []).includes(this._item.itemClass)) {
+      return this._fail(`${rule.displayName} requires ${rule.refined ? 'a Jewel' : 'a Ring or Amulet'}.`);
+    }
+    const quality = this._normalizeQualityState(this._item);
+    const maximumQuality = this._maximumCatalystQuality();
+    const replacing = quality.type !== rule.qualityType;
+    const startingAmount = replacing ? 0 : quality.amount;
+    if (startingAmount >= maximumQuality) {
+      return this._fail(`${rule.displayName} cannot be used because the item is already at maximum quality (${maximumQuality}%).`);
+    }
+    return {
+      success: true,
+      item: this.getItem(),
+      rule: structuredClone(rule),
+      replacing,
+      startingAmount,
+      maximumQuality,
+      expectedIncrement: this._expectedItemLevelQualityIncrement(),
+    };
+  }
+
+  applyCatalyst(itemId) {
+    const validation = this.validateCatalyst(itemId);
+    if (!validation.success) return validation;
+    const expected = validation.expectedIncrement;
+    const floor = Math.floor(expected);
+    const fraction = expected - floor;
+    const increment = floor + (fraction > 0 && this._randomFloat() < fraction ? 1 : 0);
+    const previousQuality = structuredClone(this._item.quality);
+    const amount = Math.min(validation.maximumQuality, validation.startingAmount + increment);
+    this._item.quality = {
+      amount,
+      type: validation.rule.qualityType,
+      source: {
+        itemId: Number(itemId),
+        displayName: validation.rule.displayName,
+        modifierTag: validation.rule.modifierTag,
+        refined: !!validation.rule.refined,
+        incrementModel: 'inferred_shared_item_level_quality_curve',
+        targetGameVersion: this._mechanicsData?.targetGameVersion || '0.5.4',
+      },
+      cap: validation.maximumQuality,
+    };
+    return this._success({
+      action: 'catalyst',
+      catalystItemId: Number(itemId),
+      previousQuality,
+      quality: structuredClone(this._item.quality),
+      increment: amount - validation.startingAmount,
+      replacedQualityType: validation.replacing ? previousQuality.type : null,
+      consumedAmount: 1,
+    });
+  }
+
+  validateCatalysingExaltation() {
+    const quality = this._normalizeQualityState(this._item);
+    const modifierTag = quality.source?.modifierTag || String(quality.type || '').replace(/_catalyst$/, '');
+    if (!(quality.amount > 0) || !modifierTag || !String(quality.type || '').endsWith('_catalyst')) {
+      return this._fail('Omen of Catalysing Exaltation requires Catalyst Quality on the item.');
+    }
+    const amount = Number(quality.amount);
+    const multiplier = amount <= 20
+      ? 1 + amount * 0.2
+      : 5 + (amount - 20) * 0.125;
+    return {
+      success: true,
+      item: this.getItem(),
+      quality: structuredClone(quality),
+      weighting: {
+        modifierTag,
+        multiplier,
+        confidence: amount === 20 || amount === 40 ? 'verified_test_point' : 'inferred_interpolation',
+      },
+    };
+  }
+
   _qualityTargetMatches(rule) {
     const classRules = this._qualityRules?.itemClasses || {};
     const baseType = String(this.baseType || '').toLocaleLowerCase();
@@ -800,16 +1005,26 @@ class CraftingEngine {
     return { success: true, item: this.getItem(), rule: structuredClone(rule), candidates };
   }
 
-  _normalizedEssenceRecord(modifier, essenceItemId) {
-    const lines = (modifier.stats || []).map(stat => {
+  _normalizedEssenceRecord(modifier, essenceItemId, sourceKind = 'essence') {
+    const sourceOrder = CraftingEngine.NORMALIZED_MODIFIER_STAT_ORDER[modifier.id] || [];
+    const orderedStats = (modifier.stats || []).slice().sort((left, right) => {
+      const leftIndex = sourceOrder.indexOf(left.id);
+      const rightIndex = sourceOrder.indexOf(right.id);
+      return (leftIndex < 0 ? Number.MAX_SAFE_INTEGER : leftIndex) -
+        (rightIndex < 0 ? Number.MAX_SAFE_INTEGER : rightIndex);
+    });
+    const lines = orderedStats.map(stat => {
       const range = Array.isArray(stat.range) ? stat.range : [null, null];
       const value = this._rollSpec(range[0], range[1], 0);
+      const template = CraftingEngine.NORMALIZED_STAT_TEMPLATES[stat.id] || String(stat.id);
       return {
-        modLine: stat.id,
+        modLine: template,
         min: range[0],
         max: range[1],
         value,
-        text: value == null ? String(stat.id) : `${stat.id}: ${value}`,
+        text: value == null
+          ? template
+          : template.includes('{0}') ? template.replaceAll('{0}', value) : template,
         sourceStatId: stat.id,
       };
     });
@@ -827,13 +1042,15 @@ class CraftingEngine {
       displayTier: modifier.tier ?? 'E',
       sourceTier: modifier.tier ?? null,
       modifierTags: (modifier.modifierTags || []).slice(),
-      essence: true,
+      essence: sourceKind === 'essence',
+      alloy: sourceKind === 'alloy',
+      sourceKind,
       essenceItemId,
       displaySource: 'normalized_stat_id',
     };
   }
 
-  _addEssenceModifier(modifier, essenceItemId) {
+  _addEssenceModifier(modifier, essenceItemId, sourceKind = 'essence') {
     const side = this._essenceModifierSide(modifier);
     if (!side) return null;
     const exactCandidate = [...this._prefixCandidates, ...this._suffixCandidates]
@@ -849,11 +1066,13 @@ class CraftingEngine {
       );
       const target = side === 'prefix' ? this._item.prefixes : this._item.suffixes;
       const stored = target[target.length - 1];
-      stored.essence = true;
+      stored.essence = sourceKind === 'essence';
+      stored.alloy = sourceKind === 'alloy';
+      stored.sourceKind = sourceKind;
       stored.essenceItemId = essenceItemId;
       return { ...stored, type: side };
     }
-    const record = this._normalizedEssenceRecord(modifier, essenceItemId);
+    const record = this._normalizedEssenceRecord(modifier, essenceItemId, sourceKind);
     (side === 'prefix' ? this._item.prefixes : this._item.suffixes).push(record);
     return { ...record, type: side };
   }
@@ -888,21 +1107,36 @@ class CraftingEngine {
       this._item.name = this._item.generatedName;
     }
 
-    const added = this._addEssenceModifier(selected, Number(itemId));
+    const sourceKind = Number(validation.rule.type) === 5 ? 'alloy' : 'essence';
+    const added = this._addEssenceModifier(selected, Number(itemId), sourceKind);
     if (!added) {
       this._item = itemSnapshot;
       this._pendingDesecration = pendingSnapshot;
       return this._fail(`${validation.rule.displayName} could not add its forced modifier; the item was not changed.`);
     }
     return this._success({
-      action: 'essence',
+      action: sourceKind,
       essenceItemId: Number(itemId),
+      ...(sourceKind === 'alloy' ? { alloyItemId: Number(itemId) } : {}),
+      consumedAmount: 1,
       essenceType: validation.rule.typeName,
       addedMods: [added],
       removedMods,
       previousRarity,
       clearedPendingDesecration: !!removedMods.find(mod => mod.unrevealed && mod.desecrated),
     });
+  }
+
+  validateAlloy(itemId) {
+    const rule = this._mechanicsRecord(this._essencesByItemId, itemId);
+    if (!rule || Number(rule.type) !== 5) return this._fail(`Unknown normalized Alloy: ${String(itemId)}.`);
+    return this.validateEssence(itemId);
+  }
+
+  applyAlloy(itemId) {
+    const validation = this.validateAlloy(itemId);
+    if (!validation.success) return validation;
+    return this.applyEssence(itemId);
   }
 
   validateArtificerOrb() {
@@ -1448,11 +1682,13 @@ class CraftingEngine {
     appendSide('prefix');
     appendSide('suffix');
     const filtered = this._filterByMinModifierLevel(candidates, craftOptions.minModLevel);
-    const totalWeight = filtered.reduce((total, candidate) => total + Number(candidate.weight), 0);
+    const totalWeight = filtered.reduce((total, candidate) =>
+      total + this._candidateCraftWeight(candidate, craftOptions), 0);
     const groupWeights = new Map();
     for (const candidate of filtered) {
       const groupKey = `${candidate.type}:${candidate.groupIdentity}`;
-      groupWeights.set(groupKey, (groupWeights.get(groupKey) || 0) + Number(candidate.weight));
+      groupWeights.set(groupKey, (groupWeights.get(groupKey) || 0) +
+        this._candidateCraftWeight(candidate, craftOptions));
     }
     const snapshots = filtered.map(candidate => {
       const source = candidate.source || {};
@@ -1478,7 +1714,8 @@ class CraftingEngine {
           : [],
         min: candidate.tier.min ?? null,
         max: candidate.tier.max ?? null,
-        weight: Number(candidate.weight),
+        baseWeight: Number(candidate.weight),
+        weight: this._candidateCraftWeight(candidate, craftOptions),
         groupWeight: groupWeights.get(groupKey),
         denominator: totalWeight,
       };
@@ -1555,6 +1792,13 @@ class CraftingEngine {
       return this._fail(`Item already has max mods (${rareLimits.prefixes} prefixes + ${rareLimits.suffixes} suffixes).`);
     }
     const omen = options.omen || null;
+    const catalysing = omen === 'catalysing_exaltation'
+      ? this.validateCatalysingExaltation()
+      : null;
+    if (catalysing && !catalysing.success) return catalysing;
+    const rollOptions = catalysing
+      ? { ...options, catalystWeighting: catalysing.weighting }
+      : options;
     const forcedSide = omen === 'sinistral_exaltation'
       ? 'prefix'
       : omen === 'dextral_exaltation' ? 'suffix' : null;
@@ -1563,8 +1807,8 @@ class CraftingEngine {
     const addedMods = [];
     for (let index = 0; index < addCount; index++) {
       const added = forcedSide
-        ? this._addRandomModOfType(forcedSide, 'rare', options)
-        : this._addRandomMod('rare', options);
+        ? this._addRandomModOfType(forcedSide, 'rare', rollOptions)
+        : this._addRandomMod('rare', rollOptions);
       if (!added) {
         this._item = snapshot;
         const detail = addCount === 2
@@ -1576,8 +1820,23 @@ class CraftingEngine {
       }
       addedMods.push(added);
     }
+    let consumedCatalystQuality = null;
+    if (catalysing) {
+      consumedCatalystQuality = structuredClone(this._item.quality);
+      this._item.quality = {
+        amount: 0,
+        type: 'normal',
+        source: null,
+        cap: this._maximumCatalystQuality(),
+      };
+    }
     return this._success({
       action: 'add', addedMods, previousRarity: 'rare',
+      ...(consumedCatalystQuality ? {
+        consumedCatalystQuality,
+        catalystWeighting: catalysing.weighting,
+        consumedOmenAmount: 1,
+      } : {}),
       ...(omen ? { omen } : {}),
     });
   }
@@ -2592,7 +2851,22 @@ class CraftingEngine {
     return {
       minModLevel: Math.max(0, Number(options?.minModLevel) || 0),
       valueQuality: Math.max(0, Math.min(1, Number(options?.valueQuality) || 0)),
+      catalystWeighting: options?.catalystWeighting &&
+        typeof options.catalystWeighting.modifierTag === 'string' &&
+        Number(options.catalystWeighting.multiplier) > 0
+        ? structuredClone(options.catalystWeighting)
+        : null,
     };
+  }
+
+  _candidateCraftWeight(candidate, craftOptions = {}) {
+    const baseWeight = Number(candidate?.weight);
+    if (!(baseWeight > 0)) return 0;
+    const weighting = craftOptions?.catalystWeighting;
+    const tags = candidate?.source?.modifierTags || [];
+    return weighting && tags.includes(weighting.modifierTag)
+      ? baseWeight * Number(weighting.multiplier)
+      : baseWeight;
   }
 
   // Minimum Modifier Level removes low tiers while preserving at least the
@@ -2656,12 +2930,12 @@ class CraftingEngine {
     const groupMap = new Map();
     for (const c of candidates) {
       const key = `${c.type}:${c.groupIdentity}`;
-      groupMap.set(key, (groupMap.get(key) || 0) + c.weight);
+      groupMap.set(key, (groupMap.get(key) || 0) + this._candidateCraftWeight(c, craftOptions));
     }
     const selectedGroupKey = this._weightedRandom(groupMap);
     if (selectedGroupKey == null) return null;
     const groupCandidates = candidates.filter(c => `${c.type}:${c.groupIdentity}` === selectedGroupKey);
-    const tierWeights = groupCandidates.map(c => [c, c.weight]);
+    const tierWeights = groupCandidates.map(c => [c, this._candidateCraftWeight(c, craftOptions)]);
     const selected = this._weightedRandomFromPairs(tierWeights);
     if (!selected) return null;
     return this._applyMod(selected.type, selected.group, selected.tier, craftOptions.valueQuality, selected.source);

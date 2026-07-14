@@ -1894,12 +1894,225 @@ test('validation:normalized-essence-transitions', () => {
   assert.equal(breachResult.essenceItemId, 144);
   assert.equal(breachResult.addedMods[0].stableModifierId, 4592);
   assert.equal(breachResult.addedMods[0].modGroup, 'LocalMaximumQuality');
+  assert.equal(breachResult.addedMods[0].displayText, '+20% to Maximum Quality');
+  assert.equal(breachResult.addedMods[0].lines[0].sourceStatId, 'local_maximum_quality_+');
 
   assert.deepEqual(
     [ordinaryResult.essenceItemId, greaterResult.essenceItemId, perfect.result.essenceItemId],
     [99, 111, 125],
     'ordinary, Greater, and Perfect Essence history identities remain distinct',
   );
+});
+
+test('validation:catalysts', () => {
+  const amulet = normalizedMechanicsEngine(2546, 'amulets', () => 0);
+  const first = amulet.applyCatalyst(277);
+  assert(first.success, first.error);
+  assert.equal(first.increment, 2, 'item-level 83 stochastic rounding must round up with RNG 0');
+  assert.equal(amulet.getItem().quality.type, 'life_catalyst');
+  assert.equal(amulet.getItem().quality.source.modifierTag, 'life');
+  assert.equal(amulet.getItem().quality.cap, 20);
+
+  const replacement = amulet.applyCatalyst(278);
+  assert(replacement.success, replacement.error);
+  assert.equal(replacement.replacedQualityType, 'life_catalyst');
+  assert.equal(amulet.getItem().quality.type, 'mana_catalyst');
+  assert.equal(amulet.getItem().quality.amount, 2, 'a different Catalyst replaces rather than carries quality');
+
+  const adjusted = Engine.catalystAdjustedModifier({
+    modifierTags: ['life'],
+    lines: [{ modLine: '+{0} to maximum Life', value: 68, min: 52, max: 79, text: '+68 to maximum Life' }],
+    displayText: '+68 to maximum Life',
+  }, { amount: 20, type: 'life_catalyst', source: { modifierTag: 'life' } });
+  assert.equal(adjusted.lines[0].value, 81);
+  assert.equal(adjusted.lines[0].text, '+81 to maximum Life');
+  const untouched = Engine.catalystAdjustedModifier({
+    modifierTags: ['mana'], value: 68, modLine: '+{0} to maximum Mana', displayText: '+68 to maximum Mana',
+  }, { amount: 20, type: 'life_catalyst', source: { modifierTag: 'life' } });
+  assert.equal(untouched.value, 68);
+
+  const jewel = normalizedMechanicsEngine(614, 'ruby', () => 0);
+  const refined = jewel.applyCatalyst(290);
+  assert(refined.success, refined.error);
+  assert.equal(jewel.getItem().quality.type, 'life_catalyst');
+  assert.equal(jewel.getItem().quality.source.refined, true);
+  const wrongTarget = amulet.applyCatalyst(290);
+  assert.equal(wrongTarget.success, false);
+  assert.match(wrongTarget.error, /requires a Jewel/);
+
+  const breach = normalizedMechanicsEngine(2669, 'rings', () => 0);
+  const breachItem = breach.getItem();
+  breachItem.quality = {
+    amount: 39, type: 'life_catalyst', cap: 40,
+    source: { itemId: 277, displayName: 'Flesh Catalyst', modifierTag: 'life' },
+  };
+  breach.loadItem(breachItem);
+  const capped = breach.applyCatalyst(277);
+  assert(capped.success, capped.error);
+  assert.equal(breach.getItem().quality.amount, 40);
+  assert.equal(breach.getItem().quality.cap, 40, 'Breach Ring implicit must extend the cap by 20');
+
+  const refinedBreach = normalizedMechanicsEngine(2670, 'rings', () => 0);
+  const refinedBreachResult = refinedBreach.applyCatalyst(277);
+  assert(refinedBreachResult.success, refinedBreachResult.error);
+  assert.equal(refinedBreach.getItem().quality.cap, 45, 'Refined Breach Ring implicit must extend the cap by 25');
+
+  const essenceCap = loadExplicitAffixes(
+    normalizedMechanicsEngine(2546, 'amulets', () => 0),
+    'rare',
+    [record('LegacyPrefix', 1)],
+    [record('LegacySuffix', 1)],
+  );
+  assert(essenceCap.applyEssenceOfBreach().success);
+  const essenceCatalyst = essenceCap.applyCatalyst(277);
+  assert(essenceCatalyst.success, essenceCatalyst.error);
+  assert.equal(essenceCap.getItem().quality.cap, 40, 'Essence of the Breach must extend Catalyst maximum quality by 20');
+
+  const restored = normalizedMechanicsEngine(2546, 'amulets', 1);
+  restored.loadItem(amulet.getItem());
+  assert.deepEqual(restored.getItem().quality, amulet.getItem().quality, 'Catalyst state must survive save/load');
+  const immutable = restored.getItem();
+  immutable.corrupted = true;
+  restored.loadItem(immutable);
+  const before = restored.getItem();
+  assert.equal(restored.applyCatalyst(277).success, false);
+  assert.deepEqual(restored.getItem(), before, 'a blocked Catalyst must be atomic');
+});
+
+test('validation:catalysing-exaltation', () => {
+  const qualityState = (amount, cap = Math.max(20, amount)) => ({
+    amount, type: 'life_catalyst', cap,
+    source: { itemId: 277, displayName: 'Flesh Catalyst', modifierTag: 'life' },
+  });
+  const engine = normalizedMechanicsEngine(2546, 'amulets', 0xcea);
+  const item = engine.getItem();
+  item.rarity = 'rare';
+  item.quality = qualityState(20);
+  engine.loadItem(item);
+  const validation = engine.validateCatalysingExaltation();
+  assert(validation.success, validation.error);
+  assert.equal(validation.weighting.multiplier, 5);
+  const odds = engine.getExactModifierOdds('rare', { catalystWeighting: validation.weighting });
+  assert(odds.candidates.some(candidate => candidate.weight === candidate.baseWeight * 5));
+  assert(odds.candidates.some(candidate => candidate.weight === candidate.baseWeight));
+
+  const perfectPool = engine.getExactModifierOdds('rare', {
+    minModLevel: 70,
+    catalystWeighting: validation.weighting,
+  });
+  const result = engine.applyExalted({ omen: 'catalysing_exaltation', minModLevel: 70 });
+  assert(result.success, result.error);
+  assert.equal(result.consumedCatalystQuality.amount, 20);
+  assert.equal(result.catalystWeighting.multiplier, 5);
+  assert.equal(engine.getItem().quality.amount, 0);
+  assert.equal(engine.getItem().quality.type, 'normal');
+  assert(perfectPool.candidates.some(candidate =>
+    candidate.stableModifierId === result.addedMods[0].stableModifierId));
+
+  const breach = normalizedMechanicsEngine(2669, 'rings', 0xceb);
+  const breachItem = breach.getItem();
+  breachItem.rarity = 'rare';
+  breachItem.quality = qualityState(40, 40);
+  breach.loadItem(breachItem);
+  assert.equal(breach.validateCatalysingExaltation().weighting.multiplier, 7.5);
+
+  const noTagData = { bases: { untagged: syntheticBase(2, 2) } };
+  const noTag = new Engine(noTagData, 'untagged', null, null, null, null, () => 0, runtimeMechanics);
+  const noTagItem = rareItem('untagged', [record('P0', 1)], []);
+  noTagItem.quality = qualityState(20);
+  noTag.loadItem(noTagItem);
+  const noCompatible = noTag.applyExalted({ omen: 'catalysing_exaltation' });
+  assert(noCompatible.success, noCompatible.error);
+  assert.equal(noTag.getItem().quality.amount, 0, 'successful off-tag slams still consume all Catalyst Quality');
+
+  const full = normalizedMechanicsEngine(2546, 'amulets', 0xcec);
+  const fullItem = full.getItem();
+  fullItem.rarity = 'rare';
+  fullItem.prefixes = ['P0', 'P1', 'P2'].map(name => record(name, 1));
+  fullItem.suffixes = ['S0', 'S1', 'S2'].map(name => record(name, 1));
+  fullItem.quality = qualityState(20);
+  full.loadItem(fullItem);
+  const before = full.getItem();
+  assert.equal(full.applyExalted({ omen: 'catalysing_exaltation' }).success, false);
+  assert.deepEqual(full.getItem(), before, 'failed Exalted operations consume neither quality nor item state');
+
+  const deterministicRun = () => {
+    const seeded = normalizedMechanicsEngine(2546, 'amulets', 0xced);
+    const seededItem = seeded.getItem();
+    seededItem.rarity = 'rare';
+    seededItem.quality = qualityState(20);
+    seeded.loadItem(seededItem);
+    return seeded.applyExalted({ omen: 'catalysing_exaltation', minModLevel: 44 });
+  };
+  assert.deepEqual(deterministicRun(), deterministicRun(),
+    'Catalysing Greater-Exalted/Hinekora-style sealed outcomes must be deterministic');
+});
+
+test('validation:normalized-alloy-transitions', () => {
+  const alloyRules = Object.values(runtimeMechanics.essencesByItemId)
+    .filter(rule => Number(rule.type) === 5)
+    .sort((left, right) => left.itemId - right.itemId);
+  assert.equal(alloyRules.length, 13);
+  assert.equal(currencyIndex.craftRegistry.filter(definition =>
+    definition.supported && definition.handler === 'applyAlloy').length, 13);
+
+  const run = (rule, seed = 0) => {
+    const mapping = rule.guaranteedModifiersByItemClass[0];
+    const data = { bases: { alloy_fixture: syntheticBase() } };
+    const engine = new Engine(data, 'alloy_fixture', null, null, null, null,
+      typeof seed === 'function' ? seed : mulberry32(seed), runtimeMechanics);
+    const item = rareItem('alloy_fixture', [record('LegacyPrefix', 1)], [record('LegacySuffix', 1)]);
+    item.itemClass = mapping.itemClass;
+    item.modifierPoolClassId = mapping.itemClassId;
+    engine.loadItem(item);
+    return { engine, result: engine.applyAlloy(rule.itemId), mapping };
+  };
+
+  for (const rule of alloyRules) {
+    const { engine, result, mapping } = run(rule, 0xa110 + rule.itemId);
+    assert(result.success, `${rule.displayName}: ${result.error}`);
+    assert.equal(result.action, 'alloy');
+    assert.equal(result.removedMods.length, 1);
+    assert.equal(result.addedMods.length, 1);
+    assert(mapping.modifierIds.includes(result.addedMods[0].stableModifierId));
+    assert.equal(result.addedMods[0].alloy, true);
+    assert.equal(result.addedMods[0].sourceKind, 'alloy');
+    assert.equal(engine.getItem().prefixes.length + engine.getItem().suffixes.length, 2);
+    assert(!result.addedMods[0].displayText.includes(result.addedMods[0].lines?.[0]?.sourceStatId || '\0'),
+      `${rule.displayName} must use a player-facing stat template`);
+  }
+  assert.deepEqual(run(alloyRules[0], 0xa111).result, run(alloyRules[0], 0xa111).result,
+    'Alloy replacement and ranges must be seed-deterministic');
+
+  const conflict = run(alloyRules[0], 0xa112).engine;
+  const conflictItem = conflict.getItem();
+  const conflictModifierId = alloyRules[0].guaranteedModifiersByItemClass[0].modifierIds[0];
+  const conflictGroupId = runtimeMechanics.essenceModifiersById[String(conflictModifierId)].modifierGroupId;
+  conflictItem.prefixes = [record('RunicConflict', 1, { sourceModifierGroupId: conflictGroupId })];
+  conflictItem.suffixes = [record('LegacySuffix', 1)];
+  conflict.loadItem(conflictItem);
+  const conflictBefore = conflict.getItem();
+  const conflictResult = conflict.applyAlloy(5049);
+  assert.equal(conflictResult.success, false);
+  assert.match(conflictResult.error, /conflicts with an existing modifier group/);
+  assert.deepEqual(conflict.getItem(), conflictBefore);
+
+  const fractured = run(alloyRules[0], 0xa113).engine;
+  const fracturedItem = fractured.getItem();
+  fracturedItem.prefixes.forEach(mod => { mod.fractured = true; });
+  fracturedItem.suffixes.forEach(mod => { mod.fractured = true; });
+  fractured.loadItem(fracturedItem);
+  const fracturedBefore = fractured.getItem();
+  assert.equal(fractured.applyAlloy(5049).success, false);
+  assert.deepEqual(fractured.getItem(), fracturedBefore);
+
+  const corrupt = run(alloyRules[0], 0xa114).engine;
+  const corruptItem = corrupt.getItem();
+  corruptItem.corrupted = true;
+  corrupt.loadItem(corruptItem);
+  const corruptBefore = corrupt.getItem();
+  assert.equal(corrupt.applyAlloy(5049).success, false);
+  assert.deepEqual(corrupt.getItem(), corruptBefore);
 });
 
 test('validation:socketing-augments', () => {
