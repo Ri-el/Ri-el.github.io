@@ -316,8 +316,10 @@
         "sourceSocketCountDistribution": { "0": 125, "1": 1084, "2": 551 },
         "verifiedMaximumSocketsAvailable": 0,
         "verifiedDefaultSocketsAvailable": 0,
-        "status": "blocked_semantics_unverified",
-        "handling": "Retain socketCount as a sourced value; do not reinterpret it as maximum or default sockets."
+        "sourceSemanticsStatus": "source_field_not_self_describing",
+        "runtimeInterpretationStatus": "inferred_maximum_with_zero_fresh_sockets",
+        "runtimeDefaultSockets": 0,
+        "handling": "Retain socketCount unchanged as source provenance. The crafting runtime explicitly labels its later inference that socketCount is the concrete-base maximum and that fresh items start with zero added Rune Sockets; it does not present that inference as a verified source field."
       },
       "perBaseSourceVersion": {
         "availableCount": 0,

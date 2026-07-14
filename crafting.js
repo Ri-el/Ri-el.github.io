@@ -224,6 +224,7 @@ class CraftingEngine {
     this._essencesByItemId = this._mechanicsData.essencesByItemId || {};
     this._essenceModifiersById = this._mechanicsData.essenceModifiersById || {};
     this._socketablesByItemId = this._mechanicsData.socketablesByItemId || {};
+    this._socketableItemClasses = this._mechanicsData.socketableItemClasses || {};
     this._socketableLimits = this._mechanicsData.socketableLimits || [];
 
     const typeData = modData?.bases?.[baseType] ?? modData?.jewelTypes?.[baseType];
@@ -926,8 +927,11 @@ class CraftingEngine {
 
   _socketableEffectForItem(socketable) {
     const effects = socketable?.effects || {};
-    const classId = String(this._item.baseClassId ?? this._item.modifierPoolClassId ?? '');
-    if (classId && effects.classes?.[classId]) return { family: `class:${classId}`, effect: effects.classes[classId] };
+    for (const [sourceItemClassId, effect] of Object.entries(effects.classes || {})) {
+      if (effect && this._socketableItemClasses[sourceItemClassId] === this._item.itemClass) {
+        return { family: `item-class:${this._item.itemClass}`, effect };
+      }
+    }
     if (effects.all) return { family: 'all', effect: effects.all };
     const tags = new Set(this._item.baseTags || []);
     if (tags.has('armour') && effects.armour) return { family: 'armour', effect: effects.armour };

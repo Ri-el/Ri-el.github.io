@@ -768,7 +768,7 @@ check('registry tabs expose every supported mechanics definition and quality aud
   craftRegistry.every(definition => registryTabIds.has(definition.tab)) &&
   craftRegistry.filter(definition => definition.supported).length ===
     craftRegistry.filter(definition => definition.implementationStatus === 'implemented').length &&
-  craftRegistry.filter(definition => definition.supported).length === 415 &&
+  craftRegistry.filter(definition => definition.supported).length === 412 &&
   craftRegistry.filter(definition => definition.supported).every(definition => definition.visible) &&
   visibleCraftDefinitions.filter(definition => definition.category === 'quality').length === 8);
 check('registry implementation classifications are exclusive after Task 07 audit surfacing',
@@ -827,13 +827,25 @@ const task06SocketTypeCounts = Object.fromEntries([...new Set(actual.craftingIte
   .map(type => [String(type), actual.craftingItems.socketables.filter(record => record.type === type).length]));
 check('socket inventory exposes inferred insertion mechanics and retains deprecated records',
   task06SocketDefinitions.length === 296 &&
-  task06SocketDefinitions.filter(definition => definition.supported).length === 288 &&
+  task06SocketDefinitions.filter(definition => definition.supported).length === 285 &&
   task06SocketDefinitions.filter(definition => definition.visible).length === 288 &&
-  task06SocketDefinitions.filter(definition => definition.implementationStatus === 'implemented').length === 288 &&
+  task06SocketDefinitions.filter(definition => definition.implementationStatus === 'implemented').length === 285 &&
+  task06SocketDefinitions.filter(definition => definition.implementationStatus === 'blocked_missing_data').length === 3 &&
   task06SocketDefinitions.filter(definition => definition.confidence === 'inferred').length === 288 &&
   task06SocketDefinitions.filter(definition => definition.supported)
     .every(definition => ['applyArtificerOrb', 'applySocketable'].includes(definition.handler)) &&
   task06SocketDefinitions.filter(definition => definition.implementationStatus === 'deprecated_for_target_version').length === 8);
+check('socketable applicability uses the retained source item-class enum rather than modifier-pool class IDs',
+  task06SocketDefinitions.find(definition => definition.craftId === 'socketable-5092')?.validItemClasses.join(',') === 'Wand' &&
+  task06SocketDefinitions.find(definition => definition.craftId === 'socketable-5102')?.validItemClasses.join(',') === 'Buckler' &&
+  task06SocketDefinitions.find(definition => definition.craftId === 'socketable-688')?.validItemClasses.join(',') === 'Body Armour' &&
+  task06SocketDefinitions.filter(definition => definition.supported && definition.handler === 'applySocketable')
+    .every(definition => definition.validItemClasses.length > 0) &&
+  stable(task06SocketDefinitions
+    .filter(definition => definition.implementationStatus === 'blocked_missing_data')
+    .map(definition => definition.sourceItemId).sort((a, b) => a - b)) === stable([5111, 5200, 5201]) &&
+  task06SocketDefinitions.filter(definition => [5111, 5200, 5201].includes(Number(definition.sourceItemId)))
+    .every(definition => /Talisman.*no selectable Talisman concrete base/i.test(definition.blocker)));
 check('Task 06 retained socketable cohorts match normalized source',
   actual.craftingItems.socketables.length === 295 &&
   stable(task06SocketTypeCounts) === stable({ '0': 221, '1': 34, '2': 35, '3': 4, '4': 1 }) &&
@@ -1124,14 +1136,16 @@ check('required level remains unavailable and distinct from complete drop-level 
     minimum: Math.min(...dropLevels),
     maximum: Math.max(...dropLevels),
   }) && requiredLevelCount === 0);
-check('socketCount remains a sourced field with maximum/default semantics explicitly unverified',
+check('socketCount remains sourced while the later runtime maximum/default interpretation stays explicitly inferred',
   stable(baseParity.task02?.fieldCoverage?.socketFields) === stable({
     sourceSocketCountAvailable: actual.baseItems.bases.filter(base => Number.isInteger(base.socketCount)).length,
     sourceSocketCountDistribution: sourceSocketDistribution,
     verifiedMaximumSocketsAvailable: actual.baseItems.bases.filter(base => base.maximumSockets != null || base.maxSockets != null).length,
     verifiedDefaultSocketsAvailable: actual.baseItems.bases.filter(base => base.defaultSockets != null).length,
-    status: 'blocked_semantics_unverified',
-    handling: 'Retain socketCount as a sourced value; do not reinterpret it as maximum or default sockets.',
+    sourceSemanticsStatus: 'source_field_not_self_describing',
+    runtimeInterpretationStatus: 'inferred_maximum_with_zero_fresh_sockets',
+    runtimeDefaultSockets: 0,
+    handling: 'Retain socketCount unchanged as source provenance. The crafting runtime explicitly labels its later inference that socketCount is the concrete-base maximum and that fresh items start with zero added Rune Sockets; it does not present that inference as a verified source field.',
   }));
 check('base-property and icon field coverage remains exact with graceful icon fallback',
   stable(baseParity.task02?.fieldCoverage?.baseProperties) === stable({
@@ -1226,6 +1240,12 @@ check('runtime mechanics projection retains exact Essence and socketable records
   runtimeMechanics.essenceModifiersById?.['83']?.modifierGroup === 'IncreasedLife' &&
   Object.keys(runtimeMechanics.socketablesByItemId || {}).length === actual.craftingItems.socketables.length &&
   stable(runtimeMechanics.socketableTypes) === stable(['Rune', 'SoulCore', 'Idol', 'AbyssalEye', 'CongealedMist']) &&
+  stable(runtimeMechanics.socketableItemClasses) === stable({
+    '8': 'Wand', '12': 'One Hand Mace', '13': 'Bow', '14': 'Staff',
+    '17': 'Two Hand Mace', '22': 'Gloves', '23': 'Boots', '24': 'Body Armour',
+    '25': 'Helmet', '26': 'Shield', '32': 'Sceptre', '57': 'Warstaff',
+    '78': 'Spear', '79': 'Crossbow', '80': 'Focus', '93': 'Buckler', '109': 'Talisman',
+  }) &&
   runtimeMechanics.socketablesByItemId?.['624']?.effects?.armour?.statId === 'base_fire_damage_resistance_%' &&
   runtimeMechanics.socketablesByItemId?.['5081']?.limit === 0 &&
   runtimeMechanics.socketableLimits?.[0]?.number === 1);

@@ -27,6 +27,7 @@ const modData = { bases };
 const desecratedData = JSON.parse(readFileSync(path.join(HERE, 'data', 'desecrated-mods.json'), 'utf8'));
 const normalizedBaseItems = JSON.parse(readFileSync(path.join(HERE, 'data', 'normalized', 'base-items.json'), 'utf8'));
 const normalizedModifiers = JSON.parse(readFileSync(path.join(HERE, 'data', 'normalized', 'modifiers.json'), 'utf8'));
+const currencyIndex = JSON.parse(readFileSync(path.join(HERE, 'data', 'crafting', 'currency-index.json'), 'utf8'));
 const normalizedModifiersById = new Map(normalizedModifiers.modifiers.map(modifier => [modifier.id, modifier]));
 const runtimeDataContext = { window: {} };
 vm.runInNewContext(readFileSync(path.join(HERE, 'data', 'runtime.data.js'), 'utf8'), runtimeDataContext);
@@ -1888,6 +1889,29 @@ test('validation:socketing-augments', () => {
   restored.loadItem(fullItem);
   assert.deepEqual(restored.getItem(), fullItem, 'socket augment state must survive save/load exactly');
 
+  const wand = normalizedMechanicsEngine(2136, 'wands', 0x50d1);
+  assert(wand.applyArtificerOrb().success);
+  const wandOnly = wand.applySocketable(5092);
+  assert(wandOnly.success, wandOnly.error);
+  assert.equal(wandOnly.occupiedSocket.effect.effectFamily, 'item-class:Wand');
+  assert.equal(wandOnly.occupiedSocket.effect.statId, 'damage_cannot_be_taken_from_ward');
+
+  const staff = normalizedMechanicsEngine(2154, 'staves', 0x50d2);
+  assert(staff.applyArtificerOrb().success);
+  const staffRune = staff.applySocketable(624);
+  assert(staffRune.success, staffRune.error);
+  assert.equal(staffRune.occupiedSocket.effect.effectFamily, 'item-class:Staff');
+  assert.equal(staffRune.occupiedSocket.effect.statId, 'non_skill_base_all_damage_%_to_gain_as_fire');
+  assert.equal(staffRune.occupiedSocket.effect.value, 8);
+
+  const wrongExplicitClass = normalizedMechanicsEngine(2241, 'body_armours_str', 0x50d3);
+  assert(wrongExplicitClass.applyArtificerOrb().success);
+  const wrongExplicitBefore = wrongExplicitClass.getItem();
+  const wrongExplicit = wrongExplicitClass.applySocketable(5092);
+  assert.equal(wrongExplicit.success, false);
+  assert.match(wrongExplicit.error, /no retained effect for Body Armour/i);
+  assert.deepEqual(wrongExplicitClass.getItem(), wrongExplicitBefore);
+
   const duplicateLimited = normalizedMechanicsEngine(2241, 'body_armours_str', 0x50e);
   assert(duplicateLimited.applyArtificerOrb().success);
   assert(duplicateLimited.applyArtificerOrb().success);
@@ -1904,6 +1928,38 @@ test('validation:socketing-augments', () => {
   assert.equal(invalid.success, false);
   assert.match(invalid.error, /requires a concrete weapon or armour base/i);
   assert.deepEqual(invalidClass.getItem(), invalidBefore);
+
+  const poolByBaseId = new Map(Object.entries(normalizedBaseItems.simulatorBaseMap || {})
+    .flatMap(([poolId, mapping]) => (mapping.concreteBaseIds || []).map(baseId => [Number(baseId), poolId])));
+  const supportedSocketables = currencyIndex.craftRegistry.filter(definition =>
+    definition.supported && definition.handler === 'applySocketable');
+  assert.equal(supportedSocketables.length, 284);
+  for (const definition of supportedSocketables) {
+    const concrete = normalizedBaseItems.bases.find(base =>
+      Number(base.socketCount) > 0 && !base.unmodifiable &&
+      definition.validItemClasses.includes(base.itemClass) &&
+      bases[poolByBaseId.get(Number(base.id))]);
+    assert(concrete, `${definition.craftId} has no constructible compatible concrete base`);
+    const poolId = poolByBaseId.get(Number(concrete.id));
+    const exhaustive = normalizedMechanicsEngine(concrete.id, poolId, definition.sourceItemId);
+    const socketResult = exhaustive.applyArtificerOrb();
+    assert(socketResult.success, `${definition.craftId}: ${socketResult.error}`);
+    const insertResult = exhaustive.applySocketable(definition.sourceItemId);
+    assert(insertResult.success, `${definition.craftId} on ${concrete.displayName}: ${insertResult.error}`);
+    assert.equal(insertResult.socketableItemId, definition.sourceItemId);
+    const source = runtimeMechanics.socketablesByItemId[String(definition.sourceItemId)];
+    const explicitKey = Object.keys(source.effects.classes || {})
+      .find(key => runtimeMechanics.socketableItemClasses[key] === concrete.itemClass);
+    const tags = new Set(concrete.tags || []);
+    const expectedEffect = explicitKey ? source.effects.classes[explicitKey]
+      : source.effects.all
+        || (tags.has('armour') ? source.effects.armour : null)
+        || (tags.has('weapon') ? source.effects.martial : null)
+        || (['Wand', 'Staff', 'Sceptre'].includes(concrete.itemClass) ? source.effects.caster : null);
+    assert(expectedEffect, `${definition.craftId} lacks an effect for ${concrete.itemClass}`);
+    assert.equal(insertResult.occupiedSocket.effect.statId, expectedEffect.statId,
+      `${definition.craftId} resolved the wrong retained effect family`);
+  }
 });
 
 test('Greater/Perfect modifier-level options filter tiers', () => {

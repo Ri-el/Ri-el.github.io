@@ -549,6 +549,7 @@ export function buildCurrencyIndex() {
     {
       craftingItems: crafting.items || [],
       socketables: crafting.socketables || [],
+      socketableItemClasses: crafting.socketableItemClasses || {},
       socketableLimits: crafting.socketableLimits || [],
       essences: essences.essences || [],
       bases: baseItems.bases || [],
@@ -687,14 +688,36 @@ function socketableHasEffect(socketable) {
     ...Object.values(effects.classes || {})].some(Boolean);
 }
 
-function socketableItemClasses(socketable, bases) {
+function buildSocketableItemClassMap(craftingItems, essences) {
+  const names = new Map(Object.entries(craftingItems.socketableItemClasses || {})
+    .filter(([, itemClass]) => typeof itemClass === 'string' && itemClass));
+  for (const essence of essences) {
+    for (const mapping of essence.guaranteedModifiersByItemClass || []) {
+      if (!mapping.itemClass) continue;
+      const key = String(mapping.itemClassId);
+      const existing = names.get(key);
+      assert(!existing || existing === mapping.itemClass,
+        `Source item-class enum ${key} resolves to both ${existing} and ${mapping.itemClass}.`);
+      names.set(key, mapping.itemClass);
+    }
+  }
+  const referenced = [...new Set(craftingItems.socketables
+    .flatMap(socketable => Object.keys(socketable.effects?.classes || {})))];
+  for (const key of referenced) {
+    assert(names.has(String(key)), `Socketable applicability enum ${key} has no retained item-class name.`);
+  }
+  return names;
+}
+
+function socketableItemClasses(socketable, bases, itemClassNames) {
   const effects = socketable?.effects || {};
-  const classIds = new Set(Object.entries(effects.classes || {})
+  const explicitItemClasses = new Set(Object.entries(effects.classes || {})
     .filter(([, effect]) => !!effect)
-    .map(([classId]) => Number(classId)));
+    .map(([classId]) => itemClassNames.get(String(classId)))
+    .filter(Boolean));
   const matches = base => {
     if (!Number.isInteger(Number(base.socketCount)) || Number(base.socketCount) <= 0) return false;
-    if (classIds.has(Number(base.classId))) return true;
+    if (explicitItemClasses.has(base.itemClass)) return true;
     if (effects.all) return true;
     const tags = new Set(base.tags || []);
     if (effects.armour && tags.has('armour')) return true;
@@ -822,11 +845,14 @@ function generatedArtificerDefinition(item, bases) {
   };
 }
 
-function generatedSocketableDefinition(socketable, item, bases, socketableLimits) {
+function generatedSocketableDefinition(socketable, item, bases, socketableLimits, itemClassNames) {
   assert(socketableHasEffect(socketable), `Socketable ${socketable.itemId} has no retained effect.`);
   const limit = socketable.limit == null ? null : socketableLimits[Number(socketable.limit)] || null;
   const typeNames = ['Rune', 'Soul Core', 'Idol', 'Abyssal Eye', 'Congealed Mist'];
   const typeName = typeNames[Number(socketable.type)] || `Socketable type ${socketable.type}`;
+  const validItemClasses = socketableItemClasses(socketable, bases, itemClassNames);
+  const supported = validItemClasses.length > 0;
+  const talismanBlocker = 'The only retained applicability is Talisman (source item-class enum 109), but the normalized target data and workbench contain no selectable Talisman concrete base.';
   return {
     craftId: `socketable-${socketable.itemId}`,
     sourceItemId: socketable.itemId,
@@ -846,13 +872,13 @@ function generatedSocketableDefinition(socketable, item, bases, socketableLimits
     engineAction: `socketable:${socketable.itemId}`,
     applicabilityPredicate: 'socketDisabledReason',
     disabledReasonHandler: 'socketDisabledReason',
-    disabledReason: '',
-    handler: 'applySocketable',
+    disabledReason: supported ? '' : talismanBlocker,
+    handler: supported ? 'applySocketable' : null,
     sourceHandler: 'poe2_socketable',
     triggeringAction: null,
     omenInteraction: { omenId: null, exclusiveGroup: null, consumeOn: 'successful_operation', triggerCraftId: null },
     corruptionRestriction: socketable.corrupt ? 'allowed_if_socketable_source_flag' : 'blocked_if_corrupted',
-    validItemClasses: socketableItemClasses(socketable, bases),
+    validItemClasses,
     validItemTags: [],
     qualityRestriction: 'none',
     socketRestriction: 'requires_empty_socket_no_replacement_or_removal',
@@ -863,21 +889,26 @@ function generatedSocketableDefinition(socketable, item, bases, socketableLimits
       duplicateLimit: limit?.number ?? null,
       duplicateLimitText: limit?.text || null,
       allowsCorrupted: !!socketable.corrupt,
-      bindsItem: !!socketable.bound,
+      sourceBoundFlag: !!socketable.bound,
       socketCapacityStatus: 'inferred_source_cap',
     },
     sourceEvidence: [
       `data/normalized/crafting-items.json#item:${socketable.itemId}`,
       `data/normalized/crafting-items.json#socketable:${socketable.itemId}`,
+      'data/normalized/essences.json#source-item-class-enum',
       'data/normalized/crafting-items.json#method:52',
       'data/crafting/registry-expansion.json',
     ],
-    implementationStatus: 'implemented',
-    verificationStatus: 'inferred_structured_socketable_transition',
+    implementationStatus: supported ? 'implemented' : 'blocked_missing_data',
+    verificationStatus: supported
+      ? 'inferred_structured_socketable_transition'
+      : 'blocked_missing_selectable_talisman_base',
     confidence: 'inferred',
-    blocker: null,
-    testFixtureIds: ['validation:socketing-augments', 'ui:implemented-socket-registry-dispatch'],
-    supported: true,
+    blocker: supported ? null : talismanBlocker,
+    testFixtureIds: supported
+      ? ['validation:socketing-augments', 'ui:implemented-socket-registry-dispatch']
+      : ['data-validation:socketable-item-class-enum'],
+    supported,
     visible: true,
   };
 }
@@ -888,6 +919,10 @@ function expandRegistryDefinitions(expansion, context) {
     `Registry expansion target ${expansion.targetGameVersion} does not match ${TARGET_VERSION}.`);
   assert(Array.isArray(expansion.definitions), 'Registry expansion definitions are missing.');
   const { craftingItems, socketables, essences, bases, methodByItemId } = context;
+  const socketableItemClassNames = buildSocketableItemClassMap({
+    socketables,
+    socketableItemClasses: context.socketableItemClasses,
+  }, essences);
   const itemById = new Map(craftingItems.map(item => [String(item.id), item]));
   const craftIds = new Set();
   const definitions = expansion.definitions.map(compact => {
@@ -1007,7 +1042,8 @@ function expandRegistryDefinitions(expansion, context) {
           socketable,
           item,
           bases,
-          context.socketableLimits || []
+          context.socketableLimits || [],
+          socketableItemClassNames,
         );
         assert(!craftIds.has(definition.craftId), `Duplicate expansion craft ID ${definition.craftId}.`);
         craftIds.add(definition.craftId);

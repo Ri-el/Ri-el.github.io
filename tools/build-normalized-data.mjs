@@ -42,6 +42,35 @@ function pickFields(source, fields) {
     .map(field => [field, source[field]]));
 }
 
+function buildSocketableItemClassMap(craftingItems, essences) {
+  const names = new Map(Object.entries(craftingItems.socketableItemClasses || {})
+    .filter(([, itemClass]) => typeof itemClass === 'string' && itemClass));
+  // The retained legacy snapshot predates socketableItemClasses. Essence
+  // applicability uses the same source enum and preserves every enum value
+  // referenced by the snapshot's socketables, so it is a deterministic
+  // compatibility source until the next raw conversion.
+  for (const essence of essences.essences || []) {
+    for (const mapping of essence.guaranteedModifiersByItemClass || []) {
+      if (!mapping.itemClass) continue;
+      const key = String(mapping.itemClassId);
+      const existing = names.get(key);
+      if (existing && existing !== mapping.itemClass) {
+        throw new Error(`Source item-class enum ${key} resolves to both ${existing} and ${mapping.itemClass}.`);
+      }
+      names.set(key, mapping.itemClass);
+    }
+  }
+  const referenced = [...new Set((craftingItems.socketables || [])
+    .flatMap(socketable => Object.keys(socketable.effects?.classes || {})))]
+    .sort((left, right) => Number(left) - Number(right));
+  for (const key of referenced) {
+    if (!names.has(String(key))) {
+      throw new Error(`Socketable applicability enum ${key} has no retained item-class name.`);
+    }
+  }
+  return Object.fromEntries(referenced.map(key => [String(key), names.get(String(key))]));
+}
+
 function jsonFiles(directory) {
   if (!existsSync(directory)) return [];
   return readdirSync(directory).filter(file => file.endsWith('.json')).sort();
@@ -208,6 +237,7 @@ export function buildRuntimeData(
   ]));
 
   const socketableTypeNames = (craftingItems.socketableTypes || []).map(type => type.id);
+  const socketableItemClasses = buildSocketableItemClassMap(craftingItems, essences);
   const socketablesByItemId = Object.fromEntries((craftingItems.socketables || []).map(socketable => [
     String(socketable.itemId),
     {
@@ -261,6 +291,7 @@ export function buildRuntimeData(
       essencesByItemId,
       essenceModifiersById: essenceModifiers,
       socketableTypes: socketableTypeNames,
+      socketableItemClasses,
       socketableLimits: craftingItems.socketableLimits || [],
       socketablesByItemId,
     },

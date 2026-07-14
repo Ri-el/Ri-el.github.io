@@ -76,7 +76,7 @@ if (targets.length === 0) {
       assert(startup.modBaseCount > 0, `${target}: MOD_BASES did not initialize`);
       assert(startup.runtimeDataPresent, `${target}: runtime data did not initialize`);
       assert(startup.currencyIndexPresent, `${target}: currency index did not initialize`);
-      assert.equal(startup.craftRegistryLength, 415, `${target}: available runtime registry length`);
+      assert.equal(startup.craftRegistryLength, 412, `${target}: available runtime registry length`);
       assert.equal(startup.craftTabsLength, 10, `${target}: tab length`);
       assert(startup.craftForgePresent && startup.normalizedCounts, `${target}: CraftForge bridge/indexes unavailable`);
       assert.equal(startup.toast, '', `${target}: startup toast`);
@@ -222,6 +222,12 @@ if (targets.length === 0) {
             `${target}: invalid socket class lacks a precise reason`);
           assert.equal(await page.locator('[data-craft-id="artificers-orb"] .craft-status').textContent(), 'Inferred',
             `${target}: inferred socket operation is not visibly labelled`);
+          const talismanOnly = page.locator('[data-craft-id="socketable-5111"]');
+          assert.equal(await talismanOnly.getAttribute('aria-disabled'), 'true',
+            `${target}: Talisman-only augment unexpectedly dispatches`);
+          assert.match(await talismanOnly.getAttribute('data-disabled-reason'),
+            /Talisman.*no selectable Talisman concrete base/i,
+            `${target}: Talisman-only augment lacks its precise base-data blocker`);
           await page.locator('#craft-show-deprecated').check();
           assert.equal(await page.locator('[data-craft-id]').count(), 296, `${target}: deprecated socket audit count`);
           await page.locator('input[name="craft-inventory-mode"][value="available"]').check();
@@ -712,7 +718,7 @@ if (targets.length === 0) {
           }
           return { names, urls };
         });
-        assert(offlineCache.names.includes('poe2-craft-registry-v8'), `${target}: updated service-worker cache missing`);
+        assert(offlineCache.names.includes('poe2-craft-registry-v9'), `${target}: updated service-worker cache missing`);
         assert(offlineCache.urls.some(url => url.endsWith('/data/crafting/known-items.data.js')),
           `${target}: lazy known-items catalog missing from offline cache`);
         page.removeAllListeners('console');

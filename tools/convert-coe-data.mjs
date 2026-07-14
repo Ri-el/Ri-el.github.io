@@ -476,6 +476,13 @@ function normalizeCraftingItems(data) {
     constraints: omen.constraints || [],
   }));
 
+  const socketableClassIds = [...new Set((data.socketables.entries || [])
+    .flatMap(entry => Object.keys(entry.class || {}).map(Number)))]
+    .sort((a, b) => a - b);
+  const socketableItemClasses = Object.fromEntries(socketableClassIds.map(itemClassId => [
+    String(itemClassId),
+    data.enums.classes[itemClassId] || null,
+  ]));
   const socketables = (data.socketables.entries || []).map(entry => ({
     itemId: entry.item,
     displayName: itemName(entryById(data.items, entry.item)),
@@ -513,6 +520,7 @@ function normalizeCraftingItems(data) {
     items,
     catalysts: items.filter(item => item.classifications.includes('catalyst')).map(item => item.id),
     socketables,
+    socketableItemClasses,
     socketableTypes: data.methods.socketables.types || [],
     socketableLimits: data.methods.socketables.limits || [],
     emotions,

@@ -6,10 +6,10 @@ This report is generated from `data/crafting/currency-index.json`. Classificatio
 
 | Classification | Source inventory | Runtime registry |
 |---|---:|---:|
-| implemented | 414 | 415 |
+| implemented | 411 | 412 |
 | conditional | 0 | 0 |
 | non_item_currency | 3 | 0 |
-| blocked_missing_data | 103 | 3 |
+| blocked_missing_data | 106 | 6 |
 | probability_unverified | 1 | 1 |
 | intentionally_out_of_scope | 0 | 0 |
 | deprecated_for_target_version | 9 | 0 |
@@ -25,6 +25,9 @@ This report is generated from `data/crafting/currency-index.json`. Classificatio
 - `omen-sovereign` — Omen of the Sovereign: Mechanic blocked because the exact target-version Omen of the Sovereign Lich-type modifier guarantee and applicable modifier table are not verified.
 - `omen-liege` — Omen of the Liege: Mechanic blocked because the exact target-version Omen of the Liege Lich-type modifier guarantee and applicable modifier table are not verified.
 - `omen-blackblooded` — Omen of the Blackblooded: Mechanic blocked because the exact target-version Omen of the Blackblooded Lich-type modifier guarantee and applicable modifier table are not verified.
+- `socketable-5111` — Ancient Rune of Animosity: The only retained applicability is Talisman (source item-class enum 109), but the normalized target data and workbench contain no selectable Talisman concrete base.
+- `socketable-5200` — Legacy of Amor Mandragora: The only retained applicability is Talisman (source item-class enum 109), but the normalized target data and workbench contain no selectable Talisman concrete base.
+- `socketable-5201` — Legacy of Spiteful Floret: The only retained applicability is Talisman (source item-class enum 109), but the normalized target data and workbench contain no selectable Talisman concrete base.
 
 ## Runtime identities missing from normalized item names
 

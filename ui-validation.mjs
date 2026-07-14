@@ -153,9 +153,9 @@ check('authoritative registry audits 531 definitions and exposes all non-depreca
   craftIds.length === new Set(craftIds).size &&
   craftIds.every(id => currencyIndex.runtimeRegistry[id] ||
     craftRegistry.find(definition => definition.craftId === id)?.sourceItemId != null));
-check('startup browser registry contains all 415 available definitions',
+check('startup browser registry contains all 412 available definitions',
   currencyBrowserSource.startsWith(currencyBrowserPrefix) &&
-  currencyBrowserIndex.craftRegistry.length === 415 &&
+  currencyBrowserIndex.craftRegistry.length === 412 &&
   currencyBrowserIndex.craftRegistry.every(definition => definition.supported === true));
 check('lazy browser registry contains every retained definition',
   knownBrowserSource.startsWith(knownBrowserPrefix) &&
@@ -186,10 +186,14 @@ check('implemented Essence definitions are available with exact source identitie
   implementedEssences.filter(definition => definition.confidence === 'inferred').length === 23);
 const implementedSocketing = craftRegistry.filter(definition => definition.category === 'socketing' && definition.supported);
 check('implemented socket definitions are visibly inferred and retain exact dispatch identities',
-  implementedSocketing.length === 288 &&
+  implementedSocketing.length === 285 &&
   implementedSocketing.every(definition => definition.confidence === 'inferred') &&
   implementedSocketing.filter(definition => definition.handler === 'applyArtificerOrb').length === 1 &&
-  implementedSocketing.filter(definition => definition.handler === 'applySocketable').length === 287 &&
+  implementedSocketing.filter(definition => definition.handler === 'applySocketable').length === 284 &&
+  craftRegistry.filter(definition => definition.category === 'socketing' && !definition.supported)
+    .filter(definition => [5111, 5200, 5201].includes(Number(definition.sourceItemId))).length === 3 &&
+  craftRegistry.find(definition => definition.craftId === 'socketable-5092')?.validItemClasses.join(',') === 'Wand' &&
+  craftRegistry.find(definition => definition.craftId === 'socketable-5102')?.validItemClasses.join(',') === 'Buckler' &&
   /definition\.confidence === 'inferred'[\s\S]*?\? 'Inferred'/.test(app));
 check('unsupported visible definitions carry a specific blocker',
   visibleCraftDefinitions.filter(definition => !definition.supported).length > 0 &&
@@ -775,7 +779,7 @@ check('Absent Amulet art is installed at its numeric base ID path',
   fs.existsSync(new URL('./assets/item-bases/2563.png', import.meta.url)));
 check('runtime selector, socket stylesheet, and performance data are versioned in the offline shell',
   /header-fix\.css\?v=20/.test(select) &&
-  /CACHE_NAME = 'poe2-craft-registry-v8'/.test(serviceWorker) &&
+  /CACHE_NAME = 'poe2-craft-registry-v9'/.test(serviceWorker) &&
   serviceWorker.includes("'./header-fix.css?v=20'") &&
   serviceWorker.includes("'./data/crafting/known-items.data.js'"));
 check('Absent Amulet art is available in the versioned offline application shell',

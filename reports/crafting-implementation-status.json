@@ -3,7 +3,7 @@
   "targetGameVersion": "0.5.4",
   "generatedFrom": {
     "path": "data/crafting/currency-index.json",
-    "sha256": "8eec410d663c302320232a15a269266d46a00b3f0408fc0cb25eee98f974c932"
+    "sha256": "a91827160f83f9f55b8a5e2587eaef7d42fbe653cc741a9ed41647d890758521"
   },
   "statusTaxonomy": [
     "verified",
@@ -117,8 +117,8 @@
     "socketing": {
       "known": 296,
       "implemented": 0,
-      "inferred": 288,
-      "blocked": 0,
+      "inferred": 285,
+      "blocked": 3,
       "deprecated": 8,
       "nonEquipment": 0,
       "catalogueOnly": 0
@@ -257,7 +257,7 @@
       },
       {
         "handler": "executeCraftOperation -> applySocketable",
-        "count": 287
+        "count": 284
       },
       {
         "handler": "executeCraftOperation -> applyTransmutation",
@@ -279,7 +279,7 @@
     "discoverableButDisabled": {
       "currency": 0,
       "quality": 8,
-      "socketing": 0,
+      "socketing": 3,
       "ritual": 19,
       "essences": 0,
       "abyss": 4,
@@ -816,6 +816,11 @@
         "category": "runeforging",
         "count": 1,
         "blocker": "Mechanic blocked because Transcendent Alloy has retained guaranteed modifier IDs, but those records lack browser-runtime display templates and modifier-group identities required for an atomic replacement that preserves identity and conflicts."
+      },
+      {
+        "category": "socketing",
+        "count": 3,
+        "blocker": "The only retained applicability is Talisman (source item-class enum 109), but the normalized target data and workbench contain no selectable Talisman concrete base."
       }
     ]
   },
@@ -1617,6 +1622,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:624",
         "data/normalized/crafting-items.json#socketable:624",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:624"
@@ -1638,9 +1644,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -1668,6 +1676,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:625",
         "data/normalized/crafting-items.json#socketable:625",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:625"
@@ -1689,9 +1698,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -1719,6 +1730,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:626",
         "data/normalized/crafting-items.json#socketable:626",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:626"
@@ -1740,9 +1752,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -1770,6 +1784,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:627",
         "data/normalized/crafting-items.json#socketable:627",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:627"
@@ -1791,9 +1806,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -1821,6 +1838,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:628",
         "data/normalized/crafting-items.json#socketable:628",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:628"
@@ -1842,9 +1860,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -1872,6 +1892,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:629",
         "data/normalized/crafting-items.json#socketable:629",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:629"
@@ -1893,9 +1914,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -1923,6 +1946,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:630",
         "data/normalized/crafting-items.json#socketable:630",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:630"
@@ -1944,9 +1968,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -1974,6 +2000,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:631",
         "data/normalized/crafting-items.json#socketable:631",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:631"
@@ -1995,9 +2022,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -2025,6 +2054,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:632",
         "data/normalized/crafting-items.json#socketable:632",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:632"
@@ -2046,9 +2076,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -2076,6 +2108,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:633",
         "data/normalized/crafting-items.json#socketable:633",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:633"
@@ -2097,9 +2130,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -2127,6 +2162,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:634",
         "data/normalized/crafting-items.json#socketable:634",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:634"
@@ -2148,9 +2184,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -2178,6 +2216,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:635",
         "data/normalized/crafting-items.json#socketable:635",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:635"
@@ -2199,9 +2238,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -2229,6 +2270,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:636",
         "data/normalized/crafting-items.json#socketable:636",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:636"
@@ -2250,9 +2292,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -2280,6 +2324,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:637",
         "data/normalized/crafting-items.json#socketable:637",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:637"
@@ -2301,9 +2346,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -2331,6 +2378,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:638",
         "data/normalized/crafting-items.json#socketable:638",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:638"
@@ -2352,9 +2400,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -2382,6 +2432,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:639",
         "data/normalized/crafting-items.json#socketable:639",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:639"
@@ -2403,9 +2454,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -2433,6 +2486,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:640",
         "data/normalized/crafting-items.json#socketable:640",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:640"
@@ -2454,9 +2508,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -2484,6 +2540,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:641",
         "data/normalized/crafting-items.json#socketable:641",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:641"
@@ -2505,9 +2562,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -2535,6 +2594,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:642",
         "data/normalized/crafting-items.json#socketable:642",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:642"
@@ -2556,9 +2616,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -2586,6 +2648,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:643",
         "data/normalized/crafting-items.json#socketable:643",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:643"
@@ -2607,9 +2670,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -2637,6 +2702,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:644",
         "data/normalized/crafting-items.json#socketable:644",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:644"
@@ -2658,9 +2724,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -2688,6 +2756,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:645",
         "data/normalized/crafting-items.json#socketable:645",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:645"
@@ -2709,9 +2778,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -2739,6 +2810,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:646",
         "data/normalized/crafting-items.json#socketable:646",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:646"
@@ -2760,9 +2832,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -2790,6 +2864,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:647",
         "data/normalized/crafting-items.json#socketable:647",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:647"
@@ -2811,9 +2886,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -2841,6 +2918,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:648",
         "data/normalized/crafting-items.json#socketable:648",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:648"
@@ -2862,9 +2940,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -2892,6 +2972,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:649",
         "data/normalized/crafting-items.json#socketable:649",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:649"
@@ -2913,9 +2994,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -2943,6 +3026,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:650",
         "data/normalized/crafting-items.json#socketable:650",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:650"
@@ -2964,9 +3048,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -2994,6 +3080,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:651",
         "data/normalized/crafting-items.json#socketable:651",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:651"
@@ -3015,9 +3102,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -3045,6 +3134,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:652",
         "data/normalized/crafting-items.json#socketable:652",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:652"
@@ -3066,9 +3156,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -3096,6 +3188,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:653",
         "data/normalized/crafting-items.json#socketable:653",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:653"
@@ -3117,9 +3210,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -3147,6 +3242,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:654",
         "data/normalized/crafting-items.json#socketable:654",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:654"
@@ -3168,9 +3264,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -3198,6 +3296,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:655",
         "data/normalized/crafting-items.json#socketable:655",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:655"
@@ -3219,9 +3318,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -3249,6 +3350,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:656",
         "data/normalized/crafting-items.json#socketable:656",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:656"
@@ -3270,9 +3372,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -3300,6 +3404,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:657",
         "data/normalized/crafting-items.json#socketable:657",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:657"
@@ -3321,9 +3426,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -3351,6 +3458,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:658",
         "data/normalized/crafting-items.json#socketable:658",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:658"
@@ -3372,9 +3480,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -3402,6 +3512,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:659",
         "data/normalized/crafting-items.json#socketable:659",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:659"
@@ -3423,9 +3534,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -3453,6 +3566,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:660",
         "data/normalized/crafting-items.json#socketable:660",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:660"
@@ -3474,9 +3588,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -3504,6 +3620,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:661",
         "data/normalized/crafting-items.json#socketable:661",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:661"
@@ -3525,9 +3642,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -3555,6 +3674,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:662",
         "data/normalized/crafting-items.json#socketable:662",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:662"
@@ -3576,9 +3696,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -3606,6 +3728,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:663",
         "data/normalized/crafting-items.json#socketable:663",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:663"
@@ -3627,9 +3750,11 @@
         "One Hand Sword",
         "Shield",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -3657,6 +3782,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:664",
         "data/normalized/crafting-items.json#socketable:664",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:664"
@@ -3711,6 +3837,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:665",
         "data/normalized/crafting-items.json#socketable:665",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:665"
@@ -3765,6 +3892,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:666",
         "data/normalized/crafting-items.json#socketable:666",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:666"
@@ -3819,6 +3947,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:667",
         "data/normalized/crafting-items.json#socketable:667",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:667"
@@ -3873,6 +4002,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:668",
         "data/normalized/crafting-items.json#socketable:668",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:668"
@@ -3927,6 +4057,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:669",
         "data/normalized/crafting-items.json#socketable:669",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:669"
@@ -3981,6 +4112,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:670",
         "data/normalized/crafting-items.json#socketable:670",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:670"
@@ -4035,6 +4167,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:671",
         "data/normalized/crafting-items.json#socketable:671",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:671"
@@ -4089,6 +4222,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:672",
         "data/normalized/crafting-items.json#socketable:672",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:672"
@@ -4143,6 +4277,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:673",
         "data/normalized/crafting-items.json#socketable:673",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:673"
@@ -4197,6 +4332,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:674",
         "data/normalized/crafting-items.json#socketable:674",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:674"
@@ -4251,6 +4387,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:675",
         "data/normalized/crafting-items.json#socketable:675",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:675"
@@ -4305,6 +4442,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:676",
         "data/normalized/crafting-items.json#socketable:676",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:676"
@@ -4356,6 +4494,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:677",
         "data/normalized/crafting-items.json#socketable:677",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:677"
@@ -4407,6 +4546,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:678",
         "data/normalized/crafting-items.json#socketable:678",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:678"
@@ -4458,6 +4598,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:679",
         "data/normalized/crafting-items.json#socketable:679",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:679"
@@ -4509,6 +4650,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:680",
         "data/normalized/crafting-items.json#socketable:680",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:680"
@@ -4560,6 +4702,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:681",
         "data/normalized/crafting-items.json#socketable:681",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:681"
@@ -4611,6 +4754,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:682",
         "data/normalized/crafting-items.json#socketable:682",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:682"
@@ -4662,12 +4806,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:683",
         "data/normalized/crafting-items.json#socketable:683",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:683"
       ],
       "supportedItemClasses": [
-        "Boots"
+        "Staff",
+        "Wand"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -4694,12 +4840,12 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:684",
         "data/normalized/crafting-items.json#socketable:684",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:684"
       ],
       "supportedItemClasses": [
-        "Boots",
         "Bow",
         "Claw",
         "Crossbow",
@@ -4709,9 +4855,11 @@
         "One Hand Mace",
         "One Hand Sword",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -4739,12 +4887,12 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:685",
         "data/normalized/crafting-items.json#socketable:685",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:685"
       ],
       "supportedItemClasses": [
-        "Boots",
         "Bow",
         "Claw",
         "Crossbow",
@@ -4754,9 +4902,11 @@
         "One Hand Mace",
         "One Hand Sword",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -4784,12 +4934,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:686",
         "data/normalized/crafting-items.json#socketable:686",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:686"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Boots"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -4816,12 +4967,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:687",
         "data/normalized/crafting-items.json#socketable:687",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:687"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Boots"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -4848,11 +5000,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:688",
         "data/normalized/crafting-items.json#socketable:688",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:688"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:688",
@@ -4878,6 +5033,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:689",
         "data/normalized/crafting-items.json#socketable:689",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:689"
@@ -4910,6 +5066,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:690",
         "data/normalized/crafting-items.json#socketable:690",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:690"
@@ -4942,6 +5099,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:691",
         "data/normalized/crafting-items.json#socketable:691",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:691"
@@ -4986,11 +5144,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:692",
         "data/normalized/crafting-items.json#socketable:692",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:692"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:692",
@@ -5016,6 +5177,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:693",
         "data/normalized/crafting-items.json#socketable:693",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:693"
@@ -5048,6 +5210,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:694",
         "data/normalized/crafting-items.json#socketable:694",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:694"
@@ -5080,6 +5243,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:695",
         "data/normalized/crafting-items.json#socketable:695",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:695"
@@ -5112,12 +5276,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:696",
         "data/normalized/crafting-items.json#socketable:696",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:696"
       ],
       "supportedItemClasses": [
-        "Boots"
+        "Bow"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -5144,12 +5309,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:697",
         "data/normalized/crafting-items.json#socketable:697",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:697"
       ],
       "supportedItemClasses": [
-        "Boots"
+        "Staff",
+        "Wand"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -5176,6 +5343,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:698",
         "data/normalized/crafting-items.json#socketable:698",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:698"
@@ -5208,6 +5376,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:699",
         "data/normalized/crafting-items.json#socketable:699",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:699"
@@ -5252,6 +5421,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:700",
         "data/normalized/crafting-items.json#socketable:700",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:700"
@@ -5296,6 +5466,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:701",
         "data/normalized/crafting-items.json#socketable:701",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:701"
@@ -5340,6 +5511,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:702",
         "data/normalized/crafting-items.json#socketable:702",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:702"
@@ -5372,11 +5544,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:703",
         "data/normalized/crafting-items.json#socketable:703",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:703"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:703",
@@ -5402,6 +5577,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:704",
         "data/normalized/crafting-items.json#socketable:704",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:704"
@@ -5456,12 +5632,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:774",
         "data/normalized/crafting-items.json#socketable:774",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:774"
       ],
       "supportedItemClasses": [
-        "Gloves",
+        "Body Armour",
+        "Boots",
         "Helmet"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -5489,11 +5667,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:775",
         "data/normalized/crafting-items.json#socketable:775",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:775"
       ],
       "supportedItemClasses": [
+        "Body Armour",
+        "Boots",
         "Gloves"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -5521,11 +5702,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:776",
         "data/normalized/crafting-items.json#socketable:776",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:776"
       ],
       "supportedItemClasses": [
+        "Boots",
         "Gloves",
         "Helmet"
       ],
@@ -5554,11 +5737,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:777",
         "data/normalized/crafting-items.json#socketable:777",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:777"
       ],
       "supportedItemClasses": [
+        "Body Armour",
         "Gloves",
         "Helmet"
       ],
@@ -5587,6 +5772,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:725",
         "data/normalized/crafting-items.json#socketable:725",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:725"
@@ -5619,12 +5805,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:726",
         "data/normalized/crafting-items.json#socketable:726",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:726"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Boots"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -5651,6 +5838,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:727",
         "data/normalized/crafting-items.json#socketable:727",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:727"
@@ -5683,11 +5871,15 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:728",
         "data/normalized/crafting-items.json#socketable:728",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:728"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour",
+        "Focus"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:728",
@@ -5713,6 +5905,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:729",
         "data/normalized/crafting-items.json#socketable:729",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:729"
@@ -5745,6 +5938,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:730",
         "data/normalized/crafting-items.json#socketable:730",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:730"
@@ -5777,12 +5971,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:731",
         "data/normalized/crafting-items.json#socketable:731",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:731"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Boots"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -5809,12 +6004,12 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:732",
         "data/normalized/crafting-items.json#socketable:732",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:732"
       ],
       "supportedItemClasses": [
-        "Boots",
         "Bow",
         "Claw",
         "Crossbow",
@@ -5824,9 +6019,11 @@
         "One Hand Mace",
         "One Hand Sword",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -5854,12 +6051,12 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:733",
         "data/normalized/crafting-items.json#socketable:733",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:733"
       ],
       "supportedItemClasses": [
-        "Boots",
         "Bow",
         "Claw",
         "Crossbow",
@@ -5869,9 +6066,11 @@
         "One Hand Mace",
         "One Hand Sword",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -5899,12 +6098,12 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:734",
         "data/normalized/crafting-items.json#socketable:734",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:734"
       ],
       "supportedItemClasses": [
-        "Boots",
         "Bow",
         "Claw",
         "Crossbow",
@@ -5914,9 +6113,11 @@
         "One Hand Mace",
         "One Hand Sword",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -5944,12 +6145,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:735",
         "data/normalized/crafting-items.json#socketable:735",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:735"
       ],
       "supportedItemClasses": [
-        "Gloves",
+        "Boots",
         "Helmet"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -5977,6 +6179,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:736",
         "data/normalized/crafting-items.json#socketable:736",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:736"
@@ -6009,12 +6212,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:737",
         "data/normalized/crafting-items.json#socketable:737",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:737"
       ],
       "supportedItemClasses": [
-        "Boots"
+        "Bow"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -6041,6 +6245,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:738",
         "data/normalized/crafting-items.json#socketable:738",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:738"
@@ -6085,12 +6290,15 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:739",
         "data/normalized/crafting-items.json#socketable:739",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:739"
       ],
       "supportedItemClasses": [
-        "Boots"
+        "Sceptre",
+        "Staff",
+        "Wand"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -6117,6 +6325,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:740",
         "data/normalized/crafting-items.json#socketable:740",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:740"
@@ -6168,6 +6377,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:741",
         "data/normalized/crafting-items.json#socketable:741",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:741"
@@ -6213,11 +6423,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:742",
         "data/normalized/crafting-items.json#socketable:742",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:742"
       ],
       "supportedItemClasses": [
+        "Body Armour",
         "Bow",
         "Claw",
         "Crossbow",
@@ -6257,6 +6469,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:743",
         "data/normalized/crafting-items.json#socketable:743",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:743"
@@ -6302,6 +6515,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:744",
         "data/normalized/crafting-items.json#socketable:744",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:744"
@@ -6353,6 +6567,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:745",
         "data/normalized/crafting-items.json#socketable:745",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:745"
@@ -6398,6 +6613,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:746",
         "data/normalized/crafting-items.json#socketable:746",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:746"
@@ -6443,17 +6659,18 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:747",
         "data/normalized/crafting-items.json#socketable:747",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:747"
       ],
       "supportedItemClasses": [
+        "Boots",
         "Bow",
         "Claw",
         "Crossbow",
         "Dagger",
         "Flail",
-        "Gloves",
         "One Hand Axe",
         "One Hand Mace",
         "One Hand Sword",
@@ -6488,6 +6705,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:748",
         "data/normalized/crafting-items.json#socketable:748",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:748"
@@ -6533,17 +6751,18 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:749",
         "data/normalized/crafting-items.json#socketable:749",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:749"
       ],
       "supportedItemClasses": [
+        "Boots",
         "Bow",
         "Claw",
         "Crossbow",
         "Dagger",
         "Flail",
-        "Gloves",
         "One Hand Axe",
         "One Hand Mace",
         "One Hand Sword",
@@ -6578,17 +6797,18 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:750",
         "data/normalized/crafting-items.json#socketable:750",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:750"
       ],
       "supportedItemClasses": [
+        "Boots",
         "Bow",
         "Claw",
         "Crossbow",
         "Dagger",
         "Flail",
-        "Gloves",
         "One Hand Axe",
         "One Hand Mace",
         "One Hand Sword",
@@ -6623,20 +6843,23 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:751",
         "data/normalized/crafting-items.json#socketable:751",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:751"
       ],
       "supportedItemClasses": [
+        "Body Armour",
         "Bow",
+        "Buckler",
         "Claw",
         "Crossbow",
         "Dagger",
         "Flail",
-        "Helmet",
         "One Hand Axe",
         "One Hand Mace",
         "One Hand Sword",
+        "Shield",
         "Spear",
         "Two Hand Axe",
         "Two Hand Mace",
@@ -6668,6 +6891,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:752",
         "data/normalized/crafting-items.json#socketable:752",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:752"
@@ -6719,6 +6943,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:753",
         "data/normalized/crafting-items.json#socketable:753",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:753"
@@ -6770,6 +6995,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:754",
         "data/normalized/crafting-items.json#socketable:754",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:754"
@@ -6821,12 +7047,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:770",
         "data/normalized/crafting-items.json#socketable:770",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:770"
       ],
       "supportedItemClasses": [
-        "Gloves",
+        "Body Armour",
+        "Boots",
         "Helmet"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -6854,11 +7082,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:771",
         "data/normalized/crafting-items.json#socketable:771",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:771"
       ],
       "supportedItemClasses": [
+        "Body Armour",
+        "Boots",
         "Gloves"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -6886,11 +7117,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:772",
         "data/normalized/crafting-items.json#socketable:772",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:772"
       ],
       "supportedItemClasses": [
+        "Boots",
         "Gloves",
         "Helmet"
       ],
@@ -6919,11 +7152,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:773",
         "data/normalized/crafting-items.json#socketable:773",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:773"
       ],
       "supportedItemClasses": [
+        "Body Armour",
         "Gloves",
         "Helmet"
       ],
@@ -6952,12 +7187,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:705",
         "data/normalized/crafting-items.json#socketable:705",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:705"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Gloves",
+        "Sceptre"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -6984,6 +7221,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:706",
         "data/normalized/crafting-items.json#socketable:706",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:706"
@@ -6997,6 +7235,7 @@
         "One Hand Axe",
         "One Hand Mace",
         "One Hand Sword",
+        "Sceptre",
         "Spear",
         "Two Hand Axe",
         "Two Hand Mace",
@@ -7028,12 +7267,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:707",
         "data/normalized/crafting-items.json#socketable:707",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:707"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Boots",
+        "Sceptre"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -7060,12 +7301,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:708",
         "data/normalized/crafting-items.json#socketable:708",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:708"
       ],
       "supportedItemClasses": [
-        "Helmet"
+        "Helmet",
+        "Sceptre"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -7092,12 +7335,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:709",
         "data/normalized/crafting-items.json#socketable:709",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:709"
       ],
       "supportedItemClasses": [
-        "Helmet"
+        "Helmet",
+        "Sceptre"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -7124,11 +7369,15 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:710",
         "data/normalized/crafting-items.json#socketable:710",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:710"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour",
+        "Sceptre"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:710",
@@ -7154,12 +7403,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:711",
         "data/normalized/crafting-items.json#socketable:711",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:711"
       ],
       "supportedItemClasses": [
-        "Helmet"
+        "Helmet",
+        "Sceptre"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -7186,12 +7437,15 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:712",
         "data/normalized/crafting-items.json#socketable:712",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:712"
       ],
       "supportedItemClasses": [
-        "Helmet"
+        "Buckler",
+        "Sceptre",
+        "Shield"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -7218,12 +7472,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:713",
         "data/normalized/crafting-items.json#socketable:713",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:713"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Boots",
+        "Sceptre"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -7250,11 +7506,15 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:714",
         "data/normalized/crafting-items.json#socketable:714",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:714"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour",
+        "Sceptre"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:714",
@@ -7280,12 +7540,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:715",
         "data/normalized/crafting-items.json#socketable:715",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:715"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Boots",
+        "Sceptre"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -7312,12 +7574,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:716",
         "data/normalized/crafting-items.json#socketable:716",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:716"
       ],
       "supportedItemClasses": [
-        "Helmet"
+        "Helmet",
+        "Sceptre"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -7344,12 +7608,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:717",
         "data/normalized/crafting-items.json#socketable:717",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:717"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Gloves",
+        "Sceptre"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -7376,12 +7642,15 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:718",
         "data/normalized/crafting-items.json#socketable:718",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:718"
       ],
       "supportedItemClasses": [
-        "Helmet"
+        "Buckler",
+        "Sceptre",
+        "Shield"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -7408,12 +7677,12 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:719",
         "data/normalized/crafting-items.json#socketable:719",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:719"
       ],
       "supportedItemClasses": [
-        "Boots",
         "Bow",
         "Claw",
         "Crossbow",
@@ -7422,10 +7691,13 @@
         "One Hand Axe",
         "One Hand Mace",
         "One Hand Sword",
+        "Sceptre",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -7453,12 +7725,12 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:720",
         "data/normalized/crafting-items.json#socketable:720",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:720"
       ],
       "supportedItemClasses": [
-        "Boots",
         "Bow",
         "Claw",
         "Crossbow",
@@ -7467,10 +7739,13 @@
         "One Hand Axe",
         "One Hand Mace",
         "One Hand Sword",
+        "Sceptre",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -7498,12 +7773,12 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:721",
         "data/normalized/crafting-items.json#socketable:721",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:721"
       ],
       "supportedItemClasses": [
-        "Boots",
         "Bow",
         "Claw",
         "Crossbow",
@@ -7512,10 +7787,13 @@
         "One Hand Axe",
         "One Hand Mace",
         "One Hand Sword",
+        "Sceptre",
         "Spear",
+        "Staff",
         "Two Hand Axe",
         "Two Hand Mace",
         "Two Hand Sword",
+        "Wand",
         "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -7543,11 +7821,15 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:722",
         "data/normalized/crafting-items.json#socketable:722",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:722"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour",
+        "Sceptre"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:722",
@@ -7573,11 +7855,15 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:723",
         "data/normalized/crafting-items.json#socketable:723",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:723"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour",
+        "Sceptre"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:723",
@@ -7603,11 +7889,15 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:724",
         "data/normalized/crafting-items.json#socketable:724",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:724"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour",
+        "Sceptre"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:724",
@@ -7633,12 +7923,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:755",
         "data/normalized/crafting-items.json#socketable:755",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:755"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Gloves",
+        "Sceptre"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -7665,12 +7957,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:756",
         "data/normalized/crafting-items.json#socketable:756",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:756"
       ],
       "supportedItemClasses": [
-        "Helmet"
+        "Helmet",
+        "Sceptre"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -7697,11 +7991,15 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:757",
         "data/normalized/crafting-items.json#socketable:757",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:757"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Focus",
+        "Sceptre"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:757",
@@ -7727,12 +8025,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:758",
         "data/normalized/crafting-items.json#socketable:758",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:758"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Gloves",
+        "Sceptre"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -7759,12 +8059,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:759",
         "data/normalized/crafting-items.json#socketable:759",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:759"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Gloves",
+        "Sceptre"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -7791,12 +8093,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:760",
         "data/normalized/crafting-items.json#socketable:760",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:760"
       ],
       "supportedItemClasses": [
-        "Helmet"
+        "Helmet",
+        "Sceptre"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -7823,12 +8127,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:761",
         "data/normalized/crafting-items.json#socketable:761",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:761"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Gloves",
+        "Sceptre"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -7855,12 +8161,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:762",
         "data/normalized/crafting-items.json#socketable:762",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:762"
       ],
       "supportedItemClasses": [
-        "Helmet"
+        "Helmet",
+        "Sceptre"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -7887,12 +8195,15 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:763",
         "data/normalized/crafting-items.json#socketable:763",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:763"
       ],
       "supportedItemClasses": [
-        "Helmet"
+        "Buckler",
+        "Sceptre",
+        "Shield"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -7919,11 +8230,15 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:764",
         "data/normalized/crafting-items.json#socketable:764",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:764"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour",
+        "Sceptre"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:764",
@@ -7949,11 +8264,15 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:765",
         "data/normalized/crafting-items.json#socketable:765",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:765"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour",
+        "Sceptre"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:765",
@@ -7979,12 +8298,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:778",
         "data/normalized/crafting-items.json#socketable:778",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:778"
       ],
       "supportedItemClasses": [
-        "Gloves",
+        "Body Armour",
+        "Boots",
         "Helmet"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -8012,11 +8333,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:779",
         "data/normalized/crafting-items.json#socketable:779",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:779"
       ],
       "supportedItemClasses": [
+        "Body Armour",
+        "Boots",
         "Gloves"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -8044,11 +8368,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:780",
         "data/normalized/crafting-items.json#socketable:780",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:780"
       ],
       "supportedItemClasses": [
+        "Body Armour",
         "Gloves",
         "Helmet"
       ],
@@ -8077,11 +8403,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:781",
         "data/normalized/crafting-items.json#socketable:781",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:781"
       ],
       "supportedItemClasses": [
+        "Boots",
         "Gloves",
         "Helmet"
       ],
@@ -8110,12 +8438,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:766",
         "data/normalized/crafting-items.json#socketable:766",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:766"
       ],
       "supportedItemClasses": [
-        "Gloves",
+        "Body Armour",
+        "Boots",
         "Helmet"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -8143,11 +8473,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:767",
         "data/normalized/crafting-items.json#socketable:767",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:767"
       ],
       "supportedItemClasses": [
+        "Body Armour",
+        "Boots",
         "Gloves"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
@@ -8175,11 +8508,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:768",
         "data/normalized/crafting-items.json#socketable:768",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:768"
       ],
       "supportedItemClasses": [
+        "Boots",
         "Gloves",
         "Helmet"
       ],
@@ -8208,11 +8543,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:769",
         "data/normalized/crafting-items.json#socketable:769",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:769"
       ],
       "supportedItemClasses": [
+        "Body Armour",
         "Gloves",
         "Helmet"
       ],
@@ -8241,6 +8578,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:782",
         "data/normalized/crafting-items.json#socketable:782",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:782"
@@ -8273,6 +8611,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5072",
         "data/normalized/crafting-items.json#socketable:5072",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5072"
@@ -8311,6 +8650,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5073",
         "data/normalized/crafting-items.json#socketable:5073",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5073"
@@ -8349,6 +8689,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5074",
         "data/normalized/crafting-items.json#socketable:5074",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5074"
@@ -8387,6 +8728,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5075",
         "data/normalized/crafting-items.json#socketable:5075",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5075"
@@ -8425,6 +8767,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5076",
         "data/normalized/crafting-items.json#socketable:5076",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5076"
@@ -8463,6 +8806,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5077",
         "data/normalized/crafting-items.json#socketable:5077",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5077"
@@ -8501,6 +8845,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5078",
         "data/normalized/crafting-items.json#socketable:5078",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5078"
@@ -8539,6 +8884,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5079",
         "data/normalized/crafting-items.json#socketable:5079",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5079"
@@ -8577,6 +8923,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5080",
         "data/normalized/crafting-items.json#socketable:5080",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5080"
@@ -8615,6 +8962,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5081",
         "data/normalized/crafting-items.json#socketable:5081",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5081"
@@ -8653,6 +9001,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5082",
         "data/normalized/crafting-items.json#socketable:5082",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5082"
@@ -8697,12 +9046,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5083",
         "data/normalized/crafting-items.json#socketable:5083",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5083"
       ],
       "supportedItemClasses": [
-        "Boots"
+        "Staff",
+        "Wand"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -8729,12 +9080,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5084",
         "data/normalized/crafting-items.json#socketable:5084",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5084"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Boots"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -8761,6 +9113,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5085",
         "data/normalized/crafting-items.json#socketable:5085",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5085"
@@ -8793,12 +9146,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5086",
         "data/normalized/crafting-items.json#socketable:5086",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5086"
       ],
       "supportedItemClasses": [
-        "Helmet"
+        "Buckler",
+        "Shield"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -8825,11 +9180,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5087",
         "data/normalized/crafting-items.json#socketable:5087",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5087"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5087",
@@ -8855,11 +9213,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5088",
         "data/normalized/crafting-items.json#socketable:5088",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5088"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5088",
@@ -8885,6 +9246,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5089",
         "data/normalized/crafting-items.json#socketable:5089",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5089"
@@ -8923,6 +9285,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5090",
         "data/normalized/crafting-items.json#socketable:5090",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5090"
@@ -8967,6 +9330,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5091",
         "data/normalized/crafting-items.json#socketable:5091",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5091"
@@ -9011,11 +9375,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5092",
         "data/normalized/crafting-items.json#socketable:5092",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5092"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Wand"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5092",
@@ -9041,6 +9408,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5093",
         "data/normalized/crafting-items.json#socketable:5093",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5093"
@@ -9075,11 +9443,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5094",
         "data/normalized/crafting-items.json#socketable:5094",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5094"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Sceptre"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5094",
@@ -9105,11 +9476,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5095",
         "data/normalized/crafting-items.json#socketable:5095",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5095"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Sceptre"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5095",
@@ -9135,6 +9509,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5096",
         "data/normalized/crafting-items.json#socketable:5096",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5096"
@@ -9169,6 +9544,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5097",
         "data/normalized/crafting-items.json#socketable:5097",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5097"
@@ -9216,6 +9592,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5098",
         "data/normalized/crafting-items.json#socketable:5098",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5098"
@@ -9263,6 +9640,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5099",
         "data/normalized/crafting-items.json#socketable:5099",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5099"
@@ -9310,6 +9688,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5100",
         "data/normalized/crafting-items.json#socketable:5100",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5100"
@@ -9357,12 +9736,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5101",
         "data/normalized/crafting-items.json#socketable:5101",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5101"
       ],
       "supportedItemClasses": [
-        "Boots"
+        "Bow"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -9389,11 +9769,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5102",
         "data/normalized/crafting-items.json#socketable:5102",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5102"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Buckler"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5102",
@@ -9419,12 +9802,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5103",
         "data/normalized/crafting-items.json#socketable:5103",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5103"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Two Hand Mace"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -9451,12 +9835,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5104",
         "data/normalized/crafting-items.json#socketable:5104",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5104"
       ],
       "supportedItemClasses": [
-        "Boots"
+        "One Hand Mace"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -9483,11 +9868,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5105",
         "data/normalized/crafting-items.json#socketable:5105",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5105"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Spear"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5105",
@@ -9513,12 +9901,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5106",
         "data/normalized/crafting-items.json#socketable:5106",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5106"
       ],
       "supportedItemClasses": [
-        "Bow"
+        "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -9545,12 +9934,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5107",
         "data/normalized/crafting-items.json#socketable:5107",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5107"
       ],
       "supportedItemClasses": [
-        "Boots"
+        "Staff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -9577,11 +9967,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5108",
         "data/normalized/crafting-items.json#socketable:5108",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5108"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Wand"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5108",
@@ -9607,11 +10000,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5109",
         "data/normalized/crafting-items.json#socketable:5109",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5109"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Focus"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5109",
@@ -9637,11 +10033,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5110",
         "data/normalized/crafting-items.json#socketable:5110",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5110"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Sceptre"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5110",
@@ -9661,30 +10060,30 @@
       "category": "socketing",
       "displayName": "Ancient Rune of Animosity",
       "sourceItemId": 5111,
-      "implementationStatus": "inferred",
-      "registryImplementationStatus": "implemented",
+      "implementationStatus": "blocked",
+      "registryImplementationStatus": "blocked_missing_data",
       "confidence": "inferred",
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5111",
         "data/normalized/crafting-items.json#socketable:5111",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5111"
       ],
       "supportedItemClasses": [],
-      "rarityRestrictions": "Any mutable compatible equipment rarity",
-      "engineHandler": "CraftingEngine.applySocketable",
+      "rarityRestrictions": "Unresolved; see blocker",
+      "engineHandler": null,
       "engineAction": "socketable:5111",
-      "uiHandler": "executeCraftOperation -> applySocketable",
+      "uiHandler": null,
       "testCoverage": [
-        "validation:socketing-augments",
-        "ui:implemented-socket-registry-dispatch"
+        "data-validation:socketable-item-class-enum"
       ],
-      "blocker": null,
-      "exactUnresolvedQuestion": null,
+      "blocker": "The only retained applicability is Talisman (source item-class enum 109), but the normalized target data and workbench contain no selectable Talisman concrete base.",
+      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: The only retained applicability is Talisman (source item-class enum 109), but the normalized target data and workbench contain no selectable Talisman concrete base?",
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": true
+      "supported": false
     },
     {
       "craftId": "socketable-5112",
@@ -9697,11 +10096,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5112",
         "data/normalized/crafting-items.json#socketable:5112",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5112"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Crossbow"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5112",
@@ -9727,12 +10129,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5113",
         "data/normalized/crafting-items.json#socketable:5113",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5113"
       ],
       "supportedItemClasses": [
-        "Helmet"
+        "Shield"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -9759,21 +10162,23 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5114",
         "data/normalized/crafting-items.json#socketable:5114",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5114"
       ],
       "supportedItemClasses": [
         "Bow",
+        "Buckler",
         "Claw",
         "Crossbow",
         "Dagger",
         "Flail",
-        "Helmet",
         "One Hand Axe",
         "One Hand Mace",
         "One Hand Sword",
         "Sceptre",
+        "Shield",
         "Spear",
         "Staff",
         "Two Hand Axe",
@@ -9807,12 +10212,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5115",
         "data/normalized/crafting-items.json#socketable:5115",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5115"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Boots",
+        "Sceptre"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -9839,17 +10246,18 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5116",
         "data/normalized/crafting-items.json#socketable:5116",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5116"
       ],
       "supportedItemClasses": [
+        "Boots",
         "Bow",
         "Claw",
         "Crossbow",
         "Dagger",
         "Flail",
-        "Gloves",
         "One Hand Axe",
         "One Hand Mace",
         "One Hand Sword",
@@ -9887,14 +10295,15 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5117",
         "data/normalized/crafting-items.json#socketable:5117",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5117"
       ],
       "supportedItemClasses": [
-        "Boots",
-        "Bow",
-        "Gloves"
+        "Gloves",
+        "One Hand Mace",
+        "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -9921,6 +10330,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5118",
         "data/normalized/crafting-items.json#socketable:5118",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5118"
@@ -9956,13 +10366,16 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5119",
         "data/normalized/crafting-items.json#socketable:5119",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5119"
       ],
       "supportedItemClasses": [
-        "Boots",
-        "Gloves"
+        "Bow",
+        "Crossbow",
+        "Gloves",
+        "Spear"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -9989,11 +10402,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5120",
         "data/normalized/crafting-items.json#socketable:5120",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5120"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5120",
@@ -10019,11 +10435,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5121",
         "data/normalized/crafting-items.json#socketable:5121",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5121"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5121",
@@ -10049,11 +10468,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5122",
         "data/normalized/crafting-items.json#socketable:5122",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5122"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5122",
@@ -10079,6 +10501,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5123",
         "data/normalized/crafting-items.json#socketable:5123",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5123"
@@ -10114,13 +10537,15 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5124",
         "data/normalized/crafting-items.json#socketable:5124",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5124"
       ],
       "supportedItemClasses": [
-        "Boots",
-        "Helmet"
+        "Helmet",
+        "Staff",
+        "Wand"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -10147,13 +10572,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5125",
         "data/normalized/crafting-items.json#socketable:5125",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5125"
       ],
       "supportedItemClasses": [
-        "Boots",
-        "Gloves"
+        "One Hand Mace",
+        "Two Hand Mace"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -10180,12 +10606,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5126",
         "data/normalized/crafting-items.json#socketable:5126",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5126"
       ],
       "supportedItemClasses": [
-        "Bow"
+        "Spear",
+        "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -10212,6 +10640,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5136",
         "data/normalized/crafting-items.json#socketable:5136",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5136"
@@ -10266,6 +10695,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5137",
         "data/normalized/crafting-items.json#socketable:5137",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5137"
@@ -10298,6 +10728,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5138",
         "data/normalized/crafting-items.json#socketable:5138",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5138"
@@ -10352,12 +10783,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5139",
         "data/normalized/crafting-items.json#socketable:5139",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5139"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Boots"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -10384,6 +10816,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5140",
         "data/normalized/crafting-items.json#socketable:5140",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5140"
@@ -10416,6 +10849,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5141",
         "data/normalized/crafting-items.json#socketable:5141",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5141"
@@ -10448,6 +10882,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5142",
         "data/normalized/crafting-items.json#socketable:5142",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5142"
@@ -10495,11 +10930,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5143",
         "data/normalized/crafting-items.json#socketable:5143",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5143"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5143",
@@ -10525,6 +10963,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5144",
         "data/normalized/crafting-items.json#socketable:5144",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5144"
@@ -10557,6 +10996,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5145",
         "data/normalized/crafting-items.json#socketable:5145",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5145"
@@ -10611,11 +11051,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5146",
         "data/normalized/crafting-items.json#socketable:5146",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5146"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5146",
@@ -10641,11 +11084,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5147",
         "data/normalized/crafting-items.json#socketable:5147",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5147"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5147",
@@ -10671,11 +11117,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5148",
         "data/normalized/crafting-items.json#socketable:5148",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5148"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5148",
@@ -10701,11 +11150,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5149",
         "data/normalized/crafting-items.json#socketable:5149",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5149"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5149",
@@ -10731,11 +11183,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5150",
         "data/normalized/crafting-items.json#socketable:5150",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5150"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5150",
@@ -10761,11 +11216,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5151",
         "data/normalized/crafting-items.json#socketable:5151",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5151"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5151",
@@ -10791,11 +11249,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5152",
         "data/normalized/crafting-items.json#socketable:5152",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5152"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5152",
@@ -10821,11 +11282,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5153",
         "data/normalized/crafting-items.json#socketable:5153",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5153"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5153",
@@ -10851,11 +11315,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5154",
         "data/normalized/crafting-items.json#socketable:5154",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5154"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Body Armour"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5154",
@@ -10881,6 +11348,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5155",
         "data/normalized/crafting-items.json#socketable:5155",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5155"
@@ -10913,6 +11381,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5156",
         "data/normalized/crafting-items.json#socketable:5156",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5156"
@@ -10945,6 +11414,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5157",
         "data/normalized/crafting-items.json#socketable:5157",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5157"
@@ -10977,6 +11447,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5158",
         "data/normalized/crafting-items.json#socketable:5158",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5158"
@@ -11009,6 +11480,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5159",
         "data/normalized/crafting-items.json#socketable:5159",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5159"
@@ -11041,6 +11513,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5160",
         "data/normalized/crafting-items.json#socketable:5160",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5160"
@@ -11073,6 +11546,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5161",
         "data/normalized/crafting-items.json#socketable:5161",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5161"
@@ -11105,6 +11579,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5162",
         "data/normalized/crafting-items.json#socketable:5162",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5162"
@@ -11137,6 +11612,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5163",
         "data/normalized/crafting-items.json#socketable:5163",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5163"
@@ -11169,6 +11645,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5164",
         "data/normalized/crafting-items.json#socketable:5164",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5164"
@@ -11201,6 +11678,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5165",
         "data/normalized/crafting-items.json#socketable:5165",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5165"
@@ -11233,6 +11711,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5166",
         "data/normalized/crafting-items.json#socketable:5166",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5166"
@@ -11265,6 +11744,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5167",
         "data/normalized/crafting-items.json#socketable:5167",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5167"
@@ -11297,6 +11777,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5168",
         "data/normalized/crafting-items.json#socketable:5168",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5168"
@@ -11329,12 +11810,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5169",
         "data/normalized/crafting-items.json#socketable:5169",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5169"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Boots"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -11361,12 +11843,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5170",
         "data/normalized/crafting-items.json#socketable:5170",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5170"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Boots"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -11393,12 +11876,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5171",
         "data/normalized/crafting-items.json#socketable:5171",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5171"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Boots"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -11425,12 +11909,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5172",
         "data/normalized/crafting-items.json#socketable:5172",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5172"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Boots"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -11457,12 +11942,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5173",
         "data/normalized/crafting-items.json#socketable:5173",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5173"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Boots"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -11489,12 +11975,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5174",
         "data/normalized/crafting-items.json#socketable:5174",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5174"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Boots"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -11521,12 +12008,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5175",
         "data/normalized/crafting-items.json#socketable:5175",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5175"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Boots"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -11553,12 +12041,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5176",
         "data/normalized/crafting-items.json#socketable:5176",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5176"
       ],
       "supportedItemClasses": [
-        "Helmet"
+        "Shield"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -11585,12 +12074,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5177",
         "data/normalized/crafting-items.json#socketable:5177",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5177"
       ],
       "supportedItemClasses": [
-        "Helmet"
+        "Shield"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -11617,12 +12107,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5178",
         "data/normalized/crafting-items.json#socketable:5178",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5178"
       ],
       "supportedItemClasses": [
-        "Helmet"
+        "Shield"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -11649,12 +12140,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5179",
         "data/normalized/crafting-items.json#socketable:5179",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5179"
       ],
       "supportedItemClasses": [
-        "Helmet"
+        "Shield"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -11681,12 +12173,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5180",
         "data/normalized/crafting-items.json#socketable:5180",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5180"
       ],
       "supportedItemClasses": [
-        "Helmet"
+        "Shield"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -11713,11 +12206,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5181",
         "data/normalized/crafting-items.json#socketable:5181",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5181"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Buckler"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5181",
@@ -11743,11 +12239,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5182",
         "data/normalized/crafting-items.json#socketable:5182",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5182"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Buckler"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5182",
@@ -11773,12 +12272,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5183",
         "data/normalized/crafting-items.json#socketable:5183",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5183"
       ],
       "supportedItemClasses": [
-        "Boots"
+        "One Hand Mace"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -11805,12 +12305,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5184",
         "data/normalized/crafting-items.json#socketable:5184",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5184"
       ],
       "supportedItemClasses": [
-        "Boots"
+        "One Hand Mace"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -11837,12 +12338,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5185",
         "data/normalized/crafting-items.json#socketable:5185",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5185"
       ],
       "supportedItemClasses": [
-        "Boots"
+        "One Hand Mace"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -11869,12 +12371,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5186",
         "data/normalized/crafting-items.json#socketable:5186",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5186"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Two Hand Mace"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -11901,12 +12404,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5187",
         "data/normalized/crafting-items.json#socketable:5187",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5187"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Two Hand Mace"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -11933,12 +12437,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5188",
         "data/normalized/crafting-items.json#socketable:5188",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5188"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Two Hand Mace"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -11965,12 +12470,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5189",
         "data/normalized/crafting-items.json#socketable:5189",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5189"
       ],
       "supportedItemClasses": [
-        "Gloves"
+        "Two Hand Mace"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -11997,11 +12503,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5190",
         "data/normalized/crafting-items.json#socketable:5190",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5190"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Wand"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5190",
@@ -12027,12 +12536,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5191",
         "data/normalized/crafting-items.json#socketable:5191",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5191"
       ],
       "supportedItemClasses": [
-        "Bow"
+        "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -12059,11 +12569,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5192",
         "data/normalized/crafting-items.json#socketable:5192",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5192"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Spear"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5192",
@@ -12089,12 +12602,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5193",
         "data/normalized/crafting-items.json#socketable:5193",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5193"
       ],
       "supportedItemClasses": [
-        "Bow"
+        "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -12121,11 +12635,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5194",
         "data/normalized/crafting-items.json#socketable:5194",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5194"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Wand"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5194",
@@ -12151,11 +12668,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5195",
         "data/normalized/crafting-items.json#socketable:5195",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5195"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Wand"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5195",
@@ -12181,12 +12701,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5196",
         "data/normalized/crafting-items.json#socketable:5196",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5196"
       ],
       "supportedItemClasses": [
-        "Boots"
+        "Staff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -12213,12 +12734,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5197",
         "data/normalized/crafting-items.json#socketable:5197",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5197"
       ],
       "supportedItemClasses": [
-        "Bow"
+        "Warstaff"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -12245,12 +12767,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5198",
         "data/normalized/crafting-items.json#socketable:5198",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5198"
       ],
       "supportedItemClasses": [
-        "Boots"
+        "Bow"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -12277,12 +12800,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5199",
         "data/normalized/crafting-items.json#socketable:5199",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5199"
       ],
       "supportedItemClasses": [
-        "Boots"
+        "Bow"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -12303,60 +12827,60 @@
       "category": "socketing",
       "displayName": "Legacy of Amor Mandragora",
       "sourceItemId": 5200,
-      "implementationStatus": "inferred",
-      "registryImplementationStatus": "implemented",
+      "implementationStatus": "blocked",
+      "registryImplementationStatus": "blocked_missing_data",
       "confidence": "inferred",
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5200",
         "data/normalized/crafting-items.json#socketable:5200",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5200"
       ],
       "supportedItemClasses": [],
-      "rarityRestrictions": "Any mutable compatible equipment rarity",
-      "engineHandler": "CraftingEngine.applySocketable",
+      "rarityRestrictions": "Unresolved; see blocker",
+      "engineHandler": null,
       "engineAction": "socketable:5200",
-      "uiHandler": "executeCraftOperation -> applySocketable",
+      "uiHandler": null,
       "testCoverage": [
-        "validation:socketing-augments",
-        "ui:implemented-socket-registry-dispatch"
+        "data-validation:socketable-item-class-enum"
       ],
-      "blocker": null,
-      "exactUnresolvedQuestion": null,
+      "blocker": "The only retained applicability is Talisman (source item-class enum 109), but the normalized target data and workbench contain no selectable Talisman concrete base.",
+      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: The only retained applicability is Talisman (source item-class enum 109), but the normalized target data and workbench contain no selectable Talisman concrete base?",
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": true
+      "supported": false
     },
     {
       "craftId": "socketable-5201",
       "category": "socketing",
       "displayName": "Legacy of Spiteful Floret",
       "sourceItemId": 5201,
-      "implementationStatus": "inferred",
-      "registryImplementationStatus": "implemented",
+      "implementationStatus": "blocked",
+      "registryImplementationStatus": "blocked_missing_data",
       "confidence": "inferred",
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5201",
         "data/normalized/crafting-items.json#socketable:5201",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5201"
       ],
       "supportedItemClasses": [],
-      "rarityRestrictions": "Any mutable compatible equipment rarity",
-      "engineHandler": "CraftingEngine.applySocketable",
+      "rarityRestrictions": "Unresolved; see blocker",
+      "engineHandler": null,
       "engineAction": "socketable:5201",
-      "uiHandler": "executeCraftOperation -> applySocketable",
+      "uiHandler": null,
       "testCoverage": [
-        "validation:socketing-augments",
-        "ui:implemented-socket-registry-dispatch"
+        "data-validation:socketable-item-class-enum"
       ],
-      "blocker": null,
-      "exactUnresolvedQuestion": null,
+      "blocker": "The only retained applicability is Talisman (source item-class enum 109), but the normalized target data and workbench contain no selectable Talisman concrete base.",
+      "exactUnresolvedQuestion": "What exact target-version evidence resolves this blocker: The only retained applicability is Talisman (source item-class enum 109), but the normalized target data and workbench contain no selectable Talisman concrete base?",
       "targetGameVersion": "0.5.4",
       "visible": true,
-      "supported": true
+      "supported": false
     },
     {
       "craftId": "socketable-5202",
@@ -12369,12 +12893,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5202",
         "data/normalized/crafting-items.json#socketable:5202",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5202"
       ],
       "supportedItemClasses": [
-        "Helmet"
+        "Shield"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -12401,6 +12926,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5203",
         "data/normalized/crafting-items.json#socketable:5203",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5203"
@@ -12433,12 +12959,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5204",
         "data/normalized/crafting-items.json#socketable:5204",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5204"
       ],
       "supportedItemClasses": [
-        "Boots"
+        "One Hand Mace"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -12465,12 +12992,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5205",
         "data/normalized/crafting-items.json#socketable:5205",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5205"
       ],
       "supportedItemClasses": [
-        "Helmet"
+        "Shield"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -12497,12 +13025,13 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5206",
         "data/normalized/crafting-items.json#socketable:5206",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5206"
       ],
       "supportedItemClasses": [
-        "Boots"
+        "One Hand Mace"
       ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
@@ -12529,11 +13058,14 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5207",
         "data/normalized/crafting-items.json#socketable:5207",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5207"
       ],
-      "supportedItemClasses": [],
+      "supportedItemClasses": [
+        "Wand"
+      ],
       "rarityRestrictions": "Any mutable compatible equipment rarity",
       "engineHandler": "CraftingEngine.applySocketable",
       "engineAction": "socketable:5207",
@@ -12559,6 +13091,7 @@
       "evidenceSource": [
         "data/normalized/crafting-items.json#item:5208",
         "data/normalized/crafting-items.json#socketable:5208",
+        "data/normalized/essences.json#source-item-class-enum",
         "data/normalized/crafting-items.json#method:52",
         "data/crafting/registry-expansion.json",
         "data/crafting/currency-index.json#source-item:5208"

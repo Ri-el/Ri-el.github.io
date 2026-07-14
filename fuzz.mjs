@@ -495,12 +495,11 @@ const ACTIONS = [
 const FIXED_SNAPSHOT = {
 	iterations: 30000,
 	seed: 542026,
-	// Zero-affix checkpoint: Augmentation failures now report effective Magic
-	// capacity instead of assuming the default 1/1 limit. Mutation totals and
-	// invariants remain unchanged. Task 07 adds the schema-v5 history identity
-	// snapshot; its schema number is part of the reviewed deterministic event
-	// stream. Expanded Omen paths are covered by focused engine/browser tests.
-	digest: '53312453235d67aa3e14245351df58ada174125c9700051daa641ca2948cef39',
+	// PoE2 mechanics checkpoint: the reviewed event stream now includes inferred
+	// per-base socket-cap state plus the user-verified Desecrated removal and
+	// pending-Well cleanup semantics. Focused tests cover Essence/socketable RNG;
+	// this golden still guards the legacy 56-pool action stream and invariants.
+	digest: '1f765c8a805e2c9378c702562347e35aeb71331b28e2ff936ccb8ed5152b3ca1',
 }
 const runHash = createHash('sha256')
 function hashEvent(event) {
