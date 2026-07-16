@@ -1,0 +1,362 @@
+﻿diff --git a/tools/base-art-core.mjs b/tools/base-art-core.mjs
+index 2be3a98..72c7a01 100644
+--- a/tools/base-art-core.mjs
++++ b/tools/base-art-core.mjs
+@@ -1,16 +1,19 @@
+ #!/usr/bin/env node
+ 
+ import { createHash } from 'node:crypto';
+ 
+ const POE2DB_HOSTS = new Set(['poe2db.tw', 'www.poe2db.tw']);
+ const CDN_HOST = 'cdn.poe2db.tw';
++const CURRENT_TARGET_GAME_VERSION = '0.5.4';
++const CURRENT_TARGET_MAPPED_BASE_COUNT = 1759;
++const UNMAPPED_TIMELESS_JEWEL_ID = 613;
+ const METADATA_RE = /^Metadata\/[A-Za-z0-9_./&'()-]+$/;
+ const ART_RE = /^Art\/[A-Za-z0-9_./-]+$/;
+ 
+ function assert(condition, message) {
+   if (!condition) throw new Error(message);
+ }
+ 
+ function asString(value, field) {
+   assert(typeof value === 'string' && value.length > 0, `${field} must be a non-empty string.`);
+   return value;
+@@ -89,25 +92,47 @@ function extractElements(source, tagName) {
+   }
+   return elements;
+ }
+ 
+ function topLevelElements(source, tagName) {
+   const all = extractElements(source, tagName);
+   return all.filter((candidate, index) => !all.some((other, otherIndex) =>
+     otherIndex !== index && other.start <= candidate.start && other.end >= candidate.end));
+ }
+ 
++function removeTopLevelElements(source, tagName) {
++  const elements = topLevelElements(source, tagName);
++  if (!elements.length) return source;
++  let result = '';
++  let cursor = 0;
++  for (const element of elements) {
++    result += source.slice(cursor, element.start);
++    result += ' ';
++    cursor = element.end;
++  }
++  return result + source.slice(cursor);
++}
++
+ function attributeValue(tag, name) {
+-  const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+-  const match = new RegExp(`\\b${escapedName}\\s*=\\s*(?:"([\\s\\S]*?)"|'([\\s\\S]*?)'|([^\\s>]+))`, 'i').exec(tag);
+-  if (!match) return null;
+-  return decodeHtmlEntities(match[1] ?? match[2] ?? match[3] ?? '');
++  const target = String(name).toLowerCase();
++  // Tokenize complete attribute names instead of searching for a suffix:
++  // `\bsrc=` also matches the `src=` part of `data-src=` because `-` creates
++  // a word boundary.  Requiring start/whitespace before the attribute prevents
++  // a lazy-load placeholder from shadowing the real src value.
++  const attributes = /(?:^|\s)([^\s"'<>/=]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+))/g;
++  const body = String(tag).replace(/^<\/?[a-z][a-z0-9:-]*/i, '').replace(/\/?\s*>\s*$/, '');
++  let match;
++  while ((match = attributes.exec(body))) {
++    if (match[1].toLowerCase() !== target) continue;
++    return decodeHtmlEntities(match[2] ?? match[3] ?? match[4] ?? '');
++  }
++  return null;
+ }
+ 
+ function elementText(element) {
+   return stripTags(element);
+ }
+ 
+ function normalizeMetadataCandidate(value) {
+   let text = decodeHtmlEntities(String(value)).trim();
+   text = text.replace(/^['"`]+|['"`]+$/g, '').trim();
+   // data-hover commonly contains a client-data path such as
+@@ -175,58 +200,70 @@ function collectCellAttributes(cellHtml, names) {
+   while ((tag = tagRe.exec(cellHtml))) {
+     for (const name of names) {
+       const value = attributeValue(tag[0], name);
+       if (value != null) values.push(value);
+     }
+   }
+   return values;
+ }
+ 
+ function sectionsFromTable(tableHtml, pageUrl) {
+-  const rows = extractElements(tableHtml, 'tr');
++  // Only rows owned by this table participate in its pairing state. Nested
++  // table rows are parsed recursively below and must never leak their Type or
++  // Icon value into the surrounding table.
++  const rows = topLevelElements(tableHtml, 'tr');
+   const sections = [];
+   let metadataKey = null;
+   let artPath = null;
+   const emit = () => {
+     if (!metadataKey || !artPath) return;
+     sections.push({
+       metadataKey,
+       artPath,
+       sourceImageUrl: sourceUrlForArt(artPath),
+       pageUrl,
+     });
+     metadataKey = null;
+     artPath = null;
+   };
+ 
+   for (const row of rows) {
+-    const pair = rowLabelAndValue(row.inner);
++    const isolatedRow = removeTopLevelElements(row.inner, 'table');
++    const pair = rowLabelAndValue(isolatedRow);
+     if (!pair) continue;
+     const label = pair.label.toLowerCase().replace(/\s+/g, ' ').trim();
+     const valueCandidates = [pair.valueHtml, pair.value];
+     if (label === 'type' || label === 'metadata' || /^(item )?type$/.test(label)) {
+       const candidate = valueCandidates.map(normalizeMetadataCandidate).find(Boolean);
+       if (candidate) {
+         if (metadataKey && artPath) emit();
+         metadataKey = candidate;
+       }
+     } else if (label === 'icon' || label === 'image') {
+       const candidates = [...valueCandidates,
+         ...collectCellAttributes(pair.valueHtml, ['src', 'data-src', 'href', 'content'])];
+       const candidate = candidates.map(normalizeArtCandidate).find(Boolean);
+       if (candidate) artPath = candidate;
+     }
+   }
+   emit();
+   return sections;
+ }
+ 
++function sectionsFromTableTree(table, pageUrl) {
++  const sections = sectionsFromTable(table.html, pageUrl);
++  for (const nested of topLevelElements(table.inner, 'table')) {
++    sections.push(...sectionsFromTableTree(nested, pageUrl));
++  }
++  return sections;
++}
++
+ function metadataFromDataHover(value) {
+   const decoded = decodeHtmlEntities(String(value));
+   let candidate = decoded;
+   try {
+     // URLSearchParams handles `%5C`, `%2F`, and `+` in the live data-hover
+     // query without changing the case of the metadata key.
+     const url = new URL(decoded, 'https://poe2db.tw/');
+     candidate = url.searchParams.get('s') || decoded;
+   } catch {
+     // A raw metadata path is also accepted.
+@@ -250,21 +287,21 @@ function sectionsFromHoverLink(anchor, pageUrl) {
+       // Preserve the fetched page URL when a malformed href is present.
+     }
+   }
+ 
+   // A few older Poe2DB surfaces put the complete hover table in the
+   // attribute instead of using the query-string identity used by the current
+   // catalogue.  Parse that fragment as its own container so Type/Icon values
+   // cannot accidentally pair with rows outside the link.
+   if (/<table\b/i.test(hover)) {
+     const inlineSections = topLevelElements(hover, 'table')
+-      .flatMap(table => sectionsFromTable(table.html, linkPageUrl));
++      .flatMap(table => sectionsFromTableTree(table, linkPageUrl));
+     if (inlineSections.length) return inlineSections;
+   }
+   if (!metadataKey) return [];
+   const imageCandidates = [];
+   const imageRe = /<img\b[^>]*>/gi;
+   let image;
+   while ((image = imageRe.exec(anchor))) {
+     for (const name of ['src', 'data-src', 'data-original', 'href']) {
+       const value = attributeValue(image[0], name);
+       if (value != null) imageCandidates.push(value);
+@@ -330,33 +367,43 @@ export function buildMappedBaseCatalog(baseItems, assetRequirements) {
+       `Base ${baseId} metadataKey does not match normalized source (${metadataKey} vs ${source.metadataKey}).`);
+     const displayName = requirement.displayName ?? source.displayName;
+     assert(typeof displayName === 'string' && displayName, `Base ${baseId} is missing displayName.`);
+     assert(displayName === source.displayName,
+       `Base ${baseId} displayName does not match normalized source.`);
+     const assetPath = requirement.assetPath || `assets/item-bases/${baseId}.png`;
+     assert(assetPath === `assets/item-bases/${baseId}.png`, `Base ${baseId} has unsafe assetPath.`);
+     const selectable = requirement.selectable == null ? !source.unmodifiable : Boolean(requirement.selectable);
+     return { baseId, metadataKey, displayName, assetPath, selectable };
+   });
+-  return result.sort((left, right) => left.baseId - right.baseId);
++  const catalog = result.sort((left, right) => left.baseId - right.baseId);
++  if (!Array.isArray(assetRequirements) &&
++      assetRequirements?.targetGameVersion === CURRENT_TARGET_GAME_VERSION) {
++    assert(!catalog.some(base => base.baseId === UNMAPPED_TIMELESS_JEWEL_ID),
++      `Target ${CURRENT_TARGET_GAME_VERSION} mapped catalog must exclude unmapped base ID ` +
++      `${UNMAPPED_TIMELESS_JEWEL_ID}.`);
++    assert(catalog.length === CURRENT_TARGET_MAPPED_BASE_COUNT,
++      `Target ${CURRENT_TARGET_GAME_VERSION} mapped catalog must contain ` +
++      `${CURRENT_TARGET_MAPPED_BASE_COUNT.toLocaleString('en-US')} records; found ${catalog.length}.`);
++  }
++  return catalog;
+ }
+ 
+ /**
+  * Parse all self-contained Type/Icon pairs in tables and base-item hover
+  * links.  A page's hero image is deliberately ignored unless it belongs to a
+  * data-hover anchor or an Icon/Image row.
+  */
+ export function parsePoe2DbSections(html, pageUrl) {
+   assert(typeof html === 'string', 'Poe2DB HTML must be a string.');
+   assert(typeof pageUrl === 'string' && pageUrl, 'Poe2DB pageUrl must be a non-empty string.');
+   const sections = [];
+-  for (const table of topLevelElements(html, 'table')) sections.push(...sectionsFromTable(table.html, pageUrl));
++  for (const table of topLevelElements(html, 'table')) sections.push(...sectionsFromTableTree(table, pageUrl));
+   for (const anchor of extractElements(html, 'a')) sections.push(...sectionsFromHoverLink(anchor.html, pageUrl));
+   return dedupeSections(sections);
+ }
+ 
+ export function matchExactSection(base, sections) {
+   const metadataKey = base?.metadataKey;
+   assert(typeof metadataKey === 'string' && metadataKey, 'Base is missing metadataKey.');
+   assert(Array.isArray(sections), 'Poe2DB sections must be an array.');
+   const matches = sections.filter(section => section?.metadataKey === metadataKey);
+   if (matches.length === 0) throw new Error(`Missing Poe2DB identity: ${metadataKey}`);
+diff --git a/tools/base-art-validation.mjs b/tools/base-art-validation.mjs
+index d8636b9..a615153 100644
+--- a/tools/base-art-validation.mjs
++++ b/tools/base-art-validation.mjs
+@@ -2,25 +2,24 @@
+ 
+ /**
+  * Deterministic, dependency-free checks for the base-art acquisition tools.
+  *
+  * The harness deliberately loads each optional phase lazily.  This keeps the
+  * core phase useful before the network/converter modules exist and gives a
+  * clear red failure when a required export has not been implemented yet.
+  */
+ 
+ import assert from 'node:assert/strict';
++import { readFileSync } from 'node:fs';
+ import { pathToFileURL } from 'node:url';
+ import path from 'node:path';
+ 
+-const TOOL_DIR = path.dirname(new URL(import.meta.url).pathname);
+-
+ const CORE_EXPORTS = [
+   'buildMappedBaseCatalog',
+   'parsePoe2DbSections',
+   'matchExactSection',
+   'buildPoe2DbImageUrl',
+   'isWebp',
+   'isPng',
+   'sha256',
+   'validateManifest',
+ ];
+@@ -143,20 +142,50 @@ export async function runCoreChecks() {
+   names.push(check('parses base-item data-hover links without using page hero images', () => {
+     const html = '<img class="hero" src="/image/Art/2DItems/Hero.webp">' +
+       '<a data-hover="&lt;table&gt;&lt;tr&gt;&lt;td&gt;Type&lt;/td&gt;&lt;td&gt;Metadata/Items/Rings/Ring1&lt;/td&gt;&lt;/tr&gt;' +
+       '&lt;tr&gt;&lt;td&gt;Icon&lt;/td&gt;&lt;td&gt;Art/2DItems/Rings/Ring.webp&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;">Ring</a>';
+     const sections = parsePoe2DbSections(html, 'https://poe2db.tw/us/Ring');
+     assert.equal(sections.length, 1);
+     assert.equal(sections[0].metadataKey, 'Metadata/Items/Rings/Ring1');
+     assert.equal(sections[0].artPath, 'Art/2DItems/Rings/Ring');
+   }));
+ 
++  names.push(check('matches exact HTML attribute names in hover images', () => {
++    const sections = parsePoe2DbSections(
++      '<a data-hover="?s=Data%5CBaseItemTypes%5CMetadata%5CItems%5CRings%5CRing1" href="Ring">' +
++      '<img data-src="https://cdn.poe2db.tw/image/Art/2DItems/Placeholder.webp" ' +
++      'src="https://cdn.poe2db.tw/image/Art/2DItems/Rings/Ring.webp"></a>',
++      'https://poe2db.tw/us/Rings',
++    );
++    assert.equal(sections.length, 1);
++    assert.equal(sections[0].artPath, 'Art/2DItems/Rings/Ring');
++    assert.equal(sections[0].sourceImageUrl,
++      'https://cdn.poe2db.tw/image/Art/2DItems/Rings/Ring.webp');
++  }));
++
++  names.push(check('isolates nested table sections from their outer table', () => {
++    const sections = parsePoe2DbSections(
++      '<table><tr><td>Type</td><td>Metadata/Items/Outer1</td></tr>' +
++      '<tr><td>Icon</td><td>Art/2DItems/Outer1</td></tr>' +
++      '<tr><td colspan="2"><table>' +
++      '<tr><td>Type</td><td>Metadata/Items/Inner1</td></tr>' +
++      '<tr><td>Icon</td><td>Art/2DItems/Inner1</td></tr>' +
++      '</table></td></tr></table>',
++      'https://poe2db.tw/us/Nested_Fixture',
++    );
++    assert.equal(sections.length, 2);
++    assert.equal(matchExactSection({ metadataKey: 'Metadata/Items/Outer1' }, sections).artPath,
++      'Art/2DItems/Outer1');
++    assert.equal(matchExactSection({ metadataKey: 'Metadata/Items/Inner1' }, sections).artPath,
++      'Art/2DItems/Inner1');
++  }));
++
+   names.push(check('builds only the mapped concrete-base catalog', () => {
+     const baseItems = {
+       bases: [
+         { id: 42, metadataKey: 'Metadata/Items/Amulets/FourAmulet1', displayName: 'Crimson Amulet', unmodifiable: false },
+         { id: 613, metadataKey: 'Metadata/Items/Jewels/Timeless', displayName: 'Unmapped Jewel', unmodifiable: false },
+       ],
+     };
+     const requirements = {
+       baseItems: [{
+         baseId: 42,
+@@ -169,20 +198,61 @@ export async function runCoreChecks() {
+     const catalog = buildMappedBaseCatalog(baseItems, requirements);
+     assert.deepEqual(catalog, [{
+       baseId: 42,
+       metadataKey: 'Metadata/Items/Amulets/FourAmulet1',
+       displayName: 'Crimson Amulet',
+       assetPath: 'assets/item-bases/42.png',
+       selectable: true,
+     }]);
+   }));
+ 
++  names.push(check('enforces current-target mapped catalog invariants', () => {
++    const baseItems = {
++      bases: [
++        { id: 42, metadataKey: 'Metadata/Items/Amulets/FourAmulet1', displayName: 'Crimson Amulet', unmodifiable: false },
++        { id: 613, metadataKey: 'Metadata/Items/Jewels/Timeless', displayName: 'Timeless Jewel', unmodifiable: false },
++      ],
++    };
++    const requirementFor = baseId => {
++      const base = baseItems.bases.find(candidate => candidate.id === baseId);
++      return {
++        baseId,
++        displayName: base.displayName,
++        assetPath: `assets/item-bases/${baseId}.png`,
++        selectable: true,
++        metadata: { metadataKey: base.metadataKey },
++      };
++    };
++    assert.throws(() => buildMappedBaseCatalog(baseItems, {
++      targetGameVersion: '0.5.4',
++      baseItems: [requirementFor(42)],
++    }), /1,?759/);
++    assert.throws(() => buildMappedBaseCatalog(baseItems, {
++      targetGameVersion: '0.5.4',
++      baseItems: [requirementFor(613)],
++    }), /613/);
++  }));
++
++  names.push(check('validates the checked-in current-target mapped catalog', () => {
++    const baseItems = JSON.parse(readFileSync(
++      new URL('../data/normalized/base-items.json', import.meta.url),
++      'utf8',
++    ));
++    const requirements = JSON.parse(readFileSync(
++      new URL('../reports/asset-requirements.json', import.meta.url),
++      'utf8',
++    ));
++    const catalog = buildMappedBaseCatalog(baseItems, requirements);
++    assert.equal(catalog.length, 1759);
++    assert.equal(catalog.some(base => base.baseId === 613), false);
++  }));
++
+   names.push(check('allowlists Poe2DB art paths and image signatures', () => {
+     assert.equal(String(buildPoe2DbImageUrl('Art/2DItems/Amulets/CrimsonAmulet')), 'https://cdn.poe2db.tw/image/Art/2DItems/Amulets/CrimsonAmulet.webp');
+     assert.throws(() => buildPoe2DbImageUrl('https://evil.example/x.webp'), /art path/i);
+     assert.throws(() => buildPoe2DbImageUrl('../secret'), /art path/i);
+     assert.equal(isWebp(Buffer.from('RIFF0000WEBPVP8 ')), true);
+     assert.equal(isPng(Buffer.from('89504e470d0a1a0a', 'hex')), true);
+     assert.equal(isWebp(Buffer.from('RIFF0000NOPEVP8 ')), false);
+     assert.equal(isPng(Buffer.from('89504e470d0a1a00', 'hex')), false);
+     assert.equal(sha256(Buffer.from('abc')), 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
+   }));

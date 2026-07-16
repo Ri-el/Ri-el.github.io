@@ -136,17 +136,6 @@ let pendingConcreteBaseId = null;
 let lastBasePickerTrigger = null;
 let renderedConcreteBaseSignature = '';
 
-// Load the focused craft-header layout fix while preserving direct file:// use.
-function ensureCraftHeaderStyles() {
-  if (document.querySelector('link[data-craft-header-fix]')) return;
-
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = 'header-fix.css?v=20';
-  link.dataset.craftHeaderFix = 'true';
-  document.head.appendChild(link);
-}
-
 // Auto-loading icon with graceful glyph fallback.
 function monogram(label) {
   const words = String(label || '').replace(/[^a-z0-9 ]/gi, ' ').trim().split(/\s+/).filter(Boolean);
@@ -159,9 +148,10 @@ function iconEl(name, label) {
   const wrap = document.createElement('span');
   wrap.className = 'cat-ico';
   const img = document.createElement('img');
-  img.src = 'assets/icons/' + name + '.png';
   img.alt = '';
   img.loading = 'lazy';
+  img.decoding = 'async';
+  img.src = 'assets/icons/' + name + '.png';
   img.addEventListener('error', () => {
     img.remove();
     const glyph = document.createElement('span');
@@ -807,7 +797,6 @@ function setupConcreteBasePicker() {
 }
 
 function init() {
-  ensureCraftHeaderStyles();
   removeCraftModeLabel();
   placeJewelSelectorInWorkbench();
   ensureWorkbenchBaseSelector();

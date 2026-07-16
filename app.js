@@ -39,6 +39,33 @@ const CRAFTING_TABS = Object.freeze([...(CRAFTING_CURRENCY_INDEX?.craftTabs || [
 const VISIBLE_CRAFT_DEFINITIONS = Object.freeze(Object.values(CRAFTING_ITEM_REGISTRY)
   .filter(definition => definition.supported)
   .sort((left, right) => (left.tabOrder || 0) - (right.tabOrder || 0) || left.displayOrder - right.displayOrder || left.displayName.localeCompare(right.displayName)));
+
+// Build the two lookup shapes used by the workbench once per catalog.  The
+// previous card renderer searched the complete definition array for every
+// definition, which made tier clustering quadratic as the catalog grew.  Keep
+// the source order in each tab bucket so rendering remains deterministic.
+function buildCraftDefinitionIndex(definitions) {
+  const byTab = new Map();
+  const variantsByAction = new Map();
+  for (const definition of definitions || []) {
+    if (!definition) continue;
+    const tab = definition.tab || definition.category;
+    if (tab) {
+      if (!byTab.has(tab)) byTab.set(tab, []);
+      byTab.get(tab).push(definition);
+    }
+    const baseAction = definition.operationOptions?.baseAction;
+    if (baseAction) {
+      if (!variantsByAction.has(baseAction)) variantsByAction.set(baseAction, []);
+      variantsByAction.get(baseAction).push(definition);
+    }
+  }
+  return { byTab, variantsByAction };
+}
+
+const CRAFT_DEFINITION_INDEX = buildCraftDefinitionIndex(VISIBLE_CRAFT_DEFINITIONS);
+let knownCraftDefinitionIndex = null;
+
 const CRAFT_DEFINITION_BY_ACTION = new Map();
 for (const definition of VISIBLE_CRAFT_DEFINITIONS) {
   if (definition.engineAction && !CRAFT_DEFINITION_BY_ACTION.has(definition.engineAction)) {
@@ -151,6 +178,32 @@ let showDeprecatedCrafts = false;
 let knownCraftDefinitions = null;
 let knownItemsLoadPromise = null;
 
+// Eligibility is rendered data, not an operation-authority boundary.  The
+// engine mutates its live item in place, so identity checks alone are not
+// sufficient; mutation paths mark this pass dirty before the next render.
+const eligibilityCache = new Map();
+// Descriptive alias retained for callers/tests that refer to the cache by its
+// workbench-specific name.
+const craftEligibilityCache = eligibilityCache;
+let craftEligibilityItem = null;
+let craftEligibilityDirty = true;
+let craftEligibilityControlsDirty = true;
+
+function markCraftEligibilityDirty() {
+  craftEligibilityDirty = true;
+  craftEligibilityControlsDirty = true;
+}
+
+function beginCraftEligibilityPass(item) {
+  if (craftEligibilityItem !== item || craftEligibilityDirty) {
+    craftEligibilityItem = item;
+    eligibilityCache.clear();
+    craftEligibilityDirty = false;
+    craftEligibilityControlsDirty = true;
+  }
+  return eligibilityCache;
+}
+
 // Desecration (Abyssal) UI state.
 // A directional Necromancy omen (sinistral/dextral) may be combined with
 // Abyssal Echoes, so we track a set of active omens rather than a single one.
@@ -247,6 +300,7 @@ function loadKnownCraftDefinitions() {
         .sort((left, right) => (left.tabOrder || 0) - (right.tabOrder || 0) ||
           left.displayOrder - right.displayOrder || left.displayName.localeCompare(right.displayName)));
       registerCraftDefinitions(knownCraftDefinitions);
+      knownCraftDefinitionIndex = buildCraftDefinitionIndex(knownCraftDefinitions);
       window.CRAFTING_KNOWN_ITEMS = null;
       resolve(knownCraftDefinitions);
     };
@@ -269,18 +323,24 @@ function loadKnownCraftDefinitions() {
 }
 
 function inventoryDefinitionsForTab(tabId) {
-  const source = craftInventoryMode === 'known'
-    ? (knownCraftDefinitions || [])
-    : VISIBLE_CRAFT_DEFINITIONS;
-  return source.filter(definition => definition.tab === tabId &&
-    (showDeprecatedCrafts || definition.implementationStatus !== 'deprecated_for_target_version'));
+  if (craftInventoryMode === 'known' && !knownCraftDefinitionIndex && knownCraftDefinitions) {
+    knownCraftDefinitionIndex = buildCraftDefinitionIndex(knownCraftDefinitions);
+  }
+  const index = craftInventoryMode === 'known'
+    ? (knownCraftDefinitionIndex || { byTab: new Map() })
+    : CRAFT_DEFINITION_INDEX;
+  const source = index.byTab.get(tabId) || [];
+  return showDeprecatedCrafts
+    ? source.slice()
+    : source.filter(definition => definition.implementationStatus !== 'deprecated_for_target_version');
 }
 
 function appendCraftCards(grid, definitions) {
+  const { variantsByAction } = buildCraftDefinitionIndex(definitions);
   const rendered = new Set();
   for (const definition of definitions) {
     if (rendered.has(definition.craftId)) continue;
-    const variants = definitions.filter(record => record.operationOptions?.baseAction === definition.engineAction);
+    const variants = variantsByAction.get(definition.engineAction) || [];
     if (variants.length) {
       const cluster = document.createElement('div');
       cluster.className = 'cur-cluster';
@@ -462,13 +522,16 @@ function refreshCraftInventoryElements() {
   elements.essenceBtns = document.querySelectorAll('.essence-btn');
   elements.craftTabs = document.querySelectorAll('[data-craft-tab]');
   elements.craftTabPanels = document.querySelectorAll('[data-craft-panel]');
+  craftEligibilityControlsDirty = true;
 }
 
 function syncRenderedCraftControlState() {
   const item = engine?.getItem();
+  updateRenderedCraftEligibility(item);
   elements.craftButtons.forEach(button => {
     const definition = definitionForElement(button);
-    setCraftButtonState(button, item ? disabledReasonForDefinition(definition, item) : '');
+    const reason = item ? craftEligibilityReason(definition, item) : '';
+    setCraftButtonState(button, reason);
     const action = definition?.engineAction;
     const isArmed = Boolean(action && action === armedCurrency);
     button.classList.toggle('armed', isArmed);
@@ -819,6 +882,29 @@ function disabledReasonForDefinition(definition, item = engine?.getItem()) {
   return item ? validator(definition, item) : '';
 }
 
+function craftEligibilityReason(definition, item = engine?.getItem()) {
+  const cache = beginCraftEligibilityPass(item);
+  const key = definition?.craftId || definition?.id;
+  if (!key) return disabledReasonForDefinition(definition, item);
+  if (cache.has(key)) return cache.get(key);
+  const reason = disabledReasonForDefinition(definition, item) || '';
+  cache.set(key, reason);
+  return reason;
+}
+
+function updateRenderedCraftEligibility(item = engine?.getItem()) {
+  const cache = beginCraftEligibilityPass(item);
+  if (typeof elements === 'undefined' || !elements.craftButtons) return cache;
+  if (!craftEligibilityControlsDirty) return cache;
+  elements.craftButtons.forEach(button => {
+    const definition = definitionForElement(button);
+    const reason = craftEligibilityReason(definition, item);
+    setCraftButtonState(button, reason);
+  });
+  craftEligibilityControlsDirty = false;
+  return cache;
+}
+
 function validateCraftRegistry() {
   const specializedHandlers = { applyHinekoraLock, startDesecrationFlow, toggleOmen, toggleCraftOmen };
   const indexedRegistry = knownCraftDefinitions || CRAFTING_CURRENCY_INDEX?.craftRegistry || [];
@@ -967,6 +1053,7 @@ function createEngine(type, concreteBase = null) {
     redoStack = [];
     resetOmenState();
     clearDesecration();
+    markCraftEligibilityDirty();
     renderItem();
     notifyConcreteBaseChange();
     return engine;
@@ -1083,6 +1170,7 @@ function selectConcreteBase(baseItemId, options = {}) {
   syncJewelSelectorActive();
   resetOmenState();
   clearDesecration();
+  markCraftEligibilityDirty();
   foreseenSeals = {};
   foreseenHover = null;
   hideForeseenBanner();
@@ -1116,6 +1204,7 @@ function syncConcreteBaseTemplateFromItem(item) {
   } else {
     engine.setConcreteBase(base, { resetItem: false });
   }
+  markCraftEligibilityDirty();
   currentConcreteBaseId = base.id;
   isJewelMode = JEWEL_BASES.has(simulatorPoolId);
   setJewelSelectorVisible(isJewelMode);
@@ -1179,6 +1268,7 @@ function loadIconInto(iconEl, iconId) {
   img.className = 'currency-img';
   img.alt = '';
   img.hidden = true;
+  img.decoding = 'async';
   img.dataset.iconId = iconId;
   img.addEventListener('load', () => {
     if (!img.isConnected) return;
@@ -1378,12 +1468,12 @@ function renderCraftingDescription(definition, reason = '') {
 }
 
 function filterCraftInventory() {
+  updateRenderedCraftEligibility();
   const query = (elements.craftItemSearch?.value || '').trim().toLocaleLowerCase();
   const applicableOnly = Boolean(elements.craftApplicableOnly?.checked);
   let visibleCount = 0;
   elements.craftButtons.forEach(button => {
-    const definition = definitionForElement(button);
-    const reason = disabledReasonForDefinition(definition);
+    const reason = button.dataset.disabledReason || '';
     const matchesSearch = !query || button.dataset.searchText.includes(query);
     const matchesApplicable = !applicableOnly || !reason;
     button.hidden = !(matchesSearch && matchesApplicable);
@@ -1430,7 +1520,7 @@ function rejectCraftOperation(reason, shiftKey = false) {
 // Validation happens before snapshots, RNG-facing work, history, or Omen state.
 function executeCraftOperation(definition, { shiftKey = false } = {}) {
   if (!definition) return rejectCraftOperation(UNSUPPORTED_REASON, shiftKey);
-  const reason = disabledReasonForDefinition(definition);
+  const reason = disabledReasonForDefinition(definition, engine?.getItem());
   if (!definition.supported) return rejectCraftOperation(reason || definition.unsupportedReason || UNSUPPORTED_REASON, shiftKey);
   if (reason) return rejectCraftOperation(reason, shiftKey);
   const currency = definition.engineAction;
@@ -1466,6 +1556,7 @@ function executeCraftOperation(definition, { shiftKey = false } = {}) {
       lightButton.setAttribute('aria-pressed', 'false');
     }
   }
+  markCraftEligibilityDirty();
   playSound(currency);
   renderItem(result);
   triggerCraftAnimation(currency);
@@ -1476,7 +1567,7 @@ function executeCraftOperation(definition, { shiftKey = false } = {}) {
 
 function dispatchCraftControl(definition, event, intent = 'activate', control = event?.currentTarget) {
   if (!definition) return false;
-  const reason = disabledReasonForDefinition(definition);
+  const reason = disabledReasonForDefinition(definition, engine?.getItem());
   renderCraftingDescription(definition, reason);
   if (reason) {
     showError(reason);
@@ -1661,6 +1752,7 @@ function setupEventListeners() {
   elements.resetBtn.addEventListener('click', () => {
     pushUndo(snapshotState(engine.getItem()));
     engine.resetItem();
+    markCraftEligibilityDirty();
     clearCraftOmen();
     clearDesecration();
     foreseenSeals = {};
@@ -1945,7 +2037,14 @@ function setupIlvlSlider() {
   const applyValue = (v) => measureOperation('item-level-change', () => {
     const previous = engine.getItem().ilvl;
     const next = engine.setItemLevel(v);
-    if (next !== previous) invalidateForesightContext({ restorePreview: true });
+    if (next !== previous) {
+      markCraftEligibilityDirty();
+      invalidateForesightContext({ restorePreview: true });
+      // Slider changes intentionally do not repaint the item tooltip, but they
+      // can change level-gated currency applicability.
+      updateRenderedCraftEligibility(engine.getItem());
+      filterCraftInventory();
+    }
     updateIlvlUI(next);
   });
 
@@ -2027,6 +2126,7 @@ function toggleOmen(omen) {
   // Desecrated modifier. The other omens influence the Well of Souls.
   if (omen === 'omen_of_light') {
     omenOfLightActive = !omenOfLightActive;
+    markCraftEligibilityDirty();
     invalidateForesightContext({ restorePreview: true });
     const btn = Array.from(elements.omenBtns).find(b => omenForElement(b) === 'omen_of_light');
     if (btn) {
@@ -2052,7 +2152,10 @@ function toggleOmen(omen) {
     b.classList.toggle('active', active);
     b.setAttribute('aria-pressed', String(active));
   });
+  markCraftEligibilityDirty();
   invalidateForesightContext({ restorePreview: true });
+  updateRenderedCraftEligibility(engine?.getItem());
+  filterCraftInventory();
 }
 
 // ---- Crafting omens (Chaos / Annulment / Divine augments) ----
@@ -2068,6 +2171,7 @@ function updateCraftOmenButtons() {
 function toggleCraftOmen(omen) {
   if (!CRAFT_OMENS[omen]) return;
   selectedCraftOmen = (selectedCraftOmen === omen) ? null : omen;
+  markCraftEligibilityDirty();
   invalidateForesightContext({ restorePreview: true });
   updateCraftOmenButtons();
   renderItem();
@@ -2115,6 +2219,7 @@ function startDesecrationFlow(bone = 'preserved_cranium') {
     showError(res.error);
     return res;
   }
+  markCraftEligibilityDirty();
   // The bone (and any omens) are consumed now: the desecration is applied and an
   // unrevealed green modifier is placed on the item. The actual modifier is
   // revealed later via the Reveal panel below the item.
@@ -2215,6 +2320,7 @@ function chooseDesec(index) {
     closeWell();
     return;
   }
+  markCraftEligibilityDirty();
   // Abyssal Echoes is now counted at REVEAL time (see openWell), so it is
   // consumed whether or not the reroll was used, and never when it was not
   // activated. Nothing left to record here on commit.
@@ -2306,6 +2412,7 @@ function restoreSnapshot(snap) {
   }
   syncConcreteBaseTemplateFromItem(snap.item);
   engine.loadItem(snap.item, snap.pending);
+  markCraftEligibilityDirty();
   clearDesecration();
   // Restore the pending reveal AFTER clearDesecration so the Reveal panel
   // re-appears when an unrevealed modifier is still on the item.
@@ -2375,6 +2482,7 @@ function applyHinekoraLock(shiftKey = false) {
   const before = snapshotState(engine.getItem());
   engine.setHinekoraLock();
   engine.recordCurrencyUse(craftIdForAction('hinekora'));
+  markCraftEligibilityDirty();
   pushUndo(before);
   foreseenSeals = {};
   foreseenHover = null;
@@ -2488,11 +2596,13 @@ function computeForesight(currency) {
   const result = applyCurrencyToEngine(currency);
   if (!result || !result.success) {
     engine.loadItem(snapshot, snapshotPending);
+    markCraftEligibilityDirty();
     return { result };
   }
   const afterItem = engine.getItem();
   const afterPending = engine.getPendingDesecration();
   engine.loadItem(snapshot, snapshotPending);
+  markCraftEligibilityDirty();
   return { result, afterItem, afterPending };
 }
 
@@ -2507,13 +2617,18 @@ function computeDesecrationForesight(bone) {
   const snapshot = engine.getItem();
   const snapshotPending = engine.getPendingDesecration();
   const res = engine.startDesecration({ bone, omens: Array.from(selectedOmens) });
-  if (!res || !res.success) { engine.loadItem(snapshot, snapshotPending); return { result: res }; }
+  if (!res || !res.success) {
+    engine.loadItem(snapshot, snapshotPending);
+    markCraftEligibilityDirty();
+    return { result: res };
+  }
   const afterItem = engine.getItem();
   // Capture the engine's pending desecration (the placement + the rolled Well of
   // Souls options) so Hinekora's Lock can later COMMIT this exact sealed
   // desecration instead of rolling a brand-new one.
   const pending = engine.getPendingDesecration();
   engine.loadItem(snapshot, snapshotPending); // roll back the placed mod + pending desecration
+  markCraftEligibilityDirty();
   return { result: res, afterItem, pending };
 }
 
@@ -2570,6 +2685,7 @@ function commitForesight(currency) {
   }
   const before = snapshotState(engine.getItem());
   engine.loadItem(seal.afterItem, seal.afterPending);   // commit the exact sealed outcome
+  markCraftEligibilityDirty();
   consumeCraftOmen(currency);
   engine.recordCurrencyUse(craftIdForAction(currency));
   engine.clearHinekoraLock();        // "The Lock is removed when this item is modified."
@@ -2614,6 +2730,7 @@ function commitDesecrationForesight(bone) {
   // Restore the sealed item (with its unrevealed placeholder) AND the sealed
   // pending desecration (same side/mode + the same revealed options).
   engine.loadItem(seal.afterItem, seal.pending);
+  markCraftEligibilityDirty();
   engine.recordCurrencyUse(craftIdForAction(bone));
   // Consume any directional / one-shot omens now (Abyssal Echoes is counted
   // later, on commit at the Well), mirroring startDesecrationFlow.
@@ -3254,12 +3371,16 @@ function renderItemArt(item) {
     aura.hidden = true;
     aura.removeAttribute('src');
   }, { once: true });
+  image.decoding = 'async';
+  image.fetchPriority = 'high';
   image.src = assetPath;
 }
 
 function renderItem(actionResult = null, overrideItem = null) {
   const item = overrideItem || engine.getItem();
   const liveItem = overrideItem ? engine.getItem() : item;
+  markCraftEligibilityDirty();
+  beginCraftEligibilityPass(liveItem);
   const realCorrupted = liveItem.corrupted;
   const realSanctified = liveItem.sanctified;
 
@@ -3440,21 +3561,23 @@ function renderItem(actionResult = null, overrideItem = null) {
 
   const heldDefinition = armedCurrency ? CRAFT_DEFINITION_BY_ACTION.get(armedCurrency) : null;
   const heldCurrencyBecameUnavailable = Boolean(
-    heldDefinition && disabledReasonForDefinition(heldDefinition, liveItem)
+    heldDefinition && craftEligibilityReason(heldDefinition, liveItem)
   );
   const selectedOmenDefinition = selectedCraftOmen
     ? CRAFTING_ITEM_REGISTRY[CRAFT_OMENS[selectedCraftOmen]?.craftId]
     : null;
   const selectedCraftOmenBecameUnavailable = Boolean(
-    selectedOmenDefinition && disabledReasonForDefinition(selectedOmenDefinition, liveItem)
+    selectedOmenDefinition && craftEligibilityReason(selectedOmenDefinition, liveItem)
   );
-  elements.craftButtons.forEach(button => {
-    const definition = definitionForElement(button);
-    const reason = disabledReasonForDefinition(definition, liveItem);
-    setCraftButtonState(button, reason);
-  });
+  updateRenderedCraftEligibility(liveItem);
   if (heldCurrencyBecameUnavailable) disarmCurrency();
-  if (selectedCraftOmenBecameUnavailable) clearCraftOmen();
+  if (selectedCraftOmenBecameUnavailable) {
+    clearCraftOmen();
+    // Clearing an Omen changes the currency validators' applicability context
+    // even though the item object itself is unchanged.
+    markCraftEligibilityDirty();
+    updateRenderedCraftEligibility(liveItem);
+  }
   filterCraftInventory();
 
   if (actionResult && actionResult.previousRarity && actionResult.previousRarity !== item.rarity) {
@@ -3636,6 +3759,7 @@ function loadFromStash(index) {
 
   // Only mutate live controller state after construction and migration pass.
   engine = candidateEngine;
+  markCraftEligibilityDirty();
   currentJewelType = savedPoolId;
   currentSelectablePoolIds = selectablePoolIds;
   currentConcreteBaseId = savedConcreteBase.id;
@@ -3700,6 +3824,8 @@ function renderStash() {
       const img = new Image();
       img.className = 'stash-img';
       img.alt = '';
+      img.loading = 'lazy';
+      img.decoding = 'async';
       img.addEventListener('load', () => slot.classList.add('has-real-icon'));
       img.addEventListener('error', () => img.remove());
       img.src = concreteBaseArtPath(item.baseItemId) ||
