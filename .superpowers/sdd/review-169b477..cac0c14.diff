@@ -1,0 +1,618 @@
+﻿diff --git a/tools/base-art-core.mjs b/tools/base-art-core.mjs
+index 72c7a01..93961c5 100644
+--- a/tools/base-art-core.mjs
++++ b/tools/base-art-core.mjs
+@@ -430,29 +430,33 @@ export function isPng(buffer) {
+   const bytes = Buffer.from(buffer);
+   return bytes.subarray(0, 8).equals(Buffer.from('89504e470d0a1a0a', 'hex'));
+ }
+ 
+ export function sha256(buffer) {
+   return createHash('sha256').update(buffer).digest('hex');
+ }
+ 
+ function validateHttpsHost(value, allowedHosts, field) {
+   assert(typeof value === 'string' && value, `${field} must be a URL.`);
++  const rawAuthority = value.match(/^[a-z][a-z0-9+.-]*:\/\/([^\/?#]*)/i)?.[1] || '';
++  assert(!rawAuthority.includes('@'), `${field} must not contain credentials.`);
+   let url;
+   try {
+     url = new URL(value);
+   } catch {
+     throw new Error(`${field} must be an absolute URL.`);
+   }
+   assert(url.protocol === 'https:', `${field} must use HTTPS.`);
+   assert(allowedHosts.has(url.hostname.toLowerCase()), `${field} host is not allowlisted.`);
+   assert(!url.username && !url.password, `${field} must not contain credentials.`);
++  assert(!url.port, `${field} must not use a non-default port.`);
++  assert(!url.hash, `${field} must not contain a fragment.`);
+   return url;
+ }
+ 
+ function validateManifestEntry(entry, index) {
+   assert(entry && typeof entry === 'object' && !Array.isArray(entry), `Manifest entry ${index} must be an object.`);
+   const baseId = Number(entry.baseId);
+   assert(Number.isSafeInteger(baseId) && baseId >= 0, `Manifest entry ${index} has invalid baseId.`);
+   assert(typeof entry.metadataKey === 'string' && METADATA_RE.test(entry.metadataKey),
+     `Manifest entry ${baseId} has invalid metadataKey.`);
+   assert(typeof entry.displayName === 'string' && entry.displayName, `Manifest entry ${baseId} is missing displayName.`);
+@@ -470,21 +474,31 @@ function validateManifestEntry(entry, index) {
+  * Validate the reviewable resolver manifest.  Returns true for convenient
+  * assertion use and throws a descriptive error for the first malformed field.
+  */
+ export function validateManifest(value) {
+   assert(value && typeof value === 'object' && !Array.isArray(value), 'Manifest must be an object.');
+   assert(value.schemaVersion === 1, 'Manifest schemaVersion must be 1.');
+   assert(typeof value.targetGameVersion === 'string' && value.targetGameVersion,
+     'Manifest targetGameVersion is missing.');
+   const catalog = value.catalog || value.sourceCatalog;
+   assert(catalog && typeof catalog === 'object', 'Manifest catalog is missing.');
+-  validateHttpsHost(catalog.url, POE2DB_HOSTS, 'Manifest catalog URL');
++  const catalogUrl = validateHttpsHost(
++    catalog.url,
++    new Set([...POE2DB_HOSTS, CDN_HOST]),
++    'Manifest catalog URL',
++  );
++  const isPoe2DbCatalog = POE2DB_HOSTS.has(catalogUrl.hostname.toLowerCase()) &&
++    /^\/us(?:\/|$)/i.test(catalogUrl.pathname);
++  const isCdnCatalog = catalogUrl.hostname.toLowerCase() === CDN_HOST &&
++    /^\/json\/autocompletecb_us\.[0-9a-f]{16,64}\.json$/i.test(catalogUrl.pathname) &&
++    !catalogUrl.search && !catalogUrl.hash;
++  assert(isPoe2DbCatalog || isCdnCatalog, 'Manifest catalog URL path is not allowlisted.');
+   assert(typeof catalog.sha256 === 'string' && /^[0-9a-f]{64}$/i.test(catalog.sha256),
+     'Manifest catalog sha256 is invalid.');
+   const resolvedAt = value.resolvedAt || value.resolverTimestamp;
+   assert(typeof resolvedAt === 'string' && !Number.isNaN(Date.parse(resolvedAt)),
+     'Manifest resolvedAt must be an ISO timestamp.');
+   assert(Array.isArray(value.entries) && value.entries.length > 0, 'Manifest entries are missing or empty.');
+   const ids = new Set();
+   const metadataKeys = new Set();
+   value.entries.forEach((entry, index) => {
+     validateManifestEntry(entry, index);
+diff --git a/tools/base-art-network.mjs b/tools/base-art-network.mjs
+index a34b21b..4f38382 100644
+--- a/tools/base-art-network.mjs
++++ b/tools/base-art-network.mjs
+@@ -18,20 +18,23 @@ const DEFAULTS = Object.freeze({
+   backoffBaseMs: 1_000,
+   maximumBackoffMs: 8_000,
+ });
+ 
+ class NetworkPolicyError extends Error {
+   constructor(message, code = 'NETWORK_POLICY', options = {}) {
+     super(message, options);
+     this.name = 'NetworkPolicyError';
+     this.code = code;
+     this.retryable = false;
++    if (options.url != null) this.url = options.url;
++    if (options.attempt != null) this.attempt = options.attempt;
++    if (options.status != null) this.status = options.status;
+   }
+ }
+ 
+ class NetworkRequestError extends Error {
+   constructor(message, code = 'NETWORK_REQUEST', options = {}) {
+     super(message, options);
+     this.name = 'NetworkRequestError';
+     this.code = code;
+     this.retryable = options.retryable !== false;
+     if (options.status != null) this.status = options.status;
+@@ -99,73 +102,126 @@ export function isPrivateAddress(address) {
+   const uniqueLocal = (ipv6[0] & 0xfe) === 0xfc;
+   const linkLocal = ipv6[0] === 0xfe && (ipv6[1] & 0xc0) === 0x80;
+   const multicast = ipv6[0] === 0xff;
+   const documentation = ipv6[0] === 0x20 && ipv6[1] === 0x01 &&
+     ipv6[2] === 0x0d && ipv6[3] === 0xb8;
+   const ipv4Mapped = ipv6.subarray(0, 10).every(byte => byte === 0) &&
+     ipv6[10] === 0xff && ipv6[11] === 0xff;
+   if (ipv4Mapped) {
+     return isPrivateAddress([...ipv6.subarray(12)].join('.'));
+   }
++  const ipv4Compatible = ipv6.subarray(0, 12).every(byte => byte === 0);
++  const firstGroup = ipv6.readUInt16BE(0);
++  const secondGroup = ipv6.readUInt16BE(2);
++  const discardOnly = firstGroup === 0x0100 && ipv6.subarray(2, 8).every(byte => byte === 0);
++  const reserved2001 = firstGroup === 0x2001 && (
++    secondGroup <= 0x0003 || (secondGroup >= 0x0010 && secondGroup <= 0x003f) ||
++    secondGroup === 0x0db8
++  );
++  const deprecatedSiteLocal = ipv6[0] === 0xfe && (ipv6[1] & 0xc0) === 0xc0;
++  const documentation3fff = firstGroup >= 0x3fff && firstGroup <= 0x3fff;
++  const nat64WellKnown = firstGroup === 0x0064 && secondGroup === 0xff9b;
++  const sixToFour = firstGroup === 0x2002;
++  if (ipv4Compatible || discardOnly || reserved2001 || deprecatedSiteLocal ||
++      documentation3fff || nat64WellKnown || sixToFour) return true;
++  // 2001:db8::/32 is already covered above; keep the broad special ranges
++  // explicit so future fixtures cannot silently treat documentation space as
++  // a public endpoint.
+   return allZero || loopback || uniqueLocal || linkLocal || multicast || documentation;
+ }
+ 
+ function assertSafePath(url) {
+   let decoded;
+   try {
+     decoded = decodeURIComponent(url.pathname);
+   } catch {
+-    throw new NetworkPolicyError(`Source URL contains malformed path encoding: ${url.href}`, 'URL_PATH');
++    throw new NetworkPolicyError(`Source URL contains malformed path encoding: ${url.href}`, 'URL_PATH', {
++      url: url.href,
++    });
+   }
+   if (decoded.includes('\\') || decoded.split('/').includes('..') || decoded.includes('\0')) {
+-    throw new NetworkPolicyError(`Source URL contains path traversal: ${url.href}`, 'URL_PATH');
++    throw new NetworkPolicyError(`Source URL contains path traversal: ${url.href}`, 'URL_PATH', {
++      url: url.href,
++    });
+   }
+ }
+ 
+ /** Parse and enforce the exact public Poe2DB sources used by this pipeline. */
+ export function assertAllowedSourceUrl(value) {
++  let rawValue;
++  try {
++    rawValue = value instanceof URL ? value.href : String(value);
++  } catch (error) {
++    throw new NetworkPolicyError('Source URL could not be converted to text.', 'URL_INVALID', { cause: error });
++  }
++  const rawAuthority = rawValue.match(/^[a-z][a-z0-9+.-]*:\/\/([^\/?#]*)/i)?.[1] || '';
++  if (rawAuthority.includes('@')) {
++    throw new NetworkPolicyError('Source URLs must not contain credentials.', 'URL_CREDENTIALS', {
++      url: rawValue,
++    });
++  }
++  const rawPath = rawValue.match(/^[a-z][a-z0-9+.-]*:\/\/[^\/?#]*(\/[^?#]*)?/i)?.[1] || '';
++  if (rawPath.includes('\\') || /(?:^|\/)(?:\.{1,2})(?:\/|$)/.test(rawPath) || /%(?:2e|5c)/i.test(rawPath)) {
++    throw new NetworkPolicyError(`Source URL contains path traversal: ${rawValue}`, 'URL_PATH', {
++      url: rawValue,
++    });
++  }
+   let url;
+   try {
+-    url = value instanceof URL ? new URL(value.href) : new URL(String(value));
++    url = new URL(rawValue);
+   } catch (error) {
+     throw new NetworkPolicyError(`Source URL is malformed: ${value}`, 'URL_INVALID', { cause: error });
+   }
+   if (url.protocol !== 'https:') {
+-    throw new NetworkPolicyError(`Only HTTPS source URLs are allowed: ${url.href}`, 'URL_HTTPS');
++    throw new NetworkPolicyError(`Only HTTPS source URLs are allowed: ${url.href}`, 'URL_HTTPS', {
++      url: url.href,
++    });
+   }
+   if (url.username || url.password) {
+-    throw new NetworkPolicyError('Source URLs must not contain credentials.', 'URL_CREDENTIALS');
++    throw new NetworkPolicyError('Source URLs must not contain credentials.', 'URL_CREDENTIALS', {
++      url: url.href,
++    });
+   }
+   if (url.port) {
+-    throw new NetworkPolicyError(`Source URL uses a non-default port: ${url.href}`, 'URL_PORT');
++    throw new NetworkPolicyError(`Source URL uses a non-default port: ${url.href}`, 'URL_PORT', {
++      url: url.href,
++    });
+   }
+   const hostname = normalizeHostname(url.hostname);
+   if (isIP(hostname) || isPrivateAddress(hostname) || hostname === 'localhost' ||
+       hostname.endsWith('.localhost') || hostname.endsWith('.local')) {
+-    throw new NetworkPolicyError(`Private or local source URL is not allowed: ${url.href}`, 'URL_PRIVATE');
++    throw new NetworkPolicyError(`Private or local source URL is not allowed: ${url.href}`, 'URL_PRIVATE', {
++      url: url.href,
++    });
+   }
+   assertSafePath(url);
+ 
+   if (PAGE_HOSTS.has(hostname)) {
+     if (!/^\/us(?:\/|$)/i.test(url.pathname)) {
+-      throw new NetworkPolicyError(`Poe2DB page path is outside the allowlist: ${url.href}`, 'URL_ALLOWLIST');
++      throw new NetworkPolicyError(`Poe2DB page path is outside the allowlist: ${url.href}`, 'URL_ALLOWLIST', {
++        url: url.href,
++      });
+     }
+   } else if (hostname === CDN_HOST) {
+     const isArtwork = /^\/image\/Art\/[A-Za-z0-9_./-]+\.webp$/.test(url.pathname) &&
+       !url.pathname.split('/').includes('..');
+     const isAutocomplete = /^\/json\/autocompletecb_us\.[0-9a-f]{16,64}\.json$/i.test(url.pathname) &&
+       !url.search;
+     if (!isArtwork && !isAutocomplete) {
+-      throw new NetworkPolicyError(`Poe2DB CDN path is outside the allowlist: ${url.href}`, 'URL_ALLOWLIST');
++      throw new NetworkPolicyError(`Poe2DB CDN path is outside the allowlist: ${url.href}`, 'URL_ALLOWLIST', {
++        url: url.href,
++      });
+     }
+   } else {
+-    throw new NetworkPolicyError(`Source host is outside the allowlist: ${url.hostname}`, 'URL_ALLOWLIST');
++    throw new NetworkPolicyError(`Source host is outside the allowlist: ${url.hostname}`, 'URL_ALLOWLIST', {
++      url: url.href,
++    });
+   }
+   url.hash = '';
+   return url;
+ }
+ 
+ export function shouldRetryStatus(status) {
+   const code = Number(status);
+   return code === 408 || code === 425 || code === 429 || (code >= 500 && code <= 599);
+ }
+ 
+@@ -217,66 +273,86 @@ function responseHeaders(response) {
+ async function cancelBody(body) {
+   if (body && typeof body.cancel === 'function') {
+     try {
+       await body.cancel();
+     } catch {
+       // The redirect/error is already authoritative; cancellation is best effort.
+     }
+   }
+ }
+ 
+-async function readBoundedBody(response, maximumBytes) {
++async function readBoundedBody(response, maximumBytes, signal = null) {
+   const headers = responseHeaders(response);
+   const declared = headers.get('content-length');
+   if (declared != null && declared !== '') {
+     const length = Number(declared);
+     if (!Number.isFinite(length) || length < 0) {
+       throw new NetworkPolicyError('Response has an invalid Content-Length header.', 'BODY_LENGTH');
+     }
+     if (length > maximumBytes) {
++      await cancelBody(response?.body);
+       throw new NetworkPolicyError(`Response exceeds the ${maximumBytes} byte limit.`, 'BODY_LIMIT');
+     }
+   }
+ 
+   const body = response?.body;
+   if (Buffer.isBuffer(body) || body instanceof Uint8Array) {
+     const bytes = Buffer.from(body);
+     if (bytes.length > maximumBytes) {
+       throw new NetworkPolicyError(`Response exceeds the ${maximumBytes} byte limit.`, 'BODY_LIMIT');
+     }
+     return bytes;
+   }
+   if (body instanceof ArrayBuffer) {
+     const bytes = Buffer.from(body);
+     if (bytes.length > maximumBytes) {
+       throw new NetworkPolicyError(`Response exceeds the ${maximumBytes} byte limit.`, 'BODY_LIMIT');
+     }
+     return bytes;
+   }
+-  if (!body) throw new NetworkPolicyError('Response has no body.', 'BODY_MISSING');
++  // Empty redirect/error responses are valid HTTP and must still be
++  // classified by status (for example a body-less 503 must be retried).
++  if (!body) return Buffer.alloc(0);
+ 
+   const chunks = [];
+   let total = 0;
+   const append = value => {
+     const bytes = Buffer.from(value);
+     total += bytes.length;
+     if (total > maximumBytes) {
+       throw new NetworkPolicyError(`Response exceeds the ${maximumBytes} byte limit.`, 'BODY_LIMIT');
+     }
+     chunks.push(bytes);
+   };
+ 
+   if (typeof body.getReader === 'function') {
+     const reader = body.getReader();
+     try {
+       for (;;) {
+-        const { done, value } = await reader.read();
++        let abortHandler;
++        const readResult = reader.read();
++        const result = signal
++          ? await Promise.race([
++            readResult,
++            new Promise((_resolve, reject) => {
++              abortHandler = () => {
++                const error = new Error('The response body read was aborted.');
++                error.name = 'AbortError';
++                reject(error);
++              };
++              if (signal.aborted) abortHandler();
++              else signal.addEventListener('abort', abortHandler, { once: true });
++            }),
++          ])
++          : await readResult;
++        if (signal && abortHandler) signal.removeEventListener('abort', abortHandler);
++        const { done, value } = result;
+         if (done) break;
+         append(value);
+       }
+     } catch (error) {
+       try {
+         await reader.cancel(error);
+       } catch {
+         // Preserve the bounded-read error when the transport is already gone.
+       }
+       throw error;
+@@ -288,42 +364,70 @@ async function readBoundedBody(response, maximumBytes) {
+       }
+     }
+   } else if (typeof body[Symbol.asyncIterator] === 'function') {
+     for await (const value of body) append(value);
+   } else {
+     throw new NetworkPolicyError('Response body is not a readable byte stream.', 'BODY_STREAM');
+   }
+   return Buffer.concat(chunks, total);
+ }
+ 
+-function challengeDescription(text, headers) {
++function challengeDescription(text, headers, responseKind) {
+   const contentType = headers.get('content-type') || '';
+-  if (!/html/i.test(contentType) && !/^\s*</.test(text)) return null;
++  if (responseKind === 'bytes' && /image\//i.test(contentType)) return null;
++  const strongMarker = /captcha|cf-chl-|cloudflare ray|just a moment|access denied|attention required|verify (?:that )?you are human/i.test(text);
++  if (!/html/i.test(contentType) && !/^\s*</.test(text) && !strongMarker) return null;
+   if (/captcha/i.test(text)) return 'CAPTCHA challenge';
+   if (/cf-chl-|cloudflare ray|just a moment/i.test(text)) return 'bot-protection challenge';
+   if (/access denied|attention required|verify (?:that )?you are human/i.test(text)) {
+     return 'access denial challenge';
+   }
+   return null;
+ }
+ 
++const RETRYABLE_TRANSPORT_CODES = new Set([
++  'ECONNRESET', 'ECONNREFUSED', 'ECONNABORTED', 'ETIMEDOUT', 'EAI_AGAIN',
++  'ENETUNREACH', 'EHOSTUNREACH', 'ENOTFOUND', 'UND_ERR_CONNECT_TIMEOUT',
++  'UND_ERR_SOCKET', 'UND_ERR_HEADERS_TIMEOUT', 'UND_ERR_BODY_TIMEOUT',
++]);
++
++function isRetryableTransportError(error) {
++  if (!error) return false;
++  if (error.name === 'AbortError' || RETRYABLE_TRANSPORT_CODES.has(error.code)) return true;
++  if (error.cause && error.cause !== error && isRetryableTransportError(error.cause)) return true;
++  if (error instanceof TypeError && /fetch|network|socket|connect|dns|undici/i.test(error.message || '')) {
++    return true;
++  }
++  return false;
++}
++
++function attachContext(error, url, attempt) {
++  if (error && typeof error === 'object') {
++    if (error.url == null) error.url = url;
++    if (error.attempt == null) error.attempt = attempt;
++  }
++  return error;
++}
++
+ function isNonRetryable(error) {
+   return error?.retryable === false || error instanceof NetworkPolicyError;
+ }
+ 
+ function contextualError(error, url, attempt) {
+-  if (error instanceof NetworkRequestError || error instanceof NetworkPolicyError) return error;
++  if (error instanceof NetworkRequestError || error instanceof NetworkPolicyError) {
++    return attachContext(error, url, attempt);
++  }
+   const message = error instanceof Error ? error.message : String(error);
+   return new NetworkRequestError(
+     `Poe2DB request failed on attempt ${attempt} for ${url}: ${message}`,
+     'REQUEST_FAILED',
+-    { cause: error, url, attempt, retryable: true },
++    { cause: error, url, attempt, retryable: isRetryableTransportError(error) },
+   );
+ }
+ 
+ function delay(milliseconds) {
+   return new Promise(resolve => setTimeout(resolve, milliseconds));
+ }
+ 
+ /**
+  * Create one guarded client. The limiter is shared by every method call on the
+  * instance, so concurrent resolver workers cannot bypass request pacing.
+@@ -407,148 +511,207 @@ export function createNetworkClient(options = {}) {
+         'DNS_TIMEOUT',
+         { url: url.href, attempt, retryable: true },
+       )), requestTimeoutMs);
+     });
+     let answer;
+     try {
+       answer = await Promise.race([
+         Promise.resolve(lookup(url.hostname, { all: true, verbatim: true })),
+         timeout,
+       ]);
++    } catch (error) {
++      if (error instanceof NetworkPolicyError || error instanceof NetworkRequestError) {
++        throw attachContext(error, url.href, attempt);
++      }
++      throw contextualError(error, url.href, attempt);
+     } finally {
+       clearTimeout(timer);
+     }
+     const records = Array.isArray(answer) ? answer : answer ? [answer] : [];
+     if (!records.length) {
+       throw new NetworkRequestError(`DNS returned no addresses for ${url.hostname}.`, 'DNS_EMPTY', {
+         url: url.href,
+         attempt,
+         retryable: true,
+       });
+     }
+     for (const record of records) {
+       const address = typeof record === 'string' ? record : record?.address;
+       if (!address || !isIP(normalizeHostname(address))) {
+-        throw new NetworkPolicyError(`DNS returned an invalid address for ${url.hostname}.`, 'DNS_INVALID');
++        throw new NetworkPolicyError(`DNS returned an invalid address for ${url.hostname}.`, 'DNS_INVALID', {
++          url: url.href,
++          attempt,
++        });
+       }
+       if (isPrivateAddress(address)) {
+         throw new NetworkPolicyError(
+           `Source host did not resolve exclusively to public addresses: ${url.hostname} (${address}).`,
+           'DNS_PRIVATE',
++          { url: url.href, attempt },
+         );
+       }
+     }
+   }
+ 
+   async function fetchHop(url, responseKind, attempt) {
+     await resolvePublicDns(url, attempt);
+     const slot = await acquire();
+     counters.lastRequestAt = slot.startedAt;
+     const controller = new AbortController();
+     let timedOut = false;
++    let rejectTimeout;
++    const timeoutPromise = new Promise((_resolve, reject) => {
++      rejectTimeout = reject;
++    });
++    const timeoutError = () => new NetworkRequestError(
++      `Poe2DB request timed out after ${requestTimeoutMs}ms on attempt ${attempt}: ${url.href}`,
++      'REQUEST_TIMEOUT',
++      { url: url.href, attempt, retryable: true },
++    );
+     const timer = setTimeout(() => {
+       timedOut = true;
+       controller.abort();
++      rejectTimeout(timeoutError());
+     }, requestTimeoutMs);
+     try {
+       let responsePromise;
+       try {
+         counters.requests += 1;
+         responsePromise = Promise.resolve(fetchImpl(url, {
+           method: 'GET',
+           headers: headersFor(url, responseKind, userAgent),
+           redirect: 'manual',
+           signal: controller.signal,
+         }));
+       } finally {
+         // Release only after fetch has been invoked. This prevents the next
+         // concurrent worker from advancing a shared test/real clock before
+         // the current request actually starts, while still allowing overlap.
+         slot.release();
+       }
+-      const response = await responsePromise;
++      const response = await Promise.race([responsePromise, timeoutPromise]);
++      if (timedOut) {
++        throw timeoutError();
++      }
+       counters.responses += 1;
+       if (!response || !Number.isInteger(Number(response.status))) {
+         throw new NetworkRequestError(`Fetch returned an invalid response for ${url.href}.`, 'RESPONSE_INVALID', {
+           url: url.href,
+           attempt,
+-          retryable: true,
++          retryable: false,
+         });
+       }
+       if (REDIRECT_STATUSES.has(Number(response.status))) {
+         await cancelBody(response.body);
+         return { response, bytes: null };
+       }
+-      const bytes = await readBoundedBody(response, maximumResponseBytes);
++      let bytes;
++      try {
++        bytes = await Promise.race([
++          readBoundedBody(response, maximumResponseBytes, controller.signal),
++          timeoutPromise,
++        ]);
++      } catch (error) {
++        // A transient HTTP status remains retryable even when an origin sends
++        // a malformed/absent error body. A declared/streamed body-limit breach
++        // is still a hard policy failure and must not be retried.
++        if (Number(response.status) < 200 || Number(response.status) > 299) {
++          if (!(error instanceof NetworkPolicyError && error.code === 'BODY_LIMIT')) {
++            bytes = Buffer.alloc(0);
++          } else {
++            throw error;
++          }
++        } else {
++          throw error;
++        }
++      }
++      if (timedOut) {
++        throw timeoutError();
++      }
+       counters.bytes += bytes.length;
+       return { response, bytes };
+     } catch (error) {
+-      if (timedOut) {
++      if (timedOut && !(error instanceof NetworkPolicyError) &&
++          !(error instanceof NetworkRequestError && error.retryable === false)) {
+         throw new NetworkRequestError(
+           `Poe2DB request timed out after ${requestTimeoutMs}ms on attempt ${attempt}: ${url.href}`,
+           'REQUEST_TIMEOUT',
+           { cause: error, url: url.href, attempt, retryable: true },
+         );
+       }
+-      throw error;
++      if (error instanceof NetworkPolicyError || error instanceof NetworkRequestError) {
++        throw attachContext(error, url.href, attempt);
++      }
++      throw contextualError(error, url.href, attempt);
+     } finally {
+       clearTimeout(timer);
+     }
+   }
+ 
+   async function oneAttempt(initialUrl, responseKind, attempt) {
+     let url = assertAllowedSourceUrl(initialUrl);
+     let redirects = 0;
+     for (;;) {
+       const { response, bytes } = await fetchHop(url, responseKind, attempt);
+       const status = Number(response.status);
+       if (!REDIRECT_STATUSES.has(status)) {
+         return { response, bytes, url };
+       }
+       if (redirects >= maximumRedirects) {
+         throw new NetworkPolicyError(
+           `Poe2DB request exceeded the ${maximumRedirects} redirect limit: ${initialUrl}`,
+           'REDIRECT_LIMIT',
++          { url: url.href, attempt },
+         );
+       }
+       const location = responseHeaders(response).get('location');
+       if (!location) {
+-        throw new NetworkPolicyError(`Redirect ${status} omitted Location: ${url.href}`, 'REDIRECT_LOCATION');
++        throw new NetworkPolicyError(`Redirect ${status} omitted Location: ${url.href}`, 'REDIRECT_LOCATION', {
++          url: url.href,
++          attempt,
++        });
+       }
+       let next;
+       try {
+         next = new URL(location, url);
+       } catch (error) {
+         throw new NetworkPolicyError(`Redirect Location is malformed: ${location}`, 'REDIRECT_LOCATION', {
+           cause: error,
++          url: url.href,
++          attempt,
+         });
+       }
+-      url = assertAllowedSourceUrl(next);
++      try {
++        url = assertAllowedSourceUrl(next);
++      } catch (error) {
++        throw attachContext(error, next.href, attempt);
++      }
+       redirects += 1;
+       counters.redirects += 1;
+     }
+   }
+ 
+   async function request(initialUrl, responseKind) {
+     const approved = assertAllowedSourceUrl(initialUrl);
+     let lastError;
+     for (let attempt = 1; attempt <= maximumAttempts; attempt += 1) {
+       try {
+         const result = await oneAttempt(approved, responseKind, attempt);
+         const status = Number(result.response.status);
+         const headers = responseHeaders(result.response);
+         const text = Buffer.from(result.bytes).toString('utf8');
+-        const challenge = challengeDescription(text, headers);
++        const challenge = challengeDescription(text, headers, responseKind);
+         if (challenge) {
+           throw new NetworkPolicyError(
+             `Poe2DB ${challenge} detected at ${result.url.href}; stopping without bypass.`,
+             'ACCESS_CHALLENGE',
++            { url: result.url.href, attempt },
+           );
+         }
+         if (status < 200 || status > 299) {
+           const snippet = text.replace(/\s+/g, ' ').trim().slice(0, 160);
+           const retryable = shouldRetryStatus(status);
+           const error = new NetworkRequestError(
+             `Poe2DB returned HTTP ${status} on attempt ${attempt} for ${result.url.href}` +
+               (snippet ? `: ${snippet}` : ''),
+             'HTTP_STATUS',
+             { status, url: result.url.href, attempt, retryable },

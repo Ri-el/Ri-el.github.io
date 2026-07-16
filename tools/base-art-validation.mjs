@@ -10,6 +10,14 @@
 
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import {
+  mkdtemp,
+  readFile,
+  readdir,
+  rm,
+  writeFile,
+} from 'node:fs/promises';
+import os from 'node:os';
 import { pathToFileURL } from 'node:url';
 import path from 'node:path';
 
@@ -29,6 +37,13 @@ const NETWORK_EXPORTS = [
   'assertAllowedSourceUrl',
   'isPrivateAddress',
   'shouldRetryStatus',
+];
+
+const CONVERTER_EXPORTS = [
+  'loadConverter',
+  'writePngIfAbsent',
+  'readVerifiedPng',
+  'inspectPng',
 ];
 
 function reportFailure(error) {
@@ -68,7 +83,7 @@ function validManifestFixture() {
     schemaVersion: 1,
     targetGameVersion: '0.5.4',
     catalog: {
-      url: 'https://poe2db.tw/us/autocomplete',
+      url: 'https://cdn.poe2db.tw/json/autocompletecb_us.0387c2cae16eb0c7.json',
       sha256: 'a'.repeat(64),
     },
     resolvedAt: '2026-07-16T00:00:00.000Z',
@@ -83,6 +98,41 @@ function validManifestFixture() {
     }],
     failures: [],
   };
+}
+
+function tinyPngFixture() {
+  // A deterministic 1x1 grayscale+alpha PNG.  It is intentionally kept
+  // inline so converter-boundary checks never depend on a checked-in asset.
+  return Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+    'base64',
+  );
+}
+
+function alternatePngFixture() {
+  // A second valid 1x1 RGBA PNG, used to prove an existing file is not
+  // replaced by a different (but valid) payload.
+  return Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg==',
+    'base64',
+  );
+}
+
+function fakeWebpFixture() {
+  // The fake sharp fixture below only needs the WebP container magic.  A
+  // genuine WebP decode is exercised separately when a bundled sharp module
+  // is supplied to the harness.
+  return Buffer.from('RIFF\u0004\u0000\u0000\u0000WEBPVP8 ', 'ascii');
+}
+
+function tinyRealWebpFixture() {
+  // 1x1 WebP emitted by the bundled sharp fixture used for the optional
+  // integration smoke.  The deterministic unit tests use fakeWebpFixture so
+  // they do not depend on a decoder being installed.
+  return Buffer.from(
+    'UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAUAmJaQAA3AA/v02aAA=',
+    'base64',
+  );
 }
 
 export async function runCoreChecks() {
@@ -272,6 +322,18 @@ export async function runCoreChecks() {
   names.push(check('validates a complete manifest and rejects malformed entries', () => {
     assert.equal(validateManifest(validManifestFixture()), true);
     assert.throws(() => validateManifest({ ...validManifestFixture(), entries: [] }), /entr|base/i);
+    assert.throws(() => validateManifest({
+      ...validManifestFixture(),
+      catalog: { ...validManifestFixture().catalog, url: 'https://cdn.poe2db.tw/cache2/catalog.json' },
+    }), /catalog|allowlist|path/i);
+    for (const url of [
+      'https://cdn.poe2db.tw:8443/json/autocompletecb_us.0387c2cae16eb0c7.json',
+      'https://@cdn.poe2db.tw/json/autocompletecb_us.0387c2cae16eb0c7.json',
+      'https://cdn.poe2db.tw/json/autocompletecb_us.0387c2cae16eb0c7.json#fragment',
+    ]) assert.throws(() => validateManifest({
+      ...validManifestFixture(),
+      catalog: { ...validManifestFixture().catalog, url },
+    }), /catalog|port|credential|fragment|hash|allowlist/i);
     assert.throws(() => validateManifest({ ...validManifestFixture(), entries: [{ ...validManifestFixture().entries[0], sourceImageUrl: 'http://evil.test/x' }] }), /url|https|cdn/i);
     assert.throws(() => validateManifest({ ...validManifestFixture(), entries: [{ ...validManifestFixture().entries[0], metadataKey: 'metadata/items/Amulets/FourAmulet1' }] }), /metadata|case/i);
   }));
@@ -321,10 +383,14 @@ export async function runNetworkChecks() {
   names.push(check('rejects credentials, non-default ports, malformed and private literals', () => {
     for (const value of [
       'https://user:pass@poe2db.tw/us/x',
+      'https://@poe2db.tw/us/x',
+      'https://:@poe2db.tw/us/x',
       'https://poe2db.tw:8443/us/x',
       'https://[::1]/us/x',
       'https://127.0.0.1/us/x',
       'https://poe2db.tw/%2e%2e/private',
+      'https://cdn.poe2db.tw/image/Art/a/../b.webp',
+      'https://cdn.poe2db.tw/image/Art/a/%2e%2e/b.webp',
       'not a URL',
     ]) {
       assert.throws(() => assertAllowedSourceUrl(value), /URL|credential|port|private|allowlist|path/i);
@@ -335,7 +401,9 @@ export async function runNetworkChecks() {
     for (const address of [
       '0.0.0.0', '10.0.0.1', '100.64.0.1', '127.0.0.1', '169.254.1.1',
       '172.16.0.1', '192.0.2.1', '192.168.1.1', '198.51.100.1', '203.0.113.1',
-      '224.0.0.1', '::', '::1', 'fc00::1', 'fe80::1', 'ff02::1', '2001:db8::1',
+      '224.0.0.1', '::', '::1', 'fc00::1', 'fe80::1', 'ff02::1', 'fec0::1',
+      '100::1', '2001:2::1', '2001:20::1', '2001:db8::1', '3fff::1', '::192.0.2.1',
+      '2002:c000:0201::1',
     ]) assert.equal(isPrivateAddress(address), true, address);
     assert.equal(isPrivateAddress('93.184.216.34'), false);
     assert.equal(isPrivateAddress('2606:4700::6812:120c'), false);
@@ -431,6 +499,30 @@ export async function runNetworkChecks() {
     await assert.rejects(() => client.getText('https://poe2db.tw/us/TooBig'), /byte|size|limit/i);
     assert.equal(calls, 1);
 
+    let declaredCanceled = false;
+    const declaredTooBig = createNetworkClient({
+      minimumRequestIntervalMs: 0,
+      maximumResponseBytes: 3,
+      fetchImpl: async () => ({
+        status: 200,
+        statusText: 'OK',
+        headers: new Headers({ 'content-length': '4' }),
+        body: new ReadableStream({
+          cancel() {
+            declaredCanceled = true;
+          },
+        }),
+      }),
+      lookup: async () => publicLookup(),
+    });
+    await assert.rejects(
+      () => declaredTooBig.getBytes('https://cdn.poe2db.tw/image/Art/2DItems/DeclaredTooBig.webp'),
+      error => /byte|size|limit/i.test(error.message) &&
+        error.url === 'https://cdn.poe2db.tw/image/Art/2DItems/DeclaredTooBig.webp' &&
+        error.attempt === 1,
+    );
+    assert.equal(declaredCanceled, true, 'declared oversized streams must be canceled');
+
     let canceled = false;
     const streaming = createNetworkClient({
       minimumRequestIntervalMs: 0,
@@ -480,6 +572,22 @@ export async function runNetworkChecks() {
     assert.deepEqual(delays, [2, 3, 3]);
     assert.equal(client.stats().retries, 3);
 
+    let bodyCalls = 0;
+    const bodyFailure = createNetworkClient({
+      minimumRequestIntervalMs: 0,
+      backoffBaseMs: 0,
+      fetchImpl: async () => {
+        bodyCalls += 1;
+        if (bodyCalls === 1) {
+          throw Object.assign(new TypeError('terminated'), { cause: { code: 'UND_ERR_SOCKET' } });
+        }
+        return fixtureResponse(200, 'body recovered');
+      },
+      lookup: async () => publicLookup(),
+    });
+    assert.equal((await bodyFailure.getText('https://poe2db.tw/us/BodyFailure')).body, 'body recovered');
+    assert.equal(bodyCalls, 2);
+
     let deniedCalls = 0;
     const denied = createNetworkClient({
       minimumRequestIntervalMs: 0,
@@ -490,9 +598,49 @@ export async function runNetworkChecks() {
       },
       lookup: async () => publicLookup(),
     });
-    await assert.rejects(() => denied.getText('https://poe2db.tw/us/Denied'), /403|CAPTCHA|denied/i);
+    await assert.rejects(
+      () => denied.getText('https://poe2db.tw/us/Denied'),
+      error => /403|CAPTCHA|denied/i.test(error.message) &&
+        error.url === 'https://poe2db.tw/us/Denied' && error.attempt === 1,
+    );
     assert.equal(deniedCalls, 1);
     assert.equal(denied.stats().retries, 0);
+
+    let plainChallengeCalls = 0;
+    const plainChallenge = createNetworkClient({
+      minimumRequestIntervalMs: 0,
+      maximumAttempts: 4,
+      backoffBaseMs: 0,
+      fetchImpl: async () => {
+        plainChallengeCalls += 1;
+        return fixtureResponse(503, 'CAPTCHA');
+      },
+      lookup: async () => publicLookup(),
+    });
+    await assert.rejects(
+      () => plainChallenge.getText('https://poe2db.tw/us/PlainChallenge'),
+      /captcha|challenge/i,
+    );
+    assert.equal(plainChallengeCalls, 1);
+  }));
+
+  names.push(await checkAsync('classifies transient status before requiring an error body', async () => {
+    let calls = 0;
+    const client = createNetworkClient({
+      minimumRequestIntervalMs: 0,
+      maximumAttempts: 2,
+      backoffBaseMs: 0,
+      fetchImpl: async () => {
+        calls += 1;
+        if (calls === 1) return { status: 503, headers: new Headers(), body: null };
+        return fixtureResponse(200, 'recovered');
+      },
+      lookup: async () => publicLookup(),
+    });
+    const result = await client.getText('https://poe2db.tw/us/Empty503');
+    assert.equal(result.body, 'recovered');
+    assert.equal(calls, 2);
+    assert.equal(client.stats().retries, 1);
   }));
 
   names.push(await checkAsync('retries a timed-out fetch within the bounded attempt count', async () => {
@@ -517,6 +665,89 @@ export async function runNetworkChecks() {
     assert.equal(response.body, 'recovered');
     assert.equal(calls, 2);
     assert.equal(client.stats().retries, 1);
+  }));
+
+  names.push(await checkAsync('retains the failing redirect URL and attempt context', async () => {
+    const redirectUrl = 'https://cdn.poe2db.tw/image/Art/2DItems/Context.webp';
+    const client = createNetworkClient({
+      minimumRequestIntervalMs: 0,
+      maximumAttempts: 1,
+      fetchImpl: async url => {
+        if (String(url) === 'https://poe2db.tw/us/Context') {
+          return fixtureResponse(302, '', { location: redirectUrl });
+        }
+        throw Object.assign(new Error('socket reset'), { code: 'ECONNRESET' });
+      },
+      lookup: async () => publicLookup(),
+    });
+    await assert.rejects(
+      () => client.getBytes('https://poe2db.tw/us/Context'),
+      error => error.url === redirectUrl && error.attempt === 1 && /socket reset/i.test(error.message),
+    );
+  }));
+
+  names.push(await checkAsync('does not retry unexpected fetch/programming errors', async () => {
+    let calls = 0;
+    const client = createNetworkClient({
+      minimumRequestIntervalMs: 0,
+      maximumAttempts: 4,
+      fetchImpl: async () => {
+        calls += 1;
+        throw new Error('programming bug');
+      },
+      lookup: async () => publicLookup(),
+    });
+    await assert.rejects(
+      () => client.getText('https://poe2db.tw/us/Unexpected'),
+      error => calls === 1 && error.retryable === false && /programming bug/i.test(error.message),
+    );
+  }));
+
+  names.push(await checkAsync('enforces the timeout even when a transport ignores AbortSignal', async () => {
+    const client = createNetworkClient({
+      minimumRequestIntervalMs: 0,
+      requestTimeoutMs: 5,
+      maximumAttempts: 1,
+      fetchImpl: async () => new Promise(resolve => {
+        setTimeout(() => resolve(fixtureResponse(200, 'late')), 20);
+      }),
+      lookup: async () => publicLookup(),
+    });
+    await assert.rejects(
+      () => client.getText('https://poe2db.tw/us/SlowTransport'),
+      /timed out|timeout/i,
+    );
+  }));
+
+  names.push(await checkAsync('bounds a response body stream that never yields', async () => {
+    let canceled = false;
+    const client = createNetworkClient({
+      minimumRequestIntervalMs: 0,
+      requestTimeoutMs: 5,
+      maximumAttempts: 1,
+      fetchImpl: async () => ({
+        status: 200,
+        headers: new Headers(),
+        body: new ReadableStream({
+          pull() {
+            return new Promise(() => {});
+          },
+          cancel() {
+            canceled = true;
+          },
+        }),
+      }),
+      lookup: async () => publicLookup(),
+    });
+    const outcome = await Promise.race([
+      client.getBytes('https://cdn.poe2db.tw/image/Art/2DItems/Stalled.webp')
+        .then(() => null, error => error),
+      new Promise(resolve => setTimeout(() => resolve(new Error('body timeout test hung')), 100)),
+    ]);
+    assert(outcome instanceof Error);
+    assert.notEqual(outcome.message, 'body timeout test hung');
+    assert.match(outcome.message, /timed out|timeout/i);
+    assert.equal(canceled, true, 'timed-out streams must be canceled');
   }));
 
   names.push(await checkAsync('validates shared limiter options and spaces concurrent starts', async () => {
@@ -569,20 +800,173 @@ export async function runNetworkChecks() {
   return names;
 }
 
-export async function runSelectedChecks() {
-  const args = new Set(process.argv.slice(2));
-  if (args.size && !args.has('--core-only') && !args.has('--network-only')) {
-    throw new Error(`Unknown validation mode: ${[...args].join(' ')}`);
+export async function runConverterChecks(options = {}) {
+  const converter = await loadModule('./base-art-converter.mjs', CONVERTER_EXPORTS);
+  const { loadConverter, writePngIfAbsent, readVerifiedPng, inspectPng } = converter;
+  const names = [];
+  const fixture = tinyPngFixture();
+  const webp = fakeWebpFixture();
+  const temporaryRoot = await mkdtemp(path.join(os.tmpdir(), 'base-art-converter-'));
+
+  try {
+    names.push(await checkAsync('writes and verifies a genuine PNG', async () => {
+      const destination = path.join(temporaryRoot, 'fresh.png');
+      const result = await writePngIfAbsent(destination, fixture);
+      assert.equal(result.written, true);
+      assert.equal(result.skipped, false);
+      const verified = await readVerifiedPng(destination);
+      assert.equal(verified.width, 1);
+      assert.equal(verified.height, 1);
+      assert.equal(verified.bytes, fixture.length);
+      assert.match(verified.sha256, /^[0-9a-f]{64}$/);
+    }));
+
+    names.push(await checkAsync('never overwrites an existing destination', async () => {
+      const destination = path.join(temporaryRoot, 'existing.png');
+      const replacement = alternatePngFixture();
+      await writeFile(destination, fixture);
+      const result = await writePngIfAbsent(destination, replacement);
+      assert.equal(result.written, false);
+      assert.equal(result.skipped, true);
+      assert.deepEqual(await readFile(destination), fixture);
+    }));
+
+    names.push(await checkAsync('ignores temporary part files as complete assets', async () => {
+      const destination = path.join(temporaryRoot, 'part-only.png');
+      const stalePart = `${destination}.stale.part`;
+      await writeFile(stalePart, fixture);
+      await assert.rejects(() => readVerifiedPng(stalePart), /part|temporary/i);
+      const result = await writePngIfAbsent(destination, fixture);
+      assert.equal(result.written, true);
+      assert.equal((await readFile(destination)).equals(fixture), true);
+      const namesOnDisk = await readdir(temporaryRoot);
+      assert.equal(namesOnDisk.some(name => name.endsWith('.part') && name !== path.basename(stalePart)), false);
+    }));
+
+    names.push(await checkAsync('rejects invalid PNG signatures and dimensions', async () => {
+      const invalidSignature = path.join(temporaryRoot, 'invalid-signature.png');
+      const invalid = Buffer.from(fixture);
+      invalid[0] = 0;
+      await writeFile(invalidSignature, invalid);
+      await assert.rejects(() => readVerifiedPng(invalidSignature), /PNG|signature/i);
+
+      const zeroDimension = path.join(temporaryRoot, 'zero-dimension.png');
+      const zero = Buffer.from(fixture);
+      zero.writeUInt32BE(0, 16);
+      await writeFile(zeroDimension, zero);
+      await assert.rejects(() => readVerifiedPng(zeroDimension), /dimension|positive/i);
+
+      const tooManyPixels = path.join(temporaryRoot, 'too-many-pixels.png');
+      const huge = Buffer.from(fixture);
+      huge.writeUInt32BE(2001, 16);
+      huge.writeUInt32BE(2000, 20);
+      await writeFile(tooManyPixels, huge);
+      await assert.rejects(() => readVerifiedPng(tooManyPixels), /pixel|dimension|limit/i);
+    }));
+
+    names.push(await checkAsync('loads an explicit sharp-shaped fake converter', async () => {
+      const fakeModulePath = path.join(temporaryRoot, 'fake-sharp.mjs');
+      const encodedPng = fixture.toString('base64');
+      await writeFile(fakeModulePath, [
+        "export const version = 'fixture-sharp-1.2.3';",
+        'export default function sharp(input, options) {',
+        "  if (options?.limitInputPixels !== 4000000) throw new Error('pixel limit was not bounded');",
+        "  if (Buffer.from(input).subarray(0, 4).toString('ascii') !== 'RIFF') throw new Error('input missing RIFF');",
+        "  const chain = { rotate() { return chain; }, png(options) {",
+        "    if (options?.compressionLevel !== 9 || options?.adaptiveFiltering !== true || options?.palette !== false) throw new Error('unexpected png options');",
+        "    return chain; },",
+        `    async toBuffer() { return Buffer.from('${encodedPng}', 'base64'); }`,
+        '  };',
+        '  return chain;',
+        '}',
+      ].join('\n'));
+      const loaded = await loadConverter({
+        sharpModule: fakeModulePath,
+        disableDefaultSharp: true,
+      });
+      assert.equal(loaded.name, 'sharp');
+      assert.equal(loaded.version, 'fixture-sharp-1.2.3');
+      assert.deepEqual(await loaded.convertWebpToPng(webp), fixture);
+    }));
+
+    names.push(await checkAsync('reports actionable converter discovery errors', async () => {
+      const missingSharp = path.join(temporaryRoot, 'missing-sharp.mjs');
+      const missingPython = path.join(temporaryRoot, 'missing-python.exe');
+      await assert.rejects(
+        () => loadConverter({
+          sharpModule: missingSharp,
+          python: missingPython,
+          disableDefaultSharp: true,
+        }),
+        error => /--sharp-module|POE2_SHARP_MODULE/i.test(String(error)) &&
+          /--python|POE2_PYTHON/i.test(String(error)),
+      );
+    }));
+
+    // A caller may opt into a real bundled converter for an integration smoke
+    // without making the offline fixture suite depend on package discovery.
+    if (options.sharpModule || options.python) {
+      names.push(await checkAsync('accepts explicitly configured converter paths', async () => {
+        const configured = await loadConverter({
+          sharpModule: options.sharpModule,
+          python: options.python,
+        });
+        assert.equal(typeof configured.name, 'string');
+        assert.equal(typeof configured.version, 'string');
+        assert.equal(typeof configured.convertWebpToPng, 'function');
+        const converted = await configured.convertWebpToPng(tinyRealWebpFixture());
+        assert.deepEqual(inspectPng(converted), { width: 1, height: 1 });
+      }));
+    }
+  } finally {
+    await rm(temporaryRoot, { recursive: true, force: true });
   }
-  if (args.has('--core-only') && args.has('--network-only')) {
+
+  return names;
+}
+
+export async function runSelectedChecks() {
+  const argv = process.argv.slice(2);
+  const modes = new Set(argv.filter(value => value === '--core-only' || value === '--network-only' || value === '--converter-only'));
+  const optionValues = {};
+  for (let index = 0; index < argv.length; index += 1) {
+    const value = argv[index];
+    if (value === '--core-only' || value === '--network-only' || value === '--converter-only') continue;
+    const match = value.match(/^(--sharp-module|--python)=(.*)$/);
+    if (match) {
+      if (!match[2]) throw new Error(`${match[1]} requires a value.`);
+      optionValues[match[1]] = match[2];
+      continue;
+    }
+    if (value === '--sharp-module' || value === '--python') {
+      const next = argv[index + 1];
+      if (!next || next.startsWith('--')) throw new Error(`${value} requires a value.`);
+      optionValues[value] = next;
+      index += 1;
+      continue;
+    }
+    throw new Error(`Unknown validation mode or option: ${value}`);
+  }
+  if (modes.size > 1) {
     throw new Error('Choose one validation mode at a time.');
   }
-  if (args.has('--network-only')) return runNetworkChecks();
+  if (modes.has('--network-only')) return runNetworkChecks();
+  if (modes.has('--converter-only')) {
+    return runConverterChecks({
+      sharpModule: optionValues['--sharp-module'] || process.env.POE2_SHARP_MODULE,
+      python: optionValues['--python'] || process.env.POE2_PYTHON,
+    });
+  }
   return runCoreChecks();
 }
 
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
   runSelectedChecks()
-    .then(names => console.log(`base-art ${process.argv.includes('--network-only') ? 'network' : 'core'} checks passed (${names.length})`))
+    .then(names => {
+      const phase = process.argv.includes('--network-only')
+        ? 'network'
+        : process.argv.includes('--converter-only') ? 'converter' : 'core';
+      console.log(`base-art ${phase} checks passed (${names.length})`);
+    })
     .catch(reportFailure);
 }
