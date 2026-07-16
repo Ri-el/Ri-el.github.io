@@ -437,6 +437,8 @@ export function sha256(buffer) {
 
 function validateHttpsHost(value, allowedHosts, field) {
   assert(typeof value === 'string' && value, `${field} must be a URL.`);
+  const rawAuthority = value.match(/^[a-z][a-z0-9+.-]*:\/\/([^\/?#]*)/i)?.[1] || '';
+  assert(!rawAuthority.includes('@'), `${field} must not contain credentials.`);
   let url;
   try {
     url = new URL(value);
@@ -446,6 +448,8 @@ function validateHttpsHost(value, allowedHosts, field) {
   assert(url.protocol === 'https:', `${field} must use HTTPS.`);
   assert(allowedHosts.has(url.hostname.toLowerCase()), `${field} host is not allowlisted.`);
   assert(!url.username && !url.password, `${field} must not contain credentials.`);
+  assert(!url.port, `${field} must not use a non-default port.`);
+  assert(!url.hash, `${field} must not contain a fragment.`);
   return url;
 }
 
@@ -477,7 +481,17 @@ export function validateManifest(value) {
     'Manifest targetGameVersion is missing.');
   const catalog = value.catalog || value.sourceCatalog;
   assert(catalog && typeof catalog === 'object', 'Manifest catalog is missing.');
-  validateHttpsHost(catalog.url, POE2DB_HOSTS, 'Manifest catalog URL');
+  const catalogUrl = validateHttpsHost(
+    catalog.url,
+    new Set([...POE2DB_HOSTS, CDN_HOST]),
+    'Manifest catalog URL',
+  );
+  const isPoe2DbCatalog = POE2DB_HOSTS.has(catalogUrl.hostname.toLowerCase()) &&
+    /^\/us(?:\/|$)/i.test(catalogUrl.pathname);
+  const isCdnCatalog = catalogUrl.hostname.toLowerCase() === CDN_HOST &&
+    /^\/json\/autocompletecb_us\.[0-9a-f]{16,64}\.json$/i.test(catalogUrl.pathname) &&
+    !catalogUrl.search && !catalogUrl.hash;
+  assert(isPoe2DbCatalog || isCdnCatalog, 'Manifest catalog URL path is not allowlisted.');
   assert(typeof catalog.sha256 === 'string' && /^[0-9a-f]{64}$/i.test(catalog.sha256),
     'Manifest catalog sha256 is invalid.');
   const resolvedAt = value.resolvedAt || value.resolverTimestamp;
