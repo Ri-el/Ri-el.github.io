@@ -430,6 +430,31 @@ export async function runNetworkChecks() {
     });
     await assert.rejects(() => client.getText('https://poe2db.tw/us/TooBig'), /byte|size|limit/i);
     assert.equal(calls, 1);
+
+    let canceled = false;
+    const streaming = createNetworkClient({
+      minimumRequestIntervalMs: 0,
+      maximumResponseBytes: 3,
+      fetchImpl: async () => ({
+        status: 200,
+        statusText: 'OK',
+        headers: new Headers(),
+        body: new ReadableStream({
+          start(controller) {
+            controller.enqueue(Uint8Array.from([1, 2, 3, 4]));
+          },
+          cancel() {
+            canceled = true;
+          },
+        }),
+      }),
+      lookup: async () => publicLookup(),
+    });
+    await assert.rejects(
+      () => streaming.getBytes('https://cdn.poe2db.tw/image/Art/2DItems/TooBig.webp'),
+      /byte|size|limit/i,
+    );
+    assert.equal(canceled, true, 'oversized streams must be canceled');
   }));
 
   names.push(await checkAsync('retries transient statuses and network failures with bounded backoff', async () => {
@@ -468,6 +493,30 @@ export async function runNetworkChecks() {
     await assert.rejects(() => denied.getText('https://poe2db.tw/us/Denied'), /403|CAPTCHA|denied/i);
     assert.equal(deniedCalls, 1);
     assert.equal(denied.stats().retries, 0);
+  }));
+
+  names.push(await checkAsync('retries a timed-out fetch within the bounded attempt count', async () => {
+    let calls = 0;
+    const client = createNetworkClient({
+      minimumRequestIntervalMs: 0,
+      requestTimeoutMs: 5,
+      maximumAttempts: 2,
+      backoffBaseMs: 0,
+      fetchImpl: async (_url, options) => {
+        calls += 1;
+        if (calls === 2) return fixtureResponse(200, 'recovered');
+        return new Promise((_resolve, reject) => {
+          options.signal.addEventListener('abort', () => {
+            reject(Object.assign(new Error('aborted'), { name: 'AbortError' }));
+          }, { once: true });
+        });
+      },
+      lookup: async () => publicLookup(),
+    });
+    const response = await client.getText('https://poe2db.tw/us/Timeout');
+    assert.equal(response.body, 'recovered');
+    assert.equal(calls, 2);
+    assert.equal(client.stats().retries, 1);
   }));
 
   names.push(await checkAsync('validates shared limiter options and spaces concurrent starts', async () => {
