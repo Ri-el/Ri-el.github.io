@@ -9,10 +9,9 @@
  */
 
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import path from 'node:path';
-
-const TOOL_DIR = path.dirname(new URL(import.meta.url).pathname);
 
 const CORE_EXPORTS = [
   'buildMappedBaseCatalog',
@@ -150,6 +149,36 @@ export async function runCoreChecks() {
     assert.equal(sections[0].artPath, 'Art/2DItems/Rings/Ring');
   }));
 
+  names.push(check('matches exact HTML attribute names in hover images', () => {
+    const sections = parsePoe2DbSections(
+      '<a data-hover="?s=Data%5CBaseItemTypes%5CMetadata%5CItems%5CRings%5CRing1" href="Ring">' +
+      '<img data-src="https://cdn.poe2db.tw/image/Art/2DItems/Placeholder.webp" ' +
+      'src="https://cdn.poe2db.tw/image/Art/2DItems/Rings/Ring.webp"></a>',
+      'https://poe2db.tw/us/Rings',
+    );
+    assert.equal(sections.length, 1);
+    assert.equal(sections[0].artPath, 'Art/2DItems/Rings/Ring');
+    assert.equal(sections[0].sourceImageUrl,
+      'https://cdn.poe2db.tw/image/Art/2DItems/Rings/Ring.webp');
+  }));
+
+  names.push(check('isolates nested table sections from their outer table', () => {
+    const sections = parsePoe2DbSections(
+      '<table><tr><td>Type</td><td>Metadata/Items/Outer1</td></tr>' +
+      '<tr><td>Icon</td><td>Art/2DItems/Outer1</td></tr>' +
+      '<tr><td colspan="2"><table>' +
+      '<tr><td>Type</td><td>Metadata/Items/Inner1</td></tr>' +
+      '<tr><td>Icon</td><td>Art/2DItems/Inner1</td></tr>' +
+      '</table></td></tr></table>',
+      'https://poe2db.tw/us/Nested_Fixture',
+    );
+    assert.equal(sections.length, 2);
+    assert.equal(matchExactSection({ metadataKey: 'Metadata/Items/Outer1' }, sections).artPath,
+      'Art/2DItems/Outer1');
+    assert.equal(matchExactSection({ metadataKey: 'Metadata/Items/Inner1' }, sections).artPath,
+      'Art/2DItems/Inner1');
+  }));
+
   names.push(check('builds only the mapped concrete-base catalog', () => {
     const baseItems = {
       bases: [
@@ -174,6 +203,47 @@ export async function runCoreChecks() {
       assetPath: 'assets/item-bases/42.png',
       selectable: true,
     }]);
+  }));
+
+  names.push(check('enforces current-target mapped catalog invariants', () => {
+    const baseItems = {
+      bases: [
+        { id: 42, metadataKey: 'Metadata/Items/Amulets/FourAmulet1', displayName: 'Crimson Amulet', unmodifiable: false },
+        { id: 613, metadataKey: 'Metadata/Items/Jewels/Timeless', displayName: 'Timeless Jewel', unmodifiable: false },
+      ],
+    };
+    const requirementFor = baseId => {
+      const base = baseItems.bases.find(candidate => candidate.id === baseId);
+      return {
+        baseId,
+        displayName: base.displayName,
+        assetPath: `assets/item-bases/${baseId}.png`,
+        selectable: true,
+        metadata: { metadataKey: base.metadataKey },
+      };
+    };
+    assert.throws(() => buildMappedBaseCatalog(baseItems, {
+      targetGameVersion: '0.5.4',
+      baseItems: [requirementFor(42)],
+    }), /1,?759/);
+    assert.throws(() => buildMappedBaseCatalog(baseItems, {
+      targetGameVersion: '0.5.4',
+      baseItems: [requirementFor(613)],
+    }), /613/);
+  }));
+
+  names.push(check('validates the checked-in current-target mapped catalog', () => {
+    const baseItems = JSON.parse(readFileSync(
+      new URL('../data/normalized/base-items.json', import.meta.url),
+      'utf8',
+    ));
+    const requirements = JSON.parse(readFileSync(
+      new URL('../reports/asset-requirements.json', import.meta.url),
+      'utf8',
+    ));
+    const catalog = buildMappedBaseCatalog(baseItems, requirements);
+    assert.equal(catalog.length, 1759);
+    assert.equal(catalog.some(base => base.baseId === 613), false);
   }));
 
   names.push(check('allowlists Poe2DB art paths and image signatures', () => {

@@ -4,6 +4,9 @@ import { createHash } from 'node:crypto';
 
 const POE2DB_HOSTS = new Set(['poe2db.tw', 'www.poe2db.tw']);
 const CDN_HOST = 'cdn.poe2db.tw';
+const CURRENT_TARGET_GAME_VERSION = '0.5.4';
+const CURRENT_TARGET_MAPPED_BASE_COUNT = 1759;
+const UNMAPPED_TIMELESS_JEWEL_ID = 613;
 const METADATA_RE = /^Metadata\/[A-Za-z0-9_./&'()-]+$/;
 const ART_RE = /^Art\/[A-Za-z0-9_./-]+$/;
 
@@ -96,11 +99,33 @@ function topLevelElements(source, tagName) {
     otherIndex !== index && other.start <= candidate.start && other.end >= candidate.end));
 }
 
+function removeTopLevelElements(source, tagName) {
+  const elements = topLevelElements(source, tagName);
+  if (!elements.length) return source;
+  let result = '';
+  let cursor = 0;
+  for (const element of elements) {
+    result += source.slice(cursor, element.start);
+    result += ' ';
+    cursor = element.end;
+  }
+  return result + source.slice(cursor);
+}
+
 function attributeValue(tag, name) {
-  const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const match = new RegExp(`\\b${escapedName}\\s*=\\s*(?:"([\\s\\S]*?)"|'([\\s\\S]*?)'|([^\\s>]+))`, 'i').exec(tag);
-  if (!match) return null;
-  return decodeHtmlEntities(match[1] ?? match[2] ?? match[3] ?? '');
+  const target = String(name).toLowerCase();
+  // Tokenize complete attribute names instead of searching for a suffix:
+  // `\bsrc=` also matches the `src=` part of `data-src=` because `-` creates
+  // a word boundary.  Requiring start/whitespace before the attribute prevents
+  // a lazy-load placeholder from shadowing the real src value.
+  const attributes = /(?:^|\s)([^\s"'<>/=]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+))/g;
+  const body = String(tag).replace(/^<\/?[a-z][a-z0-9:-]*/i, '').replace(/\/?\s*>\s*$/, '');
+  let match;
+  while ((match = attributes.exec(body))) {
+    if (match[1].toLowerCase() !== target) continue;
+    return decodeHtmlEntities(match[2] ?? match[3] ?? match[4] ?? '');
+  }
+  return null;
 }
 
 function elementText(element) {
@@ -182,7 +207,10 @@ function collectCellAttributes(cellHtml, names) {
 }
 
 function sectionsFromTable(tableHtml, pageUrl) {
-  const rows = extractElements(tableHtml, 'tr');
+  // Only rows owned by this table participate in its pairing state. Nested
+  // table rows are parsed recursively below and must never leak their Type or
+  // Icon value into the surrounding table.
+  const rows = topLevelElements(tableHtml, 'tr');
   const sections = [];
   let metadataKey = null;
   let artPath = null;
@@ -199,7 +227,8 @@ function sectionsFromTable(tableHtml, pageUrl) {
   };
 
   for (const row of rows) {
-    const pair = rowLabelAndValue(row.inner);
+    const isolatedRow = removeTopLevelElements(row.inner, 'table');
+    const pair = rowLabelAndValue(isolatedRow);
     if (!pair) continue;
     const label = pair.label.toLowerCase().replace(/\s+/g, ' ').trim();
     const valueCandidates = [pair.valueHtml, pair.value];
@@ -217,6 +246,14 @@ function sectionsFromTable(tableHtml, pageUrl) {
     }
   }
   emit();
+  return sections;
+}
+
+function sectionsFromTableTree(table, pageUrl) {
+  const sections = sectionsFromTable(table.html, pageUrl);
+  for (const nested of topLevelElements(table.inner, 'table')) {
+    sections.push(...sectionsFromTableTree(nested, pageUrl));
+  }
   return sections;
 }
 
@@ -257,7 +294,7 @@ function sectionsFromHoverLink(anchor, pageUrl) {
   // cannot accidentally pair with rows outside the link.
   if (/<table\b/i.test(hover)) {
     const inlineSections = topLevelElements(hover, 'table')
-      .flatMap(table => sectionsFromTable(table.html, linkPageUrl));
+      .flatMap(table => sectionsFromTableTree(table, linkPageUrl));
     if (inlineSections.length) return inlineSections;
   }
   if (!metadataKey) return [];
@@ -337,7 +374,17 @@ export function buildMappedBaseCatalog(baseItems, assetRequirements) {
     const selectable = requirement.selectable == null ? !source.unmodifiable : Boolean(requirement.selectable);
     return { baseId, metadataKey, displayName, assetPath, selectable };
   });
-  return result.sort((left, right) => left.baseId - right.baseId);
+  const catalog = result.sort((left, right) => left.baseId - right.baseId);
+  if (!Array.isArray(assetRequirements) &&
+      assetRequirements?.targetGameVersion === CURRENT_TARGET_GAME_VERSION) {
+    assert(!catalog.some(base => base.baseId === UNMAPPED_TIMELESS_JEWEL_ID),
+      `Target ${CURRENT_TARGET_GAME_VERSION} mapped catalog must exclude unmapped base ID ` +
+      `${UNMAPPED_TIMELESS_JEWEL_ID}.`);
+    assert(catalog.length === CURRENT_TARGET_MAPPED_BASE_COUNT,
+      `Target ${CURRENT_TARGET_GAME_VERSION} mapped catalog must contain ` +
+      `${CURRENT_TARGET_MAPPED_BASE_COUNT.toLocaleString('en-US')} records; found ${catalog.length}.`);
+  }
+  return catalog;
 }
 
 /**
@@ -349,7 +396,7 @@ export function parsePoe2DbSections(html, pageUrl) {
   assert(typeof html === 'string', 'Poe2DB HTML must be a string.');
   assert(typeof pageUrl === 'string' && pageUrl, 'Poe2DB pageUrl must be a non-empty string.');
   const sections = [];
-  for (const table of topLevelElements(html, 'table')) sections.push(...sectionsFromTable(table.html, pageUrl));
+  for (const table of topLevelElements(html, 'table')) sections.push(...sectionsFromTableTree(table, pageUrl));
   for (const anchor of extractElements(html, 'a')) sections.push(...sectionsFromHoverLink(anchor.html, pageUrl));
   return dedupeSections(sections);
 }
