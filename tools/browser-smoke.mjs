@@ -208,11 +208,21 @@ if (targets.length === 0) {
               assert(!((await retainedEssence.getAttribute('title')) || '').startsWith('Mechanic blocked because'),
                 `${target}: implemented Essence retained its old catalogue blocker`);
             }
+            const expectedCategoryCounts = await page.evaluate(tabId =>
+              window.CRAFTING_CURRENCY_INDEX?.categoryCounts?.[tabId] || null, tab);
+            assert(expectedCategoryCounts, `${target}: ${tab} category counts missing`);
+            const countPattern = new RegExp(
+              `^${expectedCategoryCounts.available} available .* ${expectedCategoryCounts.known} known$`,
+              'i',
+            );
+            assert.match(knownInventory.at(-1).count, countPattern, `${target}: ${tab} category count`);
           }
-          assert.match(knownInventory[0].count, /0 available .* 80 known/i, `${target}: Essence category count`);
-          assert.match(knownInventory[1].count, /0 available .* 19 known/i, `${target}: Runeforging category count`);
           await page.evaluate(() => window.CraftForge.setCraftTab('abyss'));
-          assert.equal(await page.locator('.craft-status-inferred').count(), 6, `${target}: inferred Bone status count`);
+          const expectedInferredBoneCount = await page.evaluate(() =>
+            Object.values(window.CraftForge.getCraftRegistry?.() || {})
+              .filter(definition => definition.tab === 'abyss' && definition.confidence === 'inferred').length);
+          assert.equal(await page.locator('.craft-status-inferred').count(), expectedInferredBoneCount,
+            `${target}: inferred Bone status count`);
           assert.equal(await page.evaluate(() => window.CraftForge.getCraftRegistry()['preserved-collarbone']?.supported), true,
             `${target}: inferred Bone has no executable registry path`);
           await page.evaluate(() => window.CraftForge.setCraftTab('socketing'));
@@ -233,9 +243,14 @@ if (targets.length === 0) {
           assert.equal(await page.locator('[data-craft-id]').count(), 296, `${target}: deprecated socket audit count`);
           await page.locator('input[name="craft-inventory-mode"][value="available"]').check();
           await page.evaluate(() => window.CraftForge.setCraftTab('runeforging'));
-          assert.equal(await page.locator('[data-craft-id]').count(), 0, `${target}: Available Runeforging should be empty`);
-          assert.match(await page.locator('.craft-inventory-empty').textContent(), /No implemented Runeforging.*19 known items/i,
-            `${target}: empty category explanation`);
+          const expectedAvailableRuneforging = await page.evaluate(() =>
+            window.CRAFTING_CURRENCY_INDEX?.categoryCounts?.runeforging?.available ?? 0);
+          assert.equal(await page.locator('[data-craft-id]').count(), expectedAvailableRuneforging,
+            `${target}: Available Runeforging count`);
+          if (expectedAvailableRuneforging === 0) {
+            assert.match(await page.locator('.craft-inventory-empty').textContent(), /No implemented Runeforging.*19 known items/i,
+              `${target}: empty category explanation`);
+          }
 
           await page.evaluate(() => window.CraftForge.setCraftTab('currency'));
           const wheel = await page.evaluate(() => {
@@ -704,23 +719,46 @@ if (targets.length === 0) {
 
       assert.deepEqual(runtimeErrors, [], `${target}: browser errors`);
       if (/^https?:/i.test(target)) {
+        // The catalog was exercised earlier in this smoke run. Remove that
+        // dynamic entry before the dedicated cache assertion so this block
+        // proves it is not install-precached and is cached only after the
+        // online request below.
+        await page.evaluate(async () => {
+          const catalogPath = '/data/crafting/known-items.data.js';
+          for (const name of await caches.keys()) {
+            const cache = await caches.open(name);
+            for (const request of await cache.keys()) {
+              if (new URL(request.url).pathname === catalogPath) await cache.delete(request);
+            }
+          }
+        });
         await page.evaluate(async () => {
           await navigator.serviceWorker.register('./sw.js');
           await navigator.serviceWorker.ready;
         });
         await page.reload({ waitUntil: 'load' });
         await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
+        const catalogBeforeRequest = await page.evaluate(async () => {
+          const cache = await caches.open('poe2-craft-registry-v14');
+          return (await cache.keys()).some(request =>
+            new URL(request.url).pathname.endsWith('/data/crafting/known-items.data.js'));
+        });
+        assert(!catalogBeforeRequest, `${target}: known-items catalog was install-precached`);
+        await page.locator('.cat-card', { hasText: 'Amulets' }).click();
+        await page.locator('input[name="craft-inventory-mode"][value="known"]').check();
+        await page.waitForFunction(() => Object.keys(window.CraftForge?.getCraftRegistry?.() || {}).length === 531);
+        await page.locator('#back-to-select').click();
         const offlineCache = await page.evaluate(async () => {
           const names = await caches.keys();
-          const urls = [];
-          for (const name of names) {
-            const cache = await caches.open(name);
-            urls.push(...(await cache.keys()).map(request => new URL(request.url).pathname));
-          }
-          return { names, urls };
+          const shell = await caches.open('poe2-craft-registry-v14');
+          const images = await caches.open('poe2-craft-images-v1');
+          const shellUrls = (await shell.keys()).map(request => new URL(request.url).pathname);
+          const imageUrls = (await images.keys()).map(request => new URL(request.url).pathname);
+          return { names, shellUrls, imageUrls };
         });
-        assert(offlineCache.names.includes('poe2-craft-registry-v13'), `${target}: updated service-worker cache missing`);
-        assert(offlineCache.urls.some(url => url.endsWith('/data/crafting/known-items.data.js')),
+        assert(offlineCache.names.includes('poe2-craft-registry-v14'), `${target}: updated service-worker cache missing`);
+        assert(offlineCache.names.includes('poe2-craft-images-v1'), `${target}: artwork cache missing`);
+        assert(offlineCache.shellUrls.some(url => url.endsWith('/data/crafting/known-items.data.js')),
           `${target}: lazy known-items catalog missing from offline cache`);
         page.removeAllListeners('console');
         page.removeAllListeners('pageerror');

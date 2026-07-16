@@ -8,6 +8,7 @@ const headerCss = fs.readFileSync(new URL('./header-fix.css', import.meta.url), 
 const app = fs.readFileSync(new URL('./app.js', import.meta.url), 'utf8');
 const select = fs.readFileSync(new URL('./select.js', import.meta.url), 'utf8');
 const serviceWorker = fs.readFileSync(new URL('./sw.js', import.meta.url), 'utf8');
+const appShellSource = serviceWorker.match(/const APP_SHELL = \[[\s\S]*?\];/)?.[0] || '';
 const browserSmoke = fs.readFileSync(new URL('./tools/browser-smoke.mjs', import.meta.url), 'utf8');
 const runtimeData = fs.readFileSync(new URL('./data/runtime.data.js', import.meta.url), 'utf8');
 const modDataBuilder = fs.readFileSync(new URL('./tools/build-mod-data.mjs', import.meta.url), 'utf8');
@@ -36,7 +37,7 @@ function check(name, condition) {
 
 const stylesheetOrder = [...html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="([^"]+)"/g)]
   .map(match => match[1]);
-check('overhaul.css is the last external stylesheet', stylesheetOrder.at(-1) === 'overhaul.css');
+check('header-fix.css is the last external stylesheet', stylesheetOrder.at(-1) === 'header-fix.css?v=20');
 
 const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map(match => match[1]);
 check('all HTML ids are unique', ids.length === new Set(ids).size);
@@ -372,6 +373,18 @@ check('tab strip consumes wheel input only while horizontal movement is possible
 check('only the active category is rendered and card icons are lazy',
   /function renderActiveCraftPanel\(\)[\s\S]*?panel\.replaceChildren\(\)[\s\S]*?inventoryDefinitionsForTab\(tab\.id\)[\s\S]*?appendCraftCards/.test(app) &&
   /IntersectionObserver[\s\S]*?lazyIconId/.test(app));
+check('craft inventory has an indexed variant grouping path',
+  /function buildCraftDefinitionIndex\(/.test(app) &&
+  /variantsByAction/.test(app) &&
+  !/function appendCraftCards\([\s\S]*?definitions\.filter\(/.test(app));
+check('craft eligibility is shared between state sync and filtering',
+  /function craftEligibilityReason\(/.test(app) &&
+  /craftEligibilityReason\(definition/.test(app) &&
+  !/function filterCraftInventory\([\s\S]*?disabledReasonForDefinition\(definition\)/.test(app));
+check('craft eligibility cache resets for a new item render',
+  /function beginCraftEligibilityPass\(item\)/.test(app) &&
+  /eligibilityCache\.clear\(\)/.test(app) &&
+  /beginCraftEligibilityPass\(liveItem\)/.test(app));
 check('All known items loads the separate local catalog on demand',
   /function loadKnownCraftDefinitions\(\)[\s\S]*?data\/crafting\/known-items\.data\.js/.test(app) &&
   /control\.value === 'known'[\s\S]*?await loadKnownCraftDefinitions\(\)/.test(app));
@@ -839,11 +852,39 @@ check('item artwork animation respects reduced-motion preferences',
   /@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?(?:item-art|craft-active)/.test(itemArtCss));
 check('Absent Amulet art is installed at its numeric base ID path',
   fs.existsSync(new URL('./assets/item-bases/2563.png', import.meta.url)));
-check('runtime selector, socket stylesheet, and performance data are versioned in the offline shell',
-  /header-fix\.css\?v=20/.test(select) &&
-  /CACHE_NAME = 'poe2-craft-registry-v13'/.test(serviceWorker) &&
+check('header-fix stylesheet is loaded before scripts',
+  /<link rel="stylesheet" href="header-fix\.css\?v=20">/.test(html) &&
+  !/function ensureCraftHeaderStyles\(/.test(select));
+check('non-critical artwork requests decode asynchronously',
+  /img\.loading = 'lazy'/.test(app) &&
+  /img\.decoding = 'async'/.test(app) &&
+  /image\.decoding = 'async'/.test(app) &&
+  /image\.fetchPriority = 'high'/.test(app) &&
+  /img\.decoding = 'async'/.test(select));
+check('service worker distinguishes navigation, app assets, and artwork',
+  /function isArtworkRequest\(/.test(serviceWorker) &&
+  /function isAppAssetRequest\(/.test(serviceWorker) &&
+  /function handleArtworkRequest\(/.test(serviceWorker) &&
+  /event\.waitUntil\(/.test(serviceWorker));
+check('compact logo is used for the visible header',
+  html.includes('assets/icons/OishyCraftingForge-compact.png') &&
+  !html.match(/src="assets\/icons\/OishyCraftingForge\.png"/));
+check('artwork uses a separate bounded service-worker cache',
+  /IMAGE_CACHE_NAME/.test(serviceWorker) &&
+  /MAX_IMAGE_CACHE_ENTRIES/.test(serviceWorker) &&
+  /isArtworkRequest\(/.test(serviceWorker) &&
+  !appShellSource.includes('known-items.data.js'));
+check('runtime styles, scripts, and data are versioned in the focused offline shell',
+  /CACHE_NAME = 'poe2-craft-registry-v14'/.test(serviceWorker) &&
   serviceWorker.includes("'./header-fix.css?v=20'") &&
-  serviceWorker.includes("'./data/crafting/known-items.data.js'"));
+  serviceWorker.includes("'./app.js'") &&
+  serviceWorker.includes("'./select.js'") &&
+  serviceWorker.includes("'./crafting.js'") &&
+  serviceWorker.includes("'./data/mods.data.js'") &&
+  serviceWorker.includes("'./data/desecrated-mods.data.js'") &&
+  serviceWorker.includes("'./data/runtime.data.js'") &&
+  serviceWorker.includes("'./data/crafting/currency-index.data.js'") &&
+  serviceWorker.includes("'./assets/icons/OishyCraftingForge-compact.png'"));
 check('Absent Amulet art is available in the versioned offline application shell',
   serviceWorker.includes("'./assets/item-bases/2563.png'"));
 check('right-click sticky currency mode is explicit, repeatable, and Escape-safe',

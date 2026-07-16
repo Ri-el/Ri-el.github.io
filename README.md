@@ -20,6 +20,8 @@ This README explains **what every file does** and **where to look when something
 
 You edit **one small JSON file per base item** in `data/bases/` (e.g. `ruby.json`, `helmets_str.json`). `build.cmd` runs `build_data.ps1`, which validates those files and compiles local browser-loadable `.data.js` bundles. `app.js` reads those globals and hands the selected pool to `crafting.js`; no external site is contacted at runtime, so direct `file://` use still works. The workbench's ten tabs load 415 supported crafting definitions at startup from one 531-definition registry. That registry contains 422 runtime-bound definitions and 522 visible catalogue definitions; unsupported entries remain explicit blockers. Repository-owned normalized source data, provenance, and the classified crafting inventory are kept separately so development-time validation does not depend on `../upload/data.json`.
 
+For a concise source/generated boundary map and debugging guide, see [Repository layout](docs/REPOSITORY_LAYOUT.md).
+
 ### Current workbench interaction
 
 - The outer screen selects an item class and opens the workbench immediately. Concrete bases are selected inside the workbench and can be switched without returning to the outer screen; Ruby/Sapphire/Emerald Jewel switching remains available.
